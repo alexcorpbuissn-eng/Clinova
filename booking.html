@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Qabulga yozilish | Habibullo-Hilola</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .steps-bar{display:flex;gap:8px;margin-bottom:28px}
+    .step-dot{flex:1;height:4px;border-radius:4px;background:var(--border);transition:background .3s}
+    .step-dot.on{background:var(--teal)}
+    .section-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--teal-dark);margin-bottom:14px}
+    .nav-back{background:none;border:none;color:var(--teal-dark);font-size:.85rem;cursor:pointer;padding:0;margin-bottom:18px;display:inline-flex;align-items:center;gap:5px;font-family:inherit;font-weight:500}
+    .nav-back:hover{text-decoration:underline}
+    .doctor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
+    .doc-card{border:2px solid var(--border);border-radius:16px;padding:18px 14px;text-align:center;cursor:pointer;transition:all .2s;background:#fff}
+    .doc-card:hover,.doc-card.sel{border-color:var(--teal);background:var(--teal-light)}
+    .doc-card img{width:64px;height:64px;object-fit:cover;border-radius:50%;margin-bottom:10px;background:#e5e7eb}
+    .doc-card h3{font-size:.9rem;color:var(--navy);margin:0 0 3px}
+    .doc-card p{font-size:.75rem;color:var(--teal-dark);font-weight:600;margin:0}
+    .proc-list{display:flex;flex-direction:column;gap:10px}
+    .proc-btn{border:2px solid var(--border);background:#fff;border-radius:12px;padding:14px 16px;text-align:left;cursor:pointer;font-family:inherit;transition:all .2s}
+    .proc-btn:hover,.proc-btn.sel{border-color:var(--teal);background:var(--teal-light)}
+    .proc-btn strong{display:block;color:var(--navy);font-size:.9rem}
+    .proc-btn span{color:var(--teal-dark);font-size:.8rem;font-weight:600}
+    .slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:16px}
+    .slot-btn{border:2px solid var(--border);background:#fff;border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;font-family:inherit;transition:all .2s;color:var(--navy);font-weight:500;font-size:.85rem}
+    .slot-btn:hover,.slot-btn.sel{border-color:var(--teal);background:var(--teal-light)}
+    .slot-btn:disabled{background:#f1f5f9;color:#94a3b8;cursor:not-allowed;border-color:var(--border)}
+    .summary-box{background:var(--teal-light);border-radius:10px;padding:12px 16px;margin-bottom:18px;font-size:.85rem;color:var(--teal-dark);font-weight:500}
+    .inline-err{background:#fff1f2;border:1px solid #fecdd3;border-radius:8px;padding:11px 15px;color:#be123c;font-size:.85rem;margin-bottom:14px;display:none}
+    .inline-err.on{display:block}
+    .otp-wrap{display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;padding:10px 0}
+    .otp-input{font-size:2rem;letter-spacing:.4em;text-align:center;width:180px;padding:12px;border:2px solid var(--border);border-radius:10px;font-family:inherit;font-weight:700;color:var(--navy)}
+    .otp-input:focus{outline:none;border-color:var(--teal)}
+    .tg-link-btn{display:inline-flex;align-items:center;gap:8px;background:#229ed9;color:#fff;font-weight:600;font-size:.95rem;padding:13px 24px;border-radius:10px;text-decoration:none;transition:opacity .2s}
+    .tg-link-btn:hover{opacity:.88}
+    .success-card{text-align:center;padding:10px 0}
+    .success-card .ico{font-size:48px;margin-bottom:14px}
+    .success-card h3{color:var(--teal-dark);margin:0 0 8px}
+    .success-card p{color:var(--text-muted);font-size:.9rem}
+    .spinner{width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 8px}
+    .state-msg{text-align:center;color:var(--text-muted);padding:20px;font-size:.9rem}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body class="bg-light">
+
+<header class="navbar" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo" id="logo-link">
+      <span class="logo-icon">✦</span>
+      <span class="logo-text">Habibullo-Hilola</span>
+    </a>
+    <nav class="nav-links" id="nav-links">
+      <a href="index.html" class="nav-link">Asosiy</a>
+      <a href="services.html" class="nav-link">Xizmatlar</a>
+      <a href="about.html" class="nav-link">Biz haqimizda</a>
+      <a href="booking.html" class="nav-link active">Qabul</a>
+    </nav>
+    <a href="booking.html" class="btn-primary">Yozilish</a>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<main class="booking-page">
+  <div class="container">
+    <div class="booking-page-header" data-animate>
+      <h1 class="booking-page-title">Qabulga Yozilish</h1>
+      <p class="booking-page-desc">4 qadamda tez va oson qabulga yoziling.</p>
+    </div>
+
+    <div class="booking-page-grid">
+      <div class="booking-form-card" data-animate>
+        <!-- Progress -->
+        <div class="steps-bar">
+          <div class="step-dot on" id="sb1"></div>
+          <div class="step-dot" id="sb2"></div>
+          <div class="step-dot" id="sb3"></div>
+          <div class="step-dot" id="sb4"></div>
+        </div>
+
+        <!-- STEP 1: Doctor -->
+        <div id="s1">
+          <p class="section-label">1-qadam — Shifokorni tanlang</p>
+          <div id="doc-container"><div class="state-msg"><div class="spinner"></div>Yuklanmoqda...</div></div>
+        </div>
+
+        <!-- STEP 2: Procedure + Slot -->
+        <div id="s2" style="display:none">
+          <button class="nav-back" id="back12">← Orqaga</button>
+          <p class="section-label">2-qadam — Protsedura va vaqt</p>
+          <div id="proc-container"><div class="state-msg"><div class="spinner"></div></div></div>
+          <div id="slot-section" style="display:none;margin-top:20px">
+            <p class="section-label" style="margin-bottom:10px">Bo'sh vaqtlar</p>
+            <div id="slot-container"></div>
+          </div>
+        </div>
+
+        <!-- STEP 3: Patient details -->
+        <div id="s3" style="display:none">
+          <button class="nav-back" id="back23">← Orqaga</button>
+          <p class="section-label">3-qadam — Ma'lumotlaringiz</p>
+          <div class="summary-box" id="summary3"></div>
+          <div class="inline-err" id="err3"></div>
+          <form id="patient-form" class="appointment-form">
+            <div class="form-row">
+              <div class="form-group"><label>Ism *</label><input id="fFirst" type="text" required placeholder="Ism"/></div>
+              <div class="form-group"><label>Familiya *</label><input id="fLast" type="text" required placeholder="Familiya"/></div>
+            </div>
+            <div class="form-group"><label>Telefon *</label><input id="fPhone" type="tel" required placeholder="+998 90 000 00 00"/></div>
+            <div class="form-group">
+              <label>Telegram raqami * <small style="color:var(--text-muted)">(OTP tasdiqlash uchun)</small></label>
+              <input id="fTgPhone" type="tel" required placeholder="+998 90 000 00 00"/>
+            </div>
+            <div class="form-group">
+              <label>Muammo tavsifi (ixtiyoriy)</label>
+              <textarea id="fDesc" rows="3" maxlength="500" placeholder="Qisqacha tasvirlang..." style="resize:vertical;padding:12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.9rem;outline:none;width:100%;box-sizing:border-box"></textarea>
+            </div>
+            <button type="submit" class="btn-submit-booking" id="btn3">Davom etish</button>
+          </form>
+        </div>
+
+        <!-- STEP 4: OTP -->
+        <div id="s4" style="display:none">
+          <button class="nav-back" id="back34">← Orqaga</button>
+          <p class="section-label">4-qadam — Telegram tasdiqlash</p>
+          <div class="inline-err" id="err4"></div>
+          <div class="otp-wrap">
+            <p style="color:var(--text-muted);font-size:.9rem;max-width:340px">
+              Telegram botimizni oching, u sizga tasdiqlash kodini yuboradi.
+            </p>
+            <a id="tg-link" href="#" target="_blank" class="tg-link-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.02 9.52c-.15.67-.54.84-1.09.52l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.5-4.97c.24-.21-.05-.33-.37-.12L6.87 13.6l-2.95-.92c-.64-.2-.65-.64.13-.95l11.53-4.44c.53-.19 1 .13.36.9z"/></svg>
+              Telegram botini ochish
+            </a>
+            <p style="color:var(--text-muted);font-size:.85rem">Kodni olgach, quyiga kiriting:</p>
+            <input class="otp-input" id="otp-input" type="text" inputmode="numeric" maxlength="6" placeholder="000000"/>
+            <button class="btn-submit-booking" id="btn-verify" style="width:100%;margin-top:4px">Tasdiqlash</button>
+            <button id="btn-resend" style="background:none;border:none;color:var(--teal-dark);cursor:pointer;font-size:.85rem;font-family:inherit">Kodni qayta yuborish</button>
+          </div>
+        </div>
+
+        <!-- SUCCESS -->
+        <div id="s-success" style="display:none">
+          <div class="success-card">
+            <div class="ico">✅</div>
+            <h3>Qabul tasdiqlandi!</h3>
+            <p id="success-detail"></p>
+            <p style="margin-top:12px;color:var(--text-muted);font-size:.82rem">Eslatmalar Telegram orqali yuboriladi.</p>
+            <button onclick="location.reload()" class="btn-submit-booking" style="margin-top:20px;width:100%">Yangi qabul →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right sidebar -->
+      <div class="booking-info-sidebar" data-animate style="transition-delay:.2s">
+        <div class="clinic-info-card">
+          <h2 class="booking-card-title">Klinika Ma'lumotlari</h2>
+          <div class="info-item">
+            <div class="info-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+            <div class="info-content"><strong>Manzil</strong><p>Toshkent shahar, Yunusobod tumani, 12-mavze</p></div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+            <div class="info-content"><strong>Aloqa</strong><p>+998 90 123 45 67<br>hello@habibullo-hilola.uz</p></div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+            <div class="info-content"><strong>Ish vaqti</strong><p>Du–Juma: 8:00–18:00<br>Shanba: 9:00–14:00<br>Yakshanba: Yopiq</p></div>
+          </div>
+        </div>
+        <div class="map-card"><div class="map-graphic">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" class="map-pin"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="container footer-grid">
+    <div class="footer-brand" id="footer-brand">
+      <div class="nav-logo"><span class="logo-icon">✦</span><span class="logo-text">Habibullo-Hilola</span></div>
+      <p>Klinik stomatologiyaga zamonaviy va insoniy yondashuv.</p>
+    </div>
+    <div class="footer-col"><h4>Xizmatlar</h4><ul>
+      <li><a href="services.html">Terapevtik</a></li>
+      <li><a href="services.html">Estetik</a></li>
+      <li><a href="services.html">Ortopediya</a></li>
+    </ul></div>
+    <div class="footer-col"><h4>Kompaniya</h4><ul>
+      <li><a href="about.html">Biz haqimizda</a></li>
+      <li><a href="booking.html">Qabul</a></li>
+    </ul></div>
+    <div class="footer-col"><h4>Aloqa</h4><ul>
+      <li><a href="#">Telegram</a></li>
+      <li><a href="#">Instagram</a></li>
+    </ul></div>
+  </div>
+  <div class="footer-bottom"><p>© 2025 Habibullo-Hilola Stomatologiya Markazi.</p></div>
+</footer>
+
+<script src="main.js"></script>
+<script>
+const API = 'http://localhost:3001'; // ← change to deployed URL
+
+// State
+let selDoctor = null, selProc = null, selSlot = null, patientId = null;
+
+// Step bars
+function setStep(n) {
+  [1,2,3,4].forEach(i => {
+    document.getElementById('s'+i).style.display = i===n?'':'none';
+    document.getElementById('sb'+i).classList.toggle('on', i<=n);
+  });
+}
+function showSuccess(detail) {
+  ['s1','s2','s3','s4'].forEach(id => document.getElementById(id).style.display='none');
+  document.getElementById('s-success').style.display='';
+  ['sb1','sb2','sb3','sb4'].forEach(id => document.getElementById(id).classList.add('on'));
+  document.getElementById('success-detail').textContent = detail;
+}
+function err(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.classList.add('on');
+}
+function clearErr(id) { document.getElementById(id).classList.remove('on'); }
+
+function fmtTime(utcStr) {
+  return new Date(utcStr).toLocaleTimeString('uz-UZ',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Tashkent'});
+}
+function fmtDate(utcStr) {
+  return new Date(utcStr).toLocaleDateString('uz-UZ',{day:'numeric',month:'long',year:'numeric',timeZone:'Asia/Tashkent'});
+}
+
+// ── STEP 1: Load doctors ─────────────────────────────────────────────────
+async function loadDoctors() {
+  const c = document.getElementById('doc-container');
+  try {
+    const {doctors} = await fetch(`${API}/api/public/doctors`).then(r=>r.json());
+    if (!doctors?.length) { c.innerHTML='<div class="state-msg">Shifokorlar topilmadi.</div>'; return; }
+    const g = document.createElement('div'); g.className='doctor-grid';
+    doctors.forEach(d => {
+      const card = document.createElement('div'); card.className='doc-card';
+      const avatar = d.photoUrl || `https://ui-avatars.com/api/?name=${d.firstName}+${d.lastName}&background=4bcbba&color=fff`;
+      card.innerHTML=`<img src="${avatar}" alt="${d.firstName}"/><h3>Dr. ${d.firstName} ${d.lastName}</h3><p>${d.specialty}</p>`;
+      card.onclick = () => { document.querySelectorAll('.doc-card').forEach(x=>x.classList.remove('sel')); card.classList.add('sel'); selDoctor=d; loadProcedures(d.id); setStep(2); };
+      g.appendChild(card);
+    });
+    c.innerHTML=''; c.appendChild(g);
+  } catch { c.innerHTML='<div class="state-msg">❌ Server xatosi. Sahifani yangilang.</div>'; }
+}
+
+// ── STEP 2: Load procedures ──────────────────────────────────────────────
+async function loadProcedures(doctorId) {
+  const c = document.getElementById('proc-container');
+  c.innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
+  document.getElementById('slot-section').style.display='none';
+  try {
+    const {procedures} = await fetch(`${API}/api/public/doctors/${doctorId}/procedures`).then(r=>r.json());
+    if (!procedures?.length) { c.innerHTML='<div class="state-msg">Bu shifokor uchun protseduralar yo\'q.</div>'; return; }
+    const list = document.createElement('div'); list.className='proc-list';
+    procedures.forEach(p => {
+      const btn = document.createElement('button'); btn.type='button'; btn.className='proc-btn';
+      btn.innerHTML=`<strong>${p.name}</strong><span>⏱ ${p.durationMinutes} daqiqa</span>`;
+      btn.onclick = () => { document.querySelectorAll('.proc-btn').forEach(x=>x.classList.remove('sel')); btn.classList.add('sel'); selProc=p; loadSlots(doctorId, p.id); };
+      list.appendChild(btn);
+    });
+    c.innerHTML=''; c.appendChild(list);
+  } catch { c.innerHTML='<div class="state-msg">❌ Xatolik.</div>'; }
+}
+
+async function loadSlots(doctorId, procedureId) {
+  const sc = document.getElementById('slot-container');
+  const ss = document.getElementById('slot-section');
+  ss.style.display=''; sc.innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
+  try {
+    const {slots} = await fetch(`${API}/api/public/doctors/${doctorId}/slots?procedureId=${procedureId}`).then(r=>r.json());
+    if (!slots?.length) { sc.innerHTML='<div class="state-msg">Bu protsedura uchun bo\'sh vaqt yo\'q.</div>'; return; }
+    const g = document.createElement('div'); g.className='slot-grid';
+    slots.forEach(s => {
+      const btn = document.createElement('button'); btn.type='button'; btn.className='slot-btn';
+      btn.innerHTML=`<strong>${fmtTime(s.startTime)}</strong><br><small style="color:#64748b">${fmtDate(s.startTime)}</small><br><small style="color:#94a3b8">→ ${fmtTime(s.endTime)}</small>`;
+      btn.onclick = () => { document.querySelectorAll('.slot-btn').forEach(x=>x.classList.remove('sel')); btn.classList.add('sel'); selSlot=s; };
+      g.appendChild(btn);
+    });
+    sc.innerHTML=''; sc.appendChild(g);
+  } catch { sc.innerHTML='<div class="state-msg">❌ Xatolik.</div>'; }
+}
+
+// ── STEP 3: Patient form ─────────────────────────────────────────────────
+document.getElementById('patient-form').addEventListener('submit', async e => {
+  e.preventDefault(); clearErr('err3');
+  if (!selSlot) { err('err3','Iltimos, vaqt tanlang.'); return; }
+  const btn = document.getElementById('btn3');
+  btn.disabled=true; btn.textContent='Tekshirilmoqda...';
+
+  const tgPhone = document.getElementById('fTgPhone').value.trim();
+
+  try {
+    const res = await fetch(`${API}/api/public/send-otp`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegramPhone:tgPhone})});
+    const data = await res.json();
+
+    // Update summary
+    document.getElementById('summary3').innerHTML=`🩺 Dr. ${selDoctor.firstName} ${selDoctor.lastName} &nbsp;|&nbsp; ${selProc.name} &nbsp;|&nbsp; ${fmtDate(selSlot.startTime)}, ${fmtTime(selSlot.startTime)}`;
+
+    if (data.alreadyVerified) {
+      // Patient is verified — book directly
+      await doBook(tgPhone);
+    } else {
+      // Show OTP step
+      document.getElementById('tg-link').href = data.deepLink;
+      setStep(4);
+    }
+  } catch { err('err3','Server xatosi. Qayta urinib ko\'ring.'); }
+  btn.disabled=false; btn.textContent='Davom etish';
+});
+
+async function doBook(tgPhoneOverride) {
+  const tgPhone = tgPhoneOverride || document.getElementById('fTgPhone').value.trim();
+  // Look up patientId from sessionStorage (set after verify-otp)
+  const pid = patientId || sessionStorage.getItem('patientId');
+
+  const res = await fetch(`${API}/api/public/book`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      slotId: selSlot.id,
+      procedureId: selProc.id,
+      patientId: pid,
+      firstName: document.getElementById('fFirst').value.trim(),
+      lastName: document.getElementById('fLast').value.trim(),
+      phone: document.getElementById('fPhone').value.trim(),
+      description: document.getElementById('fDesc').value.trim(),
+    })
+  });
+  const data = await res.json();
+  if (res.ok && data.success) {
+    const a = data.appointment;
+    showSuccess(`Dr. ${a.doctorName} | ${a.procedureName} | ${fmtDate(a.slotTime)}, ${fmtTime(a.slotTime)}`);
+  } else {
+    err('err4', data.error || 'Bron qilishda xatolik.');
+    setStep(4);
+  }
+}
+
+// ── STEP 4: OTP verify ───────────────────────────────────────────────────
+document.getElementById('btn-verify').addEventListener('click', async () => {
+  clearErr('err4');
+  const code = document.getElementById('otp-input').value.trim();
+  const tgPhone = document.getElementById('fTgPhone').value.trim();
+  if (code.length !== 6) { err('err4','6 raqamli kodni kiriting.'); return; }
+
+  const btn = document.getElementById('btn-verify');
+  btn.disabled=true; btn.textContent='Tekshirilmoqda...';
+
+  try {
+    const res = await fetch(`${API}/api/public/verify-otp`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegramPhone:tgPhone,code})});
+    const data = await res.json();
+    if (res.ok && data.success) {
+      patientId = data.patient.id;
+      sessionStorage.setItem('patientId', patientId);
+      await doBook();
+    } else {
+      err('err4', data.error || 'Noto\'g\'ri kod.');
+    }
+  } catch { err('err4','Server xatosi.'); }
+  btn.disabled=false; btn.textContent='Tasdiqlash';
+});
+
+document.getElementById('btn-resend').addEventListener('click', async () => {
+  const tgPhone = document.getElementById('fTgPhone').value.trim();
+  await fetch(`${API}/api/public/send-otp`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegramPhone:tgPhone})});
+  document.getElementById('btn-resend').textContent='✓ Qayta yuborildi';
+  setTimeout(()=>document.getElementById('btn-resend').textContent='Kodni qayta yuborish',3000);
+});
+
+// ── Navigation ───────────────────────────────────────────────────────────
+document.getElementById('back12').onclick = () => { selProc=null; selSlot=null; setStep(1); };
+document.getElementById('back23').onclick = () => { selSlot=null; setStep(2); };
+document.getElementById('back34').onclick = () => setStep(3);
+
+// ── Init ─────────────────────────────────────────────────────────────────
+loadDoctors();
+</script>
+</body>
+</html>
