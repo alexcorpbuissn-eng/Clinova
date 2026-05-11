@@ -30,11 +30,11 @@ export async function POST(req: NextRequest) {
   // Check if patient already verified
   const existing = await prisma.patient.findUnique({
     where: { telegramPhone },
-    select: { isVerified: true, telegramChatId: true },
+    select: { id: true, isVerified: true, telegramChatId: true },
   });
 
   if (existing?.isVerified && existing.telegramChatId) {
-    return NextResponse.json({ alreadyVerified: true });
+    return NextResponse.json({ alreadyVerified: true, patientId: existing.id });
   }
 
   // Return the deep-link — OTP will be sent automatically on /start

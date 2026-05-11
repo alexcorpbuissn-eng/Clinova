@@ -308,6 +308,8 @@ document.getElementById('patient-form').addEventListener('submit', async e => {
 
     if (data.alreadyVerified) {
       // Patient is verified — book directly
+      patientId = data.patientId;
+      sessionStorage.setItem('patientId', patientId);
       await doBook(tgPhone);
     } else {
       // Show OTP step
