@@ -237,7 +237,7 @@ async function loadDoctors() {
       g.appendChild(card);
     });
     c.innerHTML=''; c.appendChild(g);
-  } catch { c.innerHTML='<div class="state-msg">❌ Server xatosi. Sahifani yangilang.</div>'; }
+  } catch(e) { c.innerHTML='<div class="state-msg">❌ Server xatosi. Sahifani yangilang.</div>'; }
 }
 
 // ── STEP 2: Load procedures ──────────────────────────────────────────────
@@ -256,7 +256,7 @@ async function loadProcedures(doctorId) {
       list.appendChild(btn);
     });
     c.innerHTML=''; c.appendChild(list);
-  } catch { c.innerHTML='<div class="state-msg">❌ Xatolik.</div>'; }
+  } catch(e) { c.innerHTML='<div class="state-msg">❌ Xatolik.</div>'; }
 }
 
 async function loadSlots(doctorId, procedureId) {
@@ -274,7 +274,7 @@ async function loadSlots(doctorId, procedureId) {
       g.appendChild(btn);
     });
     sc.innerHTML=''; sc.appendChild(g);
-  } catch { sc.innerHTML='<div class="state-msg">❌ Xatolik.</div>'; }
+  } catch(e) { sc.innerHTML='<div class="state-msg">❌ Xatolik.</div>'; }
 }
 
 // ── STEP 3: Patient form & Submit ─────────────────────────────────────────
@@ -313,7 +313,7 @@ document.getElementById('patient-form').addEventListener('submit', async e => {
     } else {
       err('err3', data.error || 'Bron qilishda xatolik yuz berdi.');
     }
-  } catch { err('err3',"Server xatosi. Qayta urinib ko'ring."); }
+  } catch(e) { err('err3',"Server xatosi. Qayta urinib ko'ring."); }
   btn.disabled=false; btn.textContent='Tasdiqlash';
 });
 

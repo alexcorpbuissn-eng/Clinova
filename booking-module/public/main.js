@@ -186,16 +186,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ---- Phone number formatting ----
   const phoneInput = document.getElementById('phone');
-  phoneInput.addEventListener('input', (e) => {
-    let val = e.target.value.replace(/\D/g, '');
-    if (val.startsWith('998')) val = val.slice(3);
-    if (val.length > 9) val = val.slice(0, 9);
-    let formatted = '+998';
-    if (val.length > 0) formatted += ' ' + val.slice(0, 2);
-    if (val.length > 2) formatted += ' ' + val.slice(2, 5);
-    if (val.length > 5) formatted += ' ' + val.slice(5, 7);
-    if (val.length > 7) formatted += ' ' + val.slice(7, 9);
-    e.target.value = formatted;
-  });
+  if (phoneInput) {
+    phoneInput.addEventListener('input', (e) => {
+      let val = e.target.value.replace(/\D/g, '');
+      if (val.startsWith('998')) val = val.slice(3);
+      if (val.length > 9) val = val.slice(0, 9);
+      let formatted = '+998';
+      if (val.length > 0) formatted += ' ' + val.slice(0, 2);
+      if (val.length > 2) formatted += ' ' + val.slice(2, 5);
+      if (val.length > 5) formatted += ' ' + val.slice(5, 7);
+      if (val.length > 7) formatted += ' ' + val.slice(7, 9);
+      e.target.value = formatted;
+    });
+  }
+
+  // ---- User Profile in Navbar ----
+  const navContainer = document.querySelector('.nav-container');
+  if (navContainer) {
+    const patientId = localStorage.getItem('patientId');
+    const fFirst = localStorage.getItem('fFirst');
+    const fLast = localStorage.getItem('fLast');
+    
+    const profileWrap = document.createElement('div');
+    profileWrap.style.cssText = 'display:flex;align-items:center;gap:12px;margin-left:auto;margin-right:15px;font-size:0.85rem;font-weight:600;color:var(--navy);';
+    
+    // Find the hamburger or btn-primary to insert before
+    const insertBeforeEl = navContainer.querySelector('.btn-primary') || document.getElementById('hamburger');
+    
+    if (patientId) {
+      // Logged in
+      let nameText = (fFirst || fLast) ? `${fFirst || ''} ${fLast || ''}`.trim() : 'Mijoz';
+      profileWrap.innerHTML = `
+        <div style="background:var(--teal-light);padding:6px 12px;border-radius:20px;color:var(--teal-dark);display:flex;align-items:center;gap:6px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          ${nameText}
+        </div>
+      `;
+    } else {
+      // Not logged in
+      profileWrap.innerHTML = `
+        <a href="login.html" style="color:var(--teal-dark);text-decoration:none;display:flex;align-items:center;gap:4px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Kirish
+        </a>
+      `;
+    }
+    
+    if (insertBeforeEl) {
+      navContainer.insertBefore(profileWrap, insertBeforeEl);
+    } else {
+      navContainer.appendChild(profileWrap);
+    }
+  }
 
 });
