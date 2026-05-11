@@ -1,0 +1,4 @@
+booking-module/.env
+booking-module/node_modules/
+booking-module/.next/
+booking-module/prisma/migrations/
