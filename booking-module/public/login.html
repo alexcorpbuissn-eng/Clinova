@@ -105,7 +105,7 @@
       } else {
         err(data.error || 'Xatolik yuz berdi');
       }
-    } catch { err('Server xatosi'); }
+    } catch(e) { err('Server xatosi'); }
     btn.disabled=false; btn.textContent='Davom etish';
   });
 
@@ -135,7 +135,7 @@
       } else {
         err(data.error || 'Noto\\'g\\'ri kod.');
       }
-    } catch { err('Server xatosi'); }
+    } catch(e) { err('Server xatosi'); }
     btn.disabled=false; btn.textContent='Tasdiqlash';
   });
 
