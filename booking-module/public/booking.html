@@ -58,6 +58,7 @@
       <a href="services.html" class="nav-link">Xizmatlar</a>
       <a href="about.html" class="nav-link">Biz haqimizda</a>
       <a href="booking.html" class="nav-link active">Qabul</a>
+      <a href="my-appointments.html" class="nav-link">Mening qabullarim</a>
     </nav>
     <a href="booking.html" class="btn-primary">Yozilish</a>
     <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
@@ -111,35 +112,11 @@
             </div>
             <div class="form-group"><label>Telefon *</label><input id="fPhone" type="tel" required placeholder="+998 90 000 00 00"/></div>
             <div class="form-group">
-              <label>Telegram raqami * <small style="color:var(--text-muted)">(OTP tasdiqlash uchun)</small></label>
-              <input id="fTgPhone" type="tel" required placeholder="+998 90 000 00 00"/>
-            </div>
-            <div class="form-group">
               <label>Muammo tavsifi (ixtiyoriy)</label>
               <textarea id="fDesc" rows="3" maxlength="500" placeholder="Qisqacha tasvirlang..." style="resize:vertical;padding:12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.9rem;outline:none;width:100%;box-sizing:border-box"></textarea>
             </div>
-            <button type="submit" class="btn-submit-booking" id="btn3">Davom etish</button>
+            <button type="submit" class="btn-submit-booking" id="btn3">Tasdiqlash</button>
           </form>
-        </div>
-
-        <!-- STEP 4: OTP -->
-        <div id="s4" style="display:none">
-          <button class="nav-back" id="back34">← Orqaga</button>
-          <p class="section-label">4-qadam — Telegram tasdiqlash</p>
-          <div class="inline-err" id="err4"></div>
-          <div class="otp-wrap">
-            <p style="color:var(--text-muted);font-size:.9rem;max-width:340px">
-              Telegram botimizni oching, u sizga tasdiqlash kodini yuboradi.
-            </p>
-            <a id="tg-link" href="#" target="_blank" class="tg-link-btn">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.02 9.52c-.15.67-.54.84-1.09.52l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.5-4.97c.24-.21-.05-.33-.37-.12L6.87 13.6l-2.95-.92c-.64-.2-.65-.64.13-.95l11.53-4.44c.53-.19 1 .13.36.9z"/></svg>
-              Telegram botini ochish
-            </a>
-            <p style="color:var(--text-muted);font-size:.85rem">Kodni olgach, quyiga kiriting:</p>
-            <input class="otp-input" id="otp-input" type="text" inputmode="numeric" maxlength="6" placeholder="000000"/>
-            <button class="btn-submit-booking" id="btn-verify" style="width:100%;margin-top:4px">Tasdiqlash</button>
-            <button id="btn-resend" style="background:none;border:none;color:var(--teal-dark);cursor:pointer;font-size:.85rem;font-family:inherit">Kodni qayta yuborish</button>
-          </div>
         </div>
 
         <!-- SUCCESS -->
@@ -211,13 +188,13 @@ let selDoctor = null, selProc = null, selSlot = null, patientId = null;
 
 // Step bars
 function setStep(n) {
-  [1,2,3,4].forEach(i => {
+  [1,2,3].forEach(i => {
     document.getElementById('s'+i).style.display = i===n?'':'none';
     document.getElementById('sb'+i).classList.toggle('on', i<=n);
   });
 }
 function showSuccess(detail) {
-  ['s1','s2','s3','s4'].forEach(id => document.getElementById(id).style.display='none');
+  ['s1','s2','s3'].forEach(id => document.getElementById(id).style.display='none');
   document.getElementById('s-success').style.display='';
   ['sb1','sb2','sb3','sb4'].forEach(id => document.getElementById(id).classList.add('on'));
   document.getElementById('success-detail').textContent = detail;
@@ -233,6 +210,16 @@ function fmtTime(utcStr) {
 }
 function fmtDate(utcStr) {
   return new Date(utcStr).toLocaleDateString('uz-UZ',{day:'numeric',month:'long',year:'numeric',timeZone:'Asia/Tashkent'});
+}
+
+// ── Auth Check ───────────────────────────────────────────────────────────
+if (!localStorage.getItem('patientId')) {
+  window.location.href = 'login.html?return=booking.html';
+} else {
+  patientId = localStorage.getItem('patientId');
+  if (localStorage.getItem('fFirst')) document.getElementById('fFirst').value = localStorage.getItem('fFirst');
+  if (localStorage.getItem('fLast')) document.getElementById('fLast').value = localStorage.getItem('fLast');
+  if (localStorage.getItem('fPhone')) document.getElementById('fPhone').value = localStorage.getItem('fPhone');
 }
 
 // ── STEP 1: Load doctors ─────────────────────────────────────────────────
@@ -260,7 +247,7 @@ async function loadProcedures(doctorId) {
   document.getElementById('slot-section').style.display='none';
   try {
     const {procedures} = await fetch(`${API}/api/public/doctors/${doctorId}/procedures`).then(r=>r.json());
-    if (!procedures?.length) { c.innerHTML='<div class="state-msg">Bu shifokor uchun protseduralar yo\'q.</div>'; return; }
+    if (!procedures?.length) { c.innerHTML='<div class="state-msg">Bu shifokor uchun protseduralar yo\\'q.</div>'; return; }
     const list = document.createElement('div'); list.className='proc-list';
     procedures.forEach(p => {
       const btn = document.createElement('button'); btn.type='button'; btn.className='proc-btn';
@@ -278,111 +265,61 @@ async function loadSlots(doctorId, procedureId) {
   ss.style.display=''; sc.innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
   try {
     const {slots} = await fetch(`${API}/api/public/doctors/${doctorId}/slots?procedureId=${procedureId}`).then(r=>r.json());
-    if (!slots?.length) { sc.innerHTML='<div class="state-msg">Bu protsedura uchun bo\'sh vaqt yo\'q.</div>'; return; }
+    if (!slots?.length) { sc.innerHTML='<div class="state-msg">Bu protsedura uchun bo\\'sh vaqt yo\\'q.</div>'; return; }
     const g = document.createElement('div'); g.className='slot-grid';
     slots.forEach(s => {
       const btn = document.createElement('button'); btn.type='button'; btn.className='slot-btn';
       btn.innerHTML=`<strong>${fmtTime(s.startTime)}</strong><br><small style="color:#64748b">${fmtDate(s.startTime)}</small><br><small style="color:#94a3b8">→ ${fmtTime(s.endTime)}</small>`;
-      btn.onclick = () => { document.querySelectorAll('.slot-btn').forEach(x=>x.classList.remove('sel')); btn.classList.add('sel'); selSlot=s; setTimeout(() => setStep(3), 300); };
+      btn.onclick = () => { document.querySelectorAll('.slot-btn').forEach(x=>x.classList.remove('sel')); btn.classList.add('sel'); selSlot=s; setTimeout(() => { document.getElementById('summary3').innerHTML=\`🩺 Dr. ${selDoctor.firstName} ${selDoctor.lastName} &nbsp;|&nbsp; ${selProc.name} &nbsp;|&nbsp; ${fmtDate(selSlot.startTime)}, ${fmtTime(selSlot.startTime)}\`; setStep(3); }, 300); };
       g.appendChild(btn);
     });
     sc.innerHTML=''; sc.appendChild(g);
   } catch { sc.innerHTML='<div class="state-msg">❌ Xatolik.</div>'; }
 }
 
-// ── STEP 3: Patient form ─────────────────────────────────────────────────
+// ── STEP 3: Patient form & Submit ─────────────────────────────────────────
 document.getElementById('patient-form').addEventListener('submit', async e => {
   e.preventDefault(); clearErr('err3');
   if (!selSlot) { err('err3','Iltimos, vaqt tanlang.'); return; }
   const btn = document.getElementById('btn3');
   btn.disabled=true; btn.textContent='Tekshirilmoqda...';
 
-  const tgPhone = document.getElementById('fTgPhone').value.trim();
+  // Save updated details to localStorage
+  const fFirst = document.getElementById('fFirst').value.trim();
+  const fLast = document.getElementById('fLast').value.trim();
+  const fPhone = document.getElementById('fPhone').value.trim();
+  localStorage.setItem('fFirst', fFirst);
+  localStorage.setItem('fLast', fLast);
+  localStorage.setItem('fPhone', fPhone);
 
   try {
-    const res = await fetch(`${API}/api/public/send-otp`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegramPhone:tgPhone})});
-    const data = await res.json();
-
-    // Update summary
-    document.getElementById('summary3').innerHTML=`🩺 Dr. ${selDoctor.firstName} ${selDoctor.lastName} &nbsp;|&nbsp; ${selProc.name} &nbsp;|&nbsp; ${fmtDate(selSlot.startTime)}, ${fmtTime(selSlot.startTime)}`;
-
-    if (data.alreadyVerified) {
-      // Patient is verified — book directly
-      patientId = data.patientId;
-      sessionStorage.setItem('patientId', patientId);
-      await doBook(tgPhone);
-    } else {
-      // Show OTP step
-      document.getElementById('tg-link').href = data.deepLink;
-      setStep(4);
-    }
-  } catch { err('err3','Server xatosi. Qayta urinib ko\'ring.'); }
-  btn.disabled=false; btn.textContent='Davom etish';
-});
-
-async function doBook(tgPhoneOverride) {
-  const tgPhone = tgPhoneOverride || document.getElementById('fTgPhone').value.trim();
-  // Look up patientId from sessionStorage (set after verify-otp)
-  const pid = patientId || sessionStorage.getItem('patientId');
-
-  const res = await fetch(`${API}/api/public/book`,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      slotId: selSlot.id,
-      procedureId: selProc.id,
-      patientId: pid,
-      firstName: document.getElementById('fFirst').value.trim(),
-      lastName: document.getElementById('fLast').value.trim(),
-      phone: document.getElementById('fPhone').value.trim(),
-      description: document.getElementById('fDesc').value.trim(),
-    })
-  });
-  const data = await res.json();
-  if (res.ok && data.success) {
-    const a = data.appointment;
-    showSuccess(`Dr. ${a.doctorName} | ${a.procedureName} | ${fmtDate(a.slotTime)}, ${fmtTime(a.slotTime)}`);
-  } else {
-    err('err4', data.error || 'Bron qilishda xatolik.');
-    setStep(4);
-  }
-}
-
-// ── STEP 4: OTP verify ───────────────────────────────────────────────────
-document.getElementById('btn-verify').addEventListener('click', async () => {
-  clearErr('err4');
-  const code = document.getElementById('otp-input').value.trim();
-  const tgPhone = document.getElementById('fTgPhone').value.trim();
-  if (code.length !== 6) { err('err4','6 raqamli kodni kiriting.'); return; }
-
-  const btn = document.getElementById('btn-verify');
-  btn.disabled=true; btn.textContent='Tekshirilmoqda...';
-
-  try {
-    const res = await fetch(`${API}/api/public/verify-otp`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegramPhone:tgPhone,code})});
+    const res = await fetch(`${API}/api/public/book`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        slotId: selSlot.id,
+        procedureId: selProc.id,
+        patientId,
+        firstName: fFirst,
+        lastName: fLast,
+        phone: fPhone,
+        description: document.getElementById('fDesc').value.trim(),
+      })
+    });
     const data = await res.json();
     if (res.ok && data.success) {
-      patientId = data.patient.id;
-      sessionStorage.setItem('patientId', patientId);
-      await doBook();
+      const a = data.appointment;
+      showSuccess(`Dr. ${a.doctorName} | ${a.procedureName} | ${fmtDate(a.slotTime)}, ${fmtTime(a.slotTime)}`);
     } else {
-      err('err4', data.error || 'Noto\'g\'ri kod.');
+      err('err3', data.error || 'Bron qilishda xatolik yuz berdi.');
     }
-  } catch { err('err4','Server xatosi.'); }
+  } catch { err('err3',"Server xatosi. Qayta urinib ko'ring."); }
   btn.disabled=false; btn.textContent='Tasdiqlash';
-});
-
-document.getElementById('btn-resend').addEventListener('click', async () => {
-  const tgPhone = document.getElementById('fTgPhone').value.trim();
-  await fetch(`${API}/api/public/send-otp`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegramPhone:tgPhone})});
-  document.getElementById('btn-resend').textContent='✓ Qayta yuborildi';
-  setTimeout(()=>document.getElementById('btn-resend').textContent='Kodni qayta yuborish',3000);
 });
 
 // ── Navigation ───────────────────────────────────────────────────────────
 document.getElementById('back12').onclick = () => { selProc=null; selSlot=null; setStep(1); };
 document.getElementById('back23').onclick = () => { selSlot=null; setStep(2); };
-document.getElementById('back34').onclick = () => setStep(3);
 
 // ── Init ─────────────────────────────────────────────────────────────────
 loadDoctors();

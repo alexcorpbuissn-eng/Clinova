@@ -1,15 +1,3 @@
-/**
- * POST /api/public/send-otp
- *
- * Called after patient enters their Telegram phone on Step 3.
- *
- * If they're already verified → return { alreadyVerified: true }
- * so the frontend skips Step 4 entirely.
- *
- * Otherwise → return the bot deep-link for the patient to tap.
- * The actual OTP is sent automatically when they tap START.
- */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { normalisePhone, getBotDeepLink } from '@/lib/telegram';
@@ -34,11 +22,20 @@ export async function POST(req: NextRequest) {
   });
 
   if (existing?.isVerified && existing.telegramChatId) {
-    return NextResponse.json({ alreadyVerified: true, patientId: existing.id });
+    // Returning user! We already have their chatId, so we can send the OTP directly!
+    // Wait, generating OTP and sending it. We need a helper from telegram.ts.
+    // I will dynamically import it to avoid top-level issues if bot token is missing.
+    try {
+      const { generateAndSendOtp } = await import('@/lib/telegram');
+      await generateAndSendOtp(telegramPhone, existing.telegramChatId);
+      return NextResponse.json({ action: 'enter_otp' });
+    } catch (err) {
+      console.error('Failed to send direct OTP:', err);
+      return NextResponse.json({ error: "Telegram xatoligi. Qayta urinib ko'ring." }, { status: 500 });
+    }
   }
 
-  // Return the deep-link — OTP will be sent automatically on /start
+  // New user — Return the deep-link. OTP will be sent automatically when they tap /start
   const deepLink = getBotDeepLink(telegramPhone);
-
-  return NextResponse.json({ alreadyVerified: false, deepLink });
+  return NextResponse.json({ action: 'deep_link', deepLink });
 }

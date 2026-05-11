@@ -40,12 +40,25 @@ export async function POST(req: NextRequest) {
   // Validate patient is verified
   const patient = await prisma.patient.findUnique({
     where: { id: patientId },
-    select: { id: true, isVerified: true, telegramChatId: true },
+    select: { id: true, isVerified: true, telegramChatId: true, cancellationsToday: true, lastCancellationDate: true },
   });
 
   if (!patient?.isVerified) {
     return NextResponse.json(
       { error: 'Telefon raqami tasdiqlanmagan. Iltimos, avval tasdiqlang.' },
+      { status: 403 }
+    );
+  }
+
+  // Check 2-cancellation rule
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  let cancels = patient.cancellationsToday;
+  if (patient.lastCancellationDate && patient.lastCancellationDate < today) cancels = 0;
+
+  if (cancels >= 2) {
+    return NextResponse.json(
+      { error: "Siz bugun 2 marta qabulni bekor qildingiz. Yangi qabul uchun ertaga urinib ko'ring yoki klinika raqamiga qo'ng'iroq qiling." },
       { status: 403 }
     );
   }
@@ -94,7 +107,6 @@ export async function POST(req: NextRequest) {
       const existing = await tx.appointment.findFirst({
         where: {
           patientId,
-          doctorId: slot.doctorId,
           status: 'SCHEDULED',
           slot: { startTime: { gte: dayStart, lte: dayEnd } },
         },
@@ -149,7 +161,7 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     const msg: Record<string, string> = {
       SLOT_UNAVAILABLE: 'Bu vaqt allaqachon band qilingan. Boshqa vaqt tanlang.',
-      DUPLICATE_BOOKING: 'Siz bu shifokorga bugun allaqachon yozilgansiz.',
+      DUPLICATE_BOOKING: 'Siz ushbu sanaga allaqachon qabulga yozilgansiz. Bir kunda faqat bitta qabulga yozilish mumkin.',
       PROCEDURE_TOO_LONG: 'Tanlangan protsedura uchun bu vaqt yetarli emas.',
       PROCEDURE_NOT_FOUND: 'Protsedura topilmadi.',
     };

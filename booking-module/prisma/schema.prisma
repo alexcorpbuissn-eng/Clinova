@@ -72,9 +72,11 @@ model Patient {
   firstName      String
   lastName       String
   phone          String
-  isVerified     Boolean       @default(false)
-  appointments   Appointment[]
-  createdAt      DateTime      @default(now())
+  isVerified         Boolean       @default(false)
+  cancellationsToday Int           @default(0)
+  lastCancellationDate DateTime?
+  appointments       Appointment[]
+  createdAt          DateTime      @default(now())
 
   @@index([telegramPhone])
 }

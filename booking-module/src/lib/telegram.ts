@@ -111,7 +111,19 @@ export async function processStartCommand(
     },
   });
 
-  // 2 — invalidate old unused OTPs for this phone, then create a new one
+  await generateAndSendOtp(telegramPhone, chatId);
+}
+
+/**
+ * generateAndSendOtp
+ *
+ * Generates an OTP, invalidates old ones, and sends it directly via Telegram DM.
+ * Used by both processStartCommand (new users) and send-otp route (returning users).
+ */
+export async function generateAndSendOtp(telegramPhone: string, chatId: string): Promise<void> {
+  const bot = getBot();
+
+  // invalidate old unused OTPs for this phone
   await prisma.otp.updateMany({
     where: { telegramPhone, used: false },
     data: { used: true },
@@ -122,7 +134,6 @@ export async function processStartCommand(
 
   await prisma.otp.create({ data: { telegramPhone, code, expiresAt } });
 
-  // 3 — send OTP DM
   const text =
     `🔐 *Habibullo-Hilola tasdiqlash kodi*\n\n` +
     `Sizning bir martalik kodingiz:\n\n` +
