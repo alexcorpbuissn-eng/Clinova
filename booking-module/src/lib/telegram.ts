@@ -66,8 +66,8 @@ export function toTashkentDate(utcDate: Date): string {
 export function getBotDeepLink(telegramPhone: string): string {
   const username = process.env.TELEGRAM_BOT_USERNAME;
   if (!username) throw new Error('TELEGRAM_BOT_USERNAME is not set.');
-  // Encode phone so it arrives safely as the /start parameter
-  const param = encodeURIComponent(normalisePhone(telegramPhone));
+  // Telegram start parameter only allows A-Z, a-z, 0-9, _, -. We strip '+' to comply.
+  const param = normalisePhone(telegramPhone).replace('+', '');
   return `https://t.me/${username}?start=${param}`;
 }
 

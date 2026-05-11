@@ -60,8 +60,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    // Decode URL-encoded phone from the deep link parameter
-    const decodedPhone = decodeURIComponent(rawPhone);
+    // If it doesn't start with '+', add it back because we stripped it for the deep link
+    let decodedPhone = rawPhone;
+    if (!decodedPhone.startsWith('+')) {
+      decodedPhone = '+' + decodedPhone;
+    }
 
     try {
       await processStartCommand(decodedPhone, chatId);
