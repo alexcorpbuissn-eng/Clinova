@@ -283,7 +283,7 @@ async function loadSlots(doctorId, procedureId) {
     slots.forEach(s => {
       const btn = document.createElement('button'); btn.type='button'; btn.className='slot-btn';
       btn.innerHTML=`<strong>${fmtTime(s.startTime)}</strong><br><small style="color:#64748b">${fmtDate(s.startTime)}</small><br><small style="color:#94a3b8">→ ${fmtTime(s.endTime)}</small>`;
-      btn.onclick = () => { document.querySelectorAll('.slot-btn').forEach(x=>x.classList.remove('sel')); btn.classList.add('sel'); selSlot=s; };
+      btn.onclick = () => { document.querySelectorAll('.slot-btn').forEach(x=>x.classList.remove('sel')); btn.classList.add('sel'); selSlot=s; setTimeout(() => setStep(3), 300); };
       g.appendChild(btn);
     });
     sc.innerHTML=''; sc.appendChild(g);
