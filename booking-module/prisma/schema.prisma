@@ -1,0 +1,159 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────
+// DOCTORS
+// ─────────────────────────────────────────────
+model Doctor {
+  id           String      @id @default(uuid())
+  firstName    String
+  lastName     String
+  specialty    String
+  bio          String?     @db.Text
+  photoUrl     String?
+  isActive     Boolean     @default(true)
+  slots        Slot[]
+  appointments Appointment[]
+  procedures   Procedure[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// PROCEDURES (new)
+// Each doctor can have multiple procedures with different durations
+// ─────────────────────────────────────────────
+model Procedure {
+  id              String        @id @default(uuid())
+  doctorId        String
+  doctor          Doctor        @relation(fields: [doctorId], references: [id])
+  name            String        // e.g. "Tish tozalash"
+  durationMinutes Int           // e.g. 30, 45, 60
+  isActive        Boolean       @default(true)
+  appointments    Appointment[]
+  createdAt       DateTime      @default(now())
+
+  @@index([doctorId])
+}
+
+// ─────────────────────────────────────────────
+// SLOTS
+// Doctors define raw availability windows.
+// A slot is locked immediately on booking.
+// ─────────────────────────────────────────────
+model Slot {
+  id          String       @id @default(uuid())
+  doctorId    String
+  doctor      Doctor       @relation(fields: [doctorId], references: [id])
+  startTime   DateTime     // UTC
+  duration    Int          // total window length in minutes
+  isAvailable Boolean      @default(true)
+  appointment Appointment?
+  createdAt   DateTime     @default(now())
+
+  @@unique([doctorId, startTime])
+  @@index([startTime])
+}
+
+// ─────────────────────────────────────────────
+// PATIENTS (new)
+// Identified by Telegram phone. Verified once,
+// reused on all future bookings.
+// ─────────────────────────────────────────────
+model Patient {
+  id             String        @id @default(uuid())
+  telegramPhone  String        @unique  // e.g. "+998901234567"
+  telegramChatId String?       @unique  // filled after OTP verified
+  firstName      String
+  lastName       String
+  phone          String
+  isVerified     Boolean       @default(false)
+  appointments   Appointment[]
+  createdAt      DateTime      @default(now())
+
+  @@index([telegramPhone])
+}
+
+// ─────────────────────────────────────────────
+// OTP (new)
+// One-time codes sent via Telegram bot.
+// Expire in 10 minutes, single-use.
+// ─────────────────────────────────────────────
+model Otp {
+  id            String   @id @default(uuid())
+  telegramPhone String
+  code          String   // 6-digit string
+  expiresAt     DateTime
+  used          Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  @@index([telegramPhone, used])
+}
+
+// ─────────────────────────────────────────────
+// APPOINTMENTS (updated)
+// Now links to Patient + Procedure.
+// Reminder flags replace BullMQ queue.
+// cancelToken retained for direct cancel links.
+// ─────────────────────────────────────────────
+model Appointment {
+  id              String     @id @default(uuid())
+  slotId          String     @unique
+  slot            Slot       @relation(fields: [slotId], references: [id])
+  doctorId        String
+  doctor          Doctor     @relation(fields: [doctorId], references: [id])
+  procedureId     String
+  procedure       Procedure  @relation(fields: [procedureId], references: [id])
+
+  // Patient (new relation — replaces raw fields)
+  patientId       String
+  patient         Patient    @relation(fields: [patientId], references: [id])
+
+  // Legacy raw fields kept for backward compat during migration
+  patientEmail    String?
+  patientFirst    String?
+  patientLast     String?
+  patientPhone    String?
+
+  description     String?    @db.VarChar(500)
+  status          ApptStatus @default(SCHEDULED)
+  cancelToken     String?    @unique
+
+  // Reminder flags — checked by hourly Vercel cron job
+  reminderSent24h Boolean    @default(false)
+  reminderSent2h  Boolean    @default(false)
+
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  @@index([patientId])
+  @@index([status, reminderSent24h, reminderSent2h])
+}
+
+enum ApptStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+// ─────────────────────────────────────────────
+// USERS (admin / doctor dashboard auth)
+// ─────────────────────────────────────────────
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // bcrypt hashed
+  role      Role
+  doctorId  String?  @unique
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+}
