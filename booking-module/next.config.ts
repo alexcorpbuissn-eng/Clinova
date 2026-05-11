@@ -13,6 +13,14 @@ const nextConfig: NextConfig = {
         ]
       }
     ];
+  },
+  async rewrites() {
+    return [
+      { source: '/', destination: '/index.html' },
+      { source: '/booking', destination: '/booking.html' },
+      { source: '/about', destination: '/about.html' },
+      { source: '/services', destination: '/services.html' }
+    ];
   }
 };
 
