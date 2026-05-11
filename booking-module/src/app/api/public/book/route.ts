@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
   });
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // Lock the slot row against concurrent booking
       const slots = await tx.$queryRaw<any[]>`
         SELECT s.*, d."firstName" as "doctorFirst", d."lastName" as "doctorLast"

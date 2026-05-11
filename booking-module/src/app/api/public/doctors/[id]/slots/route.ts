@@ -13,8 +13,9 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const procedureId = req.nextUrl.searchParams.get('procedureId');
 
   let procedureDuration: number | null = null;
@@ -29,7 +30,7 @@ export async function GET(
 
   const slots = await prisma.slot.findMany({
     where: {
-      doctorId: params.id,
+      doctorId: id,
       isAvailable: true,
       startTime: { gt: new Date() },
       // If a procedure was selected, only return slots long enough
@@ -41,7 +42,7 @@ export async function GET(
   });
 
   // Enrich with computed endTime for display purposes
-  const enriched = slots.map((s) => ({
+  const enriched = slots.map((s: any) => ({
     id: s.id,
     startTime: s.startTime,
     endTime: new Date(s.startTime.getTime() + s.duration * 60_000),

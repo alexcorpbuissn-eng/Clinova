@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { sendEmail } from '@/lib/resend';
+import { toTashkentDate, toTashkentTime } from '@/lib/telegram';
+import TelegramBot from 'node-telegram-bot-api';
+
+function getBot() {
+  return new TelegramBot(process.env.TELEGRAM_BOT_TOKEN!, { polling: false });
+}
 
 // GET /api/public/cancel/:token — Validate the token and show appointment info
-export async function GET(request: Request, { params }: { params: { token: string } }) {
-  const { token } = params;
+export async function GET(request: Request, { params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params;
 
   const appointment = await prisma.appointment.findUnique({
     where: { cancelToken: token },
@@ -15,7 +20,6 @@ export async function GET(request: Request, { params }: { params: { token: strin
     return NextResponse.json({ success: false, error: 'Invalid or expired cancellation link.' }, { status: 404 });
   }
 
-  // Check if it's within 2 hours of the appointment
   const now = new Date();
   const apptTime = new Date(appointment.slot.startTime);
   const twoHoursBefore = new Date(apptTime.getTime() - 2 * 60 * 60 * 1000);
@@ -41,13 +45,13 @@ export async function GET(request: Request, { params }: { params: { token: strin
 }
 
 // POST /api/public/cancel/:token — Process the actual cancellation
-export async function POST(request: Request, { params }: { params: { token: string } }) {
-  const { token } = params;
+export async function POST(request: Request, { params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params;
 
   try {
     const appointment = await prisma.appointment.findUnique({
       where: { cancelToken: token },
-      include: { doctor: true, slot: true },
+      include: { doctor: true, slot: true, patient: true },
     });
 
     if (!appointment || appointment.status !== 'SCHEDULED') {
@@ -62,7 +66,7 @@ export async function POST(request: Request, { params }: { params: { token: stri
       return NextResponse.json({ success: false, error: 'Cancellation window has passed.' }, { status: 410 });
     }
 
-    // Cancel in a transaction: free the slot + update appointment status + invalidate token
+    // Cancel: free slot + update status + invalidate token
     await prisma.$transaction([
       prisma.appointment.update({
         where: { id: appointment.id },
@@ -74,24 +78,33 @@ export async function POST(request: Request, { params }: { params: { token: stri
       }),
     ]);
 
-    // Notify both patient and doctor
-    const formattedDate = new Date(appointment.slot.startTime).toLocaleDateString('uz-UZ', {
-      year: 'numeric', month: 'long', day: 'numeric',
-    });
-    const formattedTime = new Date(appointment.slot.startTime).toLocaleTimeString('uz-UZ', {
-      hour: '2-digit', minute: '2-digit',
-    });
+    const date = toTashkentDate(appointment.slot.startTime);
+    const time = toTashkentTime(appointment.slot.startTime);
+    const doctorName = `${appointment.doctor.firstName} ${appointment.doctor.lastName}`;
 
-    const cancelHtml = `
-      <div style="font-family: sans-serif; max-width:480px; margin:0 auto; background:#fff; padding:30px; border-radius:12px;">
-        <h2 style="color:#e11d48;">Qabul Bekor Qilindi</h2>
-        <p>Hurmatli <strong>${appointment.patientFirst}</strong>,</p>
-        <p>Dr. <strong>${appointment.doctor.firstName} ${appointment.doctor.lastName}</strong> bilan <strong>${formattedDate}, ${formattedTime}</strong> da bo'lgan qabulingiz bekor qilindi.</p>
-        <p style="color:#64748b; font-size:14px;">Qayta yozilish uchun havolani bosing: <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/booking">Qabulga yozilish</a></p>
-      </div>
-    `;
+    // Notify patient via Telegram DM
+    const chatId = appointment.patient?.telegramChatId;
+    if (chatId) {
+      const bot = getBot();
+      const text =
+        `❌ *Qabul bekor qilindi*\n\n` +
+        `Dr. *${doctorName}* bilan *${date}, ${time}* dagi qabulingiz bekor qilindi.\n\n` +
+        `Qayta yozilish uchun: ${process.env.NEXT_PUBLIC_APP_URL}/booking`;
+      bot.sendMessage(chatId, text, { parse_mode: 'Markdown' }).catch(console.error);
+    }
 
-    await sendEmail({ to: appointment.patientEmail, subject: 'Qabul bekor qilindi | Habibullo-Hilola', html: cancelHtml });
+    // Notify clinic group
+    const groupChatId = process.env.TELEGRAM_GROUP_CHAT_ID;
+    if (groupChatId) {
+      const bot = getBot();
+      const groupText =
+        `🚫 *Bemor qabulni bekor qildi*\n\n` +
+        `👤 Bemor: *${appointment.patientFirst} ${appointment.patientLast}*\n` +
+        `👨‍⚕️ Shifokor: *Dr. ${doctorName}*\n` +
+        `📅 Sana: *${date}*\n` +
+        `🕐 Vaqt: *${time}*`;
+      bot.sendMessage(groupChatId, groupText, { parse_mode: 'Markdown' }).catch(console.error);
+    }
 
     return NextResponse.json({ success: true, message: 'Qabul muvaffaqiyatli bekor qilindi.' });
   } catch (error) {

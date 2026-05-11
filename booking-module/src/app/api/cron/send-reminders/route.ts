@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
   });
 
   const results24h = await Promise.allSettled(
-    due24h.map(async (appt) => {
+    due24h.map(async (appt: any) => {
       const chatId = appt.patient.telegramChatId;
       if (!chatId) return;
 
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
   });
 
   const results2h = await Promise.allSettled(
-    due2h.map(async (appt) => {
+    due2h.map(async (appt: any) => {
       const chatId = appt.patient.telegramChatId;
       if (!chatId) return;
 
@@ -100,8 +100,8 @@ export async function POST(req: NextRequest) {
     })
   );
 
-  const sent24 = results24h.filter((r) => r.status === 'fulfilled').length;
-  const sent2  = results2h.filter((r) => r.status === 'fulfilled').length;
+  const sent24 = results24h.filter((r: any) => r.status === 'fulfilled').length;
+  const sent2  = results2h.filter((r: any) => r.status === 'fulfilled').length;
 
   console.log(`[cron] Reminders sent — 24h: ${sent24}/${due24h.length}, 2h: ${sent2}/${due2h.length}`);
 
