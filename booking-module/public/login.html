@@ -133,7 +133,7 @@
         const returnUrl = new URLSearchParams(window.location.search).get('return') || 'booking.html';
         window.location.href = returnUrl;
       } else {
-        err(data.error || 'Noto\\'g\\'ri kod.');
+        err(data.error || "Noto'g'ri kod.");
       }
     } catch(e) { err('Server xatosi'); }
     btn.disabled=false; btn.textContent='Tasdiqlash';
