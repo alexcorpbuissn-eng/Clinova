@@ -110,7 +110,17 @@
     const info = document.getElementById('cancel-info');
     
     if (remainingCancellations !== undefined) {
-      info.innerHTML = `Sizda bugun bekor qilish uchun <strong>${remainingCancellations} ta</strong> urinish qoldi (Maksimum 2 ta).`;
+      if (remainingCancellations === 0) {
+        info.innerHTML = `Siz bugungi bekor qilish limitidan (2 ta) to'liq foydalandingiz.<br><strong style="color:#be123c; display:inline-block; margin-top:6px;">Muammoni hal qilish uchun markaz bilan bog'laning: +998 90 123 45 67</strong>`;
+        info.style.background = '#fff1f2';
+        info.style.border = '1px solid #fecdd3';
+        info.style.color = '#be123c';
+      } else {
+        info.innerHTML = `Sizda bugun bekor qilish uchun <strong>${remainingCancellations} ta</strong> urinish qoldi (Maksimum 2 ta).`;
+        info.style.background = '#e0f2fe';
+        info.style.border = '1px solid #bae6fd';
+        info.style.color = 'var(--navy)';
+      }
       info.style.display = 'block';
     } else {
       info.style.display = 'none';
@@ -161,7 +171,7 @@
         let timeText = '';
         
         if (remainingCancellations === 0) {
-          timeText = "Bugun bekor qilish limiti tugadi";
+          timeText = "Markaz bilan bog'laning: +998 90 123 45 67";
         } else if (minsSince <= 15) {
           canCancel = true;
           const timeLeftMs = (bookedAt + 15 * 60000) - now;
