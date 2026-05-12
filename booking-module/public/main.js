@@ -120,35 +120,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ---- Form submission ----
   const form = document.getElementById('booking-form');
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('submit-booking');
-    const originalText = btn.innerHTML;
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-booking');
+      const originalText = btn.innerHTML;
 
-    // Validate
-    const name = document.getElementById('name').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    if (!name || !phone) {
-      showToast('Iltimos, ism va telefon raqamingizni kiriting!', 'error');
-      return;
-    }
+      // Validate
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      if (!name || !phone) {
+        showToast('Iltimos, ism va telefon raqamingizni kiriting!', 'error');
+        return;
+      }
 
-    // Simulate sending
-    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Yuborilmoqda...';
-    btn.disabled = true;
+      // Simulate sending
+      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Yuborilmoqda...';
+      btn.disabled = true;
 
-    setTimeout(() => {
-      btn.innerHTML = '✓ Muvaffaqiyatli Yuborildi!';
-      btn.style.background = '#22c55e';
-      showToast('Tez orada siz bilan bog\'lanamiz!', 'success');
-      form.reset();
       setTimeout(() => {
-        btn.innerHTML = originalText;
-        btn.style.background = '';
-        btn.disabled = false;
-      }, 3000);
-    }, 1800);
-  });
+        btn.innerHTML = '✓ Muvaffaqiyatli Yuborildi!';
+        btn.style.background = '#22c55e';
+        showToast('Tez orada siz bilan bog\\'lanamiz!', 'success');
+        form.reset();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.style.background = '';
+          btn.disabled = false;
+        }, 3000);
+      }, 1800);
+    });
+  }
 
   // ---- Toast notification ----
   function showToast(message, type = 'success') {
