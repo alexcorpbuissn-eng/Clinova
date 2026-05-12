@@ -1,63 +1,4 @@
-<!DOCTYPE html>
-<html lang="uz">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mening Qabullarim | Habibullo-Hilola</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    .dash-container { max-width: 800px; margin: 40px auto; padding: 20px; }
-    .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .dash-header h1 { color: var(--navy); font-size: 1.8rem; margin: 0; }
-    .btn-outline { border: 2px solid var(--border); background: transparent; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: 500; transition: all 0.2s; }
-    .btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; }
-    .appt-list { display: flex; flex-direction: column; gap: 16px; }
-    .appt-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
-    .appt-info h3 { margin: 0 0 6px; font-size: 1.1rem; color: var(--navy); }
-    .appt-info p { margin: 0; color: var(--text-muted); font-size: 0.9rem; }
-    .appt-info p strong { color: var(--teal-dark); }
-    .appt-status { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
-    .status-active { background: #dcfce7; color: #166534; }
-    .btn-cancel { background: #fee2e2; color: #991b1b; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; transition: opacity 0.2s; }
-    .btn-cancel:hover { opacity: 0.8; }
-    .btn-cancel:disabled { opacity: 0.5; cursor: not-allowed; }
-    .empty-state { text-align: center; padding: 60px 20px; background: #fff; border-radius: 16px; border: 1px dashed var(--border); }
-    .empty-state h3 { color: var(--navy); margin-bottom: 10px; }
-    .empty-state p { color: var(--text-muted); margin-bottom: 20px; }
-  </style>
-</head>
-<body class="bg-light">
 
-<header class="navbar" id="navbar">
-  <div class="nav-container">
-    <a href="index.html" class="nav-logo" id="logo-link">
-      <span class="logo-icon">✦</span>
-      <span class="logo-text">Habibullo-Hilola</span>
-    </a>
-    <nav class="nav-links" id="nav-links">
-      <a href="index.html" class="nav-link">Asosiy</a>
-      <a href="services.html" class="nav-link">Xizmatlar</a>
-      <a href="about.html" class="nav-link">Biz haqimizda</a>
-      <a href="booking.html" class="nav-link">Qabul</a>
-      <a href="my-appointments.html" class="nav-link active">Mening qabullarim</a>
-    </nav>
-    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
-  </div>
-</header>
-
-<main class="dash-container">
-  <div class="dash-header">
-    <h1>Mening qabullarim</h1>
-    <button class="btn-outline" onclick="logout()">Chiqish</button>
-  </div>
-
-  <div id="loader" style="text-align:center;padding:40px;color:var(--text-muted)">Yuklanmoqda...</div>
-  <div id="error" style="color:#be123c;background:#fff1f2;padding:12px;border-radius:8px;margin-bottom:20px;display:none"></div>
-  <div id="appt-container" class="appt-list"></div>
-</main>
-
-<script>
   const API = '';
   const patientId = localStorage.getItem('patientId');
   if (!patientId) {
@@ -172,6 +113,3 @@
   }
 
   fetchAppts();
-</script>
-</body>
-</html>

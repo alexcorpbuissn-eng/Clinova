@@ -247,7 +247,7 @@ async function loadProcedures(doctorId) {
   document.getElementById('slot-section').style.display='none';
   try {
     const {procedures} = await fetch(`${API}/api/public/doctors/${doctorId}/procedures`).then(r=>r.json());
-    if (!procedures?.length) { c.innerHTML='<div class="state-msg">Bu shifokor uchun protseduralar yo\\'q.</div>'; return; }
+    if (!procedures?.length) { c.innerHTML=`<div class="state-msg">Bu shifokor uchun protseduralar yo'q.</div>`; return; }
     const list = document.createElement('div'); list.className='proc-list';
     procedures.forEach(p => {
       const btn = document.createElement('button'); btn.type='button'; btn.className='proc-btn';
@@ -265,12 +265,12 @@ async function loadSlots(doctorId, procedureId) {
   ss.style.display=''; sc.innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
   try {
     const {slots} = await fetch(`${API}/api/public/doctors/${doctorId}/slots?procedureId=${procedureId}`).then(r=>r.json());
-    if (!slots?.length) { sc.innerHTML='<div class="state-msg">Bu protsedura uchun bo\\'sh vaqt yo\\'q.</div>'; return; }
+    if (!slots?.length) { sc.innerHTML=`<div class="state-msg">Bu protsedura uchun bo'sh vaqt yo'q.</div>`; return; }
     const g = document.createElement('div'); g.className='slot-grid';
     slots.forEach(s => {
       const btn = document.createElement('button'); btn.type='button'; btn.className='slot-btn';
       btn.innerHTML=`<strong>${fmtTime(s.startTime)}</strong><br><small style="color:#64748b">${fmtDate(s.startTime)}</small><br><small style="color:#94a3b8">→ ${fmtTime(s.endTime)}</small>`;
-      btn.onclick = () => { document.querySelectorAll('.slot-btn').forEach(x=>x.classList.remove('sel')); btn.classList.add('sel'); selSlot=s; setTimeout(() => { document.getElementById('summary3').innerHTML=\`🩺 Dr. ${selDoctor.firstName} ${selDoctor.lastName} &nbsp;|&nbsp; ${selProc.name} &nbsp;|&nbsp; ${fmtDate(selSlot.startTime)}, ${fmtTime(selSlot.startTime)}\`; setStep(3); }, 300); };
+      btn.onclick = () => { document.querySelectorAll('.slot-btn').forEach(x=>x.classList.remove('sel')); btn.classList.add('sel'); selSlot=s; setTimeout(() => { document.getElementById('summary3').innerHTML=`🩺 Dr. ${selDoctor.firstName} ${selDoctor.lastName} &nbsp;|&nbsp; ${selProc.name} &nbsp;|&nbsp; ${fmtDate(selSlot.startTime)}, ${fmtTime(selSlot.startTime)}`; setStep(3); }, 300); };
       g.appendChild(btn);
     });
     sc.innerHTML=''; sc.appendChild(g);
