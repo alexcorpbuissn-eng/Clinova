@@ -32,7 +32,21 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ appointments: patient.appointments });
+    // Calculate remaining cancellations
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    let currentCancellations = patient.cancellationsToday;
+    if (patient.lastCancellationDate && patient.lastCancellationDate < today) {
+      currentCancellations = 0;
+    }
+    const maxCancellations = 2;
+    const remainingCancellations = Math.max(0, maxCancellations - currentCancellations);
+
+    return NextResponse.json({ 
+      appointments: patient.appointments,
+      remainingCancellations,
+      maxCancellations
+    });
   } catch (err) {
     console.error('Failed to fetch appointments:', err);
     return NextResponse.json({ error: 'Ichki xatolik' }, { status: 500 });

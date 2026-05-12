@@ -266,14 +266,71 @@ async function loadSlots(doctorId, procedureId) {
   try {
     const {slots} = await fetch(`${API}/api/public/doctors/${doctorId}/slots?procedureId=${procedureId}`).then(r=>r.json());
     if (!slots?.length) { sc.innerHTML=`<div class="state-msg">Bu protsedura uchun bo'sh vaqt yo'q.</div>`; return; }
-    const g = document.createElement('div'); g.className='slot-grid';
+    
+    function getTabLabel(dateObj) {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const tmrw = today + 86400000;
+      const dTime = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()).getTime();
+      if (dTime === today) return "Bugun";
+      if (dTime === tmrw) return "Ertaga";
+      const uzDays = ["Yakshanba", "Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba"];
+      return `${dateObj.getDate()} ${dateObj.toLocaleDateString('uz-UZ', {month:'short'})}, ${uzDays[dateObj.getDay()]}`;
+    }
+
+    const grouped = {};
     slots.forEach(s => {
-      const btn = document.createElement('button'); btn.type='button'; btn.className='slot-btn';
-      btn.innerHTML=`<strong>${fmtTime(s.startTime)}</strong><br><small style="color:#64748b">${fmtDate(s.startTime)}</small><br><small style="color:#94a3b8">→ ${fmtTime(s.endTime)}</small>`;
-      btn.onclick = () => { document.querySelectorAll('.slot-btn').forEach(x=>x.classList.remove('sel')); btn.classList.add('sel'); selSlot=s; setTimeout(() => { document.getElementById('summary3').innerHTML=`🩺 Dr. ${selDoctor.firstName} ${selDoctor.lastName} &nbsp;|&nbsp; ${selProc.name} &nbsp;|&nbsp; ${fmtDate(selSlot.startTime)}, ${fmtTime(selSlot.startTime)}`; setStep(3); }, 300); };
-      g.appendChild(btn);
+      const d = new Date(s.startTime);
+      const dateKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      if (!grouped[dateKey]) grouped[dateKey] = { label: getTabLabel(d), slots: [] };
+      grouped[dateKey].slots.push(s);
     });
-    sc.innerHTML=''; sc.appendChild(g);
+    const dateKeys = Object.keys(grouped).sort();
+
+    const wrap = document.createElement('div');
+    const tabList = document.createElement('div');
+    tabList.className = 'slot-tabs';
+    tabList.style = 'display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; margin-bottom:15px; scrollbar-width: none;';
+    
+    const slotArea = document.createElement('div');
+    let activeKey = dateKeys[0];
+
+    function renderActiveTab() {
+      tabList.innerHTML = '';
+      dateKeys.forEach(k => {
+        const tb = document.createElement('button');
+        tb.type = 'button';
+        tb.style = `padding: 8px 16px; border: 1px solid var(--border); border-radius: 20px; background: ${k === activeKey ? 'var(--teal)' : '#fff'}; color: ${k === activeKey ? '#fff' : 'var(--navy)'}; cursor: pointer; white-space: nowrap; font-family: inherit; font-weight: 500; font-size: 0.9rem; transition: all 0.2s;`;
+        tb.textContent = grouped[k].label;
+        tb.onclick = () => { activeKey = k; renderActiveTab(); };
+        tabList.appendChild(tb);
+      });
+      
+      slotArea.innerHTML = '';
+      const g = document.createElement('div'); g.className='slot-grid';
+      grouped[activeKey].slots.forEach(s => {
+        const btn = document.createElement('button'); btn.type='button'; btn.className='slot-btn';
+        if (selSlot && selSlot.id === s.id) btn.classList.add('sel');
+        btn.innerHTML=`<strong>${fmtTime(s.startTime)}</strong><br><small style="color:#64748b">${fmtDate(s.startTime)}</small><br><small style="color:#94a3b8">→ ${fmtTime(s.endTime)}</small>`;
+        btn.onclick = () => { 
+          document.querySelectorAll('.slot-btn').forEach(x=>x.classList.remove('sel')); 
+          btn.classList.add('sel'); 
+          selSlot=s; 
+          setTimeout(() => { 
+            document.getElementById('summary3').innerHTML=`🩺 Dr. ${selDoctor.firstName} ${selDoctor.lastName} &nbsp;|&nbsp; ${selProc.name} &nbsp;|&nbsp; ${fmtDate(selSlot.startTime)}, ${fmtTime(selSlot.startTime)}`; 
+            setStep(3); 
+          }, 300); 
+        };
+        g.appendChild(btn);
+      });
+      slotArea.appendChild(g);
+    }
+
+    wrap.appendChild(tabList);
+    wrap.appendChild(slotArea);
+    
+    renderActiveTab();
+    sc.innerHTML=''; sc.appendChild(wrap);
   } catch(e) { sc.innerHTML='<div class="state-msg">❌ Xatolik.</div>'; }
 }
 

@@ -28,6 +28,10 @@ export async function POST(req: NextRequest) {
         currentCancellations = 0;
       }
 
+      if (currentCancellations >= 2) {
+        throw new Error('CANCELLATION_LIMIT_EXCEEDED');
+      }
+
       const appointment = await tx.appointment.findUnique({
         where: { id: appointmentId },
         include: { slot: true, doctor: true, procedure: true }
@@ -95,6 +99,7 @@ export async function POST(req: NextRequest) {
       'FORBIDDEN': "Sizga ruxsat yo'q.",
       'ALREADY_CANCELLED': "Qabul allaqachon bekor qilingan.",
       'LATE_CANCELLATION': "Qabulni faqatgina bron qilinganidan so'ng 15 daqiqa ichida yoki qabulga 24 soatdan ko'p vaqt qolganida bekor qilish mumkin.",
+      'CANCELLATION_LIMIT_EXCEEDED': "Kunlik bekor qilish limiti (2 marta) tugadi.",
     };
     
     if (msgs[err.message]) {
