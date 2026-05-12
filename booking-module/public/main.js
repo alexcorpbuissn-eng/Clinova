@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         btn.innerHTML = '✓ Muvaffaqiyatli Yuborildi!';
         btn.style.background = '#22c55e';
-        showToast('Tez orada siz bilan bog\\'lanamiz!', 'success');
+        showToast("Tez orada siz bilan bog'lanamiz!", 'success');
         form.reset();
         setTimeout(() => {
           btn.innerHTML = originalText;
