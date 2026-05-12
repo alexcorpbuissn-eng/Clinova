@@ -186,10 +186,10 @@ document.addEventListener('DOMContentLoaded', () => {
   style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
   document.head.appendChild(style);
 
-  // ---- Phone number formatting ----
-  const phoneInput = document.getElementById('phone');
-  if (phoneInput) {
-    phoneInput.addEventListener('input', (e) => {
+  // ---- Universal Phone number formatting ----
+  const phoneInputs = document.querySelectorAll('input[type="tel"]');
+  phoneInputs.forEach(input => {
+    input.addEventListener('input', (e) => {
       let val = e.target.value.replace(/\D/g, '');
       if (val.startsWith('998')) val = val.slice(3);
       if (val.length > 9) val = val.slice(0, 9);
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (val.length > 7) formatted += ' ' + val.slice(7, 9);
       e.target.value = formatted;
     });
-  }
+  });
 
   // ---- User Profile in Navbar ----
   const navContainer = document.querySelector('.nav-container');
@@ -219,10 +219,10 @@ document.addEventListener('DOMContentLoaded', () => {
       // Logged in
       let nameText = (fFirst || fLast) ? `${fFirst || ''} ${fLast || ''}`.trim() : 'Mijoz';
       profileWrap.innerHTML = `
-        <div style="background:var(--teal-light);padding:6px 12px;border-radius:20px;color:var(--teal-dark);display:flex;align-items:center;gap:6px">
+        <a href="profile.html" style="background:var(--teal-light);padding:6px 12px;border-radius:20px;color:var(--teal-dark);display:flex;align-items:center;gap:6px;text-decoration:none;transition:opacity 0.2s" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           ${nameText}
-        </div>
+        </a>
       `;
     } else {
       // Not logged in

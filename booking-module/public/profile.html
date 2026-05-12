@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mening Profilim | Habibullo-Hilola</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .dash-container { max-width: 600px; margin: 40px auto; padding: 20px; }
+    .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .dash-header h1 { color: var(--navy); font-size: 1.8rem; margin: 0; }
+    .btn-outline { border: 2px solid var(--border); background: transparent; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: 500; transition: all 0.2s; }
+    .btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; }
+    .profile-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+    .inline-err { background: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 11px 15px; color: #be123c; font-size: 0.85rem; margin-bottom: 14px; display: none; }
+    .inline-err.on { display: block; }
+    .inline-success { background: #dcfce7; border: 1px solid #bbf7d0; border-radius: 8px; padding: 11px 15px; color: #166534; font-size: 0.85rem; margin-bottom: 14px; display: none; }
+    .inline-success.on { display: block; }
+    .info-msg { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 11px 15px; color: #1d4ed8; font-size: 0.85rem; margin-bottom: 14px; display: flex; gap: 8px; align-items: flex-start; }
+    .info-msg svg { flex-shrink: 0; margin-top: 2px; }
+  </style>
+</head>
+<body class="bg-light">
+
+<header class="navbar" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo" id="logo-link">
+      <span class="logo-icon">✦</span>
+      <span class="logo-text">Habibullo-Hilola</span>
+    </a>
+    <nav class="nav-links" id="nav-links">
+      <a href="index.html" class="nav-link">Asosiy</a>
+      <a href="services.html" class="nav-link">Xizmatlar</a>
+      <a href="about.html" class="nav-link">Biz haqimizda</a>
+      <a href="booking.html" class="nav-link">Qabul</a>
+      <a href="my-appointments.html" class="nav-link">Mening qabullarim</a>
+    </nav>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<main class="dash-container">
+  <div class="dash-header">
+    <h1>Mening Profilim</h1>
+    <button class="btn-outline" onclick="logout()">Chiqish</button>
+  </div>
+
+  <div id="loader" style="text-align:center;padding:40px;color:var(--text-muted)">Yuklanmoqda...</div>
+  
+  <div id="profile-content" style="display:none">
+    <div class="profile-card">
+      <div id="err" class="inline-err"></div>
+      <div id="success" class="inline-success"></div>
+      
+      <div class="info-msg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>Eslatma: Agar siz telefon raqamingizni o'zgartirsangiz, xavfsizlik maqsadida tizimdan chiqib, yangi raqamingiz orqali qayta kirishingiz talab etiladi.</span>
+      </div>
+
+      <form id="profile-form" class="appointment-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ism *</label>
+            <input id="fFirst" type="text" required placeholder="Ism"/>
+          </div>
+          <div class="form-group">
+            <label>Familiya *</label>
+            <input id="fLast" type="text" required placeholder="Familiya"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Telegram raqamingiz *</label>
+          <input id="fTgPhone" type="tel" required placeholder="+998 90 000 00 00" />
+        </div>
+        <button type="submit" class="btn-submit-booking" id="btn-save" style="width:100%; margin-top: 10px;">Saqlash</button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<script src="main.js"></script>
+<script>
+  const API = '';
+  const patientId = localStorage.getItem('patientId');
+  if (!patientId) {
+    window.location.href = 'login.html?return=profile.html';
+  }
+
+  function logout() {
+    localStorage.removeItem('patientId');
+    localStorage.removeItem('fFirst');
+    localStorage.removeItem('fLast');
+    localStorage.removeItem('fPhone');
+    window.location.href = 'index.html';
+  }
+
+  function err(msg) {
+    const e = document.getElementById('err');
+    e.textContent = msg;
+    e.classList.add('on');
+    document.getElementById('success').classList.remove('on');
+  }
+
+  function success(msg) {
+    const e = document.getElementById('success');
+    e.textContent = msg;
+    e.classList.add('on');
+    document.getElementById('err').classList.remove('on');
+  }
+
+  function clearMsgs() {
+    document.getElementById('err').classList.remove('on');
+    document.getElementById('success').classList.remove('on');
+  }
+
+  async function fetchProfile() {
+    try {
+      const res = await fetch(`${API}/api/public/profile?patientId=${patientId}`);
+      const data = await res.json();
+      document.getElementById('loader').style.display = 'none';
+
+      if (res.ok && data.success) {
+        document.getElementById('profile-content').style.display = 'block';
+        document.getElementById('fFirst').value = data.patient.firstName || '';
+        document.getElementById('fLast').value = data.patient.lastName || '';
+        
+        // Format phone nicely
+        let phone = data.patient.telegramPhone || '';
+        if (phone.startsWith('+')) {
+          // just put it in, main.js mask handles formatting on input, but we can trigger it manually
+          document.getElementById('fTgPhone').value = phone;
+          // Trigger the input event so main.js formats it
+          document.getElementById('fTgPhone').dispatchEvent(new Event('input'));
+        } else {
+           document.getElementById('fTgPhone').value = '+' + phone;
+           document.getElementById('fTgPhone').dispatchEvent(new Event('input'));
+        }
+
+      } else {
+        document.getElementById('profile-content').style.display = 'block';
+        err(data.error || "Ma'lumotlarni yuklashda xatolik yuz berdi");
+      }
+    } catch (e) {
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('profile-content').style.display = 'block';
+      err("Server bilan bog'lanishda xatolik");
+    }
+  }
+
+  document.getElementById('profile-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    clearMsgs();
+
+    const fFirst = document.getElementById('fFirst').value.trim();
+    const fLast = document.getElementById('fLast').value.trim();
+    const fTgPhone = document.getElementById('fTgPhone').value.trim();
+
+    const btn = document.getElementById('btn-save');
+    btn.disabled = true;
+    btn.textContent = 'Saqlanmoqda...';
+
+    try {
+      const res = await fetch(`${API}/api/public/profile`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientId,
+          firstName: fFirst,
+          lastName: fLast,
+          telegramPhone: fTgPhone
+        })
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        if (data.phoneChanged) {
+           alert("Raqamingiz muvaffaqiyatli o'zgartirildi! Tizimga yangi raqamingiz orqali qayta kiring.");
+           logout();
+        } else {
+           // Update local storage just in case
+           localStorage.setItem('fFirst', data.patient.firstName);
+           localStorage.setItem('fLast', data.patient.lastName);
+           localStorage.setItem('fPhone', data.patient.telegramPhone);
+           
+           success("Ma'lumotlaringiz saqlandi!");
+           // Update navbar text by reloading page or dispatching an event, simple reload is robust:
+           setTimeout(() => { window.location.reload(); }, 1500);
+        }
+      } else {
+        err(data.error || "Saqlashda xatolik yuz berdi");
+      }
+    } catch (error) {
+      err("Server bilan bog'lanishda xatolik");
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Saqlash';
+  });
+
+  fetchProfile();
+</script>
+</body>
+</html>
