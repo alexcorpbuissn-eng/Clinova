@@ -191,84 +191,90 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!input) return;
     const prefix = '+998 ';
 
-    const formatNumber = (val) => {
+    const formatValue = (val) => {
+      // Strip everything except digits
       let digits = val.replace(/\D/g, '');
-      if (digits.startsWith('998')) digits = digits.slice(3);
+      // Remove the 998 if it's already there at the start
+      if (digits.startsWith('998')) {
+        digits = digits.slice(3);
+      }
+      // Limit to 9 digits (Uzbekistan mobile format)
       digits = digits.slice(0, 9);
 
-      let res = prefix;
+      let formatted = prefix;
       if (digits.length > 0) {
-        res += digits.slice(0, 2);
-        if (digits.length > 2) res += ' ' + digits.slice(2, 5);
-        if (digits.length > 5) res += ' ' + digits.slice(5, 7);
-        if (digits.length > 7) res += ' ' + digits.slice(7, 9);
+        formatted += digits.slice(0, 2);
+        if (digits.length > 2) formatted += ' ' + digits.slice(2, 5);
+        if (digits.length > 5) formatted += ' ' + digits.slice(5, 7);
+        if (digits.length > 7) formatted += ' ' + digits.slice(7, 9);
       }
-      return res;
+      return formatted;
     };
 
-    input.addEventListener('focus', () => {
-      if (!input.value || input.value.trim() === '' || input.value === '+') {
-        input.value = prefix;
-      }
-    });
-
     input.addEventListener('keydown', (e) => {
-      const isControlKey = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'].includes(e.key);
-      const isNumeric = /^\d$/.test(e.key);
-      const isModifier = e.ctrlKey || e.metaKey;
-
-      // Prevent deleting prefix
+      // Prevent deleting the prefix
       if (e.key === 'Backspace' && input.selectionStart <= prefix.length && input.selectionEnd <= prefix.length) {
         e.preventDefault();
-        return;
       }
       if (e.key === 'Delete' && input.selectionStart < prefix.length) {
         e.preventDefault();
+      }
+      
+      // Allow control keys
+      if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End', 'Enter'].includes(e.key)) {
+        return;
+      }
+      
+      // Allow Ctrl+A, Ctrl+C, Ctrl+V, etc.
+      if (e.ctrlKey || e.metaKey) return;
+
+      // Block if already reached max length (prefix + 9 digits + 3 spaces = 17)
+      if (input.value.length >= 17 && input.selectionStart === input.selectionEnd) {
+        e.preventDefault();
         return;
       }
 
-      // Block non-numeric and non-control keys
-      if (!isNumeric && !isControlKey && !isModifier) {
+      // Block non-numeric
+      if (!/^\d$/.test(e.key)) {
         e.preventDefault();
       }
     });
 
     input.addEventListener('input', (e) => {
-      let cursor = e.target.selectionStart;
-      let val = e.target.value;
+      let cursor = input.selectionStart;
+      const oldLen = input.value.length;
+      const formatted = formatValue(input.value);
       
-      // If user managed to delete prefix via selection or something, restore it
-      if (!val.startsWith(prefix)) {
-        if (val.startsWith('+998')) {
-           val = prefix + val.slice(4).replace(/\D/g, '');
-        } else {
-           val = prefix + val.replace(/\D/g, '');
-        }
-      }
-
-      const formatted = formatNumber(val);
-      const oldVal = e.target.value;
-      e.target.value = formatted;
-
-      // Simple cursor fix: if we added a space, push cursor forward
-      if (formatted.length > oldVal.length && (formatted[cursor-1] === ' ')) {
+      input.value = formatted;
+      
+      // Fix cursor position after formatting
+      if (formatted.length > oldLen && (formatted[cursor - 1] === ' ')) {
         cursor++;
       }
-      e.target.setSelectionRange(cursor, cursor);
+      // Don't let cursor go into the prefix
+      if (cursor < prefix.length) cursor = prefix.length;
+      
+      input.setSelectionRange(cursor, cursor);
     });
 
-    input.addEventListener('blur', () => {
-      if (input.value === prefix || input.value.trim() === '+998') {
-        input.value = '';
+    input.addEventListener('focus', () => {
+      if (input.value.length < prefix.length) {
+        input.value = prefix;
+      }
+      // Move cursor to end on focus if it's just the prefix
+      if (input.value === prefix) {
+        setTimeout(() => input.setSelectionRange(prefix.length, prefix.length), 1);
       }
     });
 
     input.addEventListener('paste', (e) => {
       e.preventDefault();
-      const text = (e.clipboardData || window.clipboardData).getData('text');
-      const formatted = formatNumber(text);
-      input.value = formatted;
+      const pasteData = (e.clipboardData || window.clipboardData).getData('text');
+      input.value = formatValue(pasteData);
     });
+    
+    // Prevent dragging text into the field
+    input.addEventListener('drop', (e) => e.preventDefault());
   }
 
   document.querySelectorAll('input[type="tel"]').forEach(applyPhoneFormatter);
