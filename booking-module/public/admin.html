@@ -95,6 +95,7 @@
       <div class="nav-item" onclick="switchTab('patients')">👥 Bemorlar</div>
       <div class="nav-item" onclick="switchTab('doctors')">👨‍⚕️ Shifokorlar</div>
       <div style="flex:1"></div>
+      <div class="nav-item" onclick="window.open('reception.html','_blank')" style="color:#86efac">📋 Qabul Daftari</div>
       <div class="nav-item" onclick="logout()" style="color:#fca5a5">🚪 Chiqish</div>
     </div>
 
@@ -152,36 +153,42 @@
       <!-- DOCTORS TAB -->
       <div id="tab-doctors" class="tab-content">
         <div class="header">
-          <h1>Shifokorlar</h1>
+          <h1>Shifokorlar &amp; Statistika</h1>
           <button class="btn" style="width:auto" onclick="loadDoctors()">Yangilash</button>
         </div>
         
-        <h2 style="margin-bottom: 15px; color: var(--navy); font-size: 1.2rem;">🦷 Stomatologlar</h2>
+        <h2 style="margin-bottom: 15px; color: var(--navy); font-size: 1.1rem;">🦷 Stomatologlar</h2>
         <div class="table-card" style="margin-bottom: 30px;">
           <table>
             <thead>
               <tr>
                 <th>F.I.SH.</th>
-                <th>Mutaxassisligi</th>
+                <th>Bugun</th>
+                <th>Shu hafta</th>
+                <th>Shu oy</th>
+                <th>Oylik daromad</th>
               </tr>
             </thead>
             <tbody id="doc-stomatolog-tbody">
-              <tr><td colspan="2" style="text-align:center">Yuklanmoqda...</td></tr>
+              <tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>
             </tbody>
           </table>
         </div>
 
-        <h2 style="margin-bottom: 15px; color: var(--navy); font-size: 1.2rem;">👂 LORlar</h2>
+        <h2 style="margin-bottom: 15px; color: var(--navy); font-size: 1.1rem;">👂 LORlar</h2>
         <div class="table-card">
           <table>
             <thead>
               <tr>
                 <th>F.I.SH.</th>
-                <th>Mutaxassisligi</th>
+                <th>Bugun</th>
+                <th>Shu hafta</th>
+                <th>Shu oy</th>
+                <th>Oylik daromad</th>
               </tr>
             </thead>
             <tbody id="doc-lor-tbody">
-              <tr><td colspan="2" style="text-align:center">Yuklanmoqda...</td></tr>
+              <tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>
             </tbody>
           </table>
         </div>
@@ -193,11 +200,25 @@
   <script>
     const API = '';
     
-    // Auth Check on load
-    const token = localStorage.getItem('admin_token');
-    if (token) {
-      showDashboard();
+    // Auth Check on load — verify token with server, don't just trust localStorage
+    async function verifyAuthOnLoad() {
+      const token = localStorage.getItem('admin_token');
+      if (!token) return; // no token, stay on login screen
+      try {
+        const res = await fetch('/api/admin/appointments', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          showDashboard();
+        } else {
+          // Token invalid or expired — clear it and force re-login
+          localStorage.removeItem('admin_token');
+        }
+      } catch {
+        // Network error — stay on login, don't clear token
+      }
     }
+    verifyAuthOnLoad();
 
     // Phone Submit
     document.getElementById('phone-form').addEventListener('submit', async (e) => {
@@ -274,7 +295,6 @@
       localStorage.removeItem('admin_token');
       document.getElementById('dashboard').style.display = 'none';
       document.getElementById('login-screen').style.display = 'flex';
-      document.getElementById('password').value = '';
     }
 
     function showDashboard() {
@@ -396,36 +416,37 @@
         if(err.message !== 'Unauthorized') tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:red">Xatolik yuz berdi</td></tr>';
       }
     }
-    // Fetch Doctors
+    // Fetch Doctors with Stats
     async function loadDoctors() {
       const tbodyStom = document.getElementById('doc-stomatolog-tbody');
       const tbodyLor = document.getElementById('doc-lor-tbody');
-      tbodyStom.innerHTML = '<tr><td colspan="2" style="text-align:center">Yuklanmoqda...</td></tr>';
-      tbodyLor.innerHTML = '<tr><td colspan="2" style="text-align:center">Yuklanmoqda...</td></tr>';
+      const loading5 = '<tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>';
+      tbodyStom.innerHTML = loading5;
+      tbodyLor.innerHTML = loading5;
       try {
-        const data = await apiGet('/api/admin/doctors');
+        const data = await apiGet('/api/admin/stats');
         if (data.success) {
-          const stomatologs = data.doctors.filter(d => d.specialty.toLowerCase().includes('stomatolog'));
-          const lors = data.doctors.filter(d => d.specialty.toLowerCase().includes('lor'));
-          
-          tbodyStom.innerHTML = stomatologs.length ? stomatologs.map(d => `
-            <tr>
-              <td><strong>${d.firstName} ${d.lastName}</strong></td>
-              <td>${d.specialty}</td>
-            </tr>
-          `).join('') : '<tr><td colspan="2" style="text-align:center">Shifokor topilmadi</td></tr>';
+          const fmt = (n) => n.toLocaleString('uz-UZ') + ' so\'m';
+          const stomatologs = data.stats.filter(d => d.specialty.toLowerCase().includes('stomatolog'));
+          const lors = data.stats.filter(d => d.specialty.toLowerCase().includes('lor'));
 
-          tbodyLor.innerHTML = lors.length ? lors.map(d => `
+          const renderRow = d => `
             <tr>
               <td><strong>${d.firstName} ${d.lastName}</strong></td>
-              <td>${d.specialty}</td>
+              <td style="text-align:center">${d.daily}</td>
+              <td style="text-align:center">${d.weekly}</td>
+              <td style="text-align:center">${d.monthly}</td>
+              <td style="color:var(--teal-dark);font-weight:600">${fmt(d.monthlyRevenue)}</td>
             </tr>
-          `).join('') : '<tr><td colspan="2" style="text-align:center">Shifokor topilmadi</td></tr>';
+          `;
+
+          tbodyStom.innerHTML = stomatologs.length ? stomatologs.map(renderRow).join('') : '<tr><td colspan="5" style="text-align:center">Shifokor topilmadi</td></tr>';
+          tbodyLor.innerHTML = lors.length ? lors.map(renderRow).join('') : '<tr><td colspan="5" style="text-align:center">Shifokor topilmadi</td></tr>';
         }
       } catch (err) {
         if(err.message !== 'Unauthorized') {
-          tbodyStom.innerHTML = '<tr><td colspan="2" style="text-align:center;color:red">Xatolik</td></tr>';
-          tbodyLor.innerHTML = '<tr><td colspan="2" style="text-align:center;color:red">Xatolik</td></tr>';
+          tbodyStom.innerHTML = '<tr><td colspan="5" style="text-align:center;color:red">Xatolik</td></tr>';
+          tbodyLor.innerHTML = '<tr><td colspan="5" style="text-align:center;color:red">Xatolik</td></tr>';
         }
       }
     }

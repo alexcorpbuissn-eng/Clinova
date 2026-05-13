@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Qabul Daftari | Habibullo-Hilola</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #0f172a; --teal: #0d9488; --teal-dark: #0f766e; --teal-light: #f0fdfa;
+      --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --text: #334155; --text-muted: #64748b;
+      --red: #ef4444; --red-bg: #fef2f2; --green: #16a34a; --green-bg: #dcfce7;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* Login */
+    #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 100vh; background: var(--navy); }
+    .login-card { background: var(--surface); padding: 40px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 400px; }
+    .login-logo { text-align: center; margin-bottom: 28px; }
+    .login-logo h1 { color: var(--navy); font-size: 1.4rem; }
+    .login-logo p { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--navy); margin-bottom: 7px; }
+    .form-group input { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
+    .form-group input:focus { border-color: var(--teal); }
+    .btn-full { display: block; width: 100%; background: var(--teal); color: #fff; padding: 13px 20px; border: none; border-radius: 10px; font-family: inherit; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: background 0.2s; }
+    .btn-full:hover { background: var(--teal-dark); }
+    .err-msg { color: var(--red); font-size: 0.83rem; margin-bottom: 14px; text-align: center; min-height: 20px; }
+
+    /* App layout */
+    #app { display: none; }
+    .top-bar { background: var(--navy); color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .top-bar-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .top-bar-actions { display: flex; align-items: center; gap: 14px; }
+    .top-bar-date { font-size: 0.82rem; color: #94a3b8; }
+    .btn-logout { background: none; border: 1px solid #334155; color: #94a3b8; padding: 6px 14px; border-radius: 8px; font-family: inherit; font-size: 0.82rem; cursor: pointer; }
+    .btn-logout:hover { border-color: #64748b; color: #fff; }
+
+    .page-body { max-width: 1100px; margin: 0 auto; padding: 30px 20px; display: grid; grid-template-columns: 400px 1fr; gap: 28px; align-items: start; }
+    @media(max-width: 860px) { .page-body { grid-template-columns: 1fr; } }
+
+    /* Form card */
+    .form-card { background: var(--surface); border-radius: 16px; padding: 28px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+    .form-card h2 { font-size: 1.05rem; color: var(--navy); margin-bottom: 22px; display: flex; align-items: center; gap: 8px; }
+    .source-toggle { display: flex; gap: 0; margin-bottom: 18px; border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .source-btn { flex: 1; padding: 10px; border: none; background: #fff; font-family: inherit; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.2s; color: var(--text-muted); }
+    .source-btn.active { background: var(--teal); color: #fff; }
+    .form-group select { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.93rem; outline: none; transition: border-color 0.2s; background: #fff; }
+    .form-group select:focus { border-color: var(--teal); }
+    .price-input-wrap { position: relative; }
+    .price-input-wrap input { padding-right: 60px; }
+    .price-suffix { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 0.82rem; color: var(--text-muted); font-weight: 600; }
+    .btn-submit { display: block; width: 100%; background: var(--navy); color: #fff; padding: 14px 20px; border: none; border-radius: 10px; font-family: inherit; font-weight: 700; font-size: 1rem; cursor: pointer; transition: background 0.2s; margin-top: 8px; }
+    .btn-submit:hover { background: #1e293b; }
+    .success-toast { background: var(--green-bg); border: 1px solid #86efac; border-radius: 10px; padding: 12px 16px; color: var(--green); font-weight: 600; font-size: 0.88rem; margin-top: 14px; display: none; }
+    .err-form { background: var(--red-bg); border: 1px solid #fecaca; border-radius: 10px; padding: 12px 16px; color: var(--red); font-size: 0.88rem; margin-top: 10px; display: none; }
+
+    /* Visits list */
+    .visits-card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+    .visits-header { padding: 20px 24px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+    .visits-header h2 { font-size: 1.05rem; color: var(--navy); }
+    .btn-refresh { background: none; border: 1.5px solid var(--border); color: var(--text-muted); padding: 7px 14px; border-radius: 8px; font-family: inherit; font-size: 0.82rem; cursor: pointer; }
+    .btn-refresh:hover { border-color: var(--teal); color: var(--teal); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th { background: #f1f5f9; padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+    td { padding: 13px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    .source-badge { padding: 3px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; }
+    .source-badge.booked { background: #e0f2fe; color: #0284c7; }
+    .source-badge.walkin { background: #f3f4f6; color: #4b5563; }
+    .price-cell { font-weight: 700; color: var(--teal-dark); white-space: nowrap; }
+    .empty-state { text-align: center; padding: 40px; color: var(--text-muted); font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <h1>✦ Qabul Daftari</h1>
+      <p>Habibullo-Hilola | Resepshn Paneli</p>
+    </div>
+    <div id="login-err" class="err-msg"></div>
+
+    <form id="phone-form">
+      <div class="form-group">
+        <label>Telegram raqamingiz</label>
+        <input type="tel" id="telegram-phone" required placeholder="+998 90 123 45 67" />
+      </div>
+      <button type="submit" class="btn-full" id="btn-phone">Kodni Olish</button>
+    </form>
+
+    <form id="otp-form" style="display:none;">
+      <div class="form-group">
+        <label>Tasdiqlash kodi (Telegramdan)</label>
+        <input type="text" id="otp-code" required placeholder="123456" maxlength="6" style="font-size:1.5rem; letter-spacing: 0.3em; text-align:center;" />
+      </div>
+      <button type="submit" class="btn-full" id="btn-otp">Kirish</button>
+    </form>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="top-bar">
+    <div class="top-bar-title">📋 Qabul Daftari — Habibullo-Hilola</div>
+    <div class="top-bar-actions">
+      <span class="top-bar-date" id="top-date"></span>
+      <button class="btn-logout" onclick="logout()">🚪 Chiqish</button>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <!-- Left: Log Visit Form -->
+    <div class="form-card">
+      <h2>➕ Yangi tashrif qo'shish</h2>
+
+      <div class="source-toggle">
+        <button class="source-btn active" id="btn-walkin" onclick="setSource('WALKIN')">🚶 Offline keldi</button>
+        <button class="source-btn" id="btn-booked" onclick="setSource('BOOKED')">📱 Online bron</button>
+      </div>
+
+      <div class="form-group">
+        <label>Shifokor *</label>
+        <select id="f-doctor" required>
+          <option value="">Shifokor tanlang...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Bemor ismi *</label>
+        <input type="text" id="f-patient" required placeholder="To'liq ism" />
+      </div>
+      <div class="form-group">
+        <label>Xizmat turi *</label>
+        <select id="f-service" required>
+          <option value="">Xizmatni tanlang...</option>
+          <option value="__custom__">Boshqa (qo'lda kiriting)</option>
+        </select>
+        <input type="text" id="f-service-custom" style="display:none; margin-top:8px; width:100%; padding:12px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.93rem; outline:none;" placeholder="Xizmat nomini kiriting" />
+      </div>
+      <div class="form-group">
+        <label>To'lov miqdori *</label>
+        <div class="price-input-wrap">
+          <input type="number" id="f-price" required placeholder="150000" min="0" style="width:100%; padding:12px; padding-right:60px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.93rem; outline:none;" />
+          <span class="price-suffix">so'm</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Sana va vaqt</label>
+        <input type="datetime-local" id="f-date" style="width:100%; padding:12px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.93rem; outline:none;" />
+      </div>
+      <div class="form-group">
+        <label>Izoh (ixtiyoriy)</label>
+        <input type="text" id="f-note" placeholder="Qo'shimcha ma'lumot..." />
+      </div>
+
+      <button class="btn-submit" id="btn-submit" onclick="submitVisit()">Tashrif qayd etish</button>
+      <div class="success-toast" id="success-toast">✅ Tashrif muvaffaqiyatli qayd etildi!</div>
+      <div class="err-form" id="err-form"></div>
+    </div>
+
+    <!-- Right: Recent Visits -->
+    <div class="visits-card">
+      <div class="visits-header">
+        <h2>🕐 So'nggi tashriflar</h2>
+        <button class="btn-refresh" onclick="loadVisits()">Yangilash</button>
+      </div>
+      <div id="visits-container">
+        <div class="empty-state">Yuklanmoqda...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = '';
+  let adminToken = null;
+  let visitSource = 'WALKIN';
+  let doctorsList = [];
+
+  // ── Date/Time setup ─────────────────────────────────────────────
+  function setDefaultDate() {
+    const now = new Date();
+    const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+    document.getElementById('f-date').value = local.toISOString().slice(0, 16);
+  }
+
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('top-date').textContent = now.toLocaleString('uz-UZ', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent'
+    });
+  }
+
+  // ── Auth ─────────────────────────────────────────────────────────
+  async function verifyAuthOnLoad() {
+    const t = localStorage.getItem('reception_token');
+    if (!t) return;
+    try {
+      const res = await fetch('/api/admin/visits', { headers: { 'Authorization': `Bearer ${t}` } });
+      if (res.ok) { adminToken = t; showApp(); }
+      else localStorage.removeItem('reception_token');
+    } catch {}
+  }
+
+  document.getElementById('phone-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const phone = document.getElementById('telegram-phone').value;
+    const errEl = document.getElementById('login-err');
+    const btn = document.getElementById('btn-phone');
+    errEl.textContent = '';
+    btn.textContent = 'Yuborilmoqda...'; btn.disabled = true;
+    try {
+      const res = await fetch('/api/public/send-otp', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegramPhone: phone })
+      });
+      const data = await res.json();
+      if (res.ok && (data.success || data.action)) {
+        if (data.action === 'deep_link') {
+          errEl.innerHTML = `Avval bot orqali ro'yxatdan o'ting: <a href="${data.deepLink}" target="_blank" style="color:var(--teal);text-decoration:underline;">Botga o'tish</a>`;
+        } else {
+          document.getElementById('phone-form').style.display = 'none';
+          document.getElementById('otp-form').style.display = 'block';
+        }
+      } else { errEl.textContent = data.error || 'Xatolik'; }
+    } catch { errEl.textContent = 'Tarmoq xatosi'; }
+    btn.textContent = 'Kodni Olish'; btn.disabled = false;
+  });
+
+  document.getElementById('otp-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const phone = document.getElementById('telegram-phone').value;
+    const code = document.getElementById('otp-code').value;
+    const errEl = document.getElementById('login-err');
+    const btn = document.getElementById('btn-otp');
+    errEl.textContent = '';
+    btn.textContent = 'Tekshirilmoqda...'; btn.disabled = true;
+    try {
+      const res = await fetch('/api/public/verify-otp', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegramPhone: phone, code })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (data.token) {
+          localStorage.setItem('reception_token', data.token);
+          adminToken = data.token;
+          showApp();
+        } else {
+          errEl.textContent = "Sizda admin huquqi yo'q!";
+        }
+      } else { errEl.textContent = data.error || 'Xatolik'; }
+    } catch { errEl.textContent = 'Tarmoq xatosi'; }
+    btn.textContent = 'Kirish'; btn.disabled = false;
+  });
+
+  function logout() {
+    localStorage.removeItem('reception_token');
+    adminToken = null;
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('phone-form').style.display = '';
+    document.getElementById('otp-form').style.display = 'none';
+    document.getElementById('otp-code').value = '';
+  }
+
+  async function showApp() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    setDefaultDate();
+    updateClock();
+    setInterval(updateClock, 30000);
+    await loadDoctors();
+    await loadVisits();
+  }
+
+  // ── Source toggle ─────────────────────────────────────────────
+  function setSource(src) {
+    visitSource = src;
+    document.getElementById('btn-walkin').classList.toggle('active', src === 'WALKIN');
+    document.getElementById('btn-booked').classList.toggle('active', src === 'BOOKED');
+  }
+
+  // ── Load doctors ─────────────────────────────────────────────
+  async function loadDoctors() {
+    try {
+      const res = await fetch('/api/admin/doctors', { headers: { 'Authorization': `Bearer ${adminToken}` } });
+      const data = await res.json();
+      if (data.success) {
+        doctorsList = data.doctors;
+        const sel = document.getElementById('f-doctor');
+        sel.innerHTML = '<option value="">Shifokor tanlang...</option>';
+        data.doctors.forEach(d => {
+          const opt = document.createElement('option');
+          opt.value = d.id;
+          opt.textContent = `Dr. ${d.firstName} ${d.lastName} (${d.specialty})`;
+          opt.dataset.docId = d.id;
+          sel.appendChild(opt);
+        });
+        sel.addEventListener('change', () => loadProceduresForDoctor(sel.value));
+      }
+    } catch {}
+  }
+
+  async function loadProceduresForDoctor(doctorId) {
+    const sel = document.getElementById('f-service');
+    sel.innerHTML = '<option value="">Yuklanmoqda...</option>';
+    if (!doctorId) { sel.innerHTML = '<option value="">Xizmatni tanlang...</option><option value="__custom__">Boshqa (qo\'lda kiriting)</option>'; return; }
+    try {
+      const res = await fetch(`/api/public/doctors/${doctorId}/procedures`);
+      const data = await res.json();
+      sel.innerHTML = '<option value="">Xizmatni tanlang...</option>';
+      if (data.procedures?.length) {
+        data.procedures.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.name;
+          opt.textContent = `${p.name} (${p.durationMinutes} min)`;
+          sel.appendChild(opt);
+        });
+      }
+      const customOpt = document.createElement('option');
+      customOpt.value = '__custom__';
+      customOpt.textContent = 'Boshqa (qo\'lda kiriting)';
+      sel.appendChild(customOpt);
+    } catch {
+      sel.innerHTML = '<option value="">Xizmatni tanlang...</option><option value="__custom__">Boshqa (qo\'lda kiriting)</option>';
+    }
+  }
+
+  document.getElementById('f-service').addEventListener('change', function() {
+    document.getElementById('f-service-custom').style.display = this.value === '__custom__' ? '' : 'none';
+  });
+
+  // ── Submit visit ─────────────────────────────────────────────
+  async function submitVisit() {
+    const btn = document.getElementById('btn-submit');
+    const toast = document.getElementById('success-toast');
+    const errEl = document.getElementById('err-form');
+    toast.style.display = 'none'; errEl.style.display = 'none';
+
+    const doctorId = document.getElementById('f-doctor').value;
+    const patientName = document.getElementById('f-patient').value.trim();
+    const serviceVal = document.getElementById('f-service').value;
+    const serviceName = serviceVal === '__custom__'
+      ? document.getElementById('f-service-custom').value.trim()
+      : serviceVal;
+    const price = document.getElementById('f-price').value;
+    const visitDate = document.getElementById('f-date').value;
+    const note = document.getElementById('f-note').value.trim();
+
+    if (!doctorId || !patientName || !serviceName || !price) {
+      errEl.textContent = 'Iltimos, barcha majburiy maydonlarni to\'ldiring.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Saqlanmoqda...';
+    try {
+      const res = await fetch('/api/admin/visits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+        body: JSON.stringify({ doctorId, patientName, serviceName, price, source: visitSource, visitDate, note })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.style.display = 'block';
+        setTimeout(() => toast.style.display = 'none', 4000);
+        // Reset form
+        document.getElementById('f-patient').value = '';
+        document.getElementById('f-price').value = '';
+        document.getElementById('f-note').value = '';
+        document.getElementById('f-service').selectedIndex = 0;
+        document.getElementById('f-service-custom').style.display = 'none';
+        setDefaultDate();
+        loadVisits();
+      } else {
+        errEl.textContent = data.error || 'Xatolik yuz berdi';
+        errEl.style.display = 'block';
+      }
+    } catch {
+      errEl.textContent = 'Tarmoq xatosi';
+      errEl.style.display = 'block';
+    }
+    btn.disabled = false; btn.textContent = 'Tashrif qayd etish';
+  }
+
+  // ── Load visits ─────────────────────────────────────────────
+  async function loadVisits() {
+    const container = document.getElementById('visits-container');
+    container.innerHTML = '<div class="empty-state">Yuklanmoqda...</div>';
+    try {
+      const res = await fetch('/api/admin/visits?limit=30', { headers: { 'Authorization': `Bearer ${adminToken}` } });
+      const data = await res.json();
+      if (!data.success || !data.visits.length) {
+        container.innerHTML = '<div class="empty-state">Hozircha tashriflar yo\'q.</div>';
+        return;
+      }
+      const tbody = data.visits.map(v => {
+        const date = new Date(v.visitDate).toLocaleString('uz-UZ', {
+          day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent'
+        });
+        const sourceBadge = v.source === 'BOOKED'
+          ? '<span class="source-badge booked">📱 Online</span>'
+          : '<span class="source-badge walkin">🚶 Offline</span>';
+        return `<tr>
+          <td>${date}</td>
+          <td><strong>${v.patientName}</strong></td>
+          <td>Dr. ${v.doctor.lastName}</td>
+          <td style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${v.serviceName}</td>
+          <td class="price-cell">${v.price.toLocaleString('uz-UZ')}</td>
+          <td>${sourceBadge}</td>
+        </tr>`;
+      }).join('');
+      container.innerHTML = `<table>
+        <thead><tr><th>Vaqt</th><th>Bemor</th><th>Shifokor</th><th>Xizmat</th><th>To'lov</th><th>Tur</th></tr></thead>
+        <tbody>${tbody}</tbody>
+      </table>`;
+    } catch {
+      container.innerHTML = '<div class="empty-state" style="color:red;">Xatolik yuz berdi.</div>';
+    }
+  }
+
+  // ── Init ─────────────────────────────────────────────────────
+  verifyAuthOnLoad();
+</script>
+</body>
+</html>

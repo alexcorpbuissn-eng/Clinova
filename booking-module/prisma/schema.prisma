@@ -20,6 +20,7 @@ model Doctor {
   slots        Slot[]
   appointments Appointment[]
   procedures   Procedure[]
+  visits       Visit[]
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 }
@@ -159,4 +160,30 @@ model User {
 enum Role {
   ADMIN
   DOCTOR
+}
+
+// ─────────────────────────────────────────────
+// VISITS (reception log)
+// Tracks every actual patient visit: online or walk-in.
+// Used for doctor stats and revenue tracking.
+// ─────────────────────────────────────────────
+model Visit {
+  id          String      @id @default(uuid())
+  doctorId    String
+  doctor      Doctor      @relation(fields: [doctorId], references: [id])
+  patientName String
+  serviceName String
+  price       Int         // amount in UZS (so'm)
+  source      VisitSource @default(WALKIN)
+  visitDate   DateTime    @default(now())
+  note        String?
+  createdAt   DateTime    @default(now())
+
+  @@index([doctorId])
+  @@index([visitDate])
+}
+
+enum VisitSource {
+  BOOKED   // came from online booking
+  WALKIN   // walk-in patient
 }
