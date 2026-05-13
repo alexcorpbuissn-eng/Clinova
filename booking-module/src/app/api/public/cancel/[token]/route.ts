@@ -21,13 +21,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
   }
 
   const now = new Date();
-  const apptTime = new Date(appointment.slot.startTime);
-  const twoHoursBefore = new Date(apptTime.getTime() - 2 * 60 * 60 * 1000);
+  const bookedAt = new Date(appointment.createdAt);
+  const minsSinceBooking = (now.getTime() - bookedAt.getTime()) / 60000;
 
-  if (now >= twoHoursBefore) {
+  if (minsSinceBooking > 15) {
     return NextResponse.json({
       success: false,
-      error: 'Qabulni bekor qilish muddati o\'tib ketdi (qabuldan 2 soat oldin).',
+      error: 'Qabulni faqatgina bron qilinganidan so\'ng 15 daqiqa ichida bekor qilish mumkin.',
     }, { status: 410 });
   }
 
@@ -59,11 +59,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     }
 
     const now = new Date();
-    const apptTime = new Date(appointment.slot.startTime);
-    const twoHoursBefore = new Date(apptTime.getTime() - 2 * 60 * 60 * 1000);
+    const bookedAt = new Date(appointment.createdAt);
+    const minsSinceBooking = (now.getTime() - bookedAt.getTime()) / 60000;
 
-    if (now >= twoHoursBefore) {
-      return NextResponse.json({ success: false, error: 'Cancellation window has passed.' }, { status: 410 });
+    if (minsSinceBooking > 15) {
+      return NextResponse.json({ success: false, error: 'Qabulni faqatgina bron qilinganidan so\'ng 15 daqiqa ichida bekor qilish mumkin.' }, { status: 410 });
     }
 
     // Cancel: free slot + update status + invalidate token

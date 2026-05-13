@@ -48,8 +48,8 @@ export async function POST(req: NextRequest) {
       const minsSinceBooking = (now.getTime() - bookedAt.getTime()) / 60000;
       const hoursUntilSlot = (slotTime.getTime() - now.getTime()) / 3600000;
 
-      // Rule: Can cancel if booked < 15 mins ago OR slot is > 24 hours away
-      if (minsSinceBooking > 15 && hoursUntilSlot < 24) {
+      // Rule: Can ONLY cancel if booked < 15 mins ago
+      if (minsSinceBooking > 15) {
         throw new Error('LATE_CANCELLATION');
       }
 
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
     const msgs: Record<string, string> = {
       'FORBIDDEN': "Sizga ruxsat yo'q.",
       'ALREADY_CANCELLED': "Qabul allaqachon bekor qilingan.",
-      'LATE_CANCELLATION': "Qabulni faqatgina bron qilinganidan so'ng 15 daqiqa ichida yoki qabulga 24 soatdan ko'p vaqt qolganida bekor qilish mumkin.",
+      'LATE_CANCELLATION': "Qabulni faqatgina bron qilinganidan so'ng 15 daqiqa ichida bekor qilish mumkin. Iltimos, klinika bilan bog'laning.",
       'CANCELLATION_LIMIT_EXCEEDED': "Kunlik bekor qilish limiti (2 marta) tugadi.",
     };
     
