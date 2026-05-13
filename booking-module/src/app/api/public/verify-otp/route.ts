@@ -57,16 +57,28 @@ export async function POST(req: NextRequest) {
     }),
   ]);
 
-  // Check if this phone belongs to an admin
-  const user = await prisma.user.findUnique({
+  // Check if this phone belongs to an admin or staff
+  let user = await prisma.user.findUnique({
     where: { telegramPhone }
   });
+
+  // Bootstrap: If no users exist in the database at all, make the first person an ADMIN
+  const userCount = await prisma.user.count();
+  if (userCount === 0 && !user) {
+    user = await prisma.user.create({
+      data: {
+        telegramPhone,
+        role: 'ADMIN'
+      }
+    });
+  }
 
   let token = undefined;
   if (user) {
     token = await signToken({
       userId: user.id,
-      role: user.role
+      role: user.role,
+      doctorId: user.doctorId
     });
   }
 
