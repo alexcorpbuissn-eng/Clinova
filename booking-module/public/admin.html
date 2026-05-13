@@ -60,16 +60,23 @@
     <div class="login-card">
       <h2>Admin Kirish</h2>
       <div id="login-err" class="err-msg"></div>
-      <form id="login-form">
+      
+      <!-- STEP 1: Phone -->
+      <form id="phone-form">
         <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="email" required placeholder="admin@habibullo-hilola.uz" />
+          <label>Telegram raqamingiz</label>
+          <input type="tel" id="telegram-phone" required placeholder="+998 90 123 45 67" />
         </div>
+        <button type="submit" class="btn" id="btn-phone">Kodni Olish</button>
+      </form>
+
+      <!-- STEP 2: OTP -->
+      <form id="otp-form" style="display:none;">
         <div class="form-group">
-          <label>Parol</label>
-          <input type="password" id="password" required placeholder="••••••••" />
+          <label>Tasdiqlash kodi</label>
+          <input type="text" id="otp-code" required placeholder="123456" maxlength="6" />
         </div>
-        <button type="submit" class="btn" id="btn-login">Kirish</button>
+        <button type="submit" class="btn" id="btn-otp">Kirish</button>
       </form>
     </div>
   </div>
@@ -82,6 +89,7 @@
       </div>
       <div class="nav-item active" onclick="switchTab('appointments')">📅 Qabullar</div>
       <div class="nav-item" onclick="switchTab('patients')">👥 Bemorlar</div>
+      <div class="nav-item" onclick="switchTab('doctors')">👨‍⚕️ Shifokorlar</div>
       <div style="flex:1"></div>
       <div class="nav-item" onclick="logout()" style="color:#fca5a5">🚪 Chiqish</div>
     </div>
@@ -125,13 +133,51 @@
               <tr>
                 <th>F.I.SH.</th>
                 <th>Telefon</th>
-                <th>Telegram ID</th>
+                <th>Telegram Username</th>
                 <th>Bekor qilishlar (Bugun)</th>
                 <th>Jami Qabullar</th>
               </tr>
             </thead>
             <tbody id="pat-tbody">
               <tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- DOCTORS TAB -->
+      <div id="tab-doctors" class="tab-content">
+        <div class="header">
+          <h1>Shifokorlar</h1>
+          <button class="btn" style="width:auto" onclick="loadDoctors()">Yangilash</button>
+        </div>
+        
+        <h2 style="margin-bottom: 15px; color: var(--navy); font-size: 1.2rem;">🦷 Stomatologlar</h2>
+        <div class="table-card" style="margin-bottom: 30px;">
+          <table>
+            <thead>
+              <tr>
+                <th>F.I.SH.</th>
+                <th>Mutaxassisligi</th>
+              </tr>
+            </thead>
+            <tbody id="doc-stomatolog-tbody">
+              <tr><td colspan="2" style="text-align:center">Yuklanmoqda...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 style="margin-bottom: 15px; color: var(--navy); font-size: 1.2rem;">👂 LORlar</h2>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>F.I.SH.</th>
+                <th>Mutaxassisligi</th>
+              </tr>
+            </thead>
+            <tbody id="doc-lor-tbody">
+              <tr><td colspan="2" style="text-align:center">Yuklanmoqda...</td></tr>
             </tbody>
           </table>
         </div>
@@ -149,34 +195,68 @@
       showDashboard();
     }
 
-    // Login Form Submit
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
+    // Phone Submit
+    document.getElementById('phone-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+      const phone = document.getElementById('telegram-phone').value;
       const errEl = document.getElementById('login-err');
-      const btn = document.getElementById('btn-login');
+      const btn = document.getElementById('btn-phone');
+
+      errEl.textContent = '';
+      btn.textContent = 'Yuborilmoqda...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`${API}/api/public/send-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ telegramPhone: phone })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          document.getElementById('phone-form').style.display = 'none';
+          document.getElementById('otp-form').style.display = 'block';
+        } else {
+          errEl.textContent = data.error || "Xatolik yuz berdi";
+        }
+      } catch {
+        errEl.textContent = "Tarmoq xatosi";
+      }
+      btn.textContent = 'Kodni Olish';
+      btn.disabled = false;
+    });
+
+    // OTP Submit
+    document.getElementById('otp-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const phone = document.getElementById('telegram-phone').value;
+      const code = document.getElementById('otp-code').value;
+      const errEl = document.getElementById('login-err');
+      const btn = document.getElementById('btn-otp');
 
       errEl.textContent = '';
       btn.textContent = 'Tekshirilmoqda...';
       btn.disabled = true;
 
       try {
-        const res = await fetch(`${API}/api/admin/login`, {
+        const res = await fetch(`${API}/api/public/verify-otp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ telegramPhone: phone, code })
         });
         const data = await res.json();
-        
         if (res.ok && data.success) {
-          localStorage.setItem('admin_token', data.token);
-          showDashboard();
+          if (data.token) {
+            localStorage.setItem('admin_token', data.token);
+            showDashboard();
+          } else {
+            errEl.textContent = "Sizda admin huquqi yo'q!";
+          }
         } else {
-          errEl.textContent = data.error || 'Xatolik yuz berdi';
+          errEl.textContent = data.error || "Xatolik yuz berdi";
         }
-      } catch (err) {
-        errEl.textContent = 'Server bilan bog\'lanib bo\'lmadi';
+      } catch {
+        errEl.textContent = "Tarmoq xatosi";
       }
       btn.textContent = 'Kirish';
       btn.disabled = false;
@@ -203,6 +283,7 @@
 
       if (tab === 'appointments') loadAppointments();
       if (tab === 'patients') loadPatients();
+      if (tab === 'doctors') loadDoctors();
     }
 
     async function apiGet(endpoint) {
@@ -237,14 +318,14 @@
             const pPhone = a.patient ? a.patient.phone : a.patientPhone;
             
             return `
-              <tr>
+              <tr style="${a.status === 'CANCELLED' ? 'background:var(--red-bg)' : ''}">
                 <td><strong>${pName}</strong></td>
                 <td>${pPhone}</td>
                 <td><div style="font-size:0.85rem">Dr. ${a.doctor.lastName}<br><span style="color:var(--text-muted)">${a.procedure?.name || 'Birlamchi ko\'rik'}</span></div></td>
                 <td><div style="font-size:0.85rem"><strong>${date}</strong><br>${time}</div></td>
                 <td><span class="badge badge-${a.status.toLowerCase()}">${a.status}</span></td>
                 <td>
-                  <button class="btn btn-danger" style="padding:6px 12px; font-size:0.8rem; width:auto" onclick="deleteAppt('${a.id}')">O'chirish</button>
+                  ${a.status !== 'CANCELLED' ? `<button class="btn btn-danger" style="padding:6px 12px; font-size:0.8rem; width:auto" onclick="deleteAppt('${a.id}')">Bekor qilish</button>` : ''}
                 </td>
               </tr>
             `;
@@ -255,13 +336,13 @@
       }
     }
 
-    // Delete Appointment
+    // Cancel Appointment
     async function deleteAppt(id) {
-      if (!confirm("Haqiqatan ham bu qabulni o'chirmoqchimisiz? Bo'sh vaqt yana hammaga ko'rinadigan bo'ladi.")) return;
+      if (!confirm("Haqiqatan ham bu qabulni bekor qilmoqchimisiz? Bo'sh vaqt yana hammaga ko'rinadigan bo'ladi.")) return;
       try {
         const data = await apiDelete(`/api/admin/appointments/${id}`);
         if (data.success) {
-          alert("Qabul muvaffaqiyatli o'chirildi.");
+          alert("Qabul muvaffaqiyatli bekor qilindi.");
           loadAppointments();
         } else {
           alert(data.error || "Xatolik yuz berdi");
@@ -286,7 +367,7 @@
             <tr>
               <td><strong>${p.firstName} ${p.lastName}</strong></td>
               <td>${p.phone}</td>
-              <td>${p.telegramChatId || 'Yo\'q'}</td>
+              <td>${p.telegramUsername ? '@' + p.telegramUsername : (p.telegramChatId || 'Yo\'q')}</td>
               <td>${p.cancellationsToday > 0 ? `<span style="color:var(--red)">${p.cancellationsToday}</span>` : '0'}</td>
               <td>${p._count.appointments}</td>
             </tr>
@@ -294,6 +375,39 @@
         }
       } catch (err) {
         if(err.message !== 'Unauthorized') tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:red">Xatolik yuz berdi</td></tr>';
+      }
+    }
+    // Fetch Doctors
+    async function loadDoctors() {
+      const tbodyStom = document.getElementById('doc-stomatolog-tbody');
+      const tbodyLor = document.getElementById('doc-lor-tbody');
+      tbodyStom.innerHTML = '<tr><td colspan="2" style="text-align:center">Yuklanmoqda...</td></tr>';
+      tbodyLor.innerHTML = '<tr><td colspan="2" style="text-align:center">Yuklanmoqda...</td></tr>';
+      try {
+        const data = await apiGet('/api/admin/doctors');
+        if (data.success) {
+          const stomatologs = data.doctors.filter(d => d.specialty.toLowerCase().includes('stomatolog'));
+          const lors = data.doctors.filter(d => d.specialty.toLowerCase().includes('lor'));
+          
+          tbodyStom.innerHTML = stomatologs.length ? stomatologs.map(d => `
+            <tr>
+              <td><strong>${d.firstName} ${d.lastName}</strong></td>
+              <td>${d.specialty}</td>
+            </tr>
+          `).join('') : '<tr><td colspan="2" style="text-align:center">Shifokor topilmadi</td></tr>';
+
+          tbodyLor.innerHTML = lors.length ? lors.map(d => `
+            <tr>
+              <td><strong>${d.firstName} ${d.lastName}</strong></td>
+              <td>${d.specialty}</td>
+            </tr>
+          `).join('') : '<tr><td colspan="2" style="text-align:center">Shifokor topilmadi</td></tr>';
+        }
+      } catch (err) {
+        if(err.message !== 'Unauthorized') {
+          tbodyStom.innerHTML = '<tr><td colspan="2" style="text-align:center;color:red">Xatolik</td></tr>';
+          tbodyLor.innerHTML = '<tr><td colspan="2" style="text-align:center;color:red">Xatolik</td></tr>';
+        }
       }
     }
   </script>

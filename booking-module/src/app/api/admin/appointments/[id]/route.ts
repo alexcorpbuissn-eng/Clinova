@@ -30,9 +30,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'Topilmadi' }, { status: 404 });
     }
 
-    // Delete appointment and free the slot
+    // Cancel appointment and free the slot instead of deleting it
     await prisma.$transaction([
-      prisma.appointment.delete({ where: { id } }),
+      prisma.appointment.update({ 
+        where: { id },
+        data: { status: 'CANCELLED' } 
+      }),
       prisma.slot.update({
         where: { id: appointment.slotId },
         data: { isAvailable: true },
@@ -41,7 +44,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error('Delete error:', err);
-    return NextResponse.json({ error: 'Oʻchirishda xatolik yuz berdi' }, { status: 500 });
+    console.error('Cancel error:', err);
+    return NextResponse.json({ error: 'Bekor qilishda xatolik yuz berdi' }, { status: 500 });
   }
 }

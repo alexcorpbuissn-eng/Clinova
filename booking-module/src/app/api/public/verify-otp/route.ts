@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { normalisePhone } from '@/lib/telegram';
+import { signToken } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   let telegramPhone: string;
@@ -56,5 +57,18 @@ export async function POST(req: NextRequest) {
     }),
   ]);
 
-  return NextResponse.json({ success: true, patient });
+  // Check if this phone belongs to an admin
+  const user = await prisma.user.findUnique({
+    where: { telegramPhone }
+  });
+
+  let token = undefined;
+  if (user) {
+    token = await signToken({
+      userId: user.id,
+      role: user.role
+    });
+  }
+
+  return NextResponse.json({ success: true, patient, token });
 }

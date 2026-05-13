@@ -67,7 +67,8 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      await processStartCommand(decodedPhone, chatId);
+      const username = message.from?.username;
+      await processStartCommand(decodedPhone, chatId, username);
     } catch (err) {
       console.error('[Webhook] processStartCommand error:', err);
       // Don't throw — always return 200 to Telegram or it will retry

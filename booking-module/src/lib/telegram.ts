@@ -92,7 +92,8 @@ function generateOtpCode(): string {
  */
 export async function processStartCommand(
   rawPhone: string,
-  chatId: string
+  chatId: string,
+  username?: string
 ): Promise<void> {
   const telegramPhone = normalisePhone(rawPhone);
   const bot = getBot();
@@ -100,10 +101,11 @@ export async function processStartCommand(
   // 1 — persist chatId against this phone (isVerified stays false until code check)
   await prisma.patient.upsert({
     where: { telegramPhone },
-    update: { telegramChatId: chatId },
+    update: { telegramChatId: chatId, telegramUsername: username || null },
     create: {
       telegramPhone,
       telegramChatId: chatId,
+      telegramUsername: username || null,
       firstName: '',   // filled during Step 3 form submission
       lastName: '',
       phone: telegramPhone,
