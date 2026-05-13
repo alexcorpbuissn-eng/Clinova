@@ -249,8 +249,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.querySelectorAll('input[type="tel"]').forEach(applyPhoneFormatter);
 
-  // ---- User Profile in Navbar ----
+  // ---- User Profile & Dynamic Nav in Navbar ----
   const navContainer = document.querySelector('.nav-container');
+  const navLinksList = document.getElementById('nav-links');
+  
   if (navContainer) {
     const adminToken = localStorage.getItem('admin_token');
     const receptionToken = localStorage.getItem('reception_token');
@@ -258,7 +260,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const fFirst = localStorage.getItem('fFirst');
     const fLast = localStorage.getItem('fLast');
     
+    // 1. Dynamic "Mening qabullarim" Link
+    if (patientId && navLinksList) {
+      const existingLink = navLinksList.querySelector('a[href="my-appointments.html"]');
+      if (!existingLink) {
+        const myApptsLink = document.createElement('a');
+        myApptsLink.href = 'my-appointments.html';
+        myApptsLink.className = 'nav-link';
+        myApptsLink.textContent = 'Mening qabullarim';
+        navLinksList.appendChild(myApptsLink);
+      }
+    }
+
+    // 2. Profile Widget
     const profileWrap = document.createElement('div');
+    profileWrap.className = 'nav-profile-widget';
     profileWrap.style.cssText = 'display:flex;align-items:center;gap:12px;margin-left:auto;margin-right:15px;font-size:0.85rem;font-weight:600;color:var(--navy);';
     
     const insertBeforeEl = navContainer.querySelector('.btn-primary') || document.getElementById('hamburger');
@@ -285,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       // Not logged in
       profileWrap.innerHTML = `
-        <a href="login.html" style="color:var(--teal-dark);text-decoration:none;display:flex;align-items:center;gap:4px">
+        <a href="login.html" style="color:var(--teal-dark);text-decoration:none;display:flex;align-items:center;gap:4px;white-space:nowrap;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
           Kirish
         </a>

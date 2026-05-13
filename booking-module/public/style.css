@@ -205,7 +205,7 @@ em {
   height: 68px;
   display: flex;
   align-items: center;
-  gap: 48px;
+  gap: 24px; /* Reduced gap to allow more items */
 }
 
 .nav-logo {
@@ -237,6 +237,15 @@ em {
   flex: 1;
 }
 
+.nav-profile-widget {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.nav-profile-widget a:hover {
+  opacity: 0.8;
+}
+
 .nav-link {
   font-size: 0.875rem;
   font-weight: 500;
@@ -244,6 +253,7 @@ em {
   position: relative;
   padding: 4px 0;
   transition: color var(--transition);
+  white-space: nowrap; /* Prevent wrapping of links */
 }
 
 .nav-link::after {
