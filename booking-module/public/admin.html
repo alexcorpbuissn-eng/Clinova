@@ -95,6 +95,7 @@
       <div class="nav-item active" onclick="switchTab('appointments')">📅 Qabullar</div>
       <div class="nav-item" onclick="switchTab('patients')">👥 Bemorlar</div>
       <div class="nav-item" onclick="switchTab('doctors')">👨‍⚕️ Shifokorlar</div>
+      <div class="nav-item" onclick="switchTab('users')">🔑 Ruxsatlar</div>
       <div style="flex:1"></div>
       <div class="nav-item" onclick="window.open('reception.html','_blank')" style="color:#86efac">📋 Qabul Daftari</div>
       <div class="nav-item" onclick="logout()" style="color:#fca5a5">🚪 Chiqish</div>
@@ -201,6 +202,57 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- USERS TAB -->
+  <div id="tab-users" class="tab-content" style="padding: 40px;">
+    <div class="header">
+      <h1>Foydalanuvchilar (Ruxsatlar)</h1>
+      <button class="btn" style="width:auto" onclick="loadUsers()">Yangilash</button>
+    </div>
+    
+    <div class="table-card" style="margin-bottom: 30px; padding: 20px;">
+      <h3>Yangi foydalanuvchi qo'shish</h3>
+      <div style="display: flex; gap: 15px; margin-top: 15px; align-items: flex-end;">
+        <div class="form-group" style="margin-bottom: 0; flex: 1;">
+          <label>Telefon raqam</label>
+          <input type="tel" id="new-user-phone" placeholder="+998 90 123 45 67" />
+        </div>
+        <div class="form-group" style="margin-bottom: 0; flex: 1;">
+          <label>Rol</label>
+          <select id="new-user-role" onchange="toggleDoctorSelect()" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
+            <option value="RECEPTION">Qabulxona (Reception)</option>
+            <option value="DOCTOR">Shifokor (Doctor)</option>
+            <option value="ADMIN">Admin</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 0; flex: 1; display: none;" id="doctor-select-group">
+          <label>Shifokor</label>
+          <select id="new-user-doctor" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
+            <option value="">Shifokorni tanlang...</option>
+          </select>
+        </div>
+        <button class="btn" style="width: auto; height: 46px;" onclick="createUser()">Qo'shish</button>
+      </div>
+      <div id="user-err" class="err-msg" style="margin-top: 10px; text-align: left; min-height: 20px;"></div>
+    </div>
+
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>TELEFON</th>
+            <th>ROL</th>
+            <th>SHIFOKOR</th>
+            <th>YARATILGAN SANA</th>
+            <th>AMAL</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody">
+          <tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
@@ -357,6 +409,7 @@
       if (tab === 'appointments') loadAppointments();
       if (tab === 'patients') loadPatients();
       if (tab === 'doctors') loadDoctors();
+      if (tab === 'users') loadUsers();
     }
 
     async function apiGet(endpoint) {
@@ -535,6 +588,112 @@
         }
       }
     }
+    
+    // ---- USERS (Ruxsatlar) ----
+    function toggleDoctorSelect() {
+      const role = document.getElementById('new-user-role').value;
+      document.getElementById('doctor-select-group').style.display = role === 'DOCTOR' ? 'block' : 'none';
+    }
+
+    async function loadUsers() {
+      if (!localStorage.getItem('admin_token')) return;
+      try {
+        const data = await apiGet('/api/admin/users');
+        const tbody = document.getElementById('users-tbody');
+        if (data.success) {
+          if (data.users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Foydalanuvchilar yo\'q</td></tr>';
+          } else {
+            // Also load doctors for mapping doctorId to name
+            const dData = await apiGet('/api/admin/doctors');
+            let doctorMap = {};
+            if (dData.success) {
+              const select = document.getElementById('new-user-doctor');
+              select.innerHTML = '<option value="">Shifokorni tanlang...</option>' + 
+                dData.doctors.map(d => {
+                  doctorMap[d.id] = `${d.firstName} ${d.lastName}`;
+                  return `<option value="${d.id}">${d.firstName} ${d.lastName} (${d.specialty})</option>`;
+                }).join('');
+            }
+
+            tbody.innerHTML = data.users.map(u => `
+              <tr>
+                <td>${u.telegramPhone}</td>
+                <td><span class="badge ${u.role === 'ADMIN' ? 'badge-cancelled' : u.role === 'DOCTOR' ? 'badge-scheduled' : 'badge-completed'}">${u.role}</span></td>
+                <td>${u.doctorId && doctorMap[u.doctorId] ? doctorMap[u.doctorId] : (u.doctorId || '-')}</td>
+                <td>${new Date(u.createdAt).toLocaleString('uz-UZ')}</td>
+                <td>
+                  <button onclick="deleteUser('${u.id}')" style="color:var(--red); background:none; border:none; cursor:pointer; font-weight:600">O'chirish</button>
+                </td>
+              </tr>
+            `).join('');
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function createUser() {
+      const phone = document.getElementById('new-user-phone').value.trim();
+      const role = document.getElementById('new-user-role').value;
+      const doctorId = document.getElementById('new-user-doctor').value;
+      const errEl = document.getElementById('user-err');
+      
+      if (!phone || !/^\+998 \d{2} \d{3} \d{2} \d{2}$/.test(phone)) {
+        errEl.textContent = 'To\'g\'ri telefon raqam kiriting (+998 XX XXX XX XX)';
+        errEl.style.color = 'var(--red)';
+        return;
+      }
+      if (role === 'DOCTOR' && !doctorId) {
+        errEl.textContent = 'Shifokorni tanlang';
+        errEl.style.color = 'var(--red)';
+        return;
+      }
+      
+      errEl.textContent = 'Qo\'shilmoqda...';
+      errEl.style.color = 'var(--text-muted)';
+      try {
+        const res = await fetch('/api/admin/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
+          body: JSON.stringify({ telegramPhone: phone, role, doctorId: role === 'DOCTOR' ? doctorId : null })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          errEl.textContent = 'Muvaffaqiyatli qo\'shildi!';
+          errEl.style.color = 'var(--green)';
+          document.getElementById('new-user-phone').value = '';
+          loadUsers();
+          setTimeout(() => { errEl.textContent = ''; }, 3000);
+        } else {
+          errEl.textContent = data.error || 'Xatolik yuz berdi';
+          errEl.style.color = 'var(--red)';
+        }
+      } catch (e) {
+        errEl.textContent = 'Tarmoq xatosi';
+        errEl.style.color = 'var(--red)';
+      }
+    }
+
+    async function deleteUser(id) {
+      if (!confirm('Haqiqatan ham bu foydalanuvchini o\'chirmoqchimisiz?')) return;
+      try {
+        const res = await fetch(\`/api/admin/users/\${id}\`, {
+          method: 'DELETE',
+          headers: { 'Authorization': \`Bearer \${localStorage.getItem('admin_token')}\` }
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          loadUsers();
+        } else {
+          alert(data.error || 'Xatolik yuz berdi');
+        }
+      } catch (e) {
+        alert('Tarmoq xatosi');
+      }
+    }
+
     // ---- Universal Phone number formatting (+998 xx xxx xx xx) ----
     function applyPhoneFormatter(input) {
       if (!input) return;

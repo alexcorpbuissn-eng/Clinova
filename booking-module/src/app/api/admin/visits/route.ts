@@ -2,16 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 
-async function requireAdmin(request: NextRequest) {
+async function requireStaff(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) return null;
   const payload = await verifyToken(authHeader.split(' ')[1]);
-  return payload?.role === 'ADMIN' ? payload : null;
+  if (payload?.role === 'ADMIN' || payload?.role === 'RECEPTION') return payload;
+  return null;
 }
 
 // GET /api/admin/visits — list visits (optional ?doctorId=&limit=)
 export async function GET(request: NextRequest) {
-  if (!await requireAdmin(request)) {
+  if (!await requireStaff(request)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/visits — log a new visit
 export async function POST(request: NextRequest) {
-  if (!await requireAdmin(request)) {
+  if (!await requireStaff(request)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

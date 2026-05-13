@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shifokor Paneli | Habibullo-Hilola</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <style>
+    :root {
+      --navy: #0f172a; --teal: #0d9488; --teal-dark: #0f766e; --teal-light: #f0fdfa;
+      --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --text: #334155; --text-muted: #64748b;
+      --red: #ef4444; --red-bg: #fef2f2; --green: #16a34a; --green-bg: #dcfce7;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* Login */
+    #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 100vh; background: var(--navy); }
+    .login-card { background: var(--surface); padding: 40px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 400px; }
+    .login-logo { text-align: center; margin-bottom: 28px; }
+    .login-logo h1 { color: var(--navy); font-size: 1.4rem; }
+    .login-logo p { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--navy); margin-bottom: 7px; }
+    .form-group input { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
+    .form-group input:focus { border-color: var(--teal); }
+    .btn-full { display: block; width: 100%; background: var(--teal); color: #fff; padding: 13px 20px; border: none; border-radius: 10px; font-family: inherit; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: background 0.2s; }
+    .btn-full:hover { background: var(--teal-dark); }
+    .err-msg { color: var(--red); font-size: 0.83rem; margin-bottom: 14px; text-align: center; min-height: 20px; }
+
+    /* App layout */
+    #app { display: none; }
+    .top-bar { background: var(--navy); color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .top-bar-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .top-bar-actions { display: flex; align-items: center; gap: 14px; }
+    .top-bar-date { font-size: 0.82rem; color: #94a3b8; }
+    .btn-logout { background: none; border: 1px solid #334155; color: #94a3b8; padding: 6px 14px; border-radius: 8px; font-family: inherit; font-size: 0.82rem; cursor: pointer; }
+    .btn-logout:hover { border-color: #64748b; color: #fff; }
+
+    .page-body { max-width: 1400px; margin: 0 auto; padding: 30px 20px; display: grid; grid-template-columns: 350px 1fr; gap: 28px; align-items: start; }
+    @media(max-width: 860px) { .page-body { grid-template-columns: 1fr; } }
+
+    /* Form card */
+    .form-card { background: var(--surface); border-radius: 16px; padding: 28px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+    .form-card h2 { font-size: 1.05rem; color: var(--navy); margin-bottom: 22px; display: flex; align-items: center; gap: 8px; }
+    .btn-submit { display: block; width: 100%; background: var(--navy); color: #fff; padding: 14px 20px; border: none; border-radius: 10px; font-family: inherit; font-weight: 700; font-size: 1rem; cursor: pointer; transition: background 0.2s; margin-top: 8px; }
+    .btn-submit:hover { background: #1e293b; }
+    .success-toast { background: var(--green-bg); border: 1px solid #86efac; border-radius: 10px; padding: 12px 16px; color: var(--green); font-weight: 600; font-size: 0.88rem; margin-top: 14px; display: none; }
+    .err-form { background: var(--red-bg); border: 1px solid #fecaca; border-radius: 10px; padding: 12px 16px; color: var(--red); font-size: 0.88rem; margin-top: 10px; display: none; }
+
+    /* Slots List */
+    .slot-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; }
+    .slot-time { font-weight: 600; color: var(--navy); }
+    .slot-duration { font-size: 0.8rem; color: var(--text-muted); margin-left: 8px; }
+    .btn-delete { background: none; border: none; color: var(--red); cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; transition: background 0.2s; }
+    .btn-delete:hover { background: var(--red-bg); }
+
+    /* Appointments */
+    .visits-card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+    .visits-header { padding: 20px 24px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+    .visits-header h2 { font-size: 1.05rem; color: var(--navy); }
+    .btn-refresh { background: none; border: 1.5px solid var(--border); color: var(--text-muted); padding: 7px 14px; border-radius: 8px; font-family: inherit; font-size: 0.82rem; cursor: pointer; }
+    .btn-refresh:hover { border-color: var(--teal); color: var(--teal); }
+    
+    .appt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; padding: 20px; }
+    .appt-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .appt-time { font-size: 1.1rem; font-weight: 700; color: var(--teal-dark); display: flex; align-items: center; gap: 8px; }
+    .appt-date { font-size: 0.85rem; color: var(--text-muted); }
+    .appt-patient { font-weight: 600; color: var(--navy); font-size: 1.05rem; }
+    .appt-phone { color: var(--text-muted); font-size: 0.9rem; display: flex; align-items: center; gap: 6px; }
+    .empty-state { text-align: center; padding: 40px; color: var(--text-muted); font-size: 0.9rem; width: 100%; grid-column: 1 / -1; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <h1>👨‍⚕️ Shifokor Paneli</h1>
+      <p>Habibullo-Hilola Klinikasi</p>
+    </div>
+    <div id="login-err" class="err-msg"></div>
+
+    <form id="phone-form">
+      <div class="form-group">
+        <label>Telegram raqamingiz</label>
+        <input type="tel" id="telegram-phone" required placeholder="+998 90 000 00 00" />
+      </div>
+      <button type="submit" class="btn-full" id="btn-phone">Kodni Olish</button>
+    </form>
+
+    <form id="otp-form" style="display:none;">
+      <div class="form-group">
+        <label>Tasdiqlash kodi (Telegramdan)</label>
+        <input type="text" id="otp-code" required placeholder="123456" maxlength="6" style="font-size:1.5rem; letter-spacing: 0.3em; text-align:center;" />
+      </div>
+      <button type="submit" class="btn-full" id="btn-otp">Kirish</button>
+    </form>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="top-bar">
+    <div class="top-bar-title">👨‍⚕️ Shifokor Paneli — <span id="doctor-name" style="margin-left: 5px; color: var(--teal-light);"></span></div>
+    <div class="top-bar-actions">
+      <span class="top-bar-date" id="top-date"></span>
+      <button class="btn-logout" onclick="logout()">🚪 Chiqish</button>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <!-- Left: Manage Slots -->
+    <div class="form-card">
+      <h2>🕒 Bo'sh vaqt qo'shish</h2>
+      <div class="form-group">
+        <label>Sana</label>
+        <input type="text" id="slot-date" placeholder="Sanani tanlang..." />
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="form-group">
+          <label>Boshlanish vaqti</label>
+          <input type="time" id="slot-time" required value="09:00" />
+        </div>
+        <div class="form-group">
+          <label>Davomiyligi (daqiqa)</label>
+          <input type="number" id="slot-duration" value="30" step="15" min="15" max="240" required />
+        </div>
+      </div>
+      <button class="btn-submit" id="btn-add-slot" onclick="createSlot()">Vaqt qo'shish</button>
+      <div class="err-form" id="slot-err"></div>
+      <div class="success-toast" id="slot-success">Muvaffaqiyatli qo'shildi!</div>
+
+      <h3 style="margin-top: 30px; font-size: 0.95rem; color: var(--navy); margin-bottom: 12px;">Mavjud bo'sh vaqtlar (<span id="slots-date-label">bugun</span>):</h3>
+      <div id="available-slots">
+        <!-- list slots with delete button -->
+        <div class="empty-state" style="padding: 20px;">Sana tanlang...</div>
+      </div>
+    </div>
+
+    <!-- Right: Appointments -->
+    <div class="visits-card">
+      <div class="visits-header">
+        <h2>📅 Mening qabullarim (Kelgusi)</h2>
+        <button class="btn-refresh" onclick="loadAppointments()">Yangilash</button>
+      </div>
+      <div class="appt-grid" id="appointments-container">
+        <div class="empty-state">Yuklanmoqda...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+  let doctorToken = null;
+  let doctorInfo = null;
+  let datePicker;
+  let allSlots = [];
+
+  // ---- Date/Time Setup ----
+  function initDatePicker() {
+    datePicker = flatpickr("#slot-date", {
+      dateFormat: "Y-m-d",
+      defaultDate: new Date(),
+      minDate: "today",
+      onChange: function(selectedDates, dateStr, instance) {
+        document.getElementById('slots-date-label').textContent = dateStr;
+        renderSlotsForDate(dateStr);
+      }
+    });
+    document.getElementById('slots-date-label').textContent = datePicker.formatDate(new Date(), "Y-m-d");
+  }
+
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('top-date').textContent = now.toLocaleString('uz-UZ', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent'
+    });
+  }
+
+  // ---- Auth & Init ----
+  window.addEventListener('DOMContentLoaded', async () => {
+    applyPhoneFormatter(document.getElementById('telegram-phone'));
+    const t = localStorage.getItem('doctor_token');
+    if (t) {
+      // In a real app we'd have a /api/doctor/me, but we can verify by fetching slots
+      try {
+        const res = await fetch('/api/doctor/slots', { headers: { 'Authorization': `Bearer ${t}` } });
+        if (res.ok) {
+          doctorToken = t;
+          const info = localStorage.getItem('doctor_info');
+          if (info) doctorInfo = JSON.parse(info);
+          showApp();
+        } else {
+          localStorage.removeItem('doctor_token');
+        }
+      } catch {}
+    }
+  });
+
+  document.getElementById('phone-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const phone = document.getElementById('telegram-phone').value;
+    const errEl = document.getElementById('login-err');
+    const btn = document.getElementById('btn-phone');
+
+    if (!/^\+998 \d{2} \d{3} \d{2} \d{2}$/.test(phone)) {
+      errEl.textContent = "Iltimos, to'g'ri raqam kiriting (+998 XX XXX XX XX).";
+      return;
+    }
+
+    errEl.textContent = '';
+    btn.textContent = 'Yuborilmoqda...'; btn.disabled = true;
+    try {
+      const res = await fetch('/api/public/send-otp', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegramPhone: phone })
+      });
+      const data = await res.json();
+      if (res.ok && (data.success || data.action)) {
+        if (data.action === 'deep_link') {
+          errEl.innerHTML = `Avval bot orqali ro'yxatdan o'ting: <a href="${data.deepLink}" target="_blank" style="color:var(--teal);text-decoration:underline;">Botga o'tish</a>`;
+        } else {
+          document.getElementById('phone-form').style.display = 'none';
+          document.getElementById('otp-form').style.display = 'block';
+        }
+      } else { errEl.textContent = data.error || 'Xatolik'; }
+    } catch { errEl.textContent = 'Tarmoq xatosi'; }
+    btn.textContent = 'Kodni Olish'; btn.disabled = false;
+  });
+
+  document.getElementById('otp-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const phone = document.getElementById('telegram-phone').value;
+    const code = document.getElementById('otp-code').value;
+    const errEl = document.getElementById('login-err');
+    const btn = document.getElementById('btn-otp');
+    
+    errEl.textContent = '';
+    btn.textContent = 'Tekshirilmoqda...'; btn.disabled = true;
+    try {
+      const res = await fetch('/api/doctor/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegramPhone: phone, code })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        doctorToken = data.token;
+        doctorInfo = data.doctor;
+        localStorage.setItem('doctor_token', data.token);
+        localStorage.setItem('doctor_info', JSON.stringify(data.doctor));
+        showApp();
+      } else { errEl.textContent = data.error || 'Xatolik yuz berdi'; }
+    } catch { errEl.textContent = 'Tarmoq xatosi'; }
+    btn.textContent = 'Kirish'; btn.disabled = false;
+  });
+
+  function logout() {
+    localStorage.removeItem('doctor_token');
+    localStorage.removeItem('doctor_info');
+    doctorToken = null; doctorInfo = null;
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('phone-form').style.display = 'block';
+    document.getElementById('otp-form').style.display = 'none';
+    document.getElementById('otp-code').value = '';
+  }
+
+  function showApp() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    if (doctorInfo) {
+      document.getElementById('doctor-name').textContent = `${doctorInfo.firstName} ${doctorInfo.lastName}`;
+    }
+    initDatePicker();
+    updateClock();
+    setInterval(updateClock, 30000);
+    loadSlots();
+    loadAppointments();
+  }
+
+  // ---- Data Loading & Rendering ----
+  async function loadSlots() {
+    try {
+      const res = await fetch('/api/doctor/slots', { headers: { 'Authorization': `Bearer ${doctorToken}` } });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        allSlots = data.slots;
+        renderSlotsForDate(document.getElementById('slot-date').value);
+      }
+    } catch (e) {
+      console.error('Error loading slots:', e);
+    }
+  }
+
+  function renderSlotsForDate(dateStr) {
+    const container = document.getElementById('available-slots');
+    if (!dateStr) {
+      container.innerHTML = '<div class="empty-state" style="padding:20px;">Sana tanlanmagan</div>';
+      return;
+    }
+
+    const filtered = allSlots.filter(s => {
+      const localDate = new Date(s.startTime).toLocaleDateString('en-CA'); // YYYY-MM-DD local
+      return localDate === dateStr && !s.appointment; // Only unbooked
+    });
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="empty-state" style="padding:20px;">Bu sana uchun ochiq vaqtlar yo\'q</div>';
+      return;
+    }
+
+    container.innerHTML = filtered.map(s => {
+      const t = new Date(s.startTime).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
+      return `
+        <div class="slot-item">
+          <div>
+            <span class="slot-time">${t}</span>
+            <span class="slot-duration">${s.duration} daqiqa</span>
+          </div>
+          <button class="btn-delete" onclick="deleteSlot('${s.id}')" title="O'chirish">&times;</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function createSlot() {
+    const dateStr = document.getElementById('slot-date').value;
+    const timeStr = document.getElementById('slot-time').value;
+    const duration = document.getElementById('slot-duration').value;
+    const errEl = document.getElementById('slot-err');
+    const okEl = document.getElementById('slot-success');
+    const btn = document.getElementById('btn-add-slot');
+
+    errEl.style.display = 'none'; okEl.style.display = 'none';
+
+    if (!dateStr || !timeStr || !duration) {
+      errEl.textContent = "Barcha maydonlarni to'ldiring";
+      errEl.style.display = 'block';
+      return;
+    }
+
+    // Parse local time and convert to ISO string (UTC)
+    const [year, month, day] = dateStr.split('-');
+    const [hour, minute] = timeStr.split('-');
+    const dt = new Date(year, month - 1, day, timeStr.split(':')[0], timeStr.split(':')[1]);
+    const startTimeIso = dt.toISOString();
+
+    btn.disabled = true; btn.textContent = 'Qo\'shilmoqda...';
+
+    try {
+      const res = await fetch('/api/doctor/slots', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${doctorToken}` },
+        body: JSON.stringify({ slots: [{ startTime: startTimeIso, duration: Number(duration) }] })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (data.skipped > 0) {
+           errEl.textContent = "Bu vaqtda allaqachon bo'sh vaqt mavjud!";
+           errEl.style.display = 'block';
+        } else {
+           okEl.style.display = 'block';
+           setTimeout(() => { okEl.style.display = 'none'; }, 3000);
+           loadSlots();
+        }
+      } else {
+        errEl.textContent = data.error || "Xatolik yuz berdi";
+        errEl.style.display = 'block';
+      }
+    } catch (e) {
+      errEl.textContent = "Tarmoq xatosi";
+      errEl.style.display = 'block';
+    }
+    btn.disabled = false; btn.textContent = 'Vaqt qo\'shish';
+  }
+
+  async function deleteSlot(id) {
+    if (!confirm('Haqiqatan ham bu vaqtni o\'chirmoqchimisiz?')) return;
+    try {
+      const res = await fetch('/api/doctor/slots', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${doctorToken}` },
+        body: JSON.stringify({ slotId: id })
+      });
+      if (res.ok) {
+        loadSlots();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'O\'chirishda xatolik');
+      }
+    } catch (e) {
+      alert('Tarmoq xatosi');
+    }
+  }
+
+  async function loadAppointments() {
+    const container = document.getElementById('appointments-container');
+    container.innerHTML = '<div class="empty-state">Yuklanmoqda...</div>';
+    try {
+      const res = await fetch('/api/doctor/appointments', { headers: { 'Authorization': `Bearer ${doctorToken}` } });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (data.appointments.length === 0) {
+          container.innerHTML = '<div class="empty-state">Kelgusi qabullar mavjud emas</div>';
+          return;
+        }
+        container.innerHTML = data.appointments.map(a => {
+          const st = new Date(a.slot.startTime);
+          const dateStr = st.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'long' });
+          const timeStr = st.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
+          
+          let pName = a.patient ? \`\${a.patient.firstName} \${a.patient.lastName}\` : \`\${a.patientFirst} \${a.patientLast}\`;
+          let pPhone = a.patient ? a.patient.phone : a.patientPhone;
+          if (pName.trim() === 'undefined undefined' || pName.trim() === 'null null') pName = 'Noma\'lum';
+          
+          return \`
+            <div class="appt-card">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                  <div class="appt-time">🕒 \${timeStr}</div>
+                  <div class="appt-date">\${dateStr} (\${a.slot.duration} daq)</div>
+                </div>
+                <span class="badge badge-scheduled" style="padding:4px 8px;">Tasdiqlangan</span>
+              </div>
+              <div style="border-top: 1px dashed var(--border); padding-top: 12px;">
+                <div class="appt-patient">👤 \${pName}</div>
+                <div class="appt-phone">📞 \${pPhone || 'Ko\'rsatilmagan'}</div>
+              </div>
+            </div>
+          \`;
+        }).join('');
+      } else {
+        container.innerHTML = '<div class="empty-state" style="color:var(--red)">Yuklashda xatolik yuz berdi</div>';
+      }
+    } catch (e) {
+      container.innerHTML = '<div class="empty-state" style="color:var(--red)">Tarmoq xatosi</div>';
+    }
+  }
+
+  // ---- Universal Phone number formatting ----
+  function applyPhoneFormatter(input) {
+    if (!input) return;
+    const prefix = '+998 ';
+    const formatNumber = (val) => {
+      let digits = val.replace(/\D/g, '');
+      if (digits.startsWith('998')) digits = digits.slice(3);
+      digits = digits.slice(0, 9);
+      let res = prefix;
+      if (digits.length > 0) res += digits.slice(0, 2);
+      if (digits.length > 2) res += ' ' + digits.slice(2, 5);
+      if (digits.length > 5) res += ' ' + digits.slice(5, 7);
+      if (digits.length > 7) res += ' ' + digits.slice(7, 9);
+      return res;
+    };
+    input.addEventListener('focus', () => { if (!input.value || input.value.trim() === '') input.value = prefix; });
+    input.addEventListener('keydown', (e) => {
+      if ((e.key === 'Backspace' || e.key === 'Delete') && input.selectionStart <= prefix.length && input.selectionEnd <= prefix.length) e.preventDefault();
+      const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'];
+      if (!allowed.includes(e.key) && !/^\d$/.test(e.key) && !e.ctrlKey && !e.metaKey) e.preventDefault();
+    });
+    input.addEventListener('input', (e) => { e.target.value = formatNumber(e.target.value); });
+    input.addEventListener('blur', () => { if (input.value === prefix || input.value.trim() === '+998') input.value = ''; });
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text');
+      e.target.value = formatNumber(text);
+    });
+  }
+</script>
+</body>
+</html>
