@@ -202,57 +202,57 @@
         </div>
       </div>
 
-    </div>
-  </div>
+      <!-- USERS TAB -->
+      <div id="tab-users" class="tab-content">
+        <div class="header">
+          <h1>Foydalanuvchilar (Ruxsatlar)</h1>
+          <button class="btn" style="width:auto" onclick="loadUsers()">Yangilash</button>
+        </div>
+        
+        <div class="table-card" style="margin-bottom: 30px; padding: 20px;">
+          <h3>Yangi foydalanuvchi qo'shish</h3>
+          <div style="display: flex; gap: 15px; margin-top: 15px; align-items: flex-end;">
+            <div class="form-group" style="margin-bottom: 0; flex: 1;">
+              <label>Telefon raqam</label>
+              <input type="tel" id="new-user-phone" placeholder="+998 90 123 45 67" />
+            </div>
+            <div class="form-group" style="margin-bottom: 0; flex: 1;">
+              <label>Rol</label>
+              <select id="new-user-role" onchange="toggleDoctorSelect()" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
+                <option value="RECEPTION">Qabulxona (Reception)</option>
+                <option value="DOCTOR">Shifokor (Doctor)</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0; flex: 1; display: none;" id="doctor-select-group">
+              <label>Shifokor</label>
+              <select id="new-user-doctor" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
+                <option value="">Shifokorni tanlang...</option>
+              </select>
+            </div>
+            <button class="btn" style="width: auto; height: 46px;" onclick="createUser()">Qo'shish</button>
+          </div>
+          <div id="user-err" class="err-msg" style="margin-top: 10px; text-align: left; min-height: 20px;"></div>
+        </div>
 
-  <!-- USERS TAB -->
-  <div id="tab-users" class="tab-content" style="padding: 40px;">
-    <div class="header">
-      <h1>Foydalanuvchilar (Ruxsatlar)</h1>
-      <button class="btn" style="width:auto" onclick="loadUsers()">Yangilash</button>
-    </div>
-    
-    <div class="table-card" style="margin-bottom: 30px; padding: 20px;">
-      <h3>Yangi foydalanuvchi qo'shish</h3>
-      <div style="display: flex; gap: 15px; margin-top: 15px; align-items: flex-end;">
-        <div class="form-group" style="margin-bottom: 0; flex: 1;">
-          <label>Telefon raqam</label>
-          <input type="tel" id="new-user-phone" placeholder="+998 90 123 45 67" />
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>TELEFON</th>
+                <th>ROL</th>
+                <th>SHIFOKOR</th>
+                <th>YARATILGAN SANA</th>
+                <th>AMAL</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody">
+              <tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>
+            </tbody>
+          </table>
         </div>
-        <div class="form-group" style="margin-bottom: 0; flex: 1;">
-          <label>Rol</label>
-          <select id="new-user-role" onchange="toggleDoctorSelect()" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
-            <option value="RECEPTION">Qabulxona (Reception)</option>
-            <option value="DOCTOR">Shifokor (Doctor)</option>
-            <option value="ADMIN">Admin</option>
-          </select>
-        </div>
-        <div class="form-group" style="margin-bottom: 0; flex: 1; display: none;" id="doctor-select-group">
-          <label>Shifokor</label>
-          <select id="new-user-doctor" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
-            <option value="">Shifokorni tanlang...</option>
-          </select>
-        </div>
-        <button class="btn" style="width: auto; height: 46px;" onclick="createUser()">Qo'shish</button>
       </div>
-      <div id="user-err" class="err-msg" style="margin-top: 10px; text-align: left; min-height: 20px;"></div>
-    </div>
 
-    <div class="table-card">
-      <table>
-        <thead>
-          <tr>
-            <th>TELEFON</th>
-            <th>ROL</th>
-            <th>SHIFOKOR</th>
-            <th>YARATILGAN SANA</th>
-            <th>AMAL</th>
-          </tr>
-        </thead>
-        <tbody id="users-tbody">
-          <tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>
-        </tbody>
-      </table>
     </div>
   </div>
 
