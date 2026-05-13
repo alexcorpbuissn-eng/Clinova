@@ -186,21 +186,47 @@ document.addEventListener('DOMContentLoaded', () => {
   style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
   document.head.appendChild(style);
 
-  // ---- Universal Phone number formatting ----
-  const phoneInputs = document.querySelectorAll('input[type="tel"]');
-  phoneInputs.forEach(input => {
+  // ---- Universal Phone number formatting (+998 xx-xxx-xx-xx) ----
+  function applyPhoneFormatter(input) {
+    // On focus: auto-insert +998 prefix if empty
+    input.addEventListener('focus', () => {
+      if (!input.value) input.value = '+998 ';
+    });
+
+    input.addEventListener('keydown', (e) => {
+      // Prevent deleting the +998 prefix
+      const prefix = '+998 ';
+      if ((e.key === 'Backspace' || e.key === 'Delete') && input.value.length <= prefix.length) {
+        e.preventDefault();
+      }
+    });
+
     input.addEventListener('input', (e) => {
-      let val = e.target.value.replace(/\D/g, '');
-      if (val.startsWith('998')) val = val.slice(3);
-      if (val.length > 9) val = val.slice(0, 9);
-      let formatted = '+998';
-      if (val.length > 0) formatted += ' ' + val.slice(0, 2);
-      if (val.length > 2) formatted += ' ' + val.slice(2, 5);
-      if (val.length > 5) formatted += ' ' + val.slice(5, 7);
-      if (val.length > 7) formatted += ' ' + val.slice(7, 9);
+      const prefix = '+998 ';
+      let raw = e.target.value;
+      // Strip everything before digits after +998
+      let digits = raw.replace(/\D/g, '');
+      if (digits.startsWith('998')) digits = digits.slice(3);
+      digits = digits.slice(0, 9);
+
+      // Format: xx-xxx-xx-xx
+      let formatted = prefix;
+      if (digits.length > 0) formatted += digits.slice(0, 2);
+      if (digits.length > 2) formatted += '-' + digits.slice(2, 5);
+      if (digits.length > 5) formatted += '-' + digits.slice(5, 7);
+      if (digits.length > 7) formatted += '-' + digits.slice(7, 9);
       e.target.value = formatted;
     });
-  });
+
+    // On blur: reset if only prefix is there
+    input.addEventListener('blur', () => {
+      if (input.value.trim() === '+998' || input.value.trim() === '+998 ') {
+        input.value = '';
+      }
+    });
+  }
+
+  document.querySelectorAll('input[type="tel"]').forEach(applyPhoneFormatter);
 
   // ---- User Profile in Navbar ----
   const navContainer = document.querySelector('.nav-container');

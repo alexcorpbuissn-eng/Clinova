@@ -37,7 +37,7 @@
     .btn-logout { background: none; border: 1px solid #334155; color: #94a3b8; padding: 6px 14px; border-radius: 8px; font-family: inherit; font-size: 0.82rem; cursor: pointer; }
     .btn-logout:hover { border-color: #64748b; color: #fff; }
 
-    .page-body { max-width: 1100px; margin: 0 auto; padding: 30px 20px; display: grid; grid-template-columns: 400px 1fr; gap: 28px; align-items: start; }
+    .page-body { max-width: 1400px; margin: 0 auto; padding: 30px 20px; display: grid; grid-template-columns: 450px 1fr; gap: 28px; align-items: start; }
     @media(max-width: 860px) { .page-body { grid-template-columns: 1fr; } }
 
     /* Form card */
@@ -143,7 +143,7 @@
       <div class="form-group">
         <label>To'lov miqdori *</label>
         <div class="price-input-wrap">
-          <input type="number" id="f-price" required placeholder="150000" min="0" style="width:100%; padding:12px; padding-right:60px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.93rem; outline:none;" />
+          <input type="text" id="f-price" required placeholder="150.000" style="width:100%; padding:12px; padding-right:60px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.93rem; outline:none;" oninput="this.value = this.value.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" />
           <span class="price-suffix">so'm</span>
         </div>
       </div>
@@ -348,7 +348,8 @@
     const serviceName = serviceVal === '__custom__'
       ? document.getElementById('f-service-custom').value.trim()
       : serviceVal;
-    const price = document.getElementById('f-price').value;
+    const priceStr = document.getElementById('f-price').value.replace(/\./g, '');
+    const price = parseInt(priceStr, 10);
     const visitDate = document.getElementById('f-date').value;
     const note = document.getElementById('f-note').value.trim();
 
@@ -426,6 +427,30 @@
 
   // ── Init ─────────────────────────────────────────────────────
   verifyAuthOnLoad();
+
+  // ---- Universal Phone number formatting (+998 xx-xxx-xx-xx) ----
+  function applyPhoneFormatter(input) {
+    input.addEventListener('focus', () => { if (!input.value) input.value = '+998 '; });
+    input.addEventListener('keydown', (e) => {
+      const prefix = '+998 ';
+      if ((e.key === 'Backspace' || e.key === 'Delete') && input.value.length <= prefix.length) e.preventDefault();
+    });
+    input.addEventListener('input', (e) => {
+      let digits = e.target.value.replace(/\D/g, '');
+      if (digits.startsWith('998')) digits = digits.slice(3);
+      digits = digits.slice(0, 9);
+      let formatted = '+998 ';
+      if (digits.length > 0) formatted += digits.slice(0, 2);
+      if (digits.length > 2) formatted += '-' + digits.slice(2, 5);
+      if (digits.length > 5) formatted += '-' + digits.slice(5, 7);
+      if (digits.length > 7) formatted += '-' + digits.slice(7, 9);
+      e.target.value = formatted;
+    });
+    input.addEventListener('blur', () => {
+      if (input.value.trim() === '+998') input.value = '';
+    });
+  }
+  document.querySelectorAll('input[type="tel"]').forEach(applyPhoneFormatter);
 </script>
 </body>
 </html>

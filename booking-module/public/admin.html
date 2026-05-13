@@ -328,6 +328,17 @@
       return res.json();
     }
 
+    async function apiPatch(endpoint, body) {
+      const t = localStorage.getItem('admin_token');
+      const res = await fetch(API + endpoint, { 
+        method: 'PATCH', 
+        headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.status === 401 || res.status === 403) { logout(); throw new Error('Unauthorized'); }
+      return res.json();
+    }
+
     // Fetch Appointments
     async function loadAppointments() {
       const tbody = document.getElementById('appt-tbody');
@@ -356,6 +367,16 @@
               statusCell += ` <span class="badge badge-cancelled-patient" title="Bemor tomonidan bekor qilindi">👤 Bemor</span>`;
             }
 
+            let actions = '';
+            if (a.status === 'SCHEDULED') {
+              actions = `
+                <div style="display:flex;gap:6px">
+                  <button class="btn" style="padding:6px 12px; font-size:0.8rem; width:auto; background:var(--green); border-color:var(--green)" onclick="attendAppt('${a.id}')">Keldi</button>
+                  <button class="btn btn-danger" style="padding:6px 12px; font-size:0.8rem; width:auto" onclick="deleteAppt('${a.id}')">Bekor qilish</button>
+                </div>
+              `;
+            }
+
             return `
               <tr class="${rowClass}">
                 <td><strong>${pName}</strong></td>
@@ -363,9 +384,7 @@
                 <td><div style="font-size:0.85rem">Dr. ${a.doctor.lastName}<br><span style="color:var(--text-muted)">${a.procedure?.name || 'Birlamchi ko\'rik'}</span></div></td>
                 <td><div style="font-size:0.85rem"><strong>${date}</strong><br>${time}</div></td>
                 <td>${statusCell}</td>
-                <td>
-                  ${a.status !== 'CANCELLED' ? `<button class="btn btn-danger" style="padding:6px 12px; font-size:0.8rem; width:auto" onclick="deleteAppt('${a.id}')">Bekor qilish</button>` : ''}
-                </td>
+                <td>${actions}</td>
               </tr>
             `;
           }).join('');
@@ -382,6 +401,21 @@
         const data = await apiDelete(`/api/admin/appointments/${id}`);
         if (data.success) {
           alert("Qabul muvaffaqiyatli bekor qilindi.");
+          loadAppointments();
+        } else {
+          alert(data.error || "Xatolik yuz berdi");
+        }
+      } catch (e) {
+        if(e.message !== 'Unauthorized') alert("Tarmoq xatosi");
+      }
+    }
+
+    // Mark as attended
+    async function attendAppt(id) {
+      if (!confirm("Bemor kelganini tasdiqlaysizmi? Bu qabul Qabul Daftariga tushadi.")) return;
+      try {
+        const data = await apiPatch(`/api/admin/appointments/${id}`, { action: 'ATTEND' });
+        if (data.success) {
           loadAppointments();
         } else {
           alert(data.error || "Xatolik yuz berdi");
@@ -450,6 +484,29 @@
         }
       }
     }
+    // ---- Universal Phone number formatting (+998 xx-xxx-xx-xx) ----
+    function applyPhoneFormatter(input) {
+      input.addEventListener('focus', () => { if (!input.value) input.value = '+998 '; });
+      input.addEventListener('keydown', (e) => {
+        const prefix = '+998 ';
+        if ((e.key === 'Backspace' || e.key === 'Delete') && input.value.length <= prefix.length) e.preventDefault();
+      });
+      input.addEventListener('input', (e) => {
+        let digits = e.target.value.replace(/\D/g, '');
+        if (digits.startsWith('998')) digits = digits.slice(3);
+        digits = digits.slice(0, 9);
+        let formatted = '+998 ';
+        if (digits.length > 0) formatted += digits.slice(0, 2);
+        if (digits.length > 2) formatted += '-' + digits.slice(2, 5);
+        if (digits.length > 5) formatted += '-' + digits.slice(5, 7);
+        if (digits.length > 7) formatted += '-' + digits.slice(7, 9);
+        e.target.value = formatted;
+      });
+      input.addEventListener('blur', () => {
+        if (input.value.trim() === '+998') input.value = '';
+      });
+    }
+    document.querySelectorAll('input[type="tel"]').forEach(applyPhoneFormatter);
   </script>
 </body>
 </html>
