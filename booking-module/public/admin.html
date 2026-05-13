@@ -213,9 +213,13 @@
           body: JSON.stringify({ telegramPhone: phone })
         });
         const data = await res.json();
-        if (res.ok && data.success) {
-          document.getElementById('phone-form').style.display = 'none';
-          document.getElementById('otp-form').style.display = 'block';
+        if (res.ok && (data.success || data.action)) {
+          if (data.action === 'deep_link') {
+            errEl.innerHTML = `Avval bot orqali ro'yxatdan o'ting: <br><a href="${data.deepLink}" target="_blank" style="color:var(--teal); text-decoration:underline; margin-top:5px; display:inline-block">Botga o'tish</a>`;
+          } else {
+            document.getElementById('phone-form').style.display = 'none';
+            document.getElementById('otp-form').style.display = 'block';
+          }
         } else {
           errEl.textContent = data.error || "Xatolik yuz berdi";
         }

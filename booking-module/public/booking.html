@@ -13,21 +13,34 @@
     .section-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--teal-dark);margin-bottom:14px}
     .nav-back{background:none;border:none;color:var(--teal-dark);font-size:.85rem;cursor:pointer;padding:0;margin-bottom:18px;display:inline-flex;align-items:center;gap:5px;font-family:inherit;font-weight:500}
     .nav-back:hover{text-decoration:underline}
-    .doctor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
+    .doctor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
     .doc-card{border:2px solid var(--border);border-radius:16px;padding:18px 14px;text-align:center;cursor:pointer;transition:all .2s;background:#fff}
     .doc-card:hover,.doc-card.sel{border-color:var(--teal);background:var(--teal-light)}
     .doc-card img{width:64px;height:64px;object-fit:cover;border-radius:50%;margin-bottom:10px;background:#e5e7eb}
     .doc-card h3{font-size:.9rem;color:var(--navy);margin:0 0 3px}
     .doc-card p{font-size:.75rem;color:var(--teal-dark);font-weight:600;margin:0}
-    .proc-list{display:flex;flex-direction:column;gap:10px}
-    .proc-btn{border:2px solid var(--border);background:#fff;border-radius:12px;padding:14px 16px;text-align:left;cursor:pointer;font-family:inherit;transition:all .2s}
-    .proc-btn:hover,.proc-btn.sel{border-color:var(--teal);background:var(--teal-light)}
-    .proc-btn strong{display:block;color:var(--navy);font-size:.9rem}
-    .proc-btn span{color:var(--teal-dark);font-size:.8rem;font-weight:600}
-    .slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:16px}
-    .slot-btn{border:2px solid var(--border);background:#fff;border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;font-family:inherit;transition:all .2s;color:var(--navy);font-weight:500;font-size:.85rem}
-    .slot-btn:hover,.slot-btn.sel{border-color:var(--teal);background:var(--teal-light)}
-    .slot-btn:disabled{background:#f1f5f9;color:#94a3b8;cursor:not-allowed;border-color:var(--border)}
+
+    /* Step 2: two-panel layout on desktop */
+    .step2-split{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+    .step2-panel{}
+    .step2-panel-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--teal-dark);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+    .step2-slots-wrap{background:#f8fafc;border-radius:14px;padding:16px;border:1px solid var(--border);min-height:200px;}
+    .slot-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;color:var(--text-muted);font-size:.88rem;gap:10px;text-align:center;}
+    .slot-placeholder svg{opacity:.3;}
+
+    .proc-list{display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto;padding-right:4px;}
+    .proc-list::-webkit-scrollbar{width:4px;}
+    .proc-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+    .proc-btn{border:2px solid var(--border);background:#fff;border-radius:12px;padding:12px 14px;text-align:left;cursor:pointer;font-family:inherit;transition:all .2s;}
+    .proc-btn:hover,.proc-btn.sel{border-color:var(--teal);background:var(--teal-light);}
+    .proc-btn strong{display:block;color:var(--navy);font-size:.88rem;line-height:1.3;}
+    .proc-btn span{color:var(--teal-dark);font-size:.78rem;font-weight:600;margin-top:3px;display:block;}
+
+    .slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:0;}
+    .slot-btn{border:2px solid var(--border);background:#fff;border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;font-family:inherit;transition:all .2s;color:var(--navy);font-weight:500;font-size:.83rem;}
+    .slot-btn:hover,.slot-btn.sel{border-color:var(--teal);background:var(--teal-light);}
+    .slot-btn:disabled{background:#f1f5f9;color:#94a3b8;cursor:not-allowed;border-color:var(--border);}
+
     .summary-box{background:var(--teal-light);border-radius:10px;padding:12px 16px;margin-bottom:18px;font-size:.85rem;color:var(--teal-dark);font-weight:500}
     .inline-err{background:#fff1f2;border:1px solid #fecdd3;border-radius:8px;padding:11px 15px;color:#be123c;font-size:.85rem;margin-bottom:14px;display:none}
     .inline-err.on{display:block}
@@ -43,6 +56,11 @@
     .spinner{width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 8px}
     .state-msg{text-align:center;color:var(--text-muted);padding:20px;font-size:.9rem}
     @keyframes spin{to{transform:rotate(360deg)}}
+    @media(max-width:700px){
+      .step2-split{grid-template-columns:1fr;}
+      .proc-list{max-height:none;}
+      .step2-slots-wrap{min-height:unset;}
+    }
   </style>
 </head>
 <body class="bg-light">
@@ -88,14 +106,33 @@
           <div id="doc-container"><div class="state-msg"><div class="spinner"></div>Yuklanmoqda...</div></div>
         </div>
 
-        <!-- STEP 2: Procedure + Slot -->
+        <!-- STEP 2: Procedure + Slot (side-by-side on desktop) -->
         <div id="s2" style="display:none">
           <button class="nav-back" id="back12">← Orqaga</button>
-          <p class="section-label">2-qadam — Protsedura va vaqt</p>
-          <div id="proc-container"><div class="state-msg"><div class="spinner"></div></div></div>
-          <div id="slot-section" style="display:none;margin-top:20px">
-            <p class="section-label" style="margin-bottom:10px">Bo'sh vaqtlar</p>
-            <div id="slot-container"></div>
+          <p class="section-label">2-qadam — Protsedura va vaqt tanlang</p>
+          <div class="step2-split">
+            <!-- Left: procedures -->
+            <div class="step2-panel">
+              <div class="step2-panel-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6M9 16h6M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l5 5v11a2 2 0 0 1-2 2z"/></svg>
+                Protsedura
+              </div>
+              <div id="proc-container"><div class="state-msg"><div class="spinner"></div></div></div>
+            </div>
+            <!-- Right: time slots -->
+            <div class="step2-panel">
+              <div class="step2-panel-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                Bo'sh vaqtlar
+              </div>
+              <div class="step2-slots-wrap" id="slot-section">
+                <div class="slot-placeholder" id="slot-placeholder">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                  <span>Protsedura tanlang,<br>bo'sh vaqtlar ko'rinadi</span>
+                </div>
+                <div id="slot-container"></div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -244,7 +281,10 @@ async function loadDoctors() {
 async function loadProcedures(doctorId) {
   const c = document.getElementById('proc-container');
   c.innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
-  document.getElementById('slot-section').style.display='none';
+  // Reset slot panel to placeholder
+  document.getElementById('slot-container').innerHTML='';
+  const ph = document.getElementById('slot-placeholder');
+  if (ph) ph.style.display='';
   try {
     const {procedures} = await fetch(`${API}/api/public/doctors/${doctorId}/procedures`).then(r=>r.json());
     if (!procedures?.length) { c.innerHTML=`<div class="state-msg">Bu shifokor uchun protseduralar yo'q.</div>`; return; }
@@ -252,7 +292,16 @@ async function loadProcedures(doctorId) {
     procedures.forEach(p => {
       const btn = document.createElement('button'); btn.type='button'; btn.className='proc-btn';
       btn.innerHTML=`<strong>${p.name}</strong><span>⏱ ${p.durationMinutes} daqiqa</span>`;
-      btn.onclick = () => { document.querySelectorAll('.proc-btn').forEach(x=>x.classList.remove('sel')); btn.classList.add('sel'); selProc=p; loadSlots(doctorId, p.id); };
+      btn.onclick = () => {
+        document.querySelectorAll('.proc-btn').forEach(x=>x.classList.remove('sel'));
+        btn.classList.add('sel');
+        selProc=p;
+        loadSlots(doctorId, p.id);
+        // On mobile, smoothly scroll down to slots panel
+        if (window.innerWidth <= 700) {
+          document.getElementById('slot-section').scrollIntoView({ behavior:'smooth', block:'start' });
+        }
+      };
       list.appendChild(btn);
     });
     c.innerHTML=''; c.appendChild(list);
@@ -261,8 +310,10 @@ async function loadProcedures(doctorId) {
 
 async function loadSlots(doctorId, procedureId) {
   const sc = document.getElementById('slot-container');
-  const ss = document.getElementById('slot-section');
-  ss.style.display=''; sc.innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
+  // Hide placeholder, show spinner
+  const ph = document.getElementById('slot-placeholder');
+  if (ph) ph.style.display='none';
+  sc.innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
   try {
     const {slots} = await fetch(`${API}/api/public/doctors/${doctorId}/slots?procedureId=${procedureId}`).then(r=>r.json());
     if (!slots?.length) { sc.innerHTML=`<div class="state-msg">Bu protsedura uchun bo'sh vaqt yo'q.</div>`; return; }
