@@ -414,25 +414,25 @@
           const dateStr = st.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'long' });
           const timeStr = st.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
           
-          let pName = a.patient ? \`\${a.patient.firstName} \${a.patient.lastName}\` : \`\${a.patientFirst} \${a.patientLast}\`;
+          let pName = a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : `${a.patientFirst} ${a.patientLast}`;
           let pPhone = a.patient ? a.patient.phone : a.patientPhone;
           if (pName.trim() === 'undefined undefined' || pName.trim() === 'null null') pName = 'Noma\'lum';
           
-          return \`
+          return `
             <div class="appt-card">
               <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                 <div>
-                  <div class="appt-time">🕒 \${timeStr}</div>
-                  <div class="appt-date">\${dateStr} (\${a.slot.duration} daq)</div>
+                  <div class="appt-time">🕒 ${timeStr}</div>
+                  <div class="appt-date">${dateStr} (${a.slot.duration} daq)</div>
                 </div>
                 <span class="badge badge-scheduled" style="padding:4px 8px;">Tasdiqlangan</span>
               </div>
               <div style="border-top: 1px dashed var(--border); padding-top: 12px;">
-                <div class="appt-patient">👤 \${pName}</div>
-                <div class="appt-phone">📞 \${pPhone || 'Ko\'rsatilmagan'}</div>
+                <div class="appt-patient">👤 ${pName}</div>
+                <div class="appt-phone">📞 ${pPhone || 'Ko\'rsatilmagan'}</div>
               </div>
             </div>
-          \`;
+          `;
         }).join('');
       } else {
         container.innerHTML = '<div class="empty-state" style="color:var(--red)">Yuklashda xatolik yuz berdi</div>';

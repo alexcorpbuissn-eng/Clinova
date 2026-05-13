@@ -679,9 +679,9 @@
     async function deleteUser(id) {
       if (!confirm('Haqiqatan ham bu foydalanuvchini o\'chirmoqchimisiz?')) return;
       try {
-        const res = await fetch(\`/api/admin/users/\${id}\`, {
+        const res = await fetch(`/api/admin/users/${id}`, {
           method: 'DELETE',
-          headers: { 'Authorization': \`Bearer \${localStorage.getItem('admin_token')}\` }
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
         });
         const data = await res.json();
         if (res.ok && data.success) {
