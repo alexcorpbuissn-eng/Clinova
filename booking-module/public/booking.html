@@ -147,7 +147,7 @@
               <div class="form-group"><label>Ism *</label><input id="fFirst" type="text" required placeholder="Ism"/></div>
               <div class="form-group"><label>Familiya *</label><input id="fLast" type="text" required placeholder="Familiya"/></div>
             </div>
-            <div class="form-group"><label>Telefon *</label><input id="fPhone" type="tel" required placeholder="+998 90-000-00-00"/></div>
+            <div class="form-group"><label>Telefon *</label><input id="fPhone" type="tel" required placeholder="+998 90 000 00 00"/></div>
             <div class="form-group">
               <label>Muammo tavsifi (ixtiyoriy)</label>
               <textarea id="fDesc" rows="3" maxlength="500" placeholder="Qisqacha tasvirlang..." style="resize:vertical;padding:12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.9rem;outline:none;width:100%;box-sizing:border-box"></textarea>
@@ -401,9 +401,9 @@ document.getElementById('patient-form').addEventListener('submit', async e => {
   localStorage.setItem('fPhone', fPhone);
 
   // Strict phone validation
-  const phoneRegex = /^\+998 \d{2}-\d{3}-\d{2}-\d{2}$/;
+  const phoneRegex = /^\+998 \d{2} \d{3} \d{2} \d{2}$/;
   if (!phoneRegex.test(fPhone)) {
-    err('err3', "Iltimos, to'g'ri O'zbekiston telefon raqamini kiriting (+998 XX-XXX-XX-XX).");
+    err('err3', "Iltimos, to'g'ri O'zbekiston telefon raqamini kiriting (+998 XX XXX XX XX).");
     return;
   }
 

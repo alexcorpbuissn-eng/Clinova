@@ -71,7 +71,7 @@
         </div>
         <div class="form-group">
           <label>Telegram raqamingiz *</label>
-          <input id="fTgPhone" type="tel" required placeholder="+998 90-000-00-00" />
+          <input id="fTgPhone" type="tel" required placeholder="+998 90 000 00 00" />
         </div>
         <button type="submit" class="btn-submit-booking" id="btn-save" style="width:100%; margin-top: 10px;">Saqlash</button>
       </form>
@@ -157,9 +157,9 @@
     const fTgPhone = document.getElementById('fTgPhone').value.trim();
 
     // Strict phone validation
-    const phoneRegex = /^\+998 \d{2}-\d{3}-\d{2}-\d{2}$/;
+    const phoneRegex = /^\+998 \d{2} \d{3} \d{2} \d{2}$/;
     if (!phoneRegex.test(fTgPhone)) {
-      err("Iltimos, to'g'ri O'zbekiston telefon raqamini kiriting (+998 XX-XXX-XX-XX).");
+      err("Iltimos, to'g'ri O'zbekiston telefon raqamini kiriting (+998 XX XXX XX XX).");
       return;
     }
 
