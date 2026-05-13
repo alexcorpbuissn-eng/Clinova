@@ -188,33 +188,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ---- Universal Phone number formatting (+998 xx-xxx-xx-xx) ----
   function applyPhoneFormatter(input) {
+    if (!input) return;
+
     // On focus: auto-insert +998 prefix if empty
     input.addEventListener('focus', () => {
-      if (!input.value) input.value = '+998 ';
+      if (!input.value || input.value.trim() === '') {
+        input.value = '+998 ';
+      }
     });
 
     input.addEventListener('keydown', (e) => {
-      // Prevent deleting the +998 prefix
       const prefix = '+998 ';
-      if ((e.key === 'Backspace' || e.key === 'Delete') && input.value.length <= prefix.length) {
+      
+      // Prevent deleting the +998 prefix
+      if ((e.key === 'Backspace' || e.key === 'Delete')) {
+        if (input.selectionStart <= prefix.length && input.selectionEnd <= prefix.length) {
+          e.preventDefault();
+        }
+      }
+
+      // Prevent non-numeric entry (allow control keys)
+      const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'];
+      if (!allowedKeys.includes(e.key) && !/^\d$/.test(e.key) && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
       }
     });
 
     input.addEventListener('input', (e) => {
       const prefix = '+998 ';
-      let raw = e.target.value;
-      // Strip everything before digits after +998
-      let digits = raw.replace(/\D/g, '');
-      if (digits.startsWith('998')) digits = digits.slice(3);
-      digits = digits.slice(0, 9);
+      let val = e.target.value;
 
-      // Format: xx-xxx-xx-xx
+      // Ensure it always starts with the prefix
+      if (!val.startsWith(prefix)) {
+        val = prefix + val.replace(/\D/g, '').slice(3);
+      }
+
+      // Get only the digits after the prefix
+      let digits = val.slice(prefix.length).replace(/\D/g, '');
+      digits = digits.slice(0, 9); // Limit to 9 digits (UZ standard)
+
+      // Re-format according to: xx-xxx-xx-xx
       let formatted = prefix;
-      if (digits.length > 0) formatted += digits.slice(0, 2);
-      if (digits.length > 2) formatted += '-' + digits.slice(2, 5);
-      if (digits.length > 5) formatted += '-' + digits.slice(5, 7);
-      if (digits.length > 7) formatted += '-' + digits.slice(7, 9);
+      if (digits.length > 0) {
+        formatted += digits.slice(0, 2);
+      }
+      if (digits.length > 2) {
+        formatted += '-' + digits.slice(2, 5);
+      }
+      if (digits.length > 5) {
+        formatted += '-' + digits.slice(5, 7);
+      }
+      if (digits.length > 7) {
+        formatted += '-' + digits.slice(7, 9);
+      }
+
       e.target.value = formatted;
     });
 
@@ -222,6 +249,25 @@ document.addEventListener('DOMContentLoaded', () => {
     input.addEventListener('blur', () => {
       if (input.value.trim() === '+998' || input.value.trim() === '+998 ') {
         input.value = '';
+      }
+    });
+
+    // Prevent pasting non-numeric stuff
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text');
+      const digits = text.replace(/\D/g, '').slice(-9); // take last 9 digits if it's a full number
+      if (digits) {
+        let currentDigits = input.value.slice(5).replace(/\D/g, '');
+        let newDigits = (currentDigits + digits).slice(0, 9);
+        
+        const prefix = '+998 ';
+        let formatted = prefix;
+        if (newDigits.length > 0) formatted += newDigits.slice(0, 2);
+        if (newDigits.length > 2) formatted += '-' + newDigits.slice(2, 5);
+        if (newDigits.length > 5) formatted += '-' + newDigits.slice(5, 7);
+        if (newDigits.length > 7) formatted += '-' + newDigits.slice(7, 9);
+        input.value = formatted;
       }
     });
   }

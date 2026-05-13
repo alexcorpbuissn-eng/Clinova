@@ -42,7 +42,7 @@
       <form id="phone-form" class="appointment-form">
         <div class="form-group">
           <label>Telegram raqamingiz *</label>
-          <input id="fTgPhone" type="tel" required placeholder="+998 90 000 00 00" />
+          <input id="fTgPhone" type="tel" required placeholder="+998 90-000-00-00" />
         </div>
         <button type="submit" class="btn-submit-booking" id="btn-phone" style="width:100%">Davom etish</button>
       </form>
@@ -85,9 +85,9 @@
     const tgPhone = document.getElementById('fTgPhone').value.trim();
     
     // Strict phone validation
-    const phoneRegex = /^\+998 \d{2} \d{3} \d{2} \d{2}$/;
+    const phoneRegex = /^\+998 \d{2}-\d{3}-\d{2}-\d{2}$/;
     if (!phoneRegex.test(tgPhone)) {
-      err("Iltimos, to'g'ri O'zbekiston telefon raqamini kiriting (+998 XX XXX XX XX).");
+      err("Iltimos, to'g'ri O'zbekiston telefon raqamini kiriting (+998 XX-XXX-XX-XX).");
       return;
     }
 

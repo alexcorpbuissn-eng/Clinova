@@ -69,7 +69,7 @@
       <form id="phone-form">
         <div class="form-group">
           <label>Telegram raqamingiz</label>
-          <input type="tel" id="telegram-phone" required placeholder="+998 90 123 45 67" />
+          <input type="tel" id="telegram-phone" required placeholder="+998 90-000-00-00" />
         </div>
         <button type="submit" class="btn" id="btn-phone">Kodni Olish</button>
       </form>
@@ -226,6 +226,13 @@
       const phone = document.getElementById('telegram-phone').value;
       const errEl = document.getElementById('login-err');
       const btn = document.getElementById('btn-phone');
+
+      // Strict phone validation
+      const phoneRegex = /^\+998 \d{2}-\d{3}-\d{2}-\d{2}$/;
+      if (!phoneRegex.test(phone)) {
+        errEl.textContent = "Iltimos, to'g'ri O'zbekiston telefon raqamini kiriting (+998 XX-XXX-XX-XX).";
+        return;
+      }
 
       errEl.textContent = '';
       btn.textContent = 'Yuborilmoqda...';
