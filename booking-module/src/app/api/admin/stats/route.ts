@@ -56,9 +56,9 @@ export async function GET(request: NextRequest) {
       }),
     ]);
 
-    // Monthly breakdown for last 12 months
+    // Monthly breakdown for last 12 months (chronological order)
     const monthlyHistory = [];
-    for (let i = 0; i < 12; i++) {
+    for (let i = 11; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const start = new Date(d.getFullYear(), d.getMonth(), 1);
       const end = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
@@ -68,8 +68,13 @@ export async function GET(request: NextRequest) {
         _sum: { price: true }
       });
       
+      const uzMonths = [
+        'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun',
+        'Iyul', 'Avgust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr'
+      ];
+      
       monthlyHistory.push({
-        month: d.toLocaleString('uz-UZ', { month: 'long', year: 'numeric' }),
+        month: `${uzMonths[d.getMonth()]}, ${d.getFullYear()}`,
         revenue: res._sum.price || 0
       });
     }

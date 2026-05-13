@@ -42,8 +42,9 @@
     /* Tables */
     .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
     table { width: 100%; border-collapse: collapse; text-align: left; }
-    th { background: #f1f5f9; padding: 16px 20px; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
-    td { padding: 16px 20px; font-size: 0.95rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    th { background: #f1f5f9; padding: 16px 20px; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
+    td { padding: 16px 20px; font-size: 0.95rem; border-bottom: 1px solid var(--border); vertical-align: middle; border-right: 1px solid var(--border); }
+    th:last-child, td:last-child { border-right: none; }
     tr:last-child td { border-bottom: none; }
     .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
     .badge-scheduled { background: #e0f2fe; color: #0284c7; }
@@ -163,7 +164,6 @@
             <thead>
               <tr>
                 <th>F.I.SH.</th>
-                <th>Bugun</th>
                 <th style="text-align:center">BUGUN</th>
                 <th style="text-align:center">SHU HAFTA</th>
                 <th style="text-align:center">SHU OY</th>
