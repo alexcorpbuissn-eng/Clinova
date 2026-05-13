@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard | Habibullo-Hilola</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #0f172a; --teal: #0d9488; --teal-dark: #0f766e; --teal-light: #f0fdfa;
+      --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --text: #334155; --text-muted: #64748b;
+      --red: #ef4444; --red-bg: #fef2f2;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+
+    /* Login Screen */
+    #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100vh; background: var(--bg); z-index: 100; position: absolute; top:0; left:0; }
+    .login-card { background: var(--surface); padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 400px; border: 1px solid var(--border); }
+    .login-card h2 { color: var(--navy); margin-bottom: 24px; text-align: center; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--navy); margin-bottom: 8px; }
+    .form-group input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
+    .form-group input:focus { border-color: var(--teal); }
+    .btn { display: inline-block; width: 100%; background: var(--navy); color: #fff; padding: 12px 20px; border: none; border-radius: 8px; font-family: inherit; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: background 0.2s; text-align: center; }
+    .btn:hover { background: #1e293b; }
+    .btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid #fecaca; }
+    .btn-danger:hover { background: #fee2e2; }
+
+    /* Dashboard Layout */
+    #dashboard { display: none; width: 100%; height: 100%; }
+    .sidebar { width: 260px; background: var(--navy); color: #fff; padding: 30px 20px; display: flex; flex-direction: column; }
+    .sidebar-brand { font-size: 1.25rem; font-weight: 700; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+    .nav-item { padding: 12px 16px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; font-weight: 500; transition: background 0.2s; color: #cbd5e1; }
+    .nav-item:hover, .nav-item.active { background: #1e293b; color: #fff; }
+    .main-content { flex: 1; padding: 40px; overflow-y: auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .header h1 { font-size: 1.8rem; color: var(--navy); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Tables */
+    .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { background: #f1f5f9; padding: 16px 20px; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+    td { padding: 16px 20px; font-size: 0.95rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+    .badge-scheduled { background: #e0f2fe; color: #0284c7; }
+    .badge-completed { background: #dcfce7; color: #166534; }
+    .badge-cancelled { background: var(--red-bg); color: var(--red); }
+
+    .err-msg { color: var(--red); font-size: 0.85rem; margin-bottom: 15px; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN SCREEN -->
+  <div id="login-screen">
+    <div class="login-card">
+      <h2>Admin Kirish</h2>
+      <div id="login-err" class="err-msg"></div>
+      <form id="login-form">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="email" required placeholder="admin@habibullo-hilola.uz" />
+        </div>
+        <div class="form-group">
+          <label>Parol</label>
+          <input type="password" id="password" required placeholder="••••••••" />
+        </div>
+        <button type="submit" class="btn" id="btn-login">Kirish</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard">
+    <div class="sidebar">
+      <div class="sidebar-brand">
+        <span>✦</span> Admin Panel
+      </div>
+      <div class="nav-item active" onclick="switchTab('appointments')">📅 Qabullar</div>
+      <div class="nav-item" onclick="switchTab('patients')">👥 Bemorlar</div>
+      <div style="flex:1"></div>
+      <div class="nav-item" onclick="logout()" style="color:#fca5a5">🚪 Chiqish</div>
+    </div>
+
+    <div class="main-content">
+      
+      <!-- APPOINTMENTS TAB -->
+      <div id="tab-appointments" class="tab-content active">
+        <div class="header">
+          <h1>Barcha Qabullar</h1>
+          <button class="btn" style="width:auto" onclick="loadAppointments()">Yangilash</button>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Bemor</th>
+                <th>Telefon</th>
+                <th>Shifokor / Protsedura</th>
+                <th>Sana / Vaqt</th>
+                <th>Status</th>
+                <th>Harakat</th>
+              </tr>
+            </thead>
+            <tbody id="appt-tbody">
+              <tr><td colspan="6" style="text-align:center">Yuklanmoqda...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PATIENTS TAB -->
+      <div id="tab-patients" class="tab-content">
+        <div class="header">
+          <h1>Bemorlar Bazasi</h1>
+          <button class="btn" style="width:auto" onclick="loadPatients()">Yangilash</button>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>F.I.SH.</th>
+                <th>Telefon</th>
+                <th>Telegram ID</th>
+                <th>Bekor qilishlar (Bugun)</th>
+                <th>Jami Qabullar</th>
+              </tr>
+            </thead>
+            <tbody id="pat-tbody">
+              <tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const API = '';
+    
+    // Auth Check on load
+    const token = localStorage.getItem('admin_token');
+    if (token) {
+      showDashboard();
+    }
+
+    // Login Form Submit
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errEl = document.getElementById('login-err');
+      const btn = document.getElementById('btn-login');
+
+      errEl.textContent = '';
+      btn.textContent = 'Tekshirilmoqda...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`${API}/api/admin/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        
+        if (res.ok && data.success) {
+          localStorage.setItem('admin_token', data.token);
+          showDashboard();
+        } else {
+          errEl.textContent = data.error || 'Xatolik yuz berdi';
+        }
+      } catch (err) {
+        errEl.textContent = 'Server bilan bog\'lanib bo\'lmadi';
+      }
+      btn.textContent = 'Kirish';
+      btn.disabled = false;
+    });
+
+    function logout() {
+      localStorage.removeItem('admin_token');
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('password').value = '';
+    }
+
+    function showDashboard() {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'flex';
+      loadAppointments();
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.getElementById(`tab-${tab}`).classList.add('active');
+
+      if (tab === 'appointments') loadAppointments();
+      if (tab === 'patients') loadPatients();
+    }
+
+    async function apiGet(endpoint) {
+      const t = localStorage.getItem('admin_token');
+      const res = await fetch(API + endpoint, { headers: { 'Authorization': `Bearer ${t}` } });
+      if (res.status === 401 || res.status === 403) { logout(); throw new Error('Unauthorized'); }
+      return res.json();
+    }
+
+    async function apiDelete(endpoint) {
+      const t = localStorage.getItem('admin_token');
+      const res = await fetch(API + endpoint, { method: 'DELETE', headers: { 'Authorization': `Bearer ${t}` } });
+      if (res.status === 401 || res.status === 403) { logout(); throw new Error('Unauthorized'); }
+      return res.json();
+    }
+
+    // Fetch Appointments
+    async function loadAppointments() {
+      const tbody = document.getElementById('appt-tbody');
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Yuklanmoqda...</td></tr>';
+      try {
+        const data = await apiGet('/api/admin/appointments');
+        if (data.success) {
+          if (data.appointments.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Qabullar mavjud emas</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data.appointments.map(a => {
+            const date = new Date(a.slot.startTime).toLocaleDateString('uz-UZ', { day:'numeric', month:'long' });
+            const time = new Date(a.slot.startTime).toLocaleTimeString('uz-UZ', { hour:'2-digit', minute:'2-digit' });
+            const pName = a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : (a.patientFirst ? `${a.patientFirst} ${a.patientLast}` : 'Noma\'lum');
+            const pPhone = a.patient ? a.patient.phone : a.patientPhone;
+            
+            return `
+              <tr>
+                <td><strong>${pName}</strong></td>
+                <td>${pPhone}</td>
+                <td><div style="font-size:0.85rem">Dr. ${a.doctor.lastName}<br><span style="color:var(--text-muted)">${a.procedure?.name || 'Birlamchi ko\'rik'}</span></div></td>
+                <td><div style="font-size:0.85rem"><strong>${date}</strong><br>${time}</div></td>
+                <td><span class="badge badge-${a.status.toLowerCase()}">${a.status}</span></td>
+                <td>
+                  <button class="btn btn-danger" style="padding:6px 12px; font-size:0.8rem; width:auto" onclick="deleteAppt('${a.id}')">O'chirish</button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+      } catch (err) {
+        if(err.message !== 'Unauthorized') tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red">Xatolik yuz berdi</td></tr>';
+      }
+    }
+
+    // Delete Appointment
+    async function deleteAppt(id) {
+      if (!confirm("Haqiqatan ham bu qabulni o'chirmoqchimisiz? Bo'sh vaqt yana hammaga ko'rinadigan bo'ladi.")) return;
+      try {
+        const data = await apiDelete(`/api/admin/appointments/${id}`);
+        if (data.success) {
+          alert("Qabul muvaffaqiyatli o'chirildi.");
+          loadAppointments();
+        } else {
+          alert(data.error || "Xatolik yuz berdi");
+        }
+      } catch (e) {
+        if(e.message !== 'Unauthorized') alert("Tarmoq xatosi");
+      }
+    }
+
+    // Fetch Patients
+    async function loadPatients() {
+      const tbody = document.getElementById('pat-tbody');
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>';
+      try {
+        const data = await apiGet('/api/admin/patients');
+        if (data.success) {
+          if (data.patients.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Bemorlar mavjud emas</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data.patients.map(p => `
+            <tr>
+              <td><strong>${p.firstName} ${p.lastName}</strong></td>
+              <td>${p.phone}</td>
+              <td>${p.telegramChatId || 'Yo\'q'}</td>
+              <td>${p.cancellationsToday > 0 ? `<span style="color:var(--red)">${p.cancellationsToday}</span>` : '0'}</td>
+              <td>${p._count.appointments}</td>
+            </tr>
+          `).join('');
+        }
+      } catch (err) {
+        if(err.message !== 'Unauthorized') tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:red">Xatolik yuz berdi</td></tr>';
+      }
+    }
+  </script>
+</body>
+</html>

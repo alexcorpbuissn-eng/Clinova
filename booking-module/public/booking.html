@@ -349,6 +349,13 @@ document.getElementById('patient-form').addEventListener('submit', async e => {
   localStorage.setItem('fLast', fLast);
   localStorage.setItem('fPhone', fPhone);
 
+  // Strict phone validation
+  const phoneRegex = /^\+998 \d{2} \d{3} \d{2} \d{2}$/;
+  if (!phoneRegex.test(fPhone)) {
+    err('err3', "Iltimos, to'g'ri O'zbekiston telefon raqamini kiriting (+998 XX XXX XX XX).");
+    return;
+  }
+
   try {
     const res = await fetch(`${API}/api/public/book`,{
       method:'POST',

@@ -83,6 +83,14 @@
   document.getElementById('phone-form').addEventListener('submit', async e => {
     e.preventDefault(); clearErr();
     const tgPhone = document.getElementById('fTgPhone').value.trim();
+    
+    // Strict phone validation
+    const phoneRegex = /^\+998 \d{2} \d{3} \d{2} \d{2}$/;
+    if (!phoneRegex.test(tgPhone)) {
+      err("Iltimos, to'g'ri O'zbekiston telefon raqamini kiriting (+998 XX XXX XX XX).");
+      return;
+    }
+
     const btn = document.getElementById('btn-phone');
     btn.disabled=true; btn.textContent='Kutilmoqda...';
 

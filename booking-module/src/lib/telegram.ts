@@ -202,6 +202,7 @@ export interface GroupNotificationPayload {
   procedureName: string;
   appointmentTime: Date; // UTC
   description?: string | null;
+  telegramChatId?: string | null;
 }
 
 export async function sendGroupNotification(
@@ -218,9 +219,14 @@ export async function sendGroupNotification(
   const time = toTashkentTime(payload.appointmentTime);
   const description = payload.description?.trim() || "Ko'rsatilmagan";
 
+  const patientName = `${payload.patientFirst} ${payload.patientLast}`;
+  const patientLink = payload.telegramChatId 
+    ? `[${patientName}](tg://user?id=${payload.telegramChatId})`
+    : `*${patientName}*`;
+
   const text =
     `🆕 *Yangi yozuv!*\n\n` +
-    `👤 Bemor: *${payload.patientFirst} ${payload.patientLast}*\n` +
+    `👤 Bemor: ${patientLink}\n` +
     `📞 Telefon: \`${payload.phone}\`\n` +
     `👨‍⚕️ Shifokor: *Dr. ${payload.doctorName}*\n` +
     `🦷 Protsedura: *${payload.procedureName}*\n` +

@@ -156,6 +156,13 @@
     const fLast = document.getElementById('fLast').value.trim();
     const fTgPhone = document.getElementById('fTgPhone').value.trim();
 
+    // Strict phone validation
+    const phoneRegex = /^\+998 \d{2} \d{3} \d{2} \d{2}$/;
+    if (!phoneRegex.test(fTgPhone)) {
+      err("Iltimos, to'g'ri O'zbekiston telefon raqamini kiriting (+998 XX XXX XX XX).");
+      return;
+    }
+
     const btn = document.getElementById('btn-save');
     btn.disabled = true;
     btn.textContent = 'Saqlanmoqda...';

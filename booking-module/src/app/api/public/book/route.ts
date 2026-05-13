@@ -145,6 +145,7 @@ export async function POST(req: NextRequest) {
       procedureName: result.procedure.name,
       appointmentTime: result.slot.startTime,
       description: result.description,
+      telegramChatId: patient.telegramChatId,
     }).catch(console.error);
 
     return NextResponse.json({
