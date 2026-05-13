@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       // Perform cancellation
       await tx.appointment.update({
         where: { id: appointmentId },
-        data: { status: 'CANCELLED' }
+        data: { status: 'CANCELLED', cancelledBy: 'PATIENT' }
       });
 
       // Free the slot

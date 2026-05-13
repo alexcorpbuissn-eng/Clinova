@@ -49,6 +49,10 @@
     .badge-scheduled { background: #e0f2fe; color: #0284c7; }
     .badge-completed { background: #dcfce7; color: #166534; }
     .badge-cancelled { background: var(--red-bg); color: var(--red); }
+    .badge-cancelled-admin { background: #1e293b; color: #f87171; font-size: 0.7rem; }
+    .badge-cancelled-patient { background: #fff7ed; color: #c2410c; font-size: 0.7rem; }
+    .row-cancelled-admin td { background: #1e293b14; }
+    .row-cancelled-patient td { background: var(--red-bg); }
 
     .err-msg { color: var(--red); font-size: 0.85rem; margin-bottom: 15px; text-align: center; }
   </style>
@@ -110,7 +114,7 @@
                 <th>Telefon</th>
                 <th>Shifokor / Protsedura</th>
                 <th>Sana / Vaqt</th>
-                <th>Status</th>
+                <th>Status / Kim bekor qildi</th>
                 <th>Harakat</th>
               </tr>
             </thead>
@@ -321,13 +325,24 @@
             const pName = a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : (a.patientFirst ? `${a.patientFirst} ${a.patientLast}` : 'Noma\'lum');
             const pPhone = a.patient ? a.patient.phone : a.patientPhone;
             
+            const isCancelledAdmin = a.status === 'CANCELLED' && a.cancelledBy === 'ADMIN';
+            const isCancelledPatient = a.status === 'CANCELLED' && a.cancelledBy === 'PATIENT';
+            const rowClass = isCancelledAdmin ? 'row-cancelled-admin' : (isCancelledPatient ? 'row-cancelled-patient' : '');
+            
+            let statusCell = `<span class="badge badge-${a.status.toLowerCase()}">${a.status}</span>`;
+            if (isCancelledAdmin) {
+              statusCell += ` <span class="badge badge-cancelled-admin" title="Admin tomonidan bekor qilindi">🛡 Admin</span>`;
+            } else if (isCancelledPatient) {
+              statusCell += ` <span class="badge badge-cancelled-patient" title="Bemor tomonidan bekor qilindi">👤 Bemor</span>`;
+            }
+
             return `
-              <tr style="${a.status === 'CANCELLED' ? 'background:var(--red-bg)' : ''}">
+              <tr class="${rowClass}">
                 <td><strong>${pName}</strong></td>
                 <td>${pPhone}</td>
                 <td><div style="font-size:0.85rem">Dr. ${a.doctor.lastName}<br><span style="color:var(--text-muted)">${a.procedure?.name || 'Birlamchi ko\'rik'}</span></div></td>
                 <td><div style="font-size:0.85rem"><strong>${date}</strong><br>${time}</div></td>
-                <td><span class="badge badge-${a.status.toLowerCase()}">${a.status}</span></td>
+                <td>${statusCell}</td>
                 <td>
                   ${a.status !== 'CANCELLED' ? `<button class="btn btn-danger" style="padding:6px 12px; font-size:0.8rem; width:auto" onclick="deleteAppt('${a.id}')">Bekor qilish</button>` : ''}
                 </td>

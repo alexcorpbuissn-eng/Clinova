@@ -126,6 +126,7 @@ model Appointment {
   description     String?    @db.VarChar(500)
   status          ApptStatus @default(SCHEDULED)
   cancelToken     String?    @unique
+  cancelledBy     String?    // 'PATIENT' | 'ADMIN' — set on cancellation
 
   // Reminder flags — checked by hourly Vercel cron job
   reminderSent24h Boolean    @default(false)

@@ -70,7 +70,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     await prisma.$transaction([
       prisma.appointment.update({
         where: { id: appointment.id },
-        data: { status: 'CANCELLED', cancelToken: null },
+        data: { status: 'CANCELLED', cancelToken: null, cancelledBy: 'PATIENT' },
       }),
       prisma.slot.update({
         where: { id: appointment.slotId },

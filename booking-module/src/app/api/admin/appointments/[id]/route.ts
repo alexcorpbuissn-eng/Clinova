@@ -34,7 +34,7 @@ export async function DELETE(
     await prisma.$transaction([
       prisma.appointment.update({ 
         where: { id },
-        data: { status: 'CANCELLED' } 
+        data: { status: 'CANCELLED', cancelledBy: 'ADMIN' } 
       }),
       prisma.slot.update({
         where: { id: appointment.slotId },
