@@ -197,41 +197,64 @@ document.addEventListener('DOMContentLoaded', () => {
       digits = digits.slice(0, 9);
 
       let res = prefix;
-      if (digits.length > 0) res += digits.slice(0, 2);
-      if (digits.length > 2) res += ' ' + digits.slice(2, 5);
-      if (digits.length > 5) res += ' ' + digits.slice(5, 7);
-      if (digits.length > 7) res += ' ' + digits.slice(7, 9);
+      if (digits.length > 0) {
+        res += digits.slice(0, 2);
+        if (digits.length > 2) res += ' ' + digits.slice(2, 5);
+        if (digits.length > 5) res += ' ' + digits.slice(5, 7);
+        if (digits.length > 7) res += ' ' + digits.slice(7, 9);
+      }
       return res;
     };
 
     input.addEventListener('focus', () => {
-      if (!input.value || input.value.trim() === '') {
+      if (!input.value || input.value.trim() === '' || input.value === '+') {
         input.value = prefix;
       }
     });
 
     input.addEventListener('keydown', (e) => {
-      // Prevent deleting the +998 prefix
-      if ((e.key === 'Backspace' || e.key === 'Delete')) {
-        if (input.selectionStart <= prefix.length && input.selectionEnd <= prefix.length) {
-          e.preventDefault();
-        }
+      const isControlKey = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'].includes(e.key);
+      const isNumeric = /^\d$/.test(e.key);
+      const isModifier = e.ctrlKey || e.metaKey;
+
+      // Prevent deleting prefix
+      if (e.key === 'Backspace' && input.selectionStart <= prefix.length && input.selectionEnd <= prefix.length) {
+        e.preventDefault();
+        return;
+      }
+      if (e.key === 'Delete' && input.selectionStart < prefix.length) {
+        e.preventDefault();
+        return;
       }
 
-      // Only allow numbers and control keys
-      const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'];
-      if (!allowed.includes(e.key) && !/^\d$/.test(e.key) && !e.ctrlKey && !e.metaKey) {
+      // Block non-numeric and non-control keys
+      if (!isNumeric && !isControlKey && !isModifier) {
         e.preventDefault();
       }
     });
 
     input.addEventListener('input', (e) => {
-      const val = e.target.value;
-      const formatted = formatNumber(val);
+      let cursor = e.target.selectionStart;
+      let val = e.target.value;
       
-      // Preserve cursor if possible (basic implementation)
-      const oldLen = val.length;
+      // If user managed to delete prefix via selection or something, restore it
+      if (!val.startsWith(prefix)) {
+        if (val.startsWith('+998')) {
+           val = prefix + val.slice(4).replace(/\D/g, '');
+        } else {
+           val = prefix + val.replace(/\D/g, '');
+        }
+      }
+
+      const formatted = formatNumber(val);
+      const oldVal = e.target.value;
       e.target.value = formatted;
+
+      // Simple cursor fix: if we added a space, push cursor forward
+      if (formatted.length > oldVal.length && (formatted[cursor-1] === ' ')) {
+        cursor++;
+      }
+      e.target.setSelectionRange(cursor, cursor);
     });
 
     input.addEventListener('blur', () => {
@@ -243,7 +266,8 @@ document.addEventListener('DOMContentLoaded', () => {
     input.addEventListener('paste', (e) => {
       e.preventDefault();
       const text = (e.clipboardData || window.clipboardData).getData('text');
-      e.target.value = formatNumber(text);
+      const formatted = formatNumber(text);
+      input.value = formatted;
     });
   }
 
