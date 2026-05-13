@@ -42,16 +42,16 @@ export async function GET(request: NextRequest) {
     const base = { doctorId: doc.id };
 
     const [daily, weekly, monthly, totalPatients, monthlyRevenue, yearlyRevenue] = await Promise.all([
-      prisma.visit.count({ where: { ...base, visitDate: { gte: todayStart } } }),
-      prisma.visit.count({ where: { ...base, visitDate: { gte: weekStart } } }),
-      prisma.visit.count({ where: { ...base, visitDate: { gte: monthStart } } }),
+      prisma.visit.count({ where: { ...base, startTime: { gte: todayStart } } }),
+      prisma.visit.count({ where: { ...base, startTime: { gte: weekStart } } }),
+      prisma.visit.count({ where: { ...base, startTime: { gte: monthStart } } }),
       prisma.visit.count({ where: base }),
       prisma.visit.aggregate({
-        where: { ...base, visitDate: { gte: monthStart } },
+        where: { ...base, startTime: { gte: monthStart } },
         _sum: { price: true },
       }),
       prisma.visit.aggregate({
-        where: { ...base, visitDate: { gte: yearStart } },
+        where: { ...base, startTime: { gte: yearStart } },
         _sum: { price: true },
       }),
     ]);
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
       const end = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
       
       const res = await prisma.visit.aggregate({
-        where: { ...base, visitDate: { gte: start, lte: end } },
+        where: { ...base, startTime: { gte: start, lte: end } },
         _sum: { price: true }
       });
       

@@ -72,6 +72,37 @@
     .source-badge.walkin { background: #f3f4f6; color: #4b5563; }
     .price-cell { font-weight: 700; color: var(--teal-dark); white-space: nowrap; }
     .empty-state { text-align: center; padding: 40px; color: var(--text-muted); font-size: 0.9rem; }
+
+    /* Active Treatments Section */
+    .active-visits { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+    @media(max-width: 1200px) { .active-visits { grid-template-columns: 1fr; } }
+    .active-card { background: #fff; border-radius: 14px; border: 1.5px solid var(--teal); padding: 16px; display: flex; flex-direction: column; gap: 12px; position: relative; box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.1); }
+    .active-card .patient { font-weight: 700; font-size: 1rem; color: var(--navy); }
+    .active-card .doctor { font-size: 0.82rem; color: var(--text-muted); }
+    .active-card .timer { font-family: monospace; font-size: 1.1rem; font-weight: 700; color: var(--teal); display: flex; align-items: center; gap: 6px; }
+    .active-card .finish-btn { background: var(--teal); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; transition: background 0.2s; }
+    .active-card .finish-btn:hover { background: var(--teal-dark); }
+    .active-card .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+
+    /* Payment Modal */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
+    .modal { background: #fff; border-radius: 20px; width: 100%; max-width: 450px; padding: 32px; position: relative; }
+    .modal h3 { font-size: 1.25rem; color: var(--navy); margin-bottom: 20px; }
+    .payment-summary { background: var(--bg); padding: 16px; border-radius: 12px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+    .payment-summary .row { display: flex; justify-content: space-between; font-size: 0.9rem; }
+    .payment-summary .total { font-weight: 700; font-size: 1.1rem; color: var(--navy); margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--border); }
+    
+    .paid-input-group { margin-bottom: 20px; }
+    .paid-input-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+    .paid-input-group .input-wrap { position: relative; }
+    .paid-input-group input { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-size: 1.1rem; font-weight: 700; outline: none; transition: border-color 0.2s; }
+    .paid-input-group input:focus { border-color: var(--teal); }
+    .checkbox-group { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; cursor: pointer; }
+    .checkbox-group input { width: 20px; height: 20px; cursor: pointer; }
+    
+    .btn-save-payment { width: 100%; background: var(--teal); color: #fff; padding: 14px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 1rem; }
+    .btn-save-payment:hover { background: var(--teal-dark); }
   </style>
 </head>
 <body>
@@ -148,30 +179,81 @@
           <span class="price-suffix">so'm</span>
         </div>
       </div>
-      <div class="form-group">
-        <label>Sana va vaqt</label>
-        <input type="text" id="f-date" style="width:100%; padding:12px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.93rem; outline:none;" />
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="form-group">
+          <label>Boshlanish vaqti</label>
+          <input type="text" id="f-start-date" style="width:100%; padding:12px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.93rem; outline:none;" />
+        </div>
+        <div class="form-group">
+          <label>Tugash vaqti</label>
+          <input type="text" id="f-end-date" style="width:100%; padding:12px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.93rem; outline:none;" />
+        </div>
       </div>
       <div class="form-group">
         <label>Izoh (ixtiyoriy)</label>
         <input type="text" id="f-note" placeholder="Qo'shimcha ma'lumot..." />
       </div>
 
-      <button class="btn-submit" id="btn-submit" onclick="submitVisit()">Tashrif qayd etish</button>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px;">
+        <button class="btn-submit" id="btn-start" onclick="submitVisit('IN_PROGRESS')" style="background: var(--teal);">⚡ Boshlash</button>
+        <button class="btn-submit" id="btn-submit" onclick="submitVisit('COMPLETED')" style="background: var(--navy); font-size: 0.85rem; font-weight: 500;">Qayd etish</button>
+      </div>
       <div class="success-toast" id="success-toast">✅ Tashrif muvaffaqiyatli qayd etildi!</div>
       <div class="err-form" id="err-form"></div>
     </div>
 
-    <!-- Right: Recent Visits -->
-    <div class="visits-card">
-      <div class="visits-header">
-        <h2>🕐 So'nggi tashriflar</h2>
-        <button class="btn-refresh" onclick="loadVisits()">Yangilash</button>
+    <!-- Right side: Active and Recent -->
+    <div style="display: flex; flex-direction: column; gap: 28px;">
+      
+      <!-- Active Treatments -->
+      <div id="active-treatments-section" style="display: none;">
+        <h2 style="font-size: 1.05rem; color: var(--navy); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">⚡ Hozirgi muolajalar</h2>
+        <div class="active-visits" id="active-visits-container">
+          <!-- Cards injected here -->
+        </div>
       </div>
-      <div id="visits-container">
-        <div class="empty-state">Yuklanmoqda...</div>
+
+      <!-- Recent Visits -->
+      <div class="visits-card">
+        <div class="visits-header">
+          <h2>🕐 So'nggi tashriflar</h2>
+          <button class="btn-refresh" onclick="loadVisits()">Yangilash</button>
+        </div>
+        <div id="visits-container">
+          <div class="empty-state">Yuklanmoqda...</div>
+        </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay" id="payment-modal">
+  <div class="modal">
+    <button onclick="closePaymentModal()" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-muted)">&times;</button>
+    <h3>To'lovni tasdiqlash</h3>
+    
+    <div class="payment-summary" id="payment-summary">
+      <div class="row"><span>Bemor:</span> <strong id="m-patient">...</strong></div>
+      <div class="row"><span>Shifokor:</span> <span id="m-doctor">...</span></div>
+      <div class="row"><span>Xizmat:</span> <span id="m-service">...</span></div>
+      <div class="row total"><span>Umumiy summa:</span> <span id="m-total">0 so'm</span></div>
+    </div>
+
+    <div class="paid-input-group">
+      <label>To'langan summa</label>
+      <div class="input-wrap">
+        <input type="text" id="m-paid-amount" placeholder="0" oninput="this.value = this.value.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" />
+        <span class="price-suffix">so'm</span>
+      </div>
+    </div>
+
+    <div class="checkbox-group" onclick="toggleFullPay()">
+      <input type="checkbox" id="m-full-pay" checked />
+      <span style="font-size: 0.9rem; font-weight: 500;">To'liq to'landi</span>
+    </div>
+
+    <button class="btn-save-payment" id="btn-save-payment" onclick="savePayment()">Tugatish va Saqlash</button>
   </div>
 </div>
 
@@ -183,20 +265,25 @@
   let doctorsList = [];
 
   // ── Date/Time setup ─────────────────────────────────────────────
-  let datePicker;
+  let startPicker, endPicker;
   function initDatePicker() {
-    datePicker = flatpickr("#f-date", {
+    startPicker = flatpickr("#f-start-date", {
       enableTime: true,
       dateFormat: "Y-m-d H:i",
       time_24hr: true,
       defaultDate: new Date()
     });
+    endPicker = flatpickr("#f-end-date", {
+      enableTime: true,
+      dateFormat: "Y-m-d H:i",
+      time_24hr: true,
+      defaultDate: new Date(Date.now() + 30 * 60000) // +30 min default
+    });
   }
 
   function setDefaultDate() {
-    if (datePicker) {
-      datePicker.setDate(new Date());
-    }
+    if (startPicker) startPicker.setDate(new Date());
+    if (endPicker) endPicker.setDate(new Date(Date.now() + 30 * 60000));
   }
 
   function updateClock() {
@@ -295,6 +382,7 @@
     updateClock();
     setInterval(updateClock, 30000);
     await loadDoctors();
+    await loadActiveVisits();
     await loadVisits();
   }
 
@@ -339,6 +427,7 @@
           const opt = document.createElement('option');
           opt.value = p.name;
           opt.textContent = `${p.name} (${p.durationMinutes} min)`;
+          opt.dataset.duration = p.durationMinutes;
           sel.appendChild(opt);
         });
       }
@@ -353,11 +442,20 @@
 
   document.getElementById('f-service').addEventListener('change', function() {
     document.getElementById('f-service-custom').style.display = this.value === '__custom__' ? '' : 'none';
+    
+    // Auto-calculate end time
+    const selected = this.options[this.selectedIndex];
+    const duration = parseInt(selected.dataset.duration || '30');
+    if (startPicker && endPicker) {
+      const start = startPicker.selectedDates[0] || new Date();
+      const end = new Date(start.getTime() + duration * 60000);
+      endPicker.setDate(end);
+    }
   });
 
   // ── Submit visit ─────────────────────────────────────────────
-  async function submitVisit() {
-    const btn = document.getElementById('btn-submit');
+  async function submitVisit(status = 'COMPLETED') {
+    const btn = status === 'IN_PROGRESS' ? document.getElementById('btn-start') : document.getElementById('btn-submit');
     const toast = document.getElementById('success-toast');
     const errEl = document.getElementById('err-form');
     toast.style.display = 'none'; errEl.style.display = 'none';
@@ -368,9 +466,10 @@
     const serviceName = serviceVal === '__custom__'
       ? document.getElementById('f-service-custom').value.trim()
       : serviceVal;
-    const priceStr = document.getElementById('f-price').value.replace(/\D/g, ''); // Fix: remove all non-digits (spaces, dots)
+    const priceStr = document.getElementById('f-price').value.replace(/\D/g, ''); 
     const price = parseInt(priceStr, 10);
-    const visitDate = document.getElementById('f-date').value;
+    const startTime = document.getElementById('f-start-date').value;
+    const endTime = document.getElementById('f-end-date').value;
     const note = document.getElementById('f-note').value.trim();
 
     if (!doctorId || !patientName || !serviceName || !price) {
@@ -379,12 +478,12 @@
       return;
     }
 
-    btn.disabled = true; btn.textContent = 'Saqlanmoqda...';
+    btn.disabled = true; const oldTxt = btn.textContent; btn.textContent = '...';
     try {
       const res = await fetch('/api/admin/visits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
-        body: JSON.stringify({ doctorId, patientName, serviceName, price, source: visitSource, visitDate, note })
+        body: JSON.stringify({ doctorId, patientName, serviceName, price, source: visitSource, startTime, endTime, status, note })
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -397,6 +496,7 @@
         document.getElementById('f-service').selectedIndex = 0;
         document.getElementById('f-service-custom').style.display = 'none';
         setDefaultDate();
+        loadActiveVisits();
         loadVisits();
       } else {
         errEl.textContent = data.error || 'Xatolik yuz berdi';
@@ -406,33 +506,168 @@
       errEl.textContent = 'Tarmoq xatosi';
       errEl.style.display = 'block';
     }
-    btn.disabled = false; btn.textContent = 'Tashrif qayd etish';
+    btn.disabled = false; btn.textContent = oldTxt;
   }
 
-  // ── Load visits ─────────────────────────────────────────────
+  // ── Load active treatments ───────────────────────────────────
+  let activeVisits = [];
+  async function loadActiveVisits() {
+    try {
+      const res = await fetch('/api/admin/visits?limit=100', { headers: { 'Authorization': `Bearer ${adminToken}` } });
+      const data = await res.json();
+      if (data.success) {
+        activeVisits = data.visits.filter(v => v.status === 'IN_PROGRESS');
+        renderActiveVisits();
+      }
+    } catch {}
+  }
+
+  function renderActiveVisits() {
+    const section = document.getElementById('active-treatments-section');
+    const container = document.getElementById('active-visits-container');
+    
+    if (activeVisits.length === 0) {
+      section.style.display = 'none';
+      return;
+    }
+
+    section.style.display = 'block';
+    container.innerHTML = activeVisits.map(v => `
+      <div class="active-card" id="card-${v.id}">
+        <div style="display:flex; justify-content:space-between; align-items:start;">
+          <div>
+            <div class="patient">${v.patientName}</div>
+            <div class="doctor">Dr. ${v.doctor.lastName} — ${v.serviceName}</div>
+          </div>
+          <div class="status-dot"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+          <div class="timer" id="timer-${v.id}" data-end="${v.endTime || ''}">
+            ⏳ --:--
+          </div>
+          <button class="finish-btn" onclick="finishVisit('${v.id}')">Tugatish</button>
+        </div>
+      </div>
+    `).join('');
+    updateTimers();
+  }
+
+  function updateTimers() {
+    activeVisits.forEach(v => {
+      const el = document.getElementById(`timer-${v.id}`);
+      if (!el || !v.endTime) return;
+      
+      const end = new Date(v.endTime).getTime();
+      const now = new Date().getTime();
+      const diff = end - now;
+
+      if (diff <= 0) {
+        el.textContent = '✅ Vaqt tugadi';
+        el.style.color = 'var(--red)';
+        return;
+      }
+
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diff % (1000 * 60)) / 1000);
+      el.textContent = `⏳ ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    });
+  }
+  setInterval(updateTimers, 1000);
+
+  // ── Payment Modal Logic ──────────────────────────────────────
+  let currentVisitId = null;
+  function finishVisit(id) {
+    const v = activeVisits.find(x => x.id === id);
+    if (!v) return;
+    currentVisitId = id;
+    
+    document.getElementById('m-patient').textContent = v.patientName;
+    document.getElementById('m-doctor').textContent = `Dr. ${v.doctor.firstName} ${v.doctor.lastName}`;
+    document.getElementById('m-service').textContent = v.serviceName;
+    document.getElementById('m-total').textContent = v.price.toLocaleString('uz-UZ') + ' so\'m';
+    
+    const paidInput = document.getElementById('m-paid-amount');
+    paidInput.value = v.price.toLocaleString('uz-UZ');
+    document.getElementById('m-full-pay').checked = true;
+    paidInput.disabled = true;
+
+    document.getElementById('payment-modal').style.display = 'flex';
+  }
+
+  function toggleFullPay() {
+    const cb = document.getElementById('m-full-pay');
+    cb.checked = !cb.checked;
+    const input = document.getElementById('m-paid-amount');
+    input.disabled = cb.checked;
+    if (cb.checked) {
+      const v = activeVisits.find(x => x.id === currentVisitId);
+      if (v) input.value = v.price.toLocaleString('uz-UZ');
+    }
+  }
+
+  function closePaymentModal() {
+    document.getElementById('payment-modal').style.display = 'none';
+    currentVisitId = null;
+  }
+
+  async function savePayment() {
+    const btn = document.getElementById('btn-save-payment');
+    const paidStr = document.getElementById('m-paid-amount').value.replace(/\D/g, '');
+    const paidAmount = parseInt(paidStr);
+
+    btn.disabled = true; btn.textContent = 'Saqlanmoqda...';
+    try {
+      const res = await fetch(`/api/admin/visits/${currentVisitId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+        body: JSON.stringify({ 
+          status: 'COMPLETED', 
+          paidAmount,
+          endTime: new Date().toISOString()
+        })
+      });
+      if (res.ok) {
+        closePaymentModal();
+        loadActiveVisits();
+        loadVisits();
+      }
+    } catch {}
+    btn.disabled = false; btn.textContent = 'Tugatish va Saqlash';
+  }
+
+  // ── Load visits (history) ───────────────────────────────────
   async function loadVisits() {
     const container = document.getElementById('visits-container');
-    container.innerHTML = '<div class="empty-state">Yuklanmoqda...</div>';
     try {
       const res = await fetch('/api/admin/visits?limit=30', { headers: { 'Authorization': `Bearer ${adminToken}` } });
       const data = await res.json();
-      if (!data.success || !data.visits.length) {
+      if (!data.success) return;
+      
+      const history = data.visits.filter(v => v.status === 'COMPLETED');
+      if (history.length === 0) {
         container.innerHTML = '<div class="empty-state">Hozircha tashriflar yo\'q.</div>';
         return;
       }
-      const tbody = data.visits.map(v => {
-        const date = new Date(v.visitDate).toLocaleString('uz-UZ', {
+
+      const tbody = history.map(v => {
+        const start = new Date(v.startTime).toLocaleString('uz-UZ', {
           day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent'
         });
+        const isFullPaid = v.paidAmount >= v.price;
+        const paymentStatus = isFullPaid 
+          ? `<span style="color:var(--green)">✅ ${v.price.toLocaleString()}</span>`
+          : `<span style="color:var(--red)">⚠️ ${v.paidAmount.toLocaleString()} / ${v.price.toLocaleString()}</span>`;
+
         const sourceBadge = v.source === 'BOOKED'
           ? '<span class="source-badge booked">📱 Online</span>'
           : '<span class="source-badge walkin">🚶 Offline</span>';
+          
         return `<tr>
-          <td>${date}</td>
+          <td>${start}</td>
           <td><strong>${v.patientName}</strong></td>
           <td>Dr. ${v.doctor.lastName}</td>
           <td style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${v.serviceName}</td>
-          <td class="price-cell">${v.price.toLocaleString('uz-UZ')}</td>
+          <td class="price-cell">${paymentStatus}</td>
           <td>${sourceBadge}</td>
         </tr>`;
       }).join('');

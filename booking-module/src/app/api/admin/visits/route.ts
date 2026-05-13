@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
   const visits = await prisma.visit.findMany({
     where: doctorId ? { doctorId } : undefined,
     include: { doctor: { select: { firstName: true, lastName: true, specialty: true } } },
-    orderBy: { visitDate: 'desc' },
+    orderBy: { startTime: 'desc' },
     take: limit,
   });
 
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { doctorId, patientName, serviceName, price, source, visitDate, note } = body;
+  const { doctorId, patientName, serviceName, price, source, startTime, endTime, status, note } = body;
 
   if (!doctorId || !patientName || !serviceName || price === undefined) {
     return NextResponse.json(
@@ -53,7 +53,10 @@ export async function POST(request: NextRequest) {
       serviceName: String(serviceName).trim(),
       price: parseInt(price),
       source: source === 'BOOKED' ? 'BOOKED' : 'WALKIN',
-      visitDate: visitDate ? new Date(visitDate) : new Date(),
+      startTime: startTime ? new Date(startTime) : new Date(),
+      endTime: endTime ? new Date(endTime) : null,
+      status: status === 'IN_PROGRESS' ? 'IN_PROGRESS' : 'COMPLETED',
+      paidAmount: status === 'IN_PROGRESS' ? 0 : parseInt(price),
       note: note ? String(note).trim() : null,
     },
     include: { doctor: { select: { firstName: true, lastName: true } } },

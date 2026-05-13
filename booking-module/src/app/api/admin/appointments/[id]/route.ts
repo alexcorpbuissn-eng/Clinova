@@ -104,7 +104,7 @@ export async function PATCH(
           serviceName: appointment.procedure?.name || 'Birlamchi ko\'rik',
           price: 0, // Admin can update this in the reception page later if needed
           source: 'BOOKED',
-          visitDate: new Date(),
+          startTime: new Date(),
           note: 'Qabuldan (Admin panel)',
         },
       }),

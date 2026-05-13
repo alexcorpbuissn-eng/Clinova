@@ -174,14 +174,23 @@ model Visit {
   doctor      Doctor      @relation(fields: [doctorId], references: [id])
   patientName String
   serviceName String
-  price       Int         // amount in UZS (so'm)
+  price       Int         // expected/total amount in UZS
+  paidAmount  Int         @default(0) // actual amount paid so far
+  status      VisitStatus @default(COMPLETED)
   source      VisitSource @default(WALKIN)
-  visitDate   DateTime    @default(now())
+  startTime   DateTime    @default(now())
+  endTime     DateTime?
   note        String?
   createdAt   DateTime    @default(now())
 
   @@index([doctorId])
-  @@index([visitDate])
+  @@index([startTime])
+  @@index([status])
+}
+
+enum VisitStatus {
+  IN_PROGRESS
+  COMPLETED
 }
 
 enum VisitSource {
