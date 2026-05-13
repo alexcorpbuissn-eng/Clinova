@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Qabul Daftari | Habibullo-Hilola</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <style>
     :root {
       --navy: #0f172a; --teal: #0d9488; --teal-dark: #0f766e; --teal-light: #f0fdfa;
@@ -125,7 +126,7 @@
       <div class="form-group">
         <label>Shifokor *</label>
         <select id="f-doctor" required>
-          <option value="">Shifokor tanlang...</option>
+          <option value="" disabled selected hidden>Shifokor tanlang...</option>
         </select>
       </div>
       <div class="form-group">
@@ -135,7 +136,7 @@
       <div class="form-group">
         <label>Xizmat turi *</label>
         <select id="f-service" required>
-          <option value="">Xizmatni tanlang...</option>
+          <option value="" disabled selected hidden>Xizmatni tanlang...</option>
           <option value="__custom__">Boshqa (qo'lda kiriting)</option>
         </select>
         <input type="text" id="f-service-custom" style="display:none; margin-top:8px; width:100%; padding:12px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.93rem; outline:none;" placeholder="Xizmat nomini kiriting" />
@@ -149,7 +150,7 @@
       </div>
       <div class="form-group">
         <label>Sana va vaqt</label>
-        <input type="datetime-local" id="f-date" style="width:100%; padding:12px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.93rem; outline:none;" />
+        <input type="text" id="f-date" style="width:100%; padding:12px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.93rem; outline:none;" />
       </div>
       <div class="form-group">
         <label>Izoh (ixtiyoriy)</label>
@@ -174,6 +175,7 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
   const API = '';
   let adminToken = null;
@@ -181,10 +183,20 @@
   let doctorsList = [];
 
   // ── Date/Time setup ─────────────────────────────────────────────
+  let datePicker;
+  function initDatePicker() {
+    datePicker = flatpickr("#f-date", {
+      enableTime: true,
+      dateFormat: "Y-m-d H:i",
+      time_24hr: true,
+      defaultDate: new Date()
+    });
+  }
+
   function setDefaultDate() {
-    const now = new Date();
-    const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
-    document.getElementById('f-date').value = local.toISOString().slice(0, 16);
+    if (datePicker) {
+      datePicker.setDate(new Date());
+    }
   }
 
   function updateClock() {
@@ -271,7 +283,7 @@
   async function showApp() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
-    setDefaultDate();
+    initDatePicker();
     updateClock();
     setInterval(updateClock, 30000);
     await loadDoctors();
@@ -293,7 +305,7 @@
       if (data.success) {
         doctorsList = data.doctors;
         const sel = document.getElementById('f-doctor');
-        sel.innerHTML = '<option value="">Shifokor tanlang...</option>';
+        sel.innerHTML = '<option value="" disabled selected hidden>Shifokor tanlang...</option>';
         data.doctors.forEach(d => {
           const opt = document.createElement('option');
           opt.value = d.id;
@@ -309,11 +321,11 @@
   async function loadProceduresForDoctor(doctorId) {
     const sel = document.getElementById('f-service');
     sel.innerHTML = '<option value="">Yuklanmoqda...</option>';
-    if (!doctorId) { sel.innerHTML = '<option value="">Xizmatni tanlang...</option><option value="__custom__">Boshqa (qo\'lda kiriting)</option>'; return; }
+    if (!doctorId) { sel.innerHTML = '<option value="" disabled selected hidden>Xizmatni tanlang...</option><option value="__custom__">Boshqa (qo\'lda kiriting)</option>'; return; }
     try {
       const res = await fetch(`/api/public/doctors/${doctorId}/procedures`);
       const data = await res.json();
-      sel.innerHTML = '<option value="">Xizmatni tanlang...</option>';
+      sel.innerHTML = '<option value="" disabled selected hidden>Xizmatni tanlang...</option>';
       if (data.procedures?.length) {
         data.procedures.forEach(p => {
           const opt = document.createElement('option');
@@ -327,7 +339,7 @@
       customOpt.textContent = 'Boshqa (qo\'lda kiriting)';
       sel.appendChild(customOpt);
     } catch {
-      sel.innerHTML = '<option value="">Xizmatni tanlang...</option><option value="__custom__">Boshqa (qo\'lda kiriting)</option>';
+      sel.innerHTML = '<option value="" disabled selected hidden>Xizmatni tanlang...</option><option value="__custom__">Boshqa (qo\'lda kiriting)</option>';
     }
   }
 
@@ -348,7 +360,7 @@
     const serviceName = serviceVal === '__custom__'
       ? document.getElementById('f-service-custom').value.trim()
       : serviceVal;
-    const priceStr = document.getElementById('f-price').value.replace(/\./g, '');
+    const priceStr = document.getElementById('f-price').value.replace(/\D/g, ''); // Fix: remove all non-digits (spaces, dots)
     const price = parseInt(priceStr, 10);
     const visitDate = document.getElementById('f-date').value;
     const note = document.getElementById('f-note').value.trim();

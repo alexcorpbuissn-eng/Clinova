@@ -231,6 +231,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ---- User Profile in Navbar ----
   const navContainer = document.querySelector('.nav-container');
   if (navContainer) {
+    const adminToken = localStorage.getItem('admin_token');
+    const receptionToken = localStorage.getItem('reception_token');
     const patientId = localStorage.getItem('patientId');
     const fFirst = localStorage.getItem('fFirst');
     const fLast = localStorage.getItem('fLast');
@@ -238,13 +240,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileWrap = document.createElement('div');
     profileWrap.style.cssText = 'display:flex;align-items:center;gap:12px;margin-left:auto;margin-right:15px;font-size:0.85rem;font-weight:600;color:var(--navy);';
     
-    // Find the hamburger or btn-primary to insert before
     const insertBeforeEl = navContainer.querySelector('.btn-primary') || document.getElementById('hamburger');
     
-    if (patientId) {
+    if (adminToken || receptionToken || patientId) {
       // Logged in
       let nameText = (fFirst || fLast) ? `${fFirst || ''} ${fLast || ''}`.trim() : 'Mijoz';
+      let badges = '';
+      
+      if (adminToken) {
+        badges += `<a href="admin.html" style="background:#fee2e2;color:#b91c1c;padding:4px 10px;border-radius:12px;font-size:0.75rem;text-decoration:none;">🛡 Admin</a>`;
+      }
+      if (receptionToken && !adminToken) {
+        badges += `<a href="reception.html" style="background:#e0f2fe;color:#0369a1;padding:4px 10px;border-radius:12px;font-size:0.75rem;text-decoration:none;">📋 Resepshn</a>`;
+      }
+
       profileWrap.innerHTML = `
+        ${badges}
         <a href="profile.html" style="background:var(--teal-light);padding:6px 12px;border-radius:20px;color:var(--teal-dark);display:flex;align-items:center;gap:6px;text-decoration:none;transition:opacity 0.2s" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           ${nameText}
