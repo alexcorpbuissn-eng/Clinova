@@ -26,6 +26,9 @@ export async function GET(request: NextRequest) {
   weekStart.setDate(weekStart.getDate() - 6);
   weekStart.setUTCHours(0, 0, 0, 0);
 
+  // Month: start of current calendar month
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
   // Year: start of current calendar year
   const yearStart = new Date(now.getFullYear(), 0, 1);
 
