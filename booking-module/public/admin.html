@@ -164,13 +164,17 @@
               <tr>
                 <th>F.I.SH.</th>
                 <th>Bugun</th>
-                <th>Shu hafta</th>
-                <th>Shu oy</th>
-                <th>Oylik daromad</th>
+                <th style="text-align:center">BUGUN</th>
+                <th style="text-align:center">SHU HAFTA</th>
+                <th style="text-align:center">SHU OY</th>
+                <th style="text-align:center">BEMORLAR</th>
+                <th>OYLIK DAROMAD</th>
+                <th>YILLIK DAROMAD</th>
+                <th>TARIX</th>
               </tr>
             </thead>
             <tbody id="doc-stomatolog-tbody">
-              <tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>
+              <tr><td colspan="8" style="text-align:center">Yuklanmoqda...</td></tr>
             </tbody>
           </table>
         </div>
@@ -181,14 +185,17 @@
             <thead>
               <tr>
                 <th>F.I.SH.</th>
-                <th>Bugun</th>
-                <th>Shu hafta</th>
-                <th>Shu oy</th>
-                <th>Oylik daromad</th>
+                <th style="text-align:center">BUGUN</th>
+                <th style="text-align:center">SHU HAFTA</th>
+                <th style="text-align:center">SHU OY</th>
+                <th style="text-align:center">BEMORLAR</th>
+                <th>OYLIK DAROMAD</th>
+                <th>YILLIK DAROMAD</th>
+                <th>TARIX</th>
               </tr>
             </thead>
             <tbody id="doc-lor-tbody">
-              <tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>
+              <tr><td colspan="8" style="text-align:center">Yuklanmoqda...</td></tr>
             </tbody>
           </table>
         </div>
@@ -197,7 +204,38 @@
     </div>
   </div>
 
+  <!-- Modal for Monthly History -->
+  <div id="history-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:white; padding:32px; border-radius:24px; max-width:500px; width:90%; max-height:80vh; overflow-y:auto; position:relative;">
+      <button onclick="closeModal()" style="position:absolute; top:16px; right:16px; font-size:1.5rem; background:none; border:none; cursor:pointer;">&times;</button>
+      <h3 id="modal-title" style="margin-bottom:20px; color:var(--navy)">Oylik Daromad Tarixi</h3>
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid var(--border)">Oy</th>
+            <th style="text-align:right; padding:8px; border-bottom:1px solid var(--border)">Daromad</th>
+          </tr>
+        </thead>
+        <tbody id="modal-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
   <script>
+    function closeModal() { document.getElementById('history-modal').style.display = 'none'; }
+    function showHistory(name, historyJson) {
+      const history = JSON.parse(decodeURIComponent(historyJson));
+      document.getElementById('modal-title').textContent = `${name} - Daromad Tarixi`;
+      document.getElementById('modal-tbody').innerHTML = history.map(h => `
+        <tr>
+          <td style="padding:8px; border-bottom:1px solid var(--border)">${h.month}</td>
+          <td style="padding:8px; border-bottom:1px solid var(--border); text-align:right; font-weight:600; color:var(--teal-dark)">
+            ${h.revenue.toLocaleString('uz-UZ')} so'm
+          </td>
+        </tr>
+      `).join('');
+      document.getElementById('history-modal').style.display = 'flex';
+    }
     const API = '';
     
     // Auth Check on load — verify token with server, don't just trust localStorage
@@ -461,9 +499,9 @@
     async function loadDoctors() {
       const tbodyStom = document.getElementById('doc-stomatolog-tbody');
       const tbodyLor = document.getElementById('doc-lor-tbody');
-      const loading5 = '<tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>';
-      tbodyStom.innerHTML = loading5;
-      tbodyLor.innerHTML = loading5;
+      const loadingCol = '<tr><td colspan="8" style="text-align:center">Yuklanmoqda...</td></tr>';
+      tbodyStom.innerHTML = loadingCol;
+      tbodyLor.innerHTML = loadingCol;
       try {
         const data = await apiGet('/api/admin/stats');
         if (data.success) {
@@ -477,40 +515,53 @@
               <td style="text-align:center">${d.daily}</td>
               <td style="text-align:center">${d.weekly}</td>
               <td style="text-align:center">${d.monthly}</td>
+              <td style="text-align:center; font-weight:600">${d.totalPatients}</td>
               <td style="color:var(--teal-dark);font-weight:600">${fmt(d.monthlyRevenue)}</td>
+              <td style="color:var(--navy);font-weight:600">${fmt(d.yearlyRevenue)}</td>
+              <td style="text-align:center">
+                <button onclick="showHistory('${d.firstName} ${d.lastName}', '${encodeURIComponent(JSON.stringify(d.monthlyHistory))}')" 
+                        style="color:var(--teal); font-size:1.2rem;" title="Tarix">📅</button>
+              </td>
             </tr>
           `;
 
-          tbodyStom.innerHTML = stomatologs.length ? stomatologs.map(renderRow).join('') : '<tr><td colspan="5" style="text-align:center">Shifokor topilmadi</td></tr>';
-          tbodyLor.innerHTML = lors.length ? lors.map(renderRow).join('') : '<tr><td colspan="5" style="text-align:center">Shifokor topilmadi</td></tr>';
+          tbodyStom.innerHTML = stomatologs.length ? stomatologs.map(renderRow).join('') : '<tr><td colspan="8" style="text-align:center">Shifokor topilmadi</td></tr>';
+          tbodyLor.innerHTML = lors.length ? lors.map(renderRow).join('') : '<tr><td colspan="8" style="text-align:center">Shifokor topilmadi</td></tr>';
         }
       } catch (err) {
         if(err.message !== 'Unauthorized') {
-          tbodyStom.innerHTML = '<tr><td colspan="5" style="text-align:center;color:red">Xatolik</td></tr>';
-          tbodyLor.innerHTML = '<tr><td colspan="5" style="text-align:center;color:red">Xatolik</td></tr>';
+          tbodyStom.innerHTML = '<tr><td colspan="8" style="text-align:center;color:red">Xatolik</td></tr>';
+          tbodyLor.innerHTML = '<tr><td colspan="8" style="text-align:center;color:red">Xatolik</td></tr>';
         }
       }
     }
-    // ---- Universal Phone number formatting (+998 xx-xxx-xx-xx) ----
+    // ---- Universal Phone number formatting (+998 xx xxx xx xx) ----
     function applyPhoneFormatter(input) {
-      input.addEventListener('focus', () => { if (!input.value) input.value = '+998 '; });
-      input.addEventListener('keydown', (e) => {
-        const prefix = '+998 ';
-        if ((e.key === 'Backspace' || e.key === 'Delete') && input.value.length <= prefix.length) e.preventDefault();
-      });
-      input.addEventListener('input', (e) => {
-        let digits = e.target.value.replace(/\D/g, '');
+      if (!input) return;
+      const prefix = '+998 ';
+      const formatNumber = (val) => {
+        let digits = val.replace(/\D/g, '');
         if (digits.startsWith('998')) digits = digits.slice(3);
         digits = digits.slice(0, 9);
-        let formatted = '+998 ';
-        if (digits.length > 0) formatted += digits.slice(0, 2);
-        if (digits.length > 2) formatted += '-' + digits.slice(2, 5);
-        if (digits.length > 5) formatted += '-' + digits.slice(5, 7);
-        if (digits.length > 7) formatted += '-' + digits.slice(7, 9);
-        e.target.value = formatted;
+        let res = prefix;
+        if (digits.length > 0) res += digits.slice(0, 2);
+        if (digits.length > 2) res += ' ' + digits.slice(2, 5);
+        if (digits.length > 5) res += ' ' + digits.slice(5, 7);
+        if (digits.length > 7) res += ' ' + digits.slice(7, 9);
+        return res;
+      };
+      input.addEventListener('focus', () => { if (!input.value || input.value.trim() === '') input.value = prefix; });
+      input.addEventListener('keydown', (e) => {
+        if ((e.key === 'Backspace' || e.key === 'Delete') && input.selectionStart <= prefix.length && input.selectionEnd <= prefix.length) e.preventDefault();
+        const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'];
+        if (!allowed.includes(e.key) && !/^\d$/.test(e.key) && !e.ctrlKey && !e.metaKey) e.preventDefault();
       });
-      input.addEventListener('blur', () => {
-        if (input.value.trim() === '+998') input.value = '';
+      input.addEventListener('input', (e) => { e.target.value = formatNumber(e.target.value); });
+      input.addEventListener('blur', () => { if (input.value === prefix || input.value.trim() === '+998') input.value = ''; });
+      input.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text');
+        e.target.value = formatNumber(text);
       });
     }
     document.querySelectorAll('input[type="tel"]').forEach(applyPhoneFormatter);

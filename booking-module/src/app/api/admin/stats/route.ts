@@ -26,8 +26,8 @@ export async function GET(request: NextRequest) {
   weekStart.setDate(weekStart.getDate() - 6);
   weekStart.setUTCHours(0, 0, 0, 0);
 
-  // Month: start of current calendar month
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  // Year: start of current calendar year
+  const yearStart = new Date(now.getFullYear(), 0, 1);
 
   const doctors = await prisma.doctor.findMany({
     where: { isActive: true },
@@ -38,22 +38,48 @@ export async function GET(request: NextRequest) {
   const stats = await Promise.all(doctors.map(async (doc) => {
     const base = { doctorId: doc.id };
 
-    const [daily, weekly, monthly, monthlyRevenue] = await Promise.all([
+    const [daily, weekly, monthly, totalPatients, monthlyRevenue, yearlyRevenue] = await Promise.all([
       prisma.visit.count({ where: { ...base, visitDate: { gte: todayStart } } }),
       prisma.visit.count({ where: { ...base, visitDate: { gte: weekStart } } }),
       prisma.visit.count({ where: { ...base, visitDate: { gte: monthStart } } }),
+      prisma.visit.count({ where: base }),
       prisma.visit.aggregate({
         where: { ...base, visitDate: { gte: monthStart } },
         _sum: { price: true },
       }),
+      prisma.visit.aggregate({
+        where: { ...base, visitDate: { gte: yearStart } },
+        _sum: { price: true },
+      }),
     ]);
+
+    // Monthly breakdown for last 12 months
+    const monthlyHistory = [];
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const start = new Date(d.getFullYear(), d.getMonth(), 1);
+      const end = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+      
+      const res = await prisma.visit.aggregate({
+        where: { ...base, visitDate: { gte: start, lte: end } },
+        _sum: { price: true }
+      });
+      
+      monthlyHistory.push({
+        month: d.toLocaleString('uz-UZ', { month: 'long', year: 'numeric' }),
+        revenue: res._sum.price || 0
+      });
+    }
 
     return {
       ...doc,
       daily,
       weekly,
       monthly,
+      totalPatients,
       monthlyRevenue: monthlyRevenue._sum.price || 0,
+      yearlyRevenue: yearlyRevenue._sum.price || 0,
+      monthlyHistory
     };
   }));
 
