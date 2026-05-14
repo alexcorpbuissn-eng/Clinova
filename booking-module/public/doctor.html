@@ -74,6 +74,7 @@
     .slot-btn.pending { background: #fef9c3; border: 1px dashed #ca8a04; color: #854d0e; }
     .slot-btn.booked { background: #e0f2fe; border: 1px solid #0284c7; color: #0369a1; cursor: not-allowed; }
     .slot-btn.booked span { display: block; font-size: 0.6rem; opacity: 0.8; }
+    .slot-btn.disabled { opacity: 0.4; cursor: not-allowed; background: #f1f5f9; }
 
     .grid-footer { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border-top: 1px solid var(--border); }
     .legend { display: flex; gap: 20px; font-size: 0.8rem; color: var(--text-muted); }
@@ -364,13 +365,18 @@
   }
 
   function loadData() {
-    if (!currentDoctorId) return;
     loadGrid();
     loadAppointments();
   }
 
   // ---- Grid Logic ----
   async function loadGrid() {
+    if (!currentDoctorId) {
+      allSlots = [];
+      renderGrid();
+      updateStats();
+      return;
+    }
     try {
       const res = await fetch(`/api/doctor/slots?doctorId=${currentDoctorId}`, { headers: { 'Authorization': `Bearer ${doctorToken}` } });
       const data = await res.json();
@@ -424,6 +430,12 @@
         <div class="day-col">
           ${times.map(t => {
             const key = `${iso}_${t}`;
+            
+            // Check if past
+            const [h, m] = t.split(':');
+            const slotDateTime = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Number(h), Number(m));
+            const isPast = slotDateTime < new Date();
+
             const existing = allSlots.find(s => {
               const sDate = new Date(s.startTime);
               return getLocalISO(sDate) === iso && getLocalTimeStr(sDate) === t;
@@ -438,9 +450,17 @@
             
             if (pendingChanges[key] === 'add') statusClass = 'pending';
             if (pendingChanges[key] === 'remove') statusClass = '';
+            
+            if (isPast && !existing) {
+              statusClass += ' disabled';
+            } else if (isPast && existing) {
+               statusClass += ' disabled';
+            }
+
+            const onClickAttr = isPast ? '' : `onclick="toggleSlot('${iso}', '${t}', '${existing ? existing.id : ''}', ${existing && existing.appointment ? 'true' : 'false'})"`;
 
             return `
-              <div class="grid-cell" onclick="toggleSlot('${iso}', '${t}', '${existing ? existing.id : ''}', ${existing && existing.appointment ? 'true' : 'false'})">
+              <div class="grid-cell" ${onClickAttr}>
                 <button class="slot-btn ${statusClass}">${label}</button>
               </div>
             `;
@@ -451,6 +471,10 @@
   }
 
   function toggleSlot(iso, time, existingId, isBooked) {
+    if (!currentDoctorId) {
+      alert("Iltimos, avval boshqarish uchun shifokorni tanlang!");
+      return;
+    }
     if (isBooked) return;
     const key = `${iso}_${time}`;
     const action = pendingChanges[key];
@@ -518,7 +542,11 @@
   // ---- Appointments ----
   async function loadAppointments() {
     const container = document.getElementById('appointments-container');
-    if (!currentDoctorId) return;
+    if (!currentDoctorId) {
+      container.innerHTML = '<div class="empty-state">Shifokorni tanlang...</div>';
+      return;
+    }
+    container.innerHTML = '<div class="empty-state">Yuklanmoqda...</div>';
     try {
       const res = await fetch(`/api/doctor/appointments?doctorId=${currentDoctorId}`, { headers: { 'Authorization': `Bearer ${doctorToken}` } });
       const data = await res.json();
