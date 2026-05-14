@@ -442,7 +442,7 @@
     }
   }
 
-  // ---- Universal Phone number formatting ----
+  // ---- Universal Phone number formatting (+998 xx xxx xx xx) ----
   function applyPhoneFormatter(input) {
     if (!input) return;
     const prefix = '+998 ';
@@ -460,7 +460,7 @@
     input.addEventListener('focus', () => { if (!input.value || input.value.trim() === '') input.value = prefix; });
     input.addEventListener('keydown', (e) => {
       if ((e.key === 'Backspace' || e.key === 'Delete') && input.selectionStart <= prefix.length && input.selectionEnd <= prefix.length) e.preventDefault();
-      const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'];
+      const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End', 'Enter'];
       if (!allowed.includes(e.key) && !/^\d$/.test(e.key) && !e.ctrlKey && !e.metaKey) e.preventDefault();
     });
     input.addEventListener('input', (e) => { e.target.value = formatNumber(e.target.value); });
