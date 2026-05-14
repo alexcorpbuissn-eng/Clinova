@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { signToken } from '@/lib/auth';
+import { normalisePhone } from '@/lib/telegram';
 
 // POST /api/doctor/login — Verify OTP and issue doctor JWT
 export async function POST(request: NextRequest) {
-  const { telegramPhone, code } = await request.json();
+  let { telegramPhone, code } = await request.json();
 
   if (!telegramPhone || !code) {
     return NextResponse.json({ error: 'Telefon va kod kiritilishi shart' }, { status: 400 });
   }
+
+  telegramPhone = normalisePhone(telegramPhone);
 
   // Verify OTP
   const otp = await prisma.otp.findFirst({
