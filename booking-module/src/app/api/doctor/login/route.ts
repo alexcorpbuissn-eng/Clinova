@@ -30,34 +30,38 @@ export async function POST(request: NextRequest) {
 
   await prisma.otp.update({ where: { id: otp.id }, data: { used: true } });
 
-  // Find the user (must have a doctorId linked)
+  // Find the user
   const user = await prisma.user.findFirst({
     where: { 
       telegramPhone, 
-      role: { in: ['DOCTOR', 'ADMIN', 'RECEPTION'] }, // Allow multi-role users
-      doctorId: { not: null } 
+      role: { in: ['DOCTOR', 'ADMIN', 'RECEPTION'] }
     },
   });
 
-  if (!user || !user.doctorId) {
+  if (!user) {
+    return NextResponse.json({ error: 'Sizda kirish huquqi yo\'q' }, { status: 403 });
+  }
+
+  // If role is DOCTOR or RECEPTION, they MUST have a doctorId
+  if (user.role !== 'ADMIN' && !user.doctorId) {
     return NextResponse.json({ error: 'Sizda shifokor huquqi yo\'q' }, { status: 403 });
   }
 
-  // Get doctor details
-  const doctor = await prisma.doctor.findUnique({
-    where: { id: user.doctorId },
-    select: { id: true, firstName: true, lastName: true, specialty: true },
-  });
-
-  if (!doctor) {
-    return NextResponse.json({ error: 'Shifokor topilmadi' }, { status: 404 });
+  // Get doctor details if linked
+  let doctor = null;
+  if (user.doctorId) {
+    doctor = await prisma.doctor.findUnique({
+      where: { id: user.doctorId },
+      select: { id: true, firstName: true, lastName: true, specialty: true },
+    });
   }
 
   const token = await signToken({
     userId: user.id,
-    role: 'DOCTOR',
-    doctorId: user.doctorId,
+    role: user.role,
+    doctorId: user.doctorId || 'ADMIN_GLOBAL', // Special flag for admins
   });
 
-  return NextResponse.json({ success: true, token, doctor });
+  return NextResponse.json({ success: true, token, doctor, role: user.role });
+
 }

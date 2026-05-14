@@ -2,19 +2,29 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 
-async function requireDoctor(request: NextRequest) {
+async function requireDoctorOrAdmin(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) return null;
   const payload = await verifyToken(authHeader.split(' ')[1]);
-  return payload?.role === 'DOCTOR' ? payload : null;
+  if (!payload) return null;
+  if (payload.role === 'DOCTOR' || payload.role === 'ADMIN') return payload;
+  return null;
 }
 
 // GET /api/doctor/slots — Fetch doctor's own upcoming slots
 export async function GET(request: NextRequest) {
-  const payload = await requireDoctor(request);
+  const payload = await requireDoctorOrAdmin(request);
   if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const doctorId = payload.doctorId as string;
+  let doctorId = payload.doctorId as string;
+  if (payload.role === 'ADMIN') {
+    const qDocId = request.nextUrl.searchParams.get('doctorId');
+    if (qDocId) doctorId = qDocId;
+  }
+
+  if (!doctorId || doctorId === 'ADMIN_GLOBAL') {
+    return NextResponse.json({ success: true, slots: [] });
+  }
 
   const slots = await prisma.slot.findMany({
     where: { doctorId, startTime: { gte: new Date() } },
@@ -27,11 +37,19 @@ export async function GET(request: NextRequest) {
 
 // POST /api/doctor/slots — Create one or multiple availability slots
 export async function POST(request: NextRequest) {
-  const payload = await requireDoctor(request);
+  const payload = await requireDoctorOrAdmin(request);
   if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const doctorId = payload.doctorId as string;
   const body = await request.json();
+  
+  let doctorId = payload.doctorId as string;
+  if (payload.role === 'ADMIN') {
+    if (body.doctorId) doctorId = body.doctorId;
+  }
+
+  if (!doctorId || doctorId === 'ADMIN_GLOBAL') {
+    return NextResponse.json({ error: 'Shifokor tanlanmagan' }, { status: 400 });
+  }
 
   // Support batch: { slots: [{startTime, duration}] } or single: { startTime, duration }
   const slotsToCreate: { startTime: string; duration: number }[] = body.slots || [{ startTime: body.startTime, duration: body.duration }];
@@ -63,15 +81,20 @@ export async function POST(request: NextRequest) {
 
 // DELETE /api/doctor/slots — Delete a free (unbooked) slot
 export async function DELETE(request: NextRequest) {
-  const payload = await requireDoctor(request);
+  const payload = await requireDoctorOrAdmin(request);
   if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const doctorId = payload.doctorId as string;
-  const { slotId } = await request.json();
+  const body = await request.json();
+  const { slotId } = body;
+  
+  let doctorId = payload.doctorId as string;
+  if (payload.role === 'ADMIN') {
+    if (body.doctorId) doctorId = body.doctorId;
+  }
 
   const slot = await prisma.slot.findUnique({ where: { id: slotId } });
 
-  if (!slot || slot.doctorId !== doctorId) {
+  if (!slot || (payload.role !== 'ADMIN' && slot.doctorId !== doctorId)) {
     return NextResponse.json({ error: 'Topilmadi' }, { status: 404 });
   }
 

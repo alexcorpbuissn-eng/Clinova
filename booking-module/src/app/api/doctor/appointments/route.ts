@@ -2,19 +2,30 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 
-async function requireDoctor(request: NextRequest) {
+async function requireDoctorOrAdmin(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) return null;
   const payload = await verifyToken(authHeader.split(' ')[1]);
-  return payload?.role === 'DOCTOR' ? payload : null;
+  if (!payload) return null;
+  if (payload.role === 'DOCTOR' || payload.role === 'ADMIN') return payload;
+  return null;
 }
 
 // GET /api/doctor/appointments — Upcoming appointments for authenticated doctor
 export async function GET(request: NextRequest) {
-  const payload = await requireDoctor(request);
+  const payload = await requireDoctorOrAdmin(request);
   if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const doctorId = payload.doctorId as string;
+  // If Admin, use doctorId from query params. If Doctor, use their own.
+  let doctorId = payload.doctorId as string;
+  if (payload.role === 'ADMIN') {
+    const qDocId = request.nextUrl.searchParams.get('doctorId');
+    if (qDocId) doctorId = qDocId;
+  }
+
+  if (!doctorId || doctorId === 'ADMIN_GLOBAL') {
+    return NextResponse.json({ success: true, appointments: [] }); // Or error if needed
+  }
 
   const appointments = await prisma.appointment.findMany({
     where: {

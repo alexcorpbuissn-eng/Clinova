@@ -33,6 +33,9 @@
     #app { display: none; }
     .top-bar { background: var(--navy); color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
     .top-bar-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .doctor-selector-wrap { display: none; align-items: center; gap: 10px; margin-left: 20px; }
+    .doctor-selector { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 12px; border-radius: 8px; font-family: inherit; font-size: 0.85rem; outline: none; cursor: pointer; }
+    .doctor-selector option { background: var(--navy); color: #fff; }
     .top-bar-actions { display: flex; align-items: center; gap: 14px; }
     .top-bar-date { font-size: 0.82rem; color: #94a3b8; }
     .btn-logout { background: none; border: 1px solid #334155; color: #94a3b8; padding: 6px 14px; border-radius: 8px; font-family: inherit; font-size: 0.82rem; cursor: pointer; }
@@ -157,6 +160,8 @@
 <script>
   let doctorToken = null;
   let doctorInfo = null;
+  let userRole = null;
+  let currentDoctorId = null;
   let datePicker;
   let allSlots = [];
 
@@ -187,18 +192,22 @@
     applyPhoneFormatter(document.getElementById('telegram-phone'));
     const t = localStorage.getItem('doctor_token');
     if (t) {
-      // In a real app we'd have a /api/doctor/me, but we can verify by fetching slots
       try {
-        const res = await fetch('/api/doctor/slots', { headers: { 'Authorization': `Bearer ${t}` } });
-        if (res.ok) {
+        // Use slots as a check, but we need role info too
+        const info = localStorage.getItem('doctor_info');
+        const role = localStorage.getItem('user_role');
+        if (info && role) {
           doctorToken = t;
-          const info = localStorage.getItem('doctor_info');
-          if (info) doctorInfo = JSON.parse(info);
+          doctorInfo = JSON.parse(info);
+          userRole = role;
+          currentDoctorId = doctorInfo ? doctorInfo.id : null;
           showApp();
         } else {
           localStorage.removeItem('doctor_token');
         }
-      } catch {}
+      } catch {
+        localStorage.removeItem('doctor_token');
+      }
     }
   });
 
@@ -251,8 +260,11 @@
       if (res.ok && data.success) {
         doctorToken = data.token;
         doctorInfo = data.doctor;
+        userRole = data.role;
+        currentDoctorId = data.doctor ? data.doctor.id : null;
         localStorage.setItem('doctor_token', data.token);
         localStorage.setItem('doctor_info', JSON.stringify(data.doctor));
+        localStorage.setItem('user_role', data.role);
         showApp();
       } else { errEl.textContent = data.error || 'Xatolik yuz berdi'; }
     } catch { errEl.textContent = 'Tarmoq xatosi'; }
@@ -270,23 +282,59 @@
     document.getElementById('otp-code').value = '';
   }
 
-  function showApp() {
+  async function showApp() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
+    
+    if (userRole === 'ADMIN') {
+      document.getElementById('admin-doc-selector').style.display = 'flex';
+      await loadAllDoctorsForAdmin();
+    }
+
     if (doctorInfo) {
       document.getElementById('doctor-name').textContent = `${doctorInfo.firstName} ${doctorInfo.lastName}`;
+    } else {
+      document.getElementById('doctor-name').textContent = "Admin (Shifokorni tanlang)";
     }
+    
     initDatePicker();
     updateClock();
     setInterval(updateClock, 30000);
+    if (currentDoctorId) {
+      loadSlots();
+      loadAppointments();
+    }
+  }
+
+  async function loadAllDoctorsForAdmin() {
+    try {
+      const res = await fetch('/api/public/doctors'); // Public list is enough
+      const data = await res.json();
+      if (data.success) {
+        const select = document.getElementById('doc-select');
+        select.innerHTML = '<option value="">Shifokorni tanlang...</option>' + 
+          data.doctors.map(d => `<option value="${d.id}" ${currentDoctorId === d.id ? 'selected' : ''}>${d.firstName} ${d.lastName}</option>`).join('');
+      }
+    } catch {}
+  }
+
+  function switchDoctor(id) {
+    if (!id) return;
+    currentDoctorId = id;
+    // Find name for label
+    const select = document.getElementById('doc-select');
+    const name = select.options[select.selectedIndex].text;
+    document.getElementById('doctor-name').textContent = name;
+    
     loadSlots();
     loadAppointments();
   }
 
   // ---- Data Loading & Rendering ----
   async function loadSlots() {
+    if (!currentDoctorId) return;
     try {
-      const res = await fetch('/api/doctor/slots', { headers: { 'Authorization': `Bearer ${doctorToken}` } });
+      const res = await fetch(`/api/doctor/slots?doctorId=${currentDoctorId}`, { headers: { 'Authorization': `Bearer ${doctorToken}` } });
       const data = await res.json();
       if (res.ok && data.success) {
         allSlots = data.slots;
@@ -353,10 +401,13 @@
     btn.disabled = true; btn.textContent = 'Qo\'shilmoqda...';
 
     try {
-      const res = await fetch('/api/doctor/slots', {
+      const res = await fetch(`/api/doctor/slots?doctorId=${currentDoctorId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${doctorToken}` },
-        body: JSON.stringify({ slots: [{ startTime: startTimeIso, duration: Number(duration) }] })
+        body: JSON.stringify({ 
+          doctorId: currentDoctorId,
+          slots: [{ startTime: startTimeIso, duration: Number(duration) }] 
+        })
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -385,7 +436,7 @@
       const res = await fetch('/api/doctor/slots', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${doctorToken}` },
-        body: JSON.stringify({ slotId: id })
+        body: JSON.stringify({ slotId: id, doctorId: currentDoctorId })
       });
       if (res.ok) {
         loadSlots();
@@ -399,10 +450,11 @@
   }
 
   async function loadAppointments() {
+    if (!currentDoctorId) return;
     const container = document.getElementById('appointments-container');
     container.innerHTML = '<div class="empty-state">Yuklanmoqda...</div>';
     try {
-      const res = await fetch('/api/doctor/appointments', { headers: { 'Authorization': `Bearer ${doctorToken}` } });
+      const res = await fetch(`/api/doctor/appointments?doctorId=${currentDoctorId}`, { headers: { 'Authorization': `Bearer ${doctorToken}` } });
       const data = await res.json();
       if (res.ok && data.success) {
         if (data.appointments.length === 0) {
