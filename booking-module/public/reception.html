@@ -825,26 +825,33 @@
   // ── Init ─────────────────────────────────────────────────────
   verifyAuthOnLoad();
 
-  // ---- Universal Phone number formatting (+998 xx-xxx-xx-xx) ----
+  // ---- Universal Phone number formatting (+998 xx xxx xx xx) ----
   function applyPhoneFormatter(input) {
-    input.addEventListener('focus', () => { if (!input.value) input.value = '+998 '; });
-    input.addEventListener('keydown', (e) => {
-      const prefix = '+998 ';
-      if ((e.key === 'Backspace' || e.key === 'Delete') && input.value.length <= prefix.length) e.preventDefault();
-    });
-    input.addEventListener('input', (e) => {
-      let digits = e.target.value.replace(/\D/g, '');
+    if (!input) return;
+    const prefix = '+998 ';
+    const formatNumber = (val) => {
+      let digits = val.replace(/\D/g, '');
       if (digits.startsWith('998')) digits = digits.slice(3);
       digits = digits.slice(0, 9);
-      let formatted = '+998 ';
-      if (digits.length > 0) formatted += digits.slice(0, 2);
-      if (digits.length > 2) formatted += '-' + digits.slice(2, 5);
-      if (digits.length > 5) formatted += '-' + digits.slice(5, 7);
-      if (digits.length > 7) formatted += '-' + digits.slice(7, 9);
-      e.target.value = formatted;
+      let res = prefix;
+      if (digits.length > 0) res += digits.slice(0, 2);
+      if (digits.length > 2) res += ' ' + digits.slice(2, 5);
+      if (digits.length > 5) res += ' ' + digits.slice(5, 7);
+      if (digits.length > 7) res += ' ' + digits.slice(7, 9);
+      return res;
+    };
+    input.addEventListener('focus', () => { if (!input.value || input.value.trim() === '') input.value = prefix; });
+    input.addEventListener('keydown', (e) => {
+      if ((e.key === 'Backspace' || e.key === 'Delete') && input.selectionStart <= prefix.length && input.selectionEnd <= prefix.length) e.preventDefault();
+      const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End', 'Enter'];
+      if (!allowed.includes(e.key) && !/^\d$/.test(e.key) && !e.ctrlKey && !e.metaKey) e.preventDefault();
     });
-    input.addEventListener('blur', () => {
-      if (input.value.trim() === '+998') input.value = '';
+    input.addEventListener('input', (e) => { e.target.value = formatNumber(e.target.value); });
+    input.addEventListener('blur', () => { if (input.value === prefix || input.value.trim() === '+998') input.value = ''; });
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text');
+      e.target.value = formatNumber(text);
     });
   }
   document.querySelectorAll('input[type="tel"]').forEach(applyPhoneFormatter);
