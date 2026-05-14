@@ -523,7 +523,7 @@
           doctorId: a.doctorId,
           patientName: pName,
           serviceName: a.procedure?.name || 'Ko\'rik',
-          price: 0, // Will be set on finish
+          price: a.procedure?.price || 0,
           source: 'BOOKED',
           status: 'IN_PROGRESS'
         })

@@ -122,6 +122,7 @@
       <div class="nav-item" onclick="switchTab('patients')">👥 Bemorlar</div>
       <div class="nav-item" onclick="switchTab('doctors')">👨‍⚕️ Shifokorlar</div>
       <div class="nav-item" onclick="switchTab('users')">🔑 Ruxsatlar</div>
+      <div class="nav-item" onclick="switchTab('procedures')">⚙️ Xizmatlar (Narxlar)</div>
       <div style="flex:1"></div>
       <div class="nav-item" onclick="window.open('reception.html','_blank')" style="color:#86efac">📋 Qabul Daftari</div>
       <div class="nav-item" onclick="logout()" style="color:#fca5a5">🚪 Chiqish</div>
@@ -279,6 +280,30 @@
         </div>
       </div>
 
+      <!-- PROCEDURES TAB -->
+      <div id="tab-procedures" class="tab-content" style="display:none;">
+        <div class="header">
+          <h1>Xizmatlar va Narxlar</h1>
+          <button class="btn" style="width:auto" onclick="loadProcedures()">Yangilash</button>
+        </div>
+        <div class="table-card" style="max-height: calc(100vh - 200px); overflow-y: auto;">
+          <table>
+            <thead style="position: sticky; top: 0; background: white;">
+              <tr>
+                <th>Shifokor (Soha)</th>
+                <th>Xizmat Nomi</th>
+                <th>Davomiyligi (min)</th>
+                <th>Narxi (so'm)</th>
+                <th>Amal</th>
+              </tr>
+            </thead>
+            <tbody id="proc-tbody">
+              <tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -314,6 +339,60 @@
       `).join('');
       document.getElementById('history-modal').style.display = 'flex';
     }
+
+    // ---- PROCEDURES (XIZMATLAR) ----
+    async function loadProcedures() {
+      const tbody = document.getElementById('proc-tbody');
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>';
+      try {
+        const data = await apiGet('/api/admin/procedures');
+        if (data.success) {
+          if (data.procedures.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Xizmatlar topilmadi</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data.procedures.map(p => `
+            <tr>
+              <td>Dr. ${p.doctor.firstName} ${p.doctor.lastName} <br><small style="color:var(--text-muted)">${p.doctor.specialty}</small></td>
+              <td><strong>${p.name}</strong></td>
+              <td>${p.durationMinutes} min</td>
+              <td>
+                <input type="number" id="price-${p.id}" value="${p.price}" style="padding:8px; border:1px solid var(--border); border-radius:6px; width:120px;" /> so'm
+              </td>
+              <td>
+                <button onclick="saveProcedurePrice('${p.id}')" class="btn" style="padding:8px 12px; font-size:0.8rem; width:auto;">Saqlash</button>
+              </td>
+            </tr>
+          `).join('');
+        }
+      } catch (err) {
+        if(err.message !== 'Unauthorized') tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:red">Xatolik yuz berdi</td></tr>';
+      }
+    }
+
+    async function saveProcedurePrice(id) {
+      const priceStr = document.getElementById(`price-${id}`).value;
+      const price = parseInt(priceStr, 10);
+      if (isNaN(price) || price < 0) {
+        alert("Noto'g'ri narx kiritildi!");
+        return;
+      }
+      try {
+        const res = await fetch(`/api/admin/procedures/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
+          body: JSON.stringify({ price })
+        });
+        if (res.ok) {
+          alert("Narx saqlandi!");
+        } else {
+          alert("Saqlashda xatolik!");
+        }
+      } catch (e) {
+        alert("Tarmoq xatosi!");
+      }
+    }
+
     const API = '';
     
     // Auth Check on load — verify token with server, don't just trust localStorage
@@ -430,12 +509,21 @@
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
       event.currentTarget.classList.add('active');
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      document.getElementById(`tab-${tab}`).classList.add('active');
+      
+      // Some elements have display:none initially, others rely on .active
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      
+      const contentEl = document.getElementById(`tab-${tab}`);
+      if (contentEl) {
+        contentEl.classList.add('active');
+        contentEl.style.display = 'block';
+      }
 
       if (tab === 'appointments') loadAppointments();
       if (tab === 'patients') loadPatients();
       if (tab === 'doctors') loadDoctors();
       if (tab === 'users') loadUsers();
+      if (tab === 'procedures') loadProcedures();
     }
 
     async function apiGet(endpoint) {
