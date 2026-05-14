@@ -94,29 +94,32 @@ document.addEventListener('DOMContentLoaded', () => {
   const track = document.getElementById('testimonials-track');
   const prevBtn = document.getElementById('prev-btn');
   const nextBtn = document.getElementById('next-btn');
-  const cards = track.querySelectorAll('.testimonial-card');
-  let currentIdx = 0;
+  
+  if (track && prevBtn && nextBtn) {
+    const cards = track.querySelectorAll('.testimonial-card');
+    let currentIdx = 0;
 
-  function updateCarousel() {
-    if (window.innerWidth <= 768) {
-      cards.forEach((card, i) => {
-        card.style.display = i === currentIdx ? 'block' : 'none';
-      });
-    } else {
-      cards.forEach(card => card.style.display = '');
+    function updateCarousel() {
+      if (window.innerWidth <= 768) {
+        cards.forEach((card, i) => {
+          card.style.display = i === currentIdx ? 'block' : 'none';
+        });
+      } else {
+        cards.forEach(card => card.style.display = '');
+      }
     }
-  }
 
-  nextBtn.addEventListener('click', () => {
-    currentIdx = (currentIdx + 1) % cards.length;
+    nextBtn.addEventListener('click', () => {
+      currentIdx = (currentIdx + 1) % cards.length;
+      updateCarousel();
+    });
+    prevBtn.addEventListener('click', () => {
+      currentIdx = (currentIdx - 1 + cards.length) % cards.length;
+      updateCarousel();
+    });
+    window.addEventListener('resize', updateCarousel);
     updateCarousel();
-  });
-  prevBtn.addEventListener('click', () => {
-    currentIdx = (currentIdx - 1 + cards.length) % cards.length;
-    updateCarousel();
-  });
-  window.addEventListener('resize', updateCarousel);
-  updateCarousel();
+  }
 
   // ---- Form submission ----
   const form = document.getElementById('booking-form');
