@@ -30,9 +30,13 @@ export async function POST(request: NextRequest) {
 
   await prisma.otp.update({ where: { id: otp.id }, data: { used: true } });
 
-  // Find the user with DOCTOR role
+  // Find the user (must have a doctorId linked)
   const user = await prisma.user.findFirst({
-    where: { telegramPhone, role: 'DOCTOR' },
+    where: { 
+      telegramPhone, 
+      role: { in: ['DOCTOR', 'ADMIN', 'RECEPTION'] }, // Allow multi-role users
+      doctorId: { not: null } 
+    },
   });
 
   if (!user || !user.doctorId) {

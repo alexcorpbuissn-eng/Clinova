@@ -42,3 +42,35 @@ export async function DELETE(
     return NextResponse.json({ error: 'Server xatosi' }, { status: 500 });
   }
 }
+// PATCH /api/admin/users/[id]
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  if (!await requireAdmin(request)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  try {
+    const { id } = await params;
+    const { role, doctorId } = await request.json();
+
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      return NextResponse.json({ error: 'Foydalanuvchi topilmadi' }, { status: 404 });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: {
+        role: role || user.role,
+        doctorId: doctorId !== undefined ? doctorId : user.doctorId
+      }
+    });
+
+    return NextResponse.json({ success: true, user: updatedUser });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    return NextResponse.json({ error: 'Server xatosi' }, { status: 500 });
+  }
+}

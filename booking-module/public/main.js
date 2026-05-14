@@ -287,6 +287,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const navLinksList = document.getElementById('nav-links');
   
   if (navContainer) {
+    // Prevent duplicates
+    const existingWidget = navContainer.querySelector('.nav-profile-widget');
+    if (existingWidget) existingWidget.remove();
+
     const adminToken = localStorage.getItem('admin_token');
     const receptionToken = localStorage.getItem('reception_token');
     const patientId = localStorage.getItem('patientId');

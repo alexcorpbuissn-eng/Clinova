@@ -623,6 +623,7 @@
                 <td>${u.doctorId && doctorMap[u.doctorId] ? doctorMap[u.doctorId] : (u.doctorId || '-')}</td>
                 <td>${new Date(u.createdAt).toLocaleString('uz-UZ')}</td>
                 <td>
+                  <button onclick="assignDoctor('${u.id}')" style="color:var(--teal); background:none; border:none; cursor:pointer; font-weight:600; margin-right:10px">Bog'lash</button>
                   <button onclick="deleteUser('${u.id}')" style="color:var(--red); background:none; border:none; cursor:pointer; font-weight:600">O'chirish</button>
                 </td>
               </tr>
@@ -673,6 +674,31 @@
       } catch (e) {
         errEl.textContent = 'Tarmoq xatosi';
         errEl.style.color = 'var(--red)';
+      }
+    }
+
+    async function assignDoctor(userId) {
+      const dData = await apiGet('/api/admin/doctors');
+      if (!dData.success) return;
+      
+      let msg = "Shifokorni tanlang (ID kiritiladi):\n\n";
+      dData.doctors.forEach(d => {
+        msg += `${d.id}: ${d.firstName} ${d.lastName}\n`;
+      });
+      
+      const docId = prompt(msg);
+      if (!docId) return;
+      
+      try {
+        const data = await apiPatch(`/api/admin/users/${userId}`, { doctorId: docId });
+        if (data.success) {
+          alert("Shifokor bog'landi!");
+          loadUsers();
+        } else {
+          alert(data.error || "Xatolik");
+        }
+      } catch (err) {
+        alert("Xatolik");
       }
     }
 
