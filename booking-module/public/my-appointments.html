@@ -177,12 +177,6 @@
           const m = Math.floor(timeLeftMs / 60000);
           const s = Math.floor((timeLeftMs % 60000) / 1000);
           timeText = `Bekor qilish: ${m} daq ${s} soniya`;
-        } else if (hoursUntil >= 24) {
-          canCancel = true;
-          const timeLeftMs = slotTime - 24 * 3600000 - now;
-          const h = Math.floor(timeLeftMs / 3600000);
-          const m = Math.floor((timeLeftMs % 3600000) / 60000);
-          timeText = `Bekor qilish: ${h} soat ${m} daq`;
         } else {
           timeText = "Vaqt o'tgan (Klinika bilan bog'laning)";
         }
