@@ -105,16 +105,25 @@
           <div id="doc-container"><div class="state-msg"><div class="spinner"></div>Yuklanmoqda...</div></div>
         </div>
 
-        <!-- STEP 2: Procedure + Slot (side-by-side on desktop) -->
+        <!-- STEP 2: Day + Procedure + Slot -->
         <div id="s2" style="display:none">
           <button class="nav-back" id="back12">← Orqaga</button>
-          <p class="section-label">2-qadam — Protsedura va vaqt tanlang</p>
+          <p class="section-label">2-qadam — Kun, protsedura va vaqt tanlang</p>
+          
+          <div class="step2-panel" style="margin-bottom: 20px; width: 100%; border: none; padding: 0;">
+            <div class="step2-panel-title" style="margin-bottom: 15px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              1. Kunni tanlang
+            </div>
+            <div class="slot-tabs" id="global-day-container" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; scrollbar-width: none;"></div>
+          </div>
+
           <div class="step2-split">
             <!-- Left: procedures -->
             <div class="step2-panel">
               <div class="step2-panel-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6M9 16h6M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l5 5v11a2 2 0 0 1-2 2z"/></svg>
-                Protsedura
+                2. Protsedura
               </div>
               <div id="proc-container"><div class="state-msg"><div class="spinner"></div></div></div>
             </div>
@@ -122,7 +131,7 @@
             <div class="step2-panel">
               <div class="step2-panel-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                Bo'sh vaqtlar
+                3. Bo'sh vaqtlar
               </div>
               <div class="step2-slots-wrap" id="slot-section">
                 <div class="slot-placeholder" id="slot-placeholder">
@@ -220,7 +229,7 @@
 const API = ''; // Relative path for same domain
 
 // State
-let selDoctor = null, selProc = null, selSlot = null, patientId = null;
+let selDoctor = null, selProc = null, selSlot = null, patientId = null, selDateKey = null, currentSlots = [];
 
 // Step bars
 function setStep(n) {
@@ -277,7 +286,47 @@ async function loadDoctors() {
 }
 
 // ── STEP 2: Load procedures ──────────────────────────────────────────────
+function initDays() {
+  const c = document.getElementById('global-day-container');
+  c.innerHTML = '';
+  const now = new Date();
+  for(let i=0; i<7; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+    const dateKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    
+    let label;
+    if (i===0) label = "Bugun";
+    else if (i===1) label = "Ertaga";
+    else {
+      const uzDays = ["Yakshanba", "Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba"];
+      label = `${d.getDate()} ${d.toLocaleDateString('uz-UZ', {month:'short'})}, ${uzDays[d.getDay()]}`;
+    }
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'day-btn';
+    btn.style = `padding: 10px 20px; border: 1px solid var(--border); border-radius: 20px; background: #fff; color: var(--navy); cursor: pointer; white-space: nowrap; font-family: inherit; font-weight: 500; font-size: 0.95rem; transition: all 0.2s; flex-shrink: 0;`;
+    btn.dataset.key = dateKey;
+    btn.textContent = label;
+    btn.onclick = () => {
+      document.querySelectorAll('.day-btn').forEach(b => {
+        b.style.background = '#fff'; b.style.color = 'var(--navy)';
+      });
+      btn.style.background = 'var(--teal)'; btn.style.color = '#fff';
+      selDateKey = dateKey;
+      if (selProc) renderSlotsForSelectedDay();
+    };
+    c.appendChild(btn);
+
+    if (i===0) {
+      btn.style.background = 'var(--teal)'; btn.style.color = '#fff';
+      selDateKey = dateKey;
+    }
+  }
+}
+
 async function loadProcedures(doctorId) {
+  initDays();
   const c = document.getElementById('proc-container');
   c.innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
   // Reset slot panel to placeholder
@@ -315,73 +364,49 @@ async function loadSlots(doctorId, procedureId) {
   sc.innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
   try {
     const {slots} = await fetch(`${API}/api/public/doctors/${doctorId}/slots?procedureId=${procedureId}`).then(r=>r.json());
-    if (!slots?.length) { sc.innerHTML=`<div class="state-msg">Bu protsedura uchun bo'sh vaqt yo'q.</div>`; return; }
-    
-    function getTabLabel(dateObj) {
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-      const tmrw = today + 86400000;
-      const dTime = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()).getTime();
-      if (dTime === today) return "Bugun";
-      if (dTime === tmrw) return "Ertaga";
-      const uzDays = ["Yakshanba", "Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba"];
-      return `${dateObj.getDate()} ${dateObj.toLocaleDateString('uz-UZ', {month:'short'})}, ${uzDays[dateObj.getDay()]}`;
-    }
-
-    const grouped = {};
-    slots.forEach(s => {
-      const d = new Date(s.startTime);
-      const dateKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-      if (!grouped[dateKey]) grouped[dateKey] = { label: getTabLabel(d), slots: [] };
-      grouped[dateKey].slots.push(s);
-    });
-    const dateKeys = Object.keys(grouped).sort();
-
-    const wrap = document.createElement('div');
-    const tabList = document.createElement('div');
-    tabList.className = 'slot-tabs';
-    tabList.style = 'display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; margin-bottom:15px; scrollbar-width: none;';
-    
-    const slotArea = document.createElement('div');
-    let activeKey = dateKeys[0];
-
-    function renderActiveTab() {
-      tabList.innerHTML = '';
-      dateKeys.forEach(k => {
-        const tb = document.createElement('button');
-        tb.type = 'button';
-        tb.style = `padding: 8px 16px; border: 1px solid var(--border); border-radius: 20px; background: ${k === activeKey ? 'var(--teal)' : '#fff'}; color: ${k === activeKey ? '#fff' : 'var(--navy)'}; cursor: pointer; white-space: nowrap; font-family: inherit; font-weight: 500; font-size: 0.9rem; transition: all 0.2s;`;
-        tb.textContent = grouped[k].label;
-        tb.onclick = () => { activeKey = k; renderActiveTab(); };
-        tabList.appendChild(tb);
-      });
-      
-      slotArea.innerHTML = '';
-      const g = document.createElement('div'); g.className='slot-grid';
-      grouped[activeKey].slots.forEach(s => {
-        const btn = document.createElement('button'); btn.type='button'; btn.className='slot-btn';
-        if (selSlot && selSlot.id === s.id) btn.classList.add('sel');
-        btn.innerHTML=`<strong>${fmtTime(s.startTime)}</strong><br><small style="color:#64748b">${fmtDate(s.startTime)}</small><br><small style="color:#94a3b8">→ ${fmtTime(s.endTime)}</small>`;
-        btn.onclick = () => { 
-          document.querySelectorAll('.slot-btn').forEach(x=>x.classList.remove('sel')); 
-          btn.classList.add('sel'); 
-          selSlot=s; 
-          setTimeout(() => { 
-            document.getElementById('summary3').innerHTML=`🩺 Dr. ${selDoctor.firstName} ${selDoctor.lastName} &nbsp;|&nbsp; ${selProc.name} &nbsp;|&nbsp; ${fmtDate(selSlot.startTime)}, ${fmtTime(selSlot.startTime)}`; 
-            setStep(3); 
-          }, 300); 
-        };
-        g.appendChild(btn);
-      });
-      slotArea.appendChild(g);
-    }
-
-    wrap.appendChild(tabList);
-    wrap.appendChild(slotArea);
-    
-    renderActiveTab();
-    sc.innerHTML=''; sc.appendChild(wrap);
+    currentSlots = slots || [];
+    renderSlotsForSelectedDay();
   } catch(e) { sc.innerHTML='<div class="state-msg">❌ Xatolik.</div>'; }
+}
+
+function renderSlotsForSelectedDay() {
+  const sc = document.getElementById('slot-container');
+  sc.innerHTML = '';
+  
+  if (!currentSlots || currentSlots.length === 0) {
+    sc.innerHTML = `<div class="state-msg">Yaqin kunlarda bo'sh vaqt yo'q.</div>`;
+    return;
+  }
+
+  // Filter slots by selDateKey
+  const daySlots = currentSlots.filter(s => {
+    const d = new Date(s.startTime);
+    const dateKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    return dateKey === selDateKey;
+  });
+
+  if (daySlots.length === 0) {
+    sc.innerHTML = `<div class="state-msg">Tanlangan kunda bo'sh vaqt yo'q. Boshqa kunni tanlang.</div>`;
+    return;
+  }
+
+  const g = document.createElement('div'); g.className='slot-grid';
+  daySlots.forEach(s => {
+    const btn = document.createElement('button'); btn.type='button'; btn.className='slot-btn';
+    if (selSlot && selSlot.id === s.id) btn.classList.add('sel');
+    btn.innerHTML=`<strong>${fmtTime(s.startTime)}</strong><br><small style="color:#64748b">${fmtDate(s.startTime)}</small><br><small style="color:#94a3b8">→ ${fmtTime(s.endTime)}</small>`;
+    btn.onclick = () => { 
+      document.querySelectorAll('.slot-btn').forEach(x=>x.classList.remove('sel')); 
+      btn.classList.add('sel'); 
+      selSlot=s; 
+      setTimeout(() => { 
+        document.getElementById('summary3').innerHTML=`🩺 Dr. ${selDoctor.firstName} ${selDoctor.lastName} &nbsp;|&nbsp; ${selProc.name} &nbsp;|&nbsp; ${fmtDate(selSlot.startTime)}, ${fmtTime(selSlot.startTime)}`; 
+        setStep(3); 
+      }, 300); 
+    };
+    g.appendChild(btn);
+  });
+  sc.appendChild(g);
 }
 
 // ── STEP 3: Patient form & Submit ─────────────────────────────────────────
