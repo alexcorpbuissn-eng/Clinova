@@ -14,7 +14,7 @@ export async function DELETE(
   const token = authHeader.split(' ')[1];
   const payload = await verifyToken(token);
 
-  if (!payload || payload.role !== 'ADMIN') {
+  if (!payload || (payload.role !== 'ADMIN' && payload.role !== 'RECEPTION')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -62,7 +62,7 @@ export async function PATCH(
   const token = authHeader.split(' ')[1];
   const payload = await verifyToken(token);
 
-  if (!payload || payload.role !== 'ADMIN') {
+  if (!payload || (payload.role !== 'ADMIN' && payload.role !== 'RECEPTION')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

@@ -103,6 +103,18 @@
     
     .btn-save-payment { width: 100%; background: var(--teal); color: #fff; padding: 14px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 1rem; }
     .btn-save-payment:hover { background: var(--teal-dark); }
+
+    /* Tabs */
+    .tabs-header { display: flex; gap: 10px; margin-bottom: 5px; }
+    .tab-btn { background: #e2e8f0; border: none; padding: 10px 20px; border-radius: 12px 12px 0 0; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--text-muted); }
+    .tab-btn.active { background: var(--surface); color: var(--navy); border: 1px solid var(--border); border-bottom: none; position: relative; z-index: 1; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+    
+    .btn-action { padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.2s; }
+    .btn-action:hover { opacity: 0.8; }
+    .btn-start { background: var(--teal); color: #fff; }
+    .btn-cancel { background: var(--red-bg); color: var(--red); }
   </style>
 </head>
 <body>
@@ -202,25 +214,49 @@
       <div class="err-form" id="err-form"></div>
     </div>
 
-    <!-- Right side: Active and Recent -->
-    <div style="display: flex; flex-direction: column; gap: 28px;">
+    <!-- Right side: Tabs for Qabullar, Active and History -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
       
-      <!-- Active Treatments -->
-      <div id="active-treatments-section" style="display: none;">
-        <h2 style="font-size: 1.05rem; color: var(--navy); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">⚡ Hozirgi muolajalar</h2>
-        <div class="active-visits" id="active-visits-container">
-          <!-- Cards injected here -->
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchMainTab('tab-qabullar')">📅 Qabullar</button>
+        <button class="tab-btn" onclick="switchMainTab('tab-active')">⚡ Hozirgi muolajalar</button>
+        <button class="tab-btn" onclick="switchMainTab('tab-history')">🕐 Tarix</button>
+      </div>
+
+      <!-- Tab 1: Scheduled Appointments -->
+      <div id="tab-qabullar" class="tab-pane active">
+        <div class="visits-card">
+          <div class="visits-header">
+            <h2>📅 Bugungi Qabullar</h2>
+            <button class="btn-refresh" onclick="loadAppointments()">Yangilash</button>
+          </div>
+          <div id="appointments-container">
+            <div class="empty-state">Yuklanmoqda...</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Tab 2: Active Treatments -->
+      <div id="tab-active" class="tab-pane">
+        <div id="active-treatments-section">
+          <h2 style="font-size: 1.05rem; color: var(--navy); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">⚡ Hozirgi muolajalar</h2>
+          <div class="active-visits" id="active-visits-container">
+            <!-- Cards injected here -->
+          </div>
+          <div id="active-empty" class="empty-state" style="display:none">Ayni damda muolajalar yo'q.</div>
         </div>
       </div>
 
-      <!-- Recent Visits -->
-      <div class="visits-card">
-        <div class="visits-header">
-          <h2>🕐 So'nggi tashriflar</h2>
-          <button class="btn-refresh" onclick="loadVisits()">Yangilash</button>
-        </div>
-        <div id="visits-container">
-          <div class="empty-state">Yuklanmoqda...</div>
+      <!-- Tab 3: Recent Visits -->
+      <div id="tab-history" class="tab-pane">
+        <div class="visits-card">
+          <div class="visits-header">
+            <h2>🕐 So'nggi tashriflar</h2>
+            <button class="btn-refresh" onclick="loadVisits()">Yangilash</button>
+          </div>
+          <div id="visits-container">
+            <div class="empty-state">Yuklanmoqda...</div>
+          </div>
         </div>
       </div>
     </div>
@@ -382,8 +418,114 @@
     updateClock();
     setInterval(updateClock, 30000);
     await loadDoctors();
+    await loadAppointments();
     await loadActiveVisits();
     await loadVisits();
+  }
+
+  // ── Tabs ──────────────────────────────────────────────────────
+  function switchMainTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    
+    document.querySelector(`.tab-btn[onclick*="${tabId}"]`).classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+    
+    if (tabId === 'tab-qabullar') loadAppointments();
+    if (tabId === 'tab-active') loadActiveVisits();
+    if (tabId === 'tab-history') loadVisits();
+  }
+
+  // ── Load Appointments ─────────────────────────────────────────
+  async function loadAppointments() {
+    const container = document.getElementById('appointments-container');
+    try {
+      const res = await fetch('/api/admin/appointments', { headers: { 'Authorization': `Bearer ${adminToken}` } });
+      const data = await res.json();
+      if (!data.success) return;
+
+      const upcoming = data.appointments.filter(a => a.status === 'SCHEDULED');
+      if (upcoming.length === 0) {
+        container.innerHTML = '<div class="empty-state">Bugun uchun qabullar yo\'q.</div>';
+        return;
+      }
+
+      const tbody = upcoming.map(a => {
+        const date = new Date(a.slot.startTime).toLocaleDateString('uz-UZ', { day:'numeric', month:'short' });
+        const time = new Date(a.slot.startTime).toLocaleTimeString('uz-UZ', { hour:'2-digit', minute:'2-digit' });
+        const pName = a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : (a.patientFirst ? `${a.patientFirst} ${a.patientLast}` : 'Noma\'lum');
+        
+        return `<tr>
+          <td><strong>${pName}</strong></td>
+          <td><div style="font-size:0.8rem">Dr. ${a.doctor.lastName}<br><span style="color:var(--text-muted)">${a.procedure?.name || 'Ko\'rik'}</span></div></td>
+          <td><div style="font-size:0.8rem"><strong>${date}</strong><br>${time}</div></td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <button class="btn-action btn-start" onclick="startAppointment('${a.id}')">Boshlash</button>
+              <button class="btn-action btn-cancel" onclick="deleteAppt('${a.id}')">Bekor</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+
+      container.innerHTML = `<table>
+        <thead><tr><th>Bemor</th><th>Shifokor / Xizmat</th><th>Sana / Vaqt</th><th>Amal</th></tr></thead>
+        <tbody>${tbody}</tbody>
+      </table>`;
+    } catch {
+      container.innerHTML = '<div class="empty-state" style="color:red;">Xatolik yuz berdi.</div>';
+    }
+  }
+
+  async function deleteAppt(id) {
+    if (!confirm("Haqiqatan ham bu qabulni bekor qilmoqchimisiz?")) return;
+    try {
+      const res = await fetch(`/api/admin/appointments/${id}`, { 
+        method: 'DELETE', 
+        headers: { 'Authorization': `Bearer ${adminToken}` } 
+      });
+      if (res.ok) loadAppointments();
+    } catch {}
+  }
+
+  async function startAppointment(id) {
+    // 1. Get appt details
+    try {
+      const resAll = await fetch('/api/admin/appointments', { headers: { 'Authorization': `Bearer ${adminToken}` } });
+      const dataAll = await resAll.json();
+      const a = dataAll.appointments.find(x => x.id === id);
+      if (!a) return;
+
+      const pName = a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : (a.patientFirst ? `${a.patientFirst} ${a.patientLast}` : 'Bemor');
+      
+      // 2. Create IN_PROGRESS visit
+      const vRes = await fetch('/api/admin/visits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+        body: JSON.stringify({
+          doctorId: a.doctorId,
+          patientName: pName,
+          serviceName: a.procedure?.name || 'Ko\'rik',
+          price: 0, // Will be set on finish
+          source: 'BOOKED',
+          status: 'IN_PROGRESS'
+        })
+      });
+
+      if (vRes.ok) {
+        // 3. Mark appointment as COMPLETED
+        await fetch(`/api/admin/appointments/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ action: 'ATTEND' })
+        });
+        
+        switchMainTab('tab-active');
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Xatolik yuz berdi");
+    }
   }
 
   // ── Source toggle ─────────────────────────────────────────────
