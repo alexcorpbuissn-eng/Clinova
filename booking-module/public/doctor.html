@@ -437,8 +437,9 @@
             const isPast = slotDateTime < new Date();
 
             const existing = allSlots.find(s => {
-              const sDate = new Date(s.startTime);
-              return getLocalISO(sDate) === iso && getLocalTimeStr(sDate) === t;
+              const sStart = new Date(s.startTime);
+              const sEnd = new Date(sStart.getTime() + s.duration * 60000);
+              return slotDateTime >= sStart && slotDateTime < sEnd;
             });
             
             let statusClass = '';
@@ -480,8 +481,12 @@
     const action = pendingChanges[key];
 
     const existing = allSlots.find(s => {
-      const sDate = new Date(s.startTime);
-      return getLocalISO(sDate) === iso && getLocalTimeStr(sDate) === time;
+      const sStart = new Date(s.startTime);
+      const sEnd = new Date(sStart.getTime() + s.duration * 60000);
+      const [h, m] = time.split(':');
+      const [yr, mo, dy] = iso.split('-');
+      const slotDateTime = new Date(yr, mo - 1, dy, h, m);
+      return slotDateTime >= sStart && slotDateTime < sEnd;
     });
 
     if (existing) {
@@ -509,14 +514,26 @@
         toCreate.push({ startTime: dt.toISOString(), duration: INTERVAL });
       } else if (action === 'remove') {
         const existing = allSlots.find(s => {
-          const sDate = new Date(s.startTime);
-          return getLocalISO(sDate) === iso && getLocalTimeStr(sDate) === time;
+          const sStart = new Date(s.startTime);
+          const sEnd = new Date(sStart.getTime() + s.duration * 60000);
+          return dt >= sStart && dt < sEnd;
         });
-        if (existing) toDelete.push(existing.id);
+        if (existing && !toDelete.includes(existing.id)) toDelete.push(existing.id);
       }
     }
 
-    if (!toCreate.length && !toDelete.length) return;
+    toCreate.sort((a,b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+    const mergedCreate = [];
+    for (const slot of toCreate) {
+      const prev = mergedCreate[mergedCreate.length - 1];
+      if (prev && new Date(prev.startTime).getTime() + prev.duration * 60000 === new Date(slot.startTime).getTime()) {
+        prev.duration += INTERVAL;
+      } else {
+        mergedCreate.push({...slot});
+      }
+    }
+
+    if (!mergedCreate.length && !toDelete.length) return;
     btn.disabled = true; btn.textContent = 'Saqlanmoqda...';
 
     try {
@@ -526,10 +543,10 @@
           body: JSON.stringify({ slotId: id, doctorId: currentDoctorId })
         });
       }
-      if (toCreate.length) {
+      if (mergedCreate.length) {
         await fetch('/api/doctor/slots', {
           method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${doctorToken}` },
-          body: JSON.stringify({ doctorId: currentDoctorId, slots: toCreate })
+          body: JSON.stringify({ doctorId: currentDoctorId, slots: mergedCreate })
         });
       }
       pendingChanges = {};

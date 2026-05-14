@@ -317,11 +317,6 @@ function initDays() {
       if (selProc) renderSlotsForSelectedDay();
     };
     c.appendChild(btn);
-
-    if (i===0) {
-      btn.style.background = 'var(--teal)'; btn.style.color = '#fff';
-      selDateKey = dateKey;
-    }
   }
 }
 
@@ -341,11 +336,14 @@ async function loadProcedures(doctorId) {
       const btn = document.createElement('button'); btn.type='button'; btn.className='proc-btn';
       btn.innerHTML=`<strong>${p.name}</strong><span>⏱ ${p.durationMinutes} daqiqa</span>`;
       btn.onclick = () => {
+        if (!selDateKey) {
+          alert('Iltimos, yuqoridan qabul kunini tanlang.');
+          return;
+        }
         document.querySelectorAll('.proc-btn').forEach(x=>x.classList.remove('sel'));
         btn.classList.add('sel');
         selProc=p;
         loadSlots(doctorId, p.id);
-        // On mobile, smoothly scroll down to slots panel
         if (window.innerWidth <= 700) {
           document.getElementById('slot-section').scrollIntoView({ behavior:'smooth', block:'start' });
         }
