@@ -61,6 +61,11 @@
       .proc-list{max-height:none;}
       .step2-slots-wrap{min-height:unset;}
     }
+
+    .toast-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 9999; align-items: center; pointer-events: none; }
+    .toast { background: var(--navy); color: #fff; padding: 12px 24px; border-radius: 12px; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2), 0 8px 10px -6px rgba(0,0,0,0.1); transform: translateY(20px) scale(0.9); opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .toast.show { transform: translateY(0) scale(1); opacity: 1; }
+    .toast-icon { flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; background: rgba(255,255,255,0.15); border-radius: 50%; font-weight: bold; color: #fff; }
   </style>
 </head>
 <body class="bg-light">
@@ -257,6 +262,25 @@ function fmtDate(utcStr) {
   return new Date(utcStr).toLocaleDateString('uz-UZ',{day:'numeric',month:'long',year:'numeric',timeZone:'Asia/Tashkent'});
 }
 
+function showToast(msg) {
+  let c = document.getElementById('toast-container');
+  if (!c) {
+    c = document.createElement('div');
+    c.id = 'toast-container';
+    c.className = 'toast-container';
+    document.body.appendChild(c);
+  }
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<div class="toast-icon">!</div><div>${msg}</div>`;
+  c.appendChild(t);
+  setTimeout(() => t.classList.add('show'), 10);
+  setTimeout(() => {
+    t.classList.remove('show');
+    setTimeout(() => t.remove(), 400);
+  }, 3500);
+}
+
 // ── Auth Check ───────────────────────────────────────────────────────────
 if (!localStorage.getItem('patientId')) {
   window.location.href = 'login.html?return=booking.html';
@@ -337,7 +361,7 @@ async function loadProcedures(doctorId) {
       btn.innerHTML=`<strong>${p.name}</strong><span>⏱ ${p.durationMinutes} daqiqa</span>`;
       btn.onclick = () => {
         if (!selDateKey) {
-          alert('Iltimos, yuqoridan qabul kunini tanlang.');
+          showToast('Iltimos, yuqoridan qabul kunini tanlang.');
           return;
         }
         document.querySelectorAll('.proc-btn').forEach(x=>x.classList.remove('sel'));

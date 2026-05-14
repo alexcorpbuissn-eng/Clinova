@@ -461,7 +461,7 @@
           <td><div style="font-size:0.8rem"><strong>${date}</strong><br>${time}</div></td>
           <td>
             <div style="display:flex;gap:6px">
-              <button class="btn-action btn-start" onclick="startAppointment('${a.id}')">Boshlash</button>
+              <button class="btn-action btn-start" onclick="startAppointment('${a.id}', this)">Boshlash</button>
               <button class="btn-action btn-cancel" onclick="deleteAppt('${a.id}')">Bekor</button>
             </div>
           </td>
@@ -488,13 +488,30 @@
     } catch {}
   }
 
-  async function startAppointment(id) {
+  async function startAppointment(id, btnElement) {
+    if (btnElement) {
+      btnElement.disabled = true;
+      btnElement.textContent = '...';
+    }
     // 1. Get appt details
     try {
       const resAll = await fetch('/api/admin/appointments', { headers: { 'Authorization': `Bearer ${adminToken}` } });
       const dataAll = await resAll.json();
       const a = dataAll.appointments.find(x => x.id === id);
       if (!a) return;
+
+      const apptDate = new Date(a.slot.startTime);
+      const today = new Date();
+      if (apptDate.getFullYear() !== today.getFullYear() || 
+          apptDate.getMonth() !== today.getMonth() || 
+          apptDate.getDate() !== today.getDate()) {
+        alert("Faqat bugungi qabullarni boshlash mumkin!");
+        if (btnElement) {
+          btnElement.disabled = false;
+          btnElement.textContent = 'Boshlash';
+        }
+        return;
+      }
 
       const pName = a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : (a.patientFirst ? `${a.patientFirst} ${a.patientLast}` : 'Bemor');
       
@@ -525,6 +542,10 @@
     } catch (e) {
       console.error(e);
       alert("Xatolik yuz berdi");
+      if (btnElement) {
+        btnElement.disabled = false;
+        btnElement.textContent = 'Boshlash';
+      }
     }
   }
 
