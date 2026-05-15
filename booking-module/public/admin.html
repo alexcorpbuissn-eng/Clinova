@@ -563,8 +563,10 @@
             return;
           }
           tbody.innerHTML = data.appointments.map(a => {
-            const date = new Date(a.slot.startTime).toLocaleDateString('uz-UZ', { day:'numeric', month:'long' });
-            const time = new Date(a.slot.startTime).toLocaleTimeString('uz-UZ', { hour:'2-digit', minute:'2-digit' });
+            const _d = new Date(a.slot.startTime);
+            const uzMonths = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun', 'Iyul', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
+            const date = `${_d.getDate()}-${uzMonths[_d.getMonth()]}`;
+            const time = _d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', timeZone: 'Asia/Tashkent' });
             const pName = a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : (a.patientFirst ? `${a.patientFirst} ${a.patientLast}` : 'Noma\'lum');
             const pPhone = a.patient ? a.patient.phone : a.patientPhone;
             

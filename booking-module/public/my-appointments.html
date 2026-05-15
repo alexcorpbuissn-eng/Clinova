@@ -73,10 +73,12 @@
   }
 
   function fmtTime(utcStr) {
-    return new Date(utcStr).toLocaleTimeString('uz-UZ',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Tashkent'});
+    return new Date(utcStr).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Tashkent'});
   }
   function fmtDate(utcStr) {
-    return new Date(utcStr).toLocaleDateString('uz-UZ',{day:'numeric',month:'long',year:'numeric',timeZone:'Asia/Tashkent'});
+    const _d = new Date(utcStr);
+    const _uzMonths = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'];
+    return `${_d.getDate()}-${_uzMonths[_d.getMonth()]} ${_d.getFullYear()}`;
   }
 
   async function fetchAppts() {

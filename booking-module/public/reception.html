@@ -813,9 +813,10 @@
       }
 
       const tbody = history.map(v => {
-        const start = new Date(v.startTime).toLocaleString('uz-UZ', {
-          day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent'
-        });
+        const _d = new Date(v.startTime);
+        const uzMonths = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun', 'Iyul', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
+        const timeStr = _d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', timeZone: 'Asia/Tashkent' });
+        const start = `${_d.getDate()} ${uzMonths[_d.getMonth()]} ${timeStr}`;
         const isFullPaid = v.paidAmount >= v.price;
         const paymentStatus = isFullPaid 
           ? `<span style="color:var(--green)">✅ ${v.price.toLocaleString()}</span>`

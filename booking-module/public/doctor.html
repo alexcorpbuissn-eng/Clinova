@@ -574,8 +574,9 @@
         }
         container.innerHTML = data.appointments.map(a => {
           const st = new Date(a.slot.startTime);
-          const dateStr = st.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'long' });
-          const timeStr = st.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
+          const _uzMonths = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun', 'Iyul', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
+          const dateStr = `${st.getDate()} ${_uzMonths[st.getMonth()]}`;
+          const timeStr = st.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent' });
           const pName = a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : 'Noma\'lum';
           return `
             <div class="appt-card">
