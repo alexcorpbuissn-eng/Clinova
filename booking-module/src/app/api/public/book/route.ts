@@ -21,7 +21,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { v4 as uuidv4 } from 'uuid';
-import { sendGroupNotification } from '@/lib/telegram';
+import { sendGroupNotification, sendPatientConfirmation } from '@/lib/telegram';
 
 export async function POST(req: NextRequest) {
   let body: any;
@@ -147,6 +147,16 @@ export async function POST(req: NextRequest) {
       description: result.description,
       telegramChatId: patient.telegramChatId,
     }).catch(console.error);
+
+    // Notify patient — fire and forget
+    if (patient.telegramChatId) {
+      sendPatientConfirmation({
+        chatId: patient.telegramChatId,
+        doctorName: `${result.doctor.firstName} ${result.doctor.lastName}`,
+        procedureName: result.procedure.name,
+        appointmentTime: result.slot.startTime,
+      }).catch(console.error);
+    }
 
     return NextResponse.json({
       success: true,

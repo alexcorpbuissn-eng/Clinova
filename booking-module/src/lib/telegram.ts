@@ -244,3 +244,37 @@ export async function sendGroupNotification(
     return false;
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// JOB 4 — PATIENT CONFIRMATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface ConfirmationPayload {
+  chatId: string;
+  doctorName: string;
+  procedureName: string;
+  appointmentTime: Date; // UTC
+}
+
+export async function sendPatientConfirmation(payload: ConfirmationPayload): Promise<boolean> {
+  const bot = getBot();
+  const date = toTashkentDate(payload.appointmentTime);
+  const time = toTashkentTime(payload.appointmentTime);
+
+  const text =
+    `✅ *Qabulingiz muvaffaqiyatli band qilindi!*\n\n` +
+    `👨‍⚕️ Shifokor: *Dr. ${payload.doctorName}*\n` +
+    `🦷 Protsedura: *${payload.procedureName}*\n` +
+    `📅 Sana: *${date}*\n` +
+    `🕐 Vaqt: *${time}*\n\n` +
+    `🏥 Klinika: *Habibullo-Hilola*\n` +
+    `Iltimos, belgilangan vaqtdan 10 daqiqa oldin kelishni unutmang.`;
+
+  try {
+    await bot.sendMessage(payload.chatId, text, { parse_mode: 'Markdown' });
+    return true;
+  } catch (err) {
+    console.error('[Telegram] sendPatientConfirmation error:', err);
+    return false;
+  }
+}

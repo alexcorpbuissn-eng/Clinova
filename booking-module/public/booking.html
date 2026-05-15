@@ -13,12 +13,18 @@
     .section-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--teal-dark);margin-bottom:14px}
     .nav-back{background:none;border:none;color:var(--teal-dark);font-size:.85rem;cursor:pointer;padding:0;margin-bottom:18px;display:inline-flex;align-items:center;gap:5px;font-family:inherit;font-weight:500}
     .nav-back:hover{text-decoration:underline}
-    .doctor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
-    .doc-card{border:2px solid var(--border);border-radius:16px;padding:18px 14px;text-align:center;cursor:pointer;transition:all .2s;background:#fff}
-    .doc-card:hover,.doc-card.sel{border-color:var(--teal);background:var(--teal-light)}
-    .doc-card img{width:64px;height:64px;object-fit:cover;border-radius:50%;margin-bottom:10px;background:#e5e7eb}
-    .doc-card h3{font-size:.9rem;color:var(--navy);margin:0 0 3px}
-    .doc-card p{font-size:.75rem;color:var(--teal-dark);font-weight:600;margin:0}
+    .doctor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+    .doc-card{border:2px solid var(--border);border-radius:18px;overflow:hidden;cursor:pointer;transition:all .25s;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,0.06)}
+    .doc-card:hover{border-color:var(--teal);box-shadow:0 6px 24px rgba(75,203,186,0.18);transform:translateY(-3px)}
+    .doc-card.sel{border-color:var(--teal);box-shadow:0 6px 24px rgba(75,203,186,0.25);transform:translateY(-2px)}
+    .doc-card-img{width:100%;aspect-ratio:3/4;object-fit:cover;object-position:top center;display:block;background:#e5f6f4}
+    .doc-card-body{padding:14px 12px;text-align:center;}
+    .doc-card-name{font-size:.92rem;font-weight:700;color:var(--navy);margin:0 0 4px;line-height:1.3}
+    .doc-card-spec{font-size:.75rem;color:var(--teal-dark);font-weight:600;margin:0;background:var(--teal-light);display:inline-block;padding:2px 10px;border-radius:20px}
+    .doc-card.sel .doc-card-body{background:var(--teal-light);}
+    .doc-card-check{display:none;position:absolute;top:10px;right:10px;width:26px;height:26px;background:var(--teal);border-radius:50%;align-items:center;justify-content:center;color:#fff;font-size:14px;}
+    .doc-card{position:relative;}
+    .doc-card.sel .doc-card-check{display:flex;}
 
     /* Step 2: two-panel layout on desktop */
     .step2-split{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
@@ -302,8 +308,19 @@ async function loadDoctors() {
     const g = document.createElement('div'); g.className='doctor-grid';
     doctors.forEach(d => {
       const card = document.createElement('div'); card.className='doc-card';
-      const avatar = d.photoUrl || `https://ui-avatars.com/api/?name=${d.firstName}+${d.lastName}&background=4bcbba&color=fff`;
-      card.innerHTML=`<img src="${avatar}" alt="${d.firstName}"/><h3>Dr. ${d.firstName} ${d.lastName}</h3><p>${d.specialty}</p>`;
+      const avatar = d.photoUrl || `https://ui-avatars.com/api/?name=${d.firstName}+${d.lastName}&background=4bcbba&color=fff&size=300`;
+      const isPhoto = !!d.photoUrl;
+      card.innerHTML=`
+        <div class="doc-card-check">✓</div>
+        ${isPhoto
+          ? `<img class="doc-card-img" src="${avatar}" alt="Dr. ${d.firstName} ${d.lastName}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+             <div style="display:none;width:100%;aspect-ratio:3/4;background:var(--teal-light);align-items:center;justify-content:center;font-size:2.5rem;font-weight:700;color:var(--teal-dark);">${d.firstName[0]}${d.lastName[0]}</div>`
+          : `<div style="width:100%;aspect-ratio:3/4;background:linear-gradient(135deg,#e0f7f5,#b2ebe4);display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:700;color:var(--teal-dark);">${d.firstName[0]}${d.lastName[0]}</div>`
+        }
+        <div class="doc-card-body">
+          <div class="doc-card-name">Dr. ${d.firstName} ${d.lastName}</div>
+          <div class="doc-card-spec">${d.specialty}</div>
+        </div>`;
       card.onclick = () => { document.querySelectorAll('.doc-card').forEach(x=>x.classList.remove('sel')); card.classList.add('sel'); selDoctor=d; loadProcedures(d.id); setStep(2); };
       g.appendChild(card);
     });
