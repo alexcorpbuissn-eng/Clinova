@@ -256,10 +256,12 @@ function err(id, msg) {
 function clearErr(id) { document.getElementById(id).classList.remove('on'); }
 
 function fmtTime(utcStr) {
-  return new Date(utcStr).toLocaleTimeString('uz-UZ',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Tashkent'});
+  return new Date(utcStr).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Tashkent'});
 }
 function fmtDate(utcStr) {
-  return new Date(utcStr).toLocaleDateString('uz-UZ',{day:'numeric',month:'long',year:'numeric',timeZone:'Asia/Tashkent'});
+  const _d = new Date(utcStr);
+  const _uzMonths = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'];
+  return `${_d.getDate()}-${_uzMonths[_d.getMonth()]} ${_d.getFullYear()}`;
 }
 
 function showToast(msg) {
@@ -323,7 +325,8 @@ function initDays() {
     else if (i===1) label = "Ertaga";
     else {
       const uzDays = ["Yakshanba", "Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba"];
-      label = `${d.getDate()} ${d.toLocaleDateString('uz-UZ', {month:'short'})}, ${uzDays[d.getDay()]}`;
+      const uzMonthsShort = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun', 'Iyul', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
+      label = `${d.getDate()} ${uzMonthsShort[d.getMonth()]}, ${uzDays[d.getDay()]}`;
     }
 
     const btn = document.createElement('button');
