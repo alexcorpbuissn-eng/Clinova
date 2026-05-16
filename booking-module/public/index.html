@@ -131,17 +131,17 @@
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600;1,700&family=DM+Sans:wght@300;400;500&display=swap');
       :root{--teal:#00b4a6;--teal2:#009688;--teal-lt:#e6f7f6;--dark:#0f1f2e;--body:#4a5568;--light:#f8fafb;--white:#ffffff;--border:#e2eaed;}
-      .ms2-section{width:100%;max-width:none;background:var(--white);border-radius:0;overflow:hidden;box-shadow:none;display:grid;grid-template-columns:1fr 1fr;}
-      .ms2-left{padding:80px clamp(32px,8vw,100px);display:flex;flex-direction:column;justify-content:center;position:relative;}
+      .ms2-section{width:100%;max-width:none;background:var(--white);border-radius:0;overflow:hidden;box-shadow:none;display:grid;grid-template-columns:1fr 1fr;min-height:520px;}
+      .ms2-left{padding:60px clamp(32px,8vw,100px);display:flex;flex-direction:column;justify-content:center;position:relative;}
       .ms2-left::after{content:'';position:absolute;right:0;top:60px;bottom:60px;width:1px;background:var(--border);}
-      .ms2-hero-row{display:flex;align-items:flex-start;line-height:1;opacity:0;animation:ms2up 0.7s 0.2s ease forwards;}
+      .ms2-hero-row{display:flex;align-items:center;line-height:1;opacity:0;animation:ms2up 0.7s 0.2s ease forwards;margin-bottom:8px;}
       .ms2-hero-date{font-family:'Cormorant Garamond',serif;font-size:clamp(13px,1.4vw,17px);font-style:italic;color:rgba(74,85,104,0.45);letter-spacing:.08em;margin-top:auto;padding-bottom:4px;align-self:flex-end;padding-left:16px;white-space:nowrap;}
       .ms2-hero-num{font-family:'Cormorant Garamond',serif;font-size:clamp(140px,18vw,220px);font-weight:600;color:var(--dark);line-height:0.85;}
-      .ms2-hero-sup{display:flex;flex-direction:column;padding-top:24px;padding-left:12px;gap:6px;}
+      .ms2-hero-sup{display:flex;flex-direction:column;padding-left:14px;gap:6px;}
       .ms2-hero-sup-yil{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,4vw,52px);font-style:italic;color:var(--teal);font-weight:600;line-height:1;}
       .ms2-hero-sup-tajriba{font-family:'Cormorant Garamond',serif;font-size:clamp(24px,2.8vw,36px);font-style:italic;color:var(--body);font-weight:400;line-height:1;}
       .ms2-teal-rule{width:48px;height:3px;background:var(--teal);border-radius:2px;margin:36px 0 28px;opacity:0;animation:ms2up 0.5s 0.35s ease forwards;}
-      .ms2-desc{font-size:15px;font-family:'DM Sans',sans-serif;font-weight:300;color:var(--body);line-height:1.85;max-width:380px;margin-bottom:36px;opacity:0;animation:ms2up 0.6s 0.45s ease forwards;}
+      .ms2-desc{font-size:15px;font-family:'DM Sans',sans-serif;font-weight:300;color:var(--body);line-height:1.85;max-width:380px;margin-bottom:28px;opacity:0;animation:ms2up 0.6s 0.45s ease forwards;}
       .ms2-btns{display:flex;gap:12px;flex-wrap:wrap;opacity:0;animation:ms2up 0.6s 0.55s ease forwards;}
       .ms2-btn{padding:13px 28px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;transition:all 0.2s;}
       .ms2-btn.primary{background:var(--teal);color:#fff;border:none;box-shadow:0 4px 16px rgba(0,180,166,0.25);}
