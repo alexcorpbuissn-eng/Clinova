@@ -134,14 +134,13 @@
       .ms2-section{width:100%;max-width:none;background:var(--white);border-radius:0;overflow:hidden;box-shadow:none;display:grid;grid-template-columns:1fr 1fr;}
       .ms2-left{padding:80px clamp(32px,8vw,100px);display:flex;flex-direction:column;justify-content:center;position:relative;}
       .ms2-left::after{content:'';position:absolute;right:0;top:60px;bottom:60px;width:1px;background:var(--border);}
-      .ms2-badge{display:inline-flex;align-items:center;gap:8px;background:var(--teal-lt);border-radius:100px;padding:6px 16px;font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--teal2);margin-bottom:32px;width:fit-content;opacity:0;animation:ms2up 0.6s 0.1s ease forwards;}
-      .ms2-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);}
       .ms2-hero-row{display:flex;align-items:flex-start;line-height:1;opacity:0;animation:ms2up 0.7s 0.2s ease forwards;}
+      .ms2-hero-date{font-family:'Cormorant Garamond',serif;font-size:clamp(13px,1.4vw,17px);font-style:italic;color:rgba(74,85,104,0.45);letter-spacing:.08em;margin-top:auto;padding-bottom:4px;align-self:flex-end;padding-left:16px;white-space:nowrap;}
       .ms2-hero-num{font-family:'Cormorant Garamond',serif;font-size:clamp(140px,18vw,220px);font-weight:600;color:var(--dark);line-height:0.85;}
       .ms2-hero-sup{display:flex;flex-direction:column;padding-top:24px;padding-left:12px;gap:6px;}
       .ms2-hero-sup-yil{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,4vw,52px);font-style:italic;color:var(--teal);font-weight:600;line-height:1;}
       .ms2-hero-sup-tajriba{font-family:'Cormorant Garamond',serif;font-size:clamp(24px,2.8vw,36px);font-style:italic;color:var(--body);font-weight:400;line-height:1;}
-      .ms2-teal-rule{width:48px;height:3px;background:var(--teal);border-radius:2px;margin:28px 0;opacity:0;animation:ms2up 0.5s 0.35s ease forwards;}
+      .ms2-teal-rule{width:48px;height:3px;background:var(--teal);border-radius:2px;margin:36px 0 28px;opacity:0;animation:ms2up 0.5s 0.35s ease forwards;}
       .ms2-desc{font-size:15px;font-family:'DM Sans',sans-serif;font-weight:300;color:var(--body);line-height:1.85;max-width:380px;margin-bottom:36px;opacity:0;animation:ms2up 0.6s 0.45s ease forwards;}
       .ms2-btns{display:flex;gap:12px;flex-wrap:wrap;opacity:0;animation:ms2up 0.6s 0.55s ease forwards;}
       .ms2-btn{padding:13px 28px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;transition:all 0.2s;}
@@ -181,13 +180,13 @@
     <div class="ms2-section">
       <!-- LEFT -->
       <div class="ms2-left">
-        <div class="ms2-badge"><span class="ms2-badge-dot"></span>1994 — 2024 · Yubiley</div>
         <div class="ms2-hero-row">
           <span class="ms2-hero-num">30</span>
           <div class="ms2-hero-sup">
             <span class="ms2-hero-sup-yil">Yil</span>
             <span class="ms2-hero-sup-tajriba">Tajriba</span>
           </div>
+          <span class="ms2-hero-date">1996 — 2026</span>
         </div>
         <div class="ms2-teal-rule"></div>
         <p class="ms2-desc">O'ttiz yil davomida minglab bemorlarning ishonchi, tebranmas sodiqlik va stomatologiyaga bo'lgan cheksiz muhabbat bilan yonib kelmoqdamiz.</p>
@@ -195,7 +194,7 @@
           <a class="ms2-btn primary" href="about.html">Bizning tarix →</a>
           <a class="ms2-btn ghost" href="booking.html">Qabul yoziling</a>
         </div>
-        <div class="ms2-watermark">Habibullo-Hilola · Est. 1994</div>
+        <div class="ms2-watermark">Habibullo-Hilola · Est. 1996</div>
       </div>
 
       <!-- RIGHT -->
