@@ -198,70 +198,159 @@
     </div>
   </section>
 
-  <!-- ========= SERVICES SECTION ========= -->
-  <section class="services-section dark-services" id="services-list">
-    <div class="container">
-      <div class="section-header dark-header" id="services-header">
-        <h2 class="section-title">BIZNING <span style="color: #d32f2f;">XIZMATLAR</span></h2>
-        <div class="header-hexagon"></div>
-      </div>
-      <div class="protocol-grid" id="services-grid">
-        <!-- Card 1 -->
-        <div class="protocol-card" style="background-image: url('terapevtik.png');">
-          <div class="protocol-overlay"></div>
-          <div class="protocol-content">
-            <div class="protocol-num">01</div>
-            <h3 class="protocol-title">TERAPEVTIK</h3>
-            <p class="protocol-desc">Tish kariesi, pulpit va boshqa kasalliklarni davolash.</p>
+  <!-- ========= MAXSUS TAKLIFLAR SECTION ========= -->
+  <section id="maxsus-takliflar" style="background:#f7fafd;padding:80px 0;">
+    <style>
+      .mxt-container{max-width:1140px;margin:0 auto;padding:0 24px}
+      .mxt-label{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#0e9e6e;margin-bottom:12px}
+      .mxt-title{font-size:2.2rem;font-weight:800;color:#0C447C;line-height:1.15;margin:0 0 8px}
+      .mxt-title span{color:#1a7fc1}
+      .mxt-dot{width:8px;height:8px;background:#d32f2f;border-radius:50%;margin-bottom:36px;margin-top:2px}
+      .mxt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+      /* Cards */
+      .mxt-card{background:#fff;border-radius:20px;padding:28px 24px;border:1.5px solid #e2edf7;position:relative;display:flex;flex-direction:column;gap:0;transition:transform .2s,box-shadow .2s}
+      .mxt-card:hover{transform:translateY(-4px);box-shadow:0 12px 36px rgba(26,127,193,.13)}
+      .mxt-card.featured{border:2px solid #1a7fc1;box-shadow:0 4px 24px rgba(26,127,193,.12)}
+      .mxt-badge{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:30px;margin-bottom:14px}
+      .badge-blue{background:#E6F1FB;color:#1a7fc1}
+      .badge-green{background:#E1F5EE;color:#0e9e6e}
+      .badge-orange{background:#fff3e0;color:#e65100}
+      .mxt-card-title{font-size:1.18rem;font-weight:800;color:#0C447C;margin:0 0 4px}
+      .mxt-discount{font-size:.82rem;font-weight:700;color:#1a7fc1;background:#E6F1FB;padding:2px 10px;border-radius:20px;display:inline-block;margin-bottom:14px}
+      .mxt-discount.green{color:#0e9e6e;background:#E1F5EE}
+      /* Countdown */
+      .mxt-countdown{display:flex;gap:6px;margin-bottom:18px;align-items:center}
+      .mxt-countdown-box{background:#1a7fc1;color:#fff;font-size:1.05rem;font-weight:700;border-radius:8px;padding:7px 10px;min-width:38px;text-align:center;font-family:monospace;line-height:1}
+      .mxt-countdown-sep{color:#1a7fc1;font-weight:700;font-size:1.1rem}
+      .mxt-countdown-label{font-size:.62rem;color:#7ba8c9;display:block;text-align:center;margin-top:2px;font-weight:600;letter-spacing:.04em}
+      /* Checklist */
+      .mxt-list{list-style:none;padding:0;margin:0 0 18px;display:flex;flex-direction:column;gap:8px}
+      .mxt-list li{display:flex;align-items:center;gap:9px;font-size:.88rem;color:#374151}
+      .mxt-list li::before{content:"✓";display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;background:#E1F5EE;color:#0e9e6e;border-radius:50%;font-size:.78rem;font-weight:700;flex-shrink:0}
+      /* Pricing */
+      .mxt-prices{display:flex;align-items:baseline;gap:10px;margin-bottom:20px;margin-top:auto}
+      .mxt-old-price{font-size:.9rem;color:#9ca3af;text-decoration:line-through}
+      .mxt-new-price{font-size:1.45rem;font-weight:800;color:#0C447C}
+      .mxt-new-price.green{color:#085041}
+      /* Buttons */
+      .mxt-btn{display:block;width:100%;padding:12px 0;border-radius:10px;font-size:.88rem;font-weight:700;text-align:center;cursor:pointer;text-decoration:none;transition:all .2s;border:2px solid #1a7fc1;color:#1a7fc1;background:transparent;font-family:inherit;letter-spacing:.03em}
+      .mxt-btn:hover{background:#1a7fc1;color:#fff}
+      .mxt-btn.green{border-color:#0e9e6e;color:#0e9e6e}
+      .mxt-btn.green:hover{background:#0e9e6e;color:#fff}
+      /* Banner */
+      .mxt-banner{grid-column:1/-1;background:#E1F5EE;border-radius:20px;padding:32px 36px;display:flex;align-items:center;justify-content:space-between;gap:24px;border:1.5px solid #b2dfdb;position:relative;overflow:hidden}
+      .mxt-banner::before{content:"🦷";position:absolute;right:220px;top:50%;transform:translateY(-50%);font-size:5rem;opacity:.08;pointer-events:none}
+      .mxt-banner-left{display:flex;flex-direction:column;gap:8px}
+      .mxt-banner-title{font-size:1.35rem;font-weight:800;color:#085041}
+      .mxt-banner-sub{font-size:.92rem;color:#0e9e6e;max-width:480px}
+      .mxt-banner-right{display:flex;flex-direction:column;align-items:flex-end;gap:12px;flex-shrink:0}
+      .mxt-banner-price{font-size:1.7rem;font-weight:800;color:#085041}
+      .mxt-banner-old{font-size:.9rem;color:#52918a;text-decoration:line-through;text-align:right}
+      @media(max-width:900px){.mxt-grid{grid-template-columns:1fr 1fr}.mxt-banner{flex-direction:column;align-items:flex-start}}
+      @media(max-width:600px){.mxt-grid{grid-template-columns:1fr}.mxt-title{font-size:1.6rem}}
+    </style>
+
+    <div class="mxt-container">
+      <!-- Header -->
+      <div class="mxt-label">Chegirmalar</div>
+      <h2 class="mxt-title">Maxsus <span>Takliflar</span></h2>
+      <div class="mxt-dot"></div>
+
+      <div class="mxt-grid">
+
+        <!-- Card 1: Featured – Oqartirish -->
+        <div class="mxt-card featured">
+          <span class="mxt-badge badge-blue">⭐ Ommabop</span>
+          <div class="mxt-card-title">Tishlarni oqartirish</div>
+          <span class="mxt-discount">−30% chegirma</span>
+
+          <!-- Countdown -->
+          <div style="font-size:.72rem;color:#7ba8c9;font-weight:600;margin-bottom:6px;letter-spacing:.04em">TAKLIFGACHA QOLDI:</div>
+          <div class="mxt-countdown">
+            <div class="mxt-countdown-box"><span id="cd-h">02</span><span class="mxt-countdown-label">soat</span></div>
+            <span class="mxt-countdown-sep">:</span>
+            <div class="mxt-countdown-box"><span id="cd-m">45</span><span class="mxt-countdown-label">daqiqa</span></div>
+            <span class="mxt-countdown-sep">:</span>
+            <div class="mxt-countdown-box"><span id="cd-s">00</span><span class="mxt-countdown-label">soniya</span></div>
+          </div>
+
+          <div class="mxt-prices" style="margin-top:6px">
+            <span class="mxt-old-price">700 000 so'm</span>
+            <span class="mxt-new-price">490 000 so'm</span>
+          </div>
+          <a href="booking.html" class="mxt-btn">Hozir band qiling →</a>
+        </div>
+
+        <!-- Card 2: New patient -->
+        <div class="mxt-card">
+          <span class="mxt-badge badge-green">✨ Yangi</span>
+          <div class="mxt-card-title">Birinchi tashrif</div>
+          <span class="mxt-discount green">−20% chegirma</span>
+
+          <ul class="mxt-list">
+            <li>To'liq og'iz muoyenasi</li>
+            <li>Rentgen tekshiruvi</li>
+            <li>Shifokor maslahati</li>
+          </ul>
+
+          <div class="mxt-prices">
+            <span class="mxt-old-price">250 000 so'm</span>
+            <span class="mxt-new-price green">200 000 so'm</span>
+          </div>
+          <a href="booking.html" class="mxt-btn green">Hozir band qiling →</a>
+        </div>
+
+        <!-- Card 3: Family package -->
+        <div class="mxt-card">
+          <span class="mxt-badge badge-orange">👨‍👩‍👧 Cheklangan</span>
+          <div class="mxt-card-title">Oilaviy paket</div>
+          <span class="mxt-discount green">−25% chegirma</span>
+
+          <ul class="mxt-list">
+            <li>4 nafar oila a'zosi</li>
+            <li>Profilaktik tozalash</li>
+            <li>Ftor bilan mustahkamlash</li>
+          </ul>
+
+          <div class="mxt-prices">
+            <span class="mxt-old-price">1 200 000 so'm</span>
+            <span class="mxt-new-price green">900 000 so'm</span>
+          </div>
+          <a href="booking.html" class="mxt-btn green">Hozir band qiling →</a>
+        </div>
+
+        <!-- Full-width Banner -->
+        <div class="mxt-banner">
+          <div class="mxt-banner-left">
+            <span class="mxt-badge badge-green" style="margin-bottom:0;width:fit-content">☀️ Yoz aksiyasi</span>
+            <div class="mxt-banner-title">Implant o'rnatishda — toj sovg'a!</div>
+            <div class="mxt-banner-sub">Har bir implantga premium zirkoniy toj bepul. Faqat 2026-yil 31-iyulgacha amal qiladi. O'rin cheklangan!</div>
+          </div>
+          <div class="mxt-banner-right">
+            <div class="mxt-banner-old">4 500 000 so'm</div>
+            <div class="mxt-banner-price">3 200 000 so'm</div>
+            <a href="booking.html" class="mxt-btn green" style="min-width:200px">Batafsil va band qilish →</a>
           </div>
         </div>
-        <!-- Card 2 -->
-        <div class="protocol-card" style="background-image: url('estetik.png');">
-          <div class="protocol-overlay"></div>
-          <div class="protocol-content">
-            <div class="protocol-num">02</div>
-            <h3 class="protocol-title">ESTETIK</h3>
-            <p class="protocol-desc">Oqartirish, vinirlar va estetik tiklash.</p>
-          </div>
-        </div>
-        <!-- Card 3 -->
-        <div class="protocol-card" style="background-image: url('ortopedik.png');">
-          <div class="protocol-overlay"></div>
-          <div class="protocol-content">
-            <div class="protocol-num">03</div>
-            <h3 class="protocol-title">ORTOPEDIK</h3>
-            <p class="protocol-desc">Tojlar, ko'priklar va protezlar o'rnatish.</p>
-          </div>
-        </div>
-        <!-- Card 4 -->
-        <div class="protocol-card" style="background-image: url('ortodontik.png');">
-          <div class="protocol-overlay"></div>
-          <div class="protocol-content">
-            <div class="protocol-num">04</div>
-            <h3 class="protocol-title">ORTODONTIK</h3>
-            <p class="protocol-desc">Breketlar, Invisalign va tish egriligini tuzatish.</p>
-          </div>
-        </div>
-        <!-- Card 5 -->
-        <div class="protocol-card" style="background-image: url('jarrohlik.png');">
-          <div class="protocol-overlay"></div>
-          <div class="protocol-content">
-            <div class="protocol-num">05</div>
-            <h3 class="protocol-title">JARROHLIK</h3>
-            <p class="protocol-desc">Implantlar, tish sug'urish va og'iz jarrohiyasi.</p>
-          </div>
-        </div>
-        <!-- Card 6 -->
-        <div class="protocol-card" style="background-image: url('bolalar.png');">
-          <div class="protocol-overlay"></div>
-          <div class="protocol-content">
-            <div class="protocol-num">06</div>
-            <h3 class="protocol-title">BOLALAR</h3>
-            <p class="protocol-desc">Bolalar tishlarini og'riqsiz davolash va profilaktika.</p>
-          </div>
-        </div>
+
       </div>
     </div>
+
+    <script>
+      (function(){
+        let total = 2*3600 + 45*60;
+        function pad(n){return String(n).padStart(2,'0')}
+        function tick(){
+          if(total<=0){total=0}
+          document.getElementById('cd-h').textContent=pad(Math.floor(total/3600));
+          document.getElementById('cd-m').textContent=pad(Math.floor((total%3600)/60));
+          document.getElementById('cd-s').textContent=pad(total%60);
+          if(total>0)total--;
+        }
+        tick();
+        setInterval(tick,1000);
+      })();
+    </script>
   </section>
 
   <!-- ========= TESTIMONIALS ========= -->
