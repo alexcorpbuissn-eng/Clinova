@@ -126,9 +126,160 @@
     </div>
   </section>
 
+  <!-- ========= 30 YIL MILESTONE SECTION ========= -->
+  <section id="milestone" style="background:#f5f7f8;padding:0;">
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600;1,700&family=DM+Sans:wght@300;400;500&display=swap');
+      :root{--ms-teal:#00b4a6;--ms-teal2:#009688;--ms-teal-lt:#e6f7f6;--ms-dark:#0f1f2e;--ms-body:#4a5568;--ms-light:#f8fafb;--ms-white:#ffffff;--ms-border:#e2eaed;}
+      /* ── Layout ── */
+      .ms2-section{width:100%;background:var(--ms-white);display:grid;grid-template-columns:1fr 1fr;min-height:520px;}
+      /* ── LEFT ── */
+      .ms2-left{padding:60px clamp(32px,8vw,100px);display:flex;flex-direction:column;justify-content:center;position:relative;}
+      .ms2-left::after{content:'';position:absolute;right:0;top:60px;bottom:60px;width:1px;background:var(--ms-border);}
+      .ms2-hero-row{display:flex;align-items:center;line-height:1;opacity:0;animation:ms2up .7s .2s ease forwards;margin-bottom:8px;}
+      .ms2-hero-num{font-family:'Cormorant Garamond',serif;font-size:clamp(140px,18vw,220px);font-weight:600;color:var(--ms-dark);line-height:.85;}
+      .ms2-hero-sup{display:flex;flex-direction:column;padding-left:14px;gap:6px;}
+      .ms2-hero-sup-yil{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,4vw,52px);font-style:italic;color:var(--ms-teal);font-weight:600;line-height:1;}
+      .ms2-hero-sup-tajriba{font-family:'Cormorant Garamond',serif;font-size:clamp(24px,2.8vw,36px);font-style:italic;color:var(--ms-body);font-weight:400;line-height:1;}
+      .ms2-hero-date{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,2.8vw,36px);font-style:italic;font-weight:400;color:var(--ms-teal);letter-spacing:.05em;margin:10px 0 0;opacity:0;animation:ms2up .6s .3s ease forwards;display:block;}
+      .ms2-teal-rule{width:48px;height:3px;background:var(--ms-teal);border-radius:2px;margin:36px 0 28px;opacity:0;animation:ms2up .5s .35s ease forwards;}
+      .ms2-desc{font-size:15px;font-family:'DM Sans',sans-serif;font-weight:300;color:var(--ms-body);line-height:1.85;max-width:380px;margin-bottom:28px;opacity:0;animation:ms2up .6s .45s ease forwards;}
+      .ms2-btns{display:flex;gap:12px;flex-wrap:wrap;opacity:0;animation:ms2up .6s .55s ease forwards;}
+      .ms2-btn{padding:13px 28px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;transition:all .2s;}
+      .ms2-btn.primary{background:var(--ms-teal);color:#fff;border:none;box-shadow:0 4px 16px rgba(0,180,166,.25);}
+      .ms2-btn.primary:hover{background:var(--ms-teal2);transform:translateY(-1px);}
+      .ms2-btn.ghost{background:transparent;color:var(--ms-dark);border:1px solid var(--ms-border);}
+      .ms2-btn.ghost:hover{border-color:var(--ms-teal);color:var(--ms-teal);}
+      .ms2-watermark{position:absolute;bottom:28px;left:clamp(32px,8vw,100px);font-family:'Cormorant Garamond',serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(15,31,46,.15);font-style:italic;}
+      /* ── RIGHT ── */
+      .ms2-right{padding:60px clamp(32px,8vw,100px);background:var(--ms-light);display:flex;flex-direction:column;justify-content:center;gap:0;opacity:0;animation:ms2up .7s .4s ease forwards;}
+      .ms2-main-label{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--ms-teal);font-weight:500;font-family:'DM Sans',sans-serif;margin-bottom:10px;display:block;}
+      .ms2-main-num{font-family:'Cormorant Garamond',serif;font-size:clamp(64px,8vw,96px);font-weight:600;color:var(--ms-dark);line-height:.9;display:flex;align-items:flex-start;gap:4px;}
+      .ms2-main-num sup{font-size:clamp(28px,3.5vw,42px);color:var(--ms-teal);font-style:italic;line-height:1.2;}
+      .ms2-main-sub{font-size:13px;color:var(--ms-body);font-family:'DM Sans',sans-serif;font-weight:300;margin-top:10px;margin-bottom:20px;}
+      .ms2-progress-track{height:3px;background:var(--ms-border);border-radius:2px;margin-bottom:40px;overflow:hidden;}
+      .ms2-progress-fill{height:100%;background:linear-gradient(90deg,var(--ms-teal),#00d4c4);border-radius:2px;width:0;transition:width 1.6s .3s cubic-bezier(.16,1,.3,1);}
+      .ms2-mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-bottom:36px;}
+      .ms2-mini-stat{padding:20px 0;border-top:1px solid var(--ms-border);}
+      .ms2-mini-stat:not(:last-child){padding-right:20px;border-right:1px solid var(--ms-border);}
+      .ms2-mini-stat:not(:first-child){padding-left:20px;}
+      .ms2-mini-num{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,4vw,48px);font-weight:600;color:var(--ms-dark);line-height:1;display:block;}
+      .ms2-mini-num em{font-style:italic;color:var(--ms-teal);font-size:.65em;}
+      .ms2-mini-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(74,85,104,.45);font-family:'DM Sans',sans-serif;margin-top:4px;display:block;}
+      .ms2-trust-line{display:flex;align-items:center;gap:14px;padding-top:20px;border-top:1px solid var(--ms-border);}
+      .ms2-trust-icon{font-size:18px;}
+      .ms2-trust-text{font-size:13px;color:var(--ms-body);font-family:'DM Sans',sans-serif;font-weight:300;}
+      .ms2-trust-text strong{font-weight:500;color:var(--ms-dark);}
+      .ms2-trust-stars{display:flex;align-items:center;gap:2px;margin-left:auto;}
+      .ms2-trust-star{color:var(--ms-teal);font-size:13px;}
+      .ms2-trust-stars-label{font-size:11px;color:var(--ms-body);margin-left:5px;font-weight:300;font-family:'DM Sans',sans-serif;}
+      /* ── Animation ── */
+      @keyframes ms2up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+      /* ── Responsive ── */
+      @media(max-width:860px){
+        .ms2-section{grid-template-columns:1fr;}
+        .ms2-left::after{display:none;}
+        .ms2-left,.ms2-right{padding:48px 32px;}
+        .ms2-watermark{display:none;}
+      }
+      @media(max-width:480px){
+        .ms2-hero-num{font-size:100px;}
+        .ms2-mini-stats{grid-template-columns:1fr 1fr;}
+      }
+    </style>
 
+    <div class="ms2-section">
+
+      <!-- ── LEFT ── -->
+      <div class="ms2-left">
+        <div class="ms2-hero-row">
+          <span class="ms2-hero-num">30</span>
+          <div class="ms2-hero-sup">
+            <span class="ms2-hero-sup-yil">Yil</span>
+            <span class="ms2-hero-sup-tajriba">Tajriba</span>
+          </div>
+        </div>
+        <span class="ms2-hero-date">1996 &mdash; 2026</span>
+        <div class="ms2-teal-rule"></div>
+        <p class="ms2-desc">O'ttiz yil davomida minglab bemorlarning ishonchi, tebranmas sodiqlik va stomatologiyaga bo'lgan cheksiz muhabbat bilan yonib kelmoqdamiz.</p>
+        <div class="ms2-btns">
+          <a class="ms2-btn primary" href="about.html">Bizning tarix &rarr;</a>
+          <a class="ms2-btn ghost" href="booking.html">Qabul yoziling</a>
+        </div>
+        <div class="ms2-watermark">Habibullo-Hilola &middot; Est. 1996</div>
+      </div>
+
+      <!-- ── RIGHT ── -->
+      <div class="ms2-right">
+        <span class="ms2-main-label">Asosiy ko'rsatkich</span>
+        <div class="ms2-main-num">
+          <span id="ms2-main-count">0</span><sup>+</sup>
+        </div>
+        <div class="ms2-main-sub">Mamnun bemor &mdash; barcha yillar davomida</div>
+        <div class="ms2-progress-track">
+          <div class="ms2-progress-fill" id="ms2-bar"></div>
+        </div>
+
+        <div class="ms2-mini-stats">
+          <div class="ms2-mini-stat">
+            <span class="ms2-mini-num"><span class="ms2-count" data-target="30">0</span><em> yil</em></span>
+            <span class="ms2-mini-label">Klinik tajriba</span>
+          </div>
+          <div class="ms2-mini-stat">
+            <span class="ms2-mini-num"><span class="ms2-count" data-target="98">0</span><em>%</em></span>
+            <span class="ms2-mini-label">Muvaffaqiyat</span>
+          </div>
+          <div class="ms2-mini-stat">
+            <span class="ms2-mini-num"><span class="ms2-count" data-target="12">0</span><em>+</em></span>
+            <span class="ms2-mini-label">Mutaxassis</span>
+          </div>
+        </div>
+
+        <div class="ms2-trust-line">
+          <span class="ms2-trust-icon">🦷</span>
+          <div class="ms2-trust-text"><strong>Zamonaviy texnologiyalar</strong> &nbsp;Sifatli va ishonchli davolash</div>
+          <div class="ms2-trust-stars">
+            <span class="ms2-trust-star">★</span><span class="ms2-trust-star">★</span><span class="ms2-trust-star">★</span><span class="ms2-trust-star">★</span><span class="ms2-trust-star">★</span>
+            <span class="ms2-trust-stars-label">5.0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    (function(){
+      var ran = false;
+      function animateCount(el, target){
+        var dur = 1800, t0 = performance.now();
+        function step(now){
+          var p = Math.min((now - t0) / dur, 1);
+          var ease = 1 - Math.pow(1 - p, 4);
+          el.textContent = Math.round(ease * target).toLocaleString();
+          if(p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      }
+      function runAll(){
+        if(ran) return; ran = true;
+        animateCount(document.getElementById('ms2-main-count'), 15000);
+        document.querySelectorAll('.ms2-count').forEach(function(el){
+          animateCount(el, parseInt(el.dataset.target));
+        });
+        var bar = document.getElementById('ms2-bar');
+        if(bar) bar.style.width = '92%';
+      }
+      var section = document.getElementById('milestone');
+      if(!section){ return; }
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ if(e.isIntersecting) runAll(); });
+      }, { threshold: 0.2 });
+      io.observe(section);
+    })();
+    </script>
+  </section>
 
   <!-- ========= DIFFERENCE SECTION ========= -->
+
   <section class="difference" id="services">
     <div class="container">
       <div class="section-header" id="difference-header">
