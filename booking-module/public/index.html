@@ -149,29 +149,30 @@
       .ms2-btn.ghost{background:transparent;color:var(--dark);border:1px solid var(--border);}
       .ms2-btn.ghost:hover{border-color:var(--teal);color:var(--teal);}
       .ms2-watermark{position:absolute;bottom:28px;left:60px;font-family:'Cormorant Garamond',serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(15,31,46,0.15);font-style:italic;}
-      .ms2-right{padding:80px clamp(32px,8vw,100px);background:var(--light);display:flex;flex-direction:column;justify-content:center;gap:20px;opacity:0;animation:ms2up 0.7s 0.4s ease forwards;}
-      .ms2-card-hero{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:32px;position:relative;overflow:hidden;transition:box-shadow 0.25s;}
-      .ms2-card-hero:hover{box-shadow:0 8px 32px rgba(0,180,166,0.1);}
-      .ms2-card-hero::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(to bottom,var(--teal),#00d4c4);border-radius:0 2px 2px 0;}
-      .ms2-card-tag{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);font-weight:500;font-family:'DM Sans',sans-serif;margin-bottom:14px;}
-      .ms2-card-big-num{font-family:'Cormorant Garamond',serif;font-size:56px;font-weight:600;color:var(--dark);line-height:1;}
-      .ms2-card-big-num .ms2-suf{font-size:28px;color:var(--teal);vertical-align:super;}
-      .ms2-card-sub{font-size:13px;color:var(--body);font-family:'DM Sans',sans-serif;font-weight:300;margin-top:6px;}
-      .ms2-progress-track{height:4px;background:var(--teal-lt);border-radius:2px;margin-top:20px;overflow:hidden;}
+      .ms2-right{padding:60px clamp(32px,8vw,100px);background:var(--light);display:flex;flex-direction:column;justify-content:center;gap:0;opacity:0;animation:ms2up 0.7s 0.4s ease forwards;}
+      /* Main stat */
+      .ms2-main-label{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--teal);font-weight:500;font-family:'DM Sans',sans-serif;margin-bottom:10px;display:block;}
+      .ms2-main-num{font-family:'Cormorant Garamond',serif;font-size:clamp(64px,8vw,96px);font-weight:600;color:var(--dark);line-height:0.9;display:flex;align-items:flex-start;gap:4px;}
+      .ms2-main-num sup{font-size:clamp(28px,3.5vw,42px);color:var(--teal);font-style:italic;line-height:1.2;}
+      .ms2-main-sub{font-size:13px;color:var(--body);font-family:'DM Sans',sans-serif;font-weight:300;margin-top:10px;margin-bottom:20px;}
+      .ms2-progress-track{height:3px;background:var(--border);border-radius:2px;margin-bottom:40px;overflow:hidden;}
       .ms2-progress-fill{height:100%;background:linear-gradient(90deg,var(--teal),#00d4c4);border-radius:2px;width:0;transition:width 1.6s 0.3s cubic-bezier(0.16,1,0.3,1);}
-      .ms2-stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
-      .ms2-stat{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px 16px;transition:border-color 0.2s,box-shadow 0.2s;}
-      .ms2-stat:hover{border-color:var(--teal);box-shadow:0 4px 16px rgba(0,180,166,0.08);}
-      .ms2-stat-num{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:600;color:var(--dark);line-height:1;display:block;}
-      .ms2-stat-num em{font-style:normal;font-size:18px;color:var(--teal);}
-      .ms2-stat-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(74,85,104,0.5);font-family:'DM Sans',sans-serif;margin-top:6px;display:block;}
-      .ms2-trust{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:12px;}
-      .ms2-trust-icon{width:36px;height:36px;border-radius:10px;background:var(--teal-lt);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
-      .ms2-trust-text{font-size:13px;color:var(--body);font-family:'DM Sans',sans-serif;font-weight:300;line-height:1.5;}
-      .ms2-trust-text strong{font-weight:500;color:var(--dark);display:block;}
-      .ms2-stars{display:flex;align-items:center;gap:3px;margin-left:auto;flex-shrink:0;}
-      .ms2-star{color:var(--teal);font-size:14px;}
-      .ms2-stars-label{font-size:11px;color:var(--body);margin-left:6px;font-weight:300;font-family:'DM Sans',sans-serif;}
+      /* Mini stats row */
+      .ms2-mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-bottom:36px;}
+      .ms2-mini-stat{padding:20px 0;border-top:1px solid var(--border);}
+      .ms2-mini-stat:not(:last-child){padding-right:20px;border-right:1px solid var(--border);}
+      .ms2-mini-stat:not(:first-child){padding-left:20px;}
+      .ms2-mini-num{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,4vw,48px);font-weight:600;color:var(--dark);line-height:1;display:block;}
+      .ms2-mini-num em{font-style:italic;color:var(--teal);font-size:0.65em;}
+      .ms2-mini-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(74,85,104,0.45);font-family:'DM Sans',sans-serif;margin-top:4px;display:block;}
+      /* Trust line */
+      .ms2-trust-line{display:flex;align-items:center;gap:14px;padding-top:20px;border-top:1px solid var(--border);}
+      .ms2-trust-icon{font-size:18px;}
+      .ms2-trust-text{font-size:13px;color:var(--body);font-family:'DM Sans',sans-serif;font-weight:300;}
+      .ms2-trust-text strong{font-weight:500;color:var(--dark);}
+      .ms2-stars{display:flex;align-items:center;gap:2px;margin-left:auto;}
+      .ms2-star{color:var(--teal);font-size:13px;}
+      .ms2-stars-label{font-size:11px;color:var(--body);margin-left:5px;font-weight:300;font-family:'DM Sans',sans-serif;}
       @keyframes ms2up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
       @media(max-width:860px){.ms2-section{grid-template-columns:1fr}.ms2-left::after{display:none}.ms2-left,.ms2-right{padding:48px 32px}.ms2-watermark{display:none}}
       @media(max-width:480px){.ms2-stats-grid{grid-template-columns:1fr 1fr}.ms2-hero-num{font-size:100px}}
@@ -199,20 +200,34 @@
 
       <!-- RIGHT -->
       <div class="ms2-right">
-        <div class="ms2-card-hero">
-          <div class="ms2-card-tag">Asosiy ko'rsatkich</div>
-          <div class="ms2-card-big-num"><span id="ms2-main-count">0</span><span class="ms2-suf">+</span></div>
-          <div class="ms2-card-sub">Mamnun bemor — barcha yillar davomida</div>
-          <div class="ms2-progress-track"><div class="ms2-progress-fill" data-width="92%"></div></div>
+        <!-- Main stat -->
+        <span class="ms2-main-label">Asosiy ko'rsatkich</span>
+        <div class="ms2-main-num">
+          <span id="ms2-main-count">0</span><sup>+</sup>
         </div>
-        <div class="ms2-stats-grid">
-          <div class="ms2-stat"><span class="ms2-stat-num"><span data-target="30">0</span><em> yil</em></span><span class="ms2-stat-label">Klinik tajriba</span></div>
-          <div class="ms2-stat"><span class="ms2-stat-num"><span data-target="98">0</span><em>%</em></span><span class="ms2-stat-label">Muvaffaqiyat</span></div>
-          <div class="ms2-stat"><span class="ms2-stat-num"><span data-target="12">0</span><em>+</em></span><span class="ms2-stat-label">Mutaxassis</span></div>
+        <div class="ms2-main-sub">Mamnun bemor — barcha yillar davomida</div>
+        <div class="ms2-progress-track"><div class="ms2-progress-fill" data-width="92%"></div></div>
+
+        <!-- Mini stats -->
+        <div class="ms2-mini-stats">
+          <div class="ms2-mini-stat">
+            <span class="ms2-mini-num"><span data-target="30">0</span><em> yil</em></span>
+            <span class="ms2-mini-label">Klinik tajriba</span>
+          </div>
+          <div class="ms2-mini-stat">
+            <span class="ms2-mini-num"><span data-target="98">0</span><em>%</em></span>
+            <span class="ms2-mini-label">Muvaffaqiyat</span>
+          </div>
+          <div class="ms2-mini-stat">
+            <span class="ms2-mini-num"><span data-target="12">0</span><em>+</em></span>
+            <span class="ms2-mini-label">Mutaxassis</span>
+          </div>
         </div>
-        <div class="ms2-trust">
-          <div class="ms2-trust-icon">🦷</div>
-          <div class="ms2-trust-text"><strong>Zamonaviy texnologiyalar</strong>Sifatli va ishonchli davolash</div>
+
+        <!-- Trust line -->
+        <div class="ms2-trust-line">
+          <span class="ms2-trust-icon">🦷</span>
+          <div class="ms2-trust-text"><strong>Zamonaviy texnologiyalar</strong> &nbsp;Sifatli va ishonchli davolash</div>
           <div class="ms2-stars"><span class="ms2-star">★</span><span class="ms2-star">★</span><span class="ms2-star">★</span><span class="ms2-star">★</span><span class="ms2-star">★</span><span class="ms2-stars-label">5.0</span></div>
         </div>
       </div>
