@@ -127,12 +127,12 @@
   </section>
 
   <!-- ========= 30 YIL MILESTONE SECTION ========= -->
-  <section id="milestone" style="background:#f5f7f8;padding:80px 20px;display:flex;justify-content:center;">
+  <section id="milestone" style="background:#f5f7f8;padding:0;">
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600;1,700&family=DM+Sans:wght@300;400;500&display=swap');
       :root{--teal:#00b4a6;--teal2:#009688;--teal-lt:#e6f7f6;--dark:#0f1f2e;--body:#4a5568;--light:#f8fafb;--white:#ffffff;--border:#e2eaed;}
-      .ms2-section{width:100%;max-width:1160px;background:var(--white);border-radius:24px;overflow:hidden;box-shadow:0 4px 40px rgba(0,0,0,0.06);display:grid;grid-template-columns:1fr 1fr;}
-      .ms2-left{padding:72px 60px;display:flex;flex-direction:column;justify-content:center;position:relative;}
+      .ms2-section{width:100%;max-width:none;background:var(--white);border-radius:0;overflow:hidden;box-shadow:none;display:grid;grid-template-columns:1fr 1fr;}
+      .ms2-left{padding:80px clamp(32px,8vw,100px);display:flex;flex-direction:column;justify-content:center;position:relative;}
       .ms2-left::after{content:'';position:absolute;right:0;top:60px;bottom:60px;width:1px;background:var(--border);}
       .ms2-badge{display:inline-flex;align-items:center;gap:8px;background:var(--teal-lt);border-radius:100px;padding:6px 16px;font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--teal2);margin-bottom:32px;width:fit-content;opacity:0;animation:ms2up 0.6s 0.1s ease forwards;}
       .ms2-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);}
@@ -150,7 +150,7 @@
       .ms2-btn.ghost{background:transparent;color:var(--dark);border:1px solid var(--border);}
       .ms2-btn.ghost:hover{border-color:var(--teal);color:var(--teal);}
       .ms2-watermark{position:absolute;bottom:28px;left:60px;font-family:'Cormorant Garamond',serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(15,31,46,0.15);font-style:italic;}
-      .ms2-right{padding:72px 60px;background:var(--light);display:flex;flex-direction:column;justify-content:center;gap:20px;opacity:0;animation:ms2up 0.7s 0.4s ease forwards;}
+      .ms2-right{padding:80px clamp(32px,8vw,100px);background:var(--light);display:flex;flex-direction:column;justify-content:center;gap:20px;opacity:0;animation:ms2up 0.7s 0.4s ease forwards;}
       .ms2-card-hero{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:32px;position:relative;overflow:hidden;transition:box-shadow 0.25s;}
       .ms2-card-hero:hover{box-shadow:0 8px 32px rgba(0,180,166,0.1);}
       .ms2-card-hero::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(to bottom,var(--teal),#00d4c4);border-radius:0 2px 2px 0;}
