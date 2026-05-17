@@ -682,6 +682,17 @@
       return res.json();
     }
 
+    async function apiPost(endpoint, body) {
+      const t = localStorage.getItem('admin_token');
+      const res = await fetch(API + endpoint, { 
+        method: 'POST', 
+        headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.status === 401 || res.status === 403) { logout(); throw new Error('Unauthorized'); }
+      return res.json();
+    }
+
     // Fetch Appointments
     async function loadAppointments() {
       const tbody = document.getElementById('appt-tbody');
