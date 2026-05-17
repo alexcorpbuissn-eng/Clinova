@@ -1146,6 +1146,10 @@
     const ADMIN_END_HOUR = 19;
     const ADMIN_INTERVAL = 30;
 
+    function getLocalISO(date) {
+      return date.toLocaleDateString('en-CA'); // YYYY-MM-DD
+    }
+
     async function loadScheduleTab() {
       const select = document.getElementById('schedule-doc-select');
       select.innerHTML = '<option value="">Shifokor yuklanmoqda...</option>';
