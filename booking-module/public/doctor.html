@@ -99,6 +99,72 @@
     .btn-submit { background: var(--navy); color: #fff; padding: 10px 24px; border: none; border-radius: 10px; font-family: inherit; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; }
     .btn-submit:hover { background: #1e293b; }
     .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Modern Premium Toast Notifications */
+    #toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: none;
+    }
+    .toast {
+      pointer-events: auto;
+      min-width: 320px;
+      max-width: 450px;
+      background: rgba(15, 23, 42, 0.9); /* Dark navy */
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px 20px;
+      color: #fff;
+      font-weight: 500;
+      font-size: 0.9rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transform: translateX(120%);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    .toast.success {
+      border-left: 4px solid var(--teal);
+    }
+    .toast.error {
+      border-left: 4px solid var(--red);
+    }
+    .toast.info {
+      border-left: 4px solid #3b82f6; /* Blue info color */
+    }
+    .toast-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    .toast-content {
+      flex: 1;
+      line-height: 1.4;
+    }
+    .toast-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+    .toast-close:hover {
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -515,7 +581,7 @@
 
   function toggleSlot(iso, time, existingId, isBooked) {
     if (!currentDoctorId) {
-      alert("Iltimos, avval boshqarish uchun shifokorni tanlang!");
+      showToast("Iltimos, avval boshqarish uchun shifokorni tanlang!", "error");
       return;
     }
     if (isBooked) return;
@@ -593,8 +659,8 @@
       }
       pendingChanges = {};
       await loadGrid();
-      alert("Muvaffaqiyatli saqlandi!");
-    } catch (e) { alert("Xatolik yuz berdi"); }
+      showToast("Muvaffaqiyatli saqlandi!", "success");
+    } catch (e) { showToast("Xatolik yuz berdi", "error"); }
     btn.disabled = false; btn.textContent = 'Saqlash';
   }
 
@@ -648,7 +714,7 @@
   function copySelectedDay() {
     const isoDate = document.getElementById('copy-day-select').value;
     if (!isoDate) {
-      alert("Iltimos, nusxalash uchun kunni tanlang!");
+      showToast("Iltimos, nusxalash uchun kunni tanlang!", "error");
       return;
     }
 
@@ -761,7 +827,7 @@
     }
 
     renderGrid();
-    alert("Nusxalangan shablon haftadagi barcha kunlarga qo'llandi! Tasdiqlash uchun pastdagi 'Saqlash' tugmasini bosing.");
+    showToast("Nusxalangan shablon haftadagi barcha kunlarga qo'llandi! Tasdiqlash uchun pastdagi 'Saqlash' tugmasini bosing.", "info");
   }
 
   function pasteToDay(targetIso, event) {
@@ -813,6 +879,36 @@
     renderGrid();
   }
 
+  function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    let icon = '✨';
+    if (type === 'success') icon = '✅';
+    else if (type === 'error') icon = '❌';
+    else if (type === 'info') icon = 'ℹ️';
+
+    toast.innerHTML = `
+      <div class="toast-icon">${icon}</div>
+      <div class="toast-content">${message}</div>
+      <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+    `;
+
+    container.appendChild(toast);
+
+    // Trigger animation
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // Auto dismiss
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 400);
+    }, 4000);
+  }
+
   function cancelCopyState() {
     copiedSchedule = null;
     copiedDayLabel = '';
@@ -823,5 +919,6 @@
     renderGrid();
   }
 </script>
+<div id="toast-container"></div>
 </body>
 </html>
