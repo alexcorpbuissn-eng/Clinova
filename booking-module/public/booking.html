@@ -166,7 +166,14 @@
               <div class="form-group"><label>Ism *</label><input id="fFirst" type="text" required placeholder="Ism"/></div>
               <div class="form-group"><label>Familiya *</label><input id="fLast" type="text" required placeholder="Familiya"/></div>
             </div>
-            <div class="form-group"><label>Telefon *</label><input id="fPhone" type="tel" required placeholder="+998 90 000 00 00" pattern="^\+998 \d{2} \d{3} \d{2} \d{2}$"/></div>
+            <div class="form-group">
+              <label>Telefon *</label>
+              <input id="fPhone" type="tel" required placeholder="+998 90 000 00 00" pattern="^\+998 \d{2} \d{3} \d{2} \d{2}$"/>
+              <label class="checkbox-label" style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:0.85rem; color:var(--text-muted); cursor:pointer; font-weight: 500;">
+                <input type="checkbox" id="fAltPhoneCheck" style="width:16px; height:16px; cursor:pointer;" />
+                Bog'lanish uchun boshqa raqam ko'rsatish
+              </label>
+            </div>
             <div class="form-group">
               <label>Muammo tavsifi (ixtiyoriy)</label>
               <textarea id="fDesc" rows="3" maxlength="500" placeholder="Qisqacha tasvirlang..." style="resize:vertical;padding:12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.9rem;outline:none;width:100%;box-sizing:border-box"></textarea>
@@ -289,14 +296,20 @@ function showToast(msg) {
   }, 3500);
 }
 
-// ── Auth Check ───────────────────────────────────────────────────────────
+// ── Auth Check & Profile Pre-filling ─────────────────────────────────────
+let originalVerifiedPhone = '';
+
 if (!localStorage.getItem('patientId')) {
   window.location.href = 'login.html?return=booking.html';
 } else {
   patientId = localStorage.getItem('patientId');
   if (localStorage.getItem('fFirst')) document.getElementById('fFirst').value = localStorage.getItem('fFirst');
   if (localStorage.getItem('fLast')) document.getElementById('fLast').value = localStorage.getItem('fLast');
-  if (localStorage.getItem('fPhone')) document.getElementById('fPhone').value = localStorage.getItem('fPhone');
+  if (localStorage.getItem('fPhone')) {
+    document.getElementById('fPhone').value = localStorage.getItem('fPhone');
+    originalVerifiedPhone = localStorage.getItem('fPhone');
+  }
+  loadPatientProfile();
 }
 
 // ── STEP 1: Load doctors ─────────────────────────────────────────────────
@@ -497,6 +510,79 @@ document.getElementById('patient-form').addEventListener('submit', async e => {
   } catch(e) { err('err3',"Server xatosi. Qayta urinib ko'ring."); }
   btn.disabled=false; btn.textContent='Tasdiqlash';
 });
+
+// ── Profile Loader & Alternative Phone Support ───────────────────────────
+async function loadPatientProfile() {
+  patientId = localStorage.getItem('patientId');
+  if (!patientId) return;
+  try {
+    const res = await fetch(`${API}/api/public/profile?patientId=${patientId}`);
+    const data = await res.json();
+    if (data.success && data.patient) {
+      const p = data.patient;
+      
+      // Update inputs if they are empty
+      if (p.firstName && !document.getElementById('fFirst').value) {
+        document.getElementById('fFirst').value = p.firstName;
+      }
+      if (p.lastName && !document.getElementById('fLast').value) {
+        document.getElementById('fLast').value = p.lastName;
+      }
+      
+      // Store the official Telegram verified phone
+      originalVerifiedPhone = p.telegramPhone || p.phone || '';
+      
+      // Format it beautifully if it has 12 digits (+998901234567 -> +998 90 123 45 67)
+      if (originalVerifiedPhone && !originalVerifiedPhone.includes(' ')) {
+        const digits = originalVerifiedPhone.replace(/\D/g, '');
+        if (digits.startsWith('998') && digits.length === 12) {
+          const d = digits.slice(3);
+          originalVerifiedPhone = `+998 ${d.slice(0,2)} ${d.slice(2,5)} ${d.slice(5,7)} ${d.slice(7,9)}`;
+        }
+      }
+      
+      // Prefill phone input if empty
+      const phoneInput = document.getElementById('fPhone');
+      if (!phoneInput.value && originalVerifiedPhone) {
+        phoneInput.value = originalVerifiedPhone;
+      }
+      
+      updatePhoneInputState();
+    }
+  } catch (err) {
+    console.error("Error loading patient profile:", err);
+  }
+}
+
+function updatePhoneInputState() {
+  const phoneInput = document.getElementById('fPhone');
+  const checkbox = document.getElementById('fAltPhoneCheck');
+  
+  if (!checkbox) return;
+  
+  if (checkbox.checked) {
+    // Enable input to let them type their alternative number
+    phoneInput.disabled = false;
+    phoneInput.style.background = '#fff';
+    phoneInput.style.color = 'var(--navy)';
+    phoneInput.style.cursor = 'text';
+    phoneInput.placeholder = "+998 90 000 00 00";
+    phoneInput.focus();
+  } else {
+    // Disable input and pre-fill with verified number
+    phoneInput.disabled = true;
+    phoneInput.style.background = '#f1f5f9'; // Slate 100
+    phoneInput.style.color = '#64748b'; // Slate 500
+    phoneInput.style.cursor = 'not-allowed';
+    if (originalVerifiedPhone) {
+      phoneInput.value = originalVerifiedPhone;
+    }
+  }
+}
+
+if (document.getElementById('fAltPhoneCheck')) {
+  document.getElementById('fAltPhoneCheck').addEventListener('change', updatePhoneInputState);
+}
 
 // ── Navigation ───────────────────────────────────────────────────────────
 document.getElementById('back12').onclick = () => { selProc=null; selSlot=null; setStep(1); };
