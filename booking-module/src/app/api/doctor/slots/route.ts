@@ -45,6 +45,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const payload = await requireDoctorOrAdmin(request);
   if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (payload.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Faqatgina administrator jadvalni o\'zgartirishi mumkin' }, { status: 403 });
+  }
 
   const body = await request.json();
   
@@ -89,6 +92,9 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const payload = await requireDoctorOrAdmin(request);
   if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (payload.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Faqatgina administrator jadvalni o\'zgartirishi mumkin' }, { status: 403 });
+  }
 
   const body = await request.json();
   const { slotId } = body;

@@ -87,6 +87,35 @@
       .header { flex-direction: column; align-items: flex-start; gap: 15px; }
       .table-card { overflow-x: auto; }
       td, th { white-space: nowrap; }
+    /* Weekly Grid Scheduling for Admin */
+    .weekly-container { background: var(--surface); border-radius: 20px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.04); margin-bottom: 28px; }
+    .weekly-header { display: grid; grid-template-columns: 80px repeat(7, 1fr); background: var(--navy); color: #fff; text-align: center; border-bottom: 1px solid #1e293b; }
+    .weekly-header-cell { padding: 15px 5px; border-right: 1px solid #1e293b; }
+    .weekly-header-cell:last-child { border-right: none; }
+    .weekly-header-cell .day-name { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7; font-weight: 700; }
+    .weekly-header-cell .day-date { font-size: 1.1rem; font-weight: 700; display: block; margin-top: 2px; }
+    .weekly-header-cell.today { background: var(--teal); color: #fff; }
+
+    .weekly-grid { display: grid; grid-template-columns: 80px repeat(7, 1fr); max-height: 600px; overflow-y: auto; }
+    .time-col { background: #f1f5f9; border-right: 1px solid var(--border); }
+    .time-cell { height: 50px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    
+    .day-col { border-right: 1px solid var(--border); position: relative; }
+    .day-col:last-child { border-right: none; }
+    .grid-cell { height: 50px; border-bottom: 1px solid #f1f5f9; position: relative; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; }
+    .grid-cell:hover { background: var(--teal-light); }
+    
+    .slot-btn { width: 100%; height: 100%; border-radius: 8px; border: 1px dashed var(--border); background: none; transition: all 0.2s; cursor: pointer; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); }
+    .slot-btn.active { background: #dcfce7; border: 1px solid #16a34a; color: #16a34a; }
+    .slot-btn.pending { background: #fef9c3; border: 1px dashed #ca8a04; color: #854d0e; }
+    .slot-btn.booked { background: #e0f2fe; border: 1px solid #0284c7; color: #0369a1; cursor: not-allowed; }
+    .slot-btn.booked span { display: block; font-size: 0.6rem; opacity: 0.8; }
+    .slot-btn.disabled { opacity: 0.4; cursor: not-allowed; background: #f1f5f9; }
+
+    .grid-footer { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border-top: 1px solid var(--border); }
+    .legend { display: flex; gap: 20px; font-size: 0.8rem; color: var(--text-muted); }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
     }
   </style>
 </head>
@@ -148,6 +177,7 @@
       <div class="nav-item" onclick="switchTab('doctors')">Shifokorlar</div>
       <div class="nav-item" onclick="switchTab('users')">Ruxsatlar</div>
       <div class="nav-item" onclick="switchTab('procedures')">Xizmatlar (Narxlar)</div>
+      <div class="nav-item" onclick="switchTab('schedule')">Jadval boshqaruvi</div>
       <div style="flex:1"></div>
       <div class="nav-item" onclick="window.open('reception.html','_blank')" style="color:#86efac">Qabul Daftari</div>
       <div class="nav-item" onclick="logout()" style="color:#fca5a5">Chiqish</div>
@@ -327,6 +357,55 @@
               <tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- SCHEDULE MANAGEMENT TAB -->
+      <div id="tab-schedule" class="tab-content" style="display:none;">
+        <div class="header">
+          <h1>Jadval boshqaruvi</h1>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <label style="font-weight:600; color:var(--navy);">Shifokorni tanlang:</label>
+            <select id="schedule-doc-select" style="background:#fff; color:var(--navy); border:1.5px solid var(--border); padding:8px 16px; border-radius:10px; font-family:inherit; font-size:0.9rem; outline:none; cursor:pointer;" onchange="switchScheduleDoctor(this.value)">
+              <option value="">Shifokor tanlang...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="weekly-container" id="admin-schedule-container" style="display:none; margin-top:20px;">
+          <!-- Shablon Asboblari (Copy/Paste toolbar) -->
+          <div class="schedule-toolbar" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; background:#1e293b; padding:12px 20px; border-bottom:1px solid #334155; color:#fff; font-size:0.85rem; gap:12px; border-radius: 12px 12px 0 0;">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <span>📋 <strong>Kunlik jadval shabloni:</strong></span>
+              <select id="admin-copy-day-select" style="background:#0f172a; color:#fff; border:1px solid #475569; padding:6px 12px; border-radius:8px; font-family:inherit; font-size:0.8rem; outline:none; cursor:pointer;">
+                <option value="">Kunni tanlang...</option>
+              </select>
+              <button onclick="adminCopySelectedDay()" class="btn" style="padding:6px 14px; font-size:0.8rem; background:var(--teal); color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:5px; width:auto; margin:0;">📋 Nusxalash</button>
+            </div>
+            <div id="admin-paste-actions-wrap" style="display:none; align-items:center; gap:10px; flex-wrap:wrap;">
+              <span id="admin-copied-status-msg" style="color:#2dd4bf; font-weight:600; font-size:0.8rem; margin-right:5px;"></span>
+              <button onclick="adminApplyToAllDays()" class="btn" style="padding:6px 14px; font-size:0.8rem; background:var(--teal); color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:5px; width:auto; margin:0;">🔁 Haftaga qo'llash (Barchaga)</button>
+              <button onclick="adminCancelCopyState()" class="btn" style="padding:6px 12px; font-size:0.8rem; border:1px solid #475569; color:#94a3b8; border-radius:8px; cursor:pointer; background:none; width:auto; margin:0;">Bekor qilish</button>
+            </div>
+          </div>
+
+          <div class="weekly-header" id="admin-grid-header"></div>
+          <div class="weekly-grid">
+            <div class="time-col" id="admin-time-labels"></div>
+            <div id="admin-grid-columns" style="display:contents;"></div>
+          </div>
+          <div class="grid-footer">
+            <div class="legend">
+              <div class="legend-item"><div class="legend-dot" style="border:1px dashed var(--border)"></div> Bo'sh</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#16a34a; border:1px solid #16a34a"></div> Ochiq</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#fef9c3; border:1px dashed #ca8a04;"></div> Saqlanmoqda</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#e0f2fe; border:1px solid #0284c7;"></div> Band</div>
+            </div>
+            <div style="display:flex; gap:12px;">
+              <button class="btn" onclick="loadAdminScheduleGrid()" style="width:auto; background:none; border:1.5px solid var(--border); color:var(--text-muted); margin:0;">Yangilash</button>
+              <button class="btn" id="admin-btn-save-grid" onclick="saveAdminGridChanges()" style="width:auto; background:var(--navy); color:#fff; margin:0;">Saqlash</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -655,6 +734,7 @@
       if (tab === 'doctors') loadDoctors();
       if (tab === 'users') loadUsers();
       if (tab === 'procedures') loadProcedures();
+      if (tab === 'schedule') loadScheduleTab();
     }
 
     async function apiGet(endpoint) {
@@ -1054,6 +1134,425 @@
       });
     }
     document.querySelectorAll('input[type="tel"]').forEach(applyPhoneFormatter);
+
+    // ---- Schedule Tab Logic ----
+    let adminAllSlots = [];
+    let adminPendingChanges = {};
+    let adminCopiedSchedule = null;
+    let adminCopiedDayLabel = '';
+    let adminCurrentDoctorId = null;
+
+    const ADMIN_START_HOUR = 8;
+    const ADMIN_END_HOUR = 19;
+    const ADMIN_INTERVAL = 30;
+
+    async function loadScheduleTab() {
+      const select = document.getElementById('schedule-doc-select');
+      select.innerHTML = '<option value="">Shifokor yuklanmoqda...</option>';
+      try {
+        const data = await apiGet('/api/admin/doctors');
+        if (data.success) {
+          select.innerHTML = '<option value="">Shifokor tanlang...</option>' +
+            data.doctors.map(d => `<option value="${d.id}" ${adminCurrentDoctorId === d.id ? 'selected' : ''}>Dr. ${d.firstName} ${d.lastName} (${d.specialty})</option>`).join('');
+          
+          if (adminCurrentDoctorId) {
+            document.getElementById('admin-schedule-container').style.display = 'block';
+            loadAdminScheduleGrid();
+          } else {
+            document.getElementById('admin-schedule-container').style.display = 'none';
+          }
+        }
+      } catch (err) {
+        select.innerHTML = '<option value="">Yuklashda xatolik</option>';
+      }
+    }
+
+    function switchScheduleDoctor(docId) {
+      adminCurrentDoctorId = docId || null;
+      adminPendingChanges = {};
+      adminCancelCopyState();
+      
+      if (adminCurrentDoctorId) {
+        document.getElementById('admin-schedule-container').style.display = 'block';
+        loadAdminScheduleGrid();
+      } else {
+        document.getElementById('admin-schedule-container').style.display = 'none';
+      }
+    }
+
+    async function loadAdminScheduleGrid() {
+      if (!adminCurrentDoctorId) return;
+      
+      const container = document.getElementById('admin-grid-columns');
+      container.innerHTML = '<div style="grid-column: 1 / span 8; text-align: center; padding: 40px; color: var(--text-muted);">Yuklanmoqda...</div>';
+      
+      try {
+        const data = await apiGet(`/api/doctor/slots?doctorId=${adminCurrentDoctorId}`);
+        if (data.success) {
+          adminAllSlots = data.slots;
+          renderAdminGrid();
+        }
+      } catch (err) {
+        container.innerHTML = '<div style="grid-column: 1 / span 8; text-align: center; padding: 40px; color: var(--red);">Yuklashda xatolik yuz berdi</div>';
+      }
+    }
+
+    function renderAdminGrid() {
+      const header = document.getElementById('admin-grid-header');
+      const labels = document.getElementById('admin-time-labels');
+      const columns = document.getElementById('admin-grid-columns');
+      
+      const days = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() + i);
+        days.push(d);
+      }
+
+      // Update copy dropdown dynamically
+      const copySelect = document.getElementById('admin-copy-day-select');
+      if (copySelect) {
+        const prevVal = copySelect.value;
+        copySelect.innerHTML = '<option value="">Kunni tanlang...</option>' + 
+          days.map(d => {
+            const iso = getLocalISO(d);
+            const name = d.toLocaleDateString('uz-UZ', { weekday: 'long' });
+            const dateStr = d.getDate();
+            const monthStr = d.toLocaleDateString('uz-UZ', { month: 'short' });
+            return `<option value="${iso}">${name} (${dateStr} ${monthStr})</option>`;
+          }).join('');
+        if (prevVal) copySelect.value = prevVal;
+      }
+
+      header.innerHTML = '<div class="weekly-header-cell" style="width:80px"></div>' + 
+        days.map(d => {
+          const iso = getLocalISO(d);
+          const isToday = iso === getLocalISO(new Date());
+          
+          const sourceIso = copySelect ? copySelect.value : '';
+          const showPaste = (adminCopiedSchedule !== null) && iso !== sourceIso;
+          const pasteBtn = showPaste ? `
+            <button onclick="adminPasteToDay('${iso}', event)" title="Nusxalangan jadvalni shu kunga joylash" style="background:rgba(255,255,255,0.2); color:#fff; border:1px solid rgba(255,255,255,0.3); padding:2px 6px; border-radius:6px; font-size:0.65rem; margin-top:5px; cursor:pointer; display:inline-block; transition:all 0.2s;" onmouseover="this.style.background='var(--teal)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">📥 Joylash</button>
+          ` : '';
+
+          return `
+            <div class="weekly-header-cell ${isToday ? 'today' : ''}" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:80px;">
+              <span class="day-name">${d.toLocaleDateString('uz-UZ', { weekday: 'short' })}</span>
+              <span class="day-date" style="font-size:1.1rem; font-weight:700; margin-top:2px;">${d.getDate()}</span>
+              ${pasteBtn}
+            </div>
+          `;
+        }).join('');
+
+      const times = [];
+      for (let h = ADMIN_START_HOUR; h <= ADMIN_END_HOUR; h++) {
+        for (let m = 0; m < 60; m += ADMIN_INTERVAL) {
+          const t = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+          times.push(t);
+        }
+      }
+      labels.innerHTML = times.map(t => `<div class="time-cell">${t}</div>`).join('');
+
+      columns.innerHTML = days.map(d => {
+        const iso = getLocalISO(d);
+        return `
+          <div class="day-col">
+            ${times.map(t => {
+              const key = `${iso}_${t}`;
+              
+              const [h, m] = t.split(':');
+              const slotDateTime = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Number(h), Number(m));
+              const isPast = slotDateTime < new Date();
+
+              const existing = adminAllSlots.find(s => {
+                const sStart = new Date(s.startTime);
+                const sEnd = new Date(sStart.getTime() + s.duration * 60000);
+                return slotDateTime >= sStart && slotDateTime < sEnd;
+              });
+              
+              let statusClass = '';
+              let label = '';
+              if (existing) {
+                statusClass = existing.appointment ? 'booked' : 'active';
+                if (existing.appointment) label = '<span>Band</span>';
+              }
+              
+              if (adminPendingChanges[key] === 'add') statusClass = 'pending';
+              if (adminPendingChanges[key] === 'remove') statusClass = '';
+              
+              if (isPast && !existing) {
+                statusClass += ' disabled';
+              }
+
+              const onClickAttr = isPast ? '' : `onclick="toggleAdminSlot('${iso}', '${t}', '${existing ? existing.id : ''}', ${existing && existing.appointment ? 'true' : 'false'})"`;
+
+              return `
+                <div class="grid-cell" ${onClickAttr}>
+                  <button class="slot-btn ${statusClass}">${label}</button>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleAdminSlot(iso, time, existingId, isBooked) {
+      if (isBooked) return;
+      const key = `${iso}_${time}`;
+      const action = adminPendingChanges[key];
+
+      const existing = adminAllSlots.find(s => {
+        const sStart = new Date(s.startTime);
+        const sEnd = new Date(sStart.getTime() + s.duration * 60000);
+        const [h, m] = time.split(':');
+        const [yr, mo, dy] = iso.split('-');
+        const slotDateTime = new Date(yr, mo - 1, dy, h, m);
+        return slotDateTime >= sStart && slotDateTime < sEnd;
+      });
+
+      if (existing) {
+        if (action === 'remove') delete adminPendingChanges[key];
+        else adminPendingChanges[key] = 'remove';
+      } else {
+        if (action === 'add') delete adminPendingChanges[key];
+        else adminPendingChanges[key] = 'add';
+      }
+      renderAdminGrid();
+    }
+
+    async function saveAdminGridChanges() {
+      const btn = document.getElementById('admin-btn-save-grid');
+      const toCreate = [];
+      const toDelete = [];
+
+      for (const [key, action] of Object.entries(adminPendingChanges)) {
+        const [iso, time] = key.split('_');
+        const [h, m] = time.split(':');
+        const [yr, mo, dy] = iso.split('-');
+        const dt = new Date(yr, mo - 1, dy, h, m);
+        
+        if (action === 'add') {
+          toCreate.push({ startTime: dt.toISOString(), duration: ADMIN_INTERVAL });
+        } else if (action === 'remove') {
+          const existing = adminAllSlots.find(s => {
+            const sStart = new Date(s.startTime);
+            const sEnd = new Date(sStart.getTime() + s.duration * 60000);
+            return dt >= sStart && dt < sEnd;
+          });
+          if (existing && !toDelete.includes(existing.id)) toDelete.push(existing.id);
+        }
+      }
+
+      toCreate.sort((a,b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+      const mergedCreate = [];
+      for (const slot of toCreate) {
+        const prev = mergedCreate[mergedCreate.length - 1];
+        if (prev && new Date(prev.startTime).getTime() + prev.duration * 60000 === new Date(slot.startTime).getTime()) {
+          prev.duration += ADMIN_INTERVAL;
+        } else {
+          mergedCreate.push({...slot});
+        }
+      }
+
+      if (!mergedCreate.length && !toDelete.length) return;
+      btn.disabled = true; btn.textContent = 'Saqlanmoqda...';
+
+      try {
+        const t = localStorage.getItem('admin_token');
+        for (const id of toDelete) {
+          await fetch('/api/doctor/slots', {
+            method: 'DELETE', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${t}` },
+            body: JSON.stringify({ slotId: id, doctorId: adminCurrentDoctorId })
+          });
+        }
+        if (mergedCreate.length) {
+          await fetch('/api/doctor/slots', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${t}` },
+            body: JSON.stringify({ doctorId: adminCurrentDoctorId, slots: mergedCreate })
+          });
+        }
+        adminPendingChanges = {};
+        await loadAdminScheduleGrid();
+        alert("Muvaffaqiyatli saqlandi!");
+      } catch (e) { alert("Xatolik yuz berdi"); }
+      btn.disabled = false; btn.textContent = 'Saqlash';
+    }
+
+    function adminCopySelectedDay() {
+      const isoDate = document.getElementById('admin-copy-day-select').value;
+      if (!isoDate) {
+        alert("Iltimos, nusxalash uchun kunni tanlang!");
+        return;
+      }
+
+      const select = document.getElementById('admin-copy-day-select');
+      adminCopiedDayLabel = select.options[select.selectedIndex].text;
+
+      const times = [];
+      for (let h = ADMIN_START_HOUR; h <= ADMIN_END_HOUR; h++) {
+        for (let m = 0; m < 60; m += ADMIN_INTERVAL) {
+          const t = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+          times.push(t);
+        }
+      }
+
+      adminCopiedSchedule = [];
+      for (const t of times) {
+        const key = `${isoDate}_${t}`;
+        const [h_str, m_str] = t.split(':');
+        const slotDateTime = new Date(
+          Number(isoDate.split('-')[0]),
+          Number(isoDate.split('-')[1]) - 1,
+          Number(isoDate.split('-')[2]),
+          Number(h_str),
+          Number(m_str)
+        );
+
+        const existing = adminAllSlots.find(s => {
+          const sStart = new Date(s.startTime);
+          const sEnd = new Date(sStart.getTime() + s.duration * 60000);
+          return slotDateTime >= sStart && slotDateTime < sEnd;
+        });
+
+        const action = adminPendingChanges[key];
+        let isOpen = false;
+
+        if (existing) {
+          if (action !== 'remove' && !existing.appointment) isOpen = true;
+        } else {
+          if (action === 'add') isOpen = true;
+        }
+
+        if (isOpen) {
+          adminCopiedSchedule.push(t);
+        }
+      }
+
+      document.getElementById('admin-copied-status-msg').textContent = `📋 ${adminCopiedDayLabel} nusxalandi (${adminCopiedSchedule.length} ta ochiq soat)`;
+      document.getElementById('admin-paste-actions-wrap').style.display = 'flex';
+      renderAdminGrid();
+    }
+
+    function adminApplyToAllDays() {
+      if (!adminCopiedSchedule) return;
+      
+      const days = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() + i);
+        days.push(d);
+      }
+
+      const times = [];
+      for (let h = ADMIN_START_HOUR; h <= ADMIN_END_HOUR; h++) {
+        for (let m = 0; m < 60; m += ADMIN_INTERVAL) {
+          const t = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+          times.push(t);
+        }
+      }
+
+      const sourceIso = document.getElementById('admin-copy-day-select').value;
+
+      for (const d of days) {
+        const iso = getLocalISO(d);
+        if (iso === sourceIso) continue;
+
+        for (const t of times) {
+          const key = `${iso}_${t}`;
+          const [h_str, m_str] = t.split(':');
+          const slotDateTime = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Number(h_str), Number(m_str));
+          
+          if (slotDateTime < new Date()) continue;
+
+          const existing = adminAllSlots.find(s => {
+            const sStart = new Date(s.startTime);
+            const sEnd = new Date(sStart.getTime() + s.duration * 60000);
+            return slotDateTime >= sStart && slotDateTime < sEnd;
+          });
+
+          if (existing && existing.appointment) continue;
+
+          const shouldBeOpen = adminCopiedSchedule.includes(t);
+
+          if (shouldBeOpen) {
+            if (existing) {
+              if (adminPendingChanges[key] === 'remove') delete adminPendingChanges[key];
+            } else {
+              adminPendingChanges[key] = 'add';
+            }
+          } else {
+            if (existing) {
+              adminPendingChanges[key] = 'remove';
+            } else {
+              if (adminPendingChanges[key] === 'add') delete adminPendingChanges[key];
+            }
+          }
+        }
+      }
+
+      renderAdminGrid();
+      alert("Nusxalangan shablon haftadagi barcha kunlarga qo'llandi! Tasdiqlash uchun pastdagi 'Saqlash' tugmasini bosing.");
+    }
+
+    function adminPasteToDay(targetIso, event) {
+      if (event) event.stopPropagation();
+      if (!adminCopiedSchedule) return;
+
+      const times = [];
+      for (let h = ADMIN_START_HOUR; h <= ADMIN_END_HOUR; h++) {
+        for (let m = 0; m < 60; m += ADMIN_INTERVAL) {
+          const t = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+          times.push(t);
+        }
+      }
+
+      const [yr, mo, dy] = targetIso.split('-');
+
+      for (const t of times) {
+        const key = `${targetIso}_${t}`;
+        const [h_str, m_str] = t.split(':');
+        const slotDateTime = new Date(Number(yr), Number(mo) - 1, Number(dy), Number(h_str), Number(m_str));
+        
+        if (slotDateTime < new Date()) continue;
+
+        const existing = adminAllSlots.find(s => {
+          const sStart = new Date(s.startTime);
+          const sEnd = new Date(sStart.getTime() + s.duration * 60000);
+          return slotDateTime >= sStart && slotDateTime < sEnd;
+        });
+
+        if (existing && existing.appointment) continue;
+
+        const shouldBeOpen = adminCopiedSchedule.includes(t);
+
+        if (shouldBeOpen) {
+          if (existing) {
+            if (adminPendingChanges[key] === 'remove') delete adminPendingChanges[key];
+          } else {
+            adminPendingChanges[key] = 'add';
+          }
+        } else {
+          if (existing) {
+            adminPendingChanges[key] = 'remove';
+          } else {
+            if (adminPendingChanges[key] === 'add') delete adminPendingChanges[key];
+          }
+        }
+      }
+
+      renderAdminGrid();
+    }
+
+    function adminCancelCopyState() {
+      adminCopiedSchedule = null;
+      adminCopiedDayLabel = '';
+      const select = document.getElementById('admin-copy-day-select');
+      if (select) select.value = '';
+      const wrap = document.getElementById('admin-paste-actions-wrap');
+      if (wrap) wrap.style.display = 'none';
+      renderAdminGrid();
+    }
   </script>
 </body>
 </html>

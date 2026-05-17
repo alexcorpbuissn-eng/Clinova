@@ -176,6 +176,10 @@
         <label>Bemor ismi *</label>
         <input type="text" id="f-patient" required placeholder="To'liq ism" />
       </div>
+      <div class="form-group" id="f-phone-group">
+        <label>Telefon raqami *</label>
+        <input type="tel" id="f-phone" placeholder="+998 90 000 00 00" />
+      </div>
       <div class="form-group">
         <label>Xizmat turi *</label>
         <select id="f-service" required>
@@ -421,6 +425,33 @@
     await loadAppointments();
     await loadActiveVisits();
     await loadVisits();
+
+    // Initialize auto-formatting mask for patient phone
+    const fPhone = document.getElementById('f-phone');
+    if (fPhone) {
+      fPhone.addEventListener('input', function(e) {
+        let x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,2})(\d{0,3})(\d{0,2})(\d{0,2})/);
+        if (!x[1]) {
+          e.target.value = '+998 ';
+          return;
+        }
+        if (x[1] !== '998') {
+          x[1] = '998';
+        }
+        let val = '+998';
+        if (x[2]) val += ' ' + x[2];
+        if (x[3]) val += ' ' + x[3];
+        if (x[4]) val += ' ' + x[4];
+        if (x[5]) val += ' ' + x[5];
+        e.target.value = val;
+      });
+
+      fPhone.addEventListener('focus', function(e) {
+        if (!e.target.value) {
+          e.target.value = '+998 ';
+        }
+      });
+    }
   }
 
   // ── Tabs ──────────────────────────────────────────────────────
@@ -748,6 +779,7 @@
 
     const doctorId = document.getElementById('f-doctor').value;
     const patientName = document.getElementById('f-patient').value.trim();
+    const patientPhone = document.getElementById('f-phone').value.trim();
     const serviceVal = document.getElementById('f-service').value;
     const serviceName = serviceVal === '__custom__'
       ? document.getElementById('f-service-custom').value.trim()
@@ -764,12 +796,18 @@
       return;
     }
 
+    if (visitSource === 'WALKIN' && (!patientPhone || !/^\+998 \d{2} \d{3} \d{2} \d{2}$/.test(patientPhone))) {
+      errEl.textContent = 'Iltimos, to\'g\'ri telefon raqamini kiriting (+998 XX XXX XX XX).';
+      errEl.style.display = 'block';
+      return;
+    }
+
     btn.disabled = true; const oldTxt = btn.textContent; btn.textContent = '...';
     try {
       const res = await fetch('/api/admin/visits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
-        body: JSON.stringify({ doctorId, patientName, serviceName, price, source: visitSource, startTime, endTime, status, note })
+        body: JSON.stringify({ doctorId, patientName, serviceName, price, source: visitSource, startTime, endTime, status, note, patientPhone })
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -777,6 +815,7 @@
         setTimeout(() => toast.style.display = 'none', 4000);
         // Reset form
         document.getElementById('f-patient').value = '';
+        document.getElementById('f-phone').value = '';
         document.getElementById('f-price').value = '';
         document.getElementById('f-note').value = '';
         document.getElementById('f-service').selectedIndex = 0;
