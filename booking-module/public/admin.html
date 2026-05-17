@@ -292,7 +292,7 @@
           <table>
             <thead>
               <tr>
-                <th>TELEFON</th>
+                <th>XODIM / TELEFON</th>
                 <th>ROL</th>
                 <th>SHIFOKOR</th>
                 <th>YARATILGAN SANA</th>
@@ -888,7 +888,10 @@
 
             tbody.innerHTML = data.users.map(u => `
               <tr>
-                <td>${u.telegramPhone}</td>
+                <td>
+                  <strong>${u.name || 'Noma\'lum (Bemor emas)'}</strong><br>
+                  <small style="color:var(--text-muted)">${u.telegramPhone}</small>
+                </td>
                 <td><span class="badge ${u.role === 'ADMIN' ? 'badge-cancelled' : u.role === 'DOCTOR' ? 'badge-scheduled' : 'badge-completed'}">${u.role}</span></td>
                 <td>${u.doctorId && doctorMap[u.doctorId] ? doctorMap[u.doctorId] : (u.doctorId || '-')}</td>
                 <td>${new Date(u.createdAt).toLocaleString('uz-UZ')}</td>

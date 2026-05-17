@@ -21,7 +21,27 @@ export async function GET(request: NextRequest) {
     orderBy: { createdAt: 'desc' }
   });
 
-  return NextResponse.json({ success: true, users });
+  const phones = users.map(u => u.telegramPhone);
+  const patients = await prisma.patient.findMany({
+    where: { telegramPhone: { in: phones } },
+    select: {
+      telegramPhone: true,
+      firstName: true,
+      lastName: true
+    }
+  });
+
+  const patientMap: Record<string, string> = {};
+  for (const p of patients) {
+    patientMap[p.telegramPhone] = `${p.firstName} ${p.lastName}`;
+  }
+
+  const usersWithName = users.map(u => ({
+    ...u,
+    name: patientMap[u.telegramPhone] || null
+  }));
+
+  return NextResponse.json({ success: true, users: usersWithName });
 }
 
 // POST /api/admin/users
