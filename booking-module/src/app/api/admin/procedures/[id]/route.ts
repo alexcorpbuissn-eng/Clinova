@@ -24,12 +24,25 @@ export async function PATCH(
   }
 
   try {
-    const procedure = await prisma.procedure.update({
+    const target = await prisma.procedure.findUnique({
       where: { id },
+      include: { doctor: true }
+    });
+
+    if (!target) {
+      return NextResponse.json({ error: 'Procedure not found' }, { status: 404 });
+    }
+
+    await prisma.procedure.updateMany({
+      where: {
+        name: target.name,
+        doctor: { specialty: target.doctor.specialty }
+      },
       data: { price: body.price },
     });
-    return NextResponse.json({ success: true, procedure });
+
+    return NextResponse.json({ success: true, message: 'All specialty procedures updated' });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to update procedure' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to update procedures' }, { status: 500 });
   }
 }

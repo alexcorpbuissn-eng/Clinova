@@ -14,7 +14,7 @@ export async function PATCH(
   const token = authHeader.split(' ')[1];
   const payload = await verifyToken(token);
 
-  if (!payload || (payload.role !== 'ADMIN' && payload.role !== 'RECEPTION')) {
+  if (!payload || (payload.role !== 'ADMIN' && payload.role !== 'RECEPTION' && payload.role !== 'DOCTOR')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

@@ -619,16 +619,39 @@
             tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Xizmatlar topilmadi</td></tr>';
             return;
           }
-          tbody.innerHTML = data.procedures.map(p => `
+          
+          // Group procedures by specialty and name
+          const grouped = [];
+          const seenKeys = new Set();
+          
+          for (const p of data.procedures) {
+            const key = `${p.doctor.specialty.toLowerCase()}_${p.name.trim().toLowerCase()}`;
+            if (!seenKeys.has(key)) {
+              seenKeys.add(key);
+              grouped.push({
+                specialty: p.doctor.specialty,
+                name: p.name,
+                durationMinutes: p.durationMinutes,
+                price: p.price,
+                id: p.id
+              });
+            }
+          }
+
+          tbody.innerHTML = grouped.map((g, idx) => `
             <tr>
-              <td>Dr. ${p.doctor.firstName} ${p.doctor.lastName} <br><small style="color:var(--text-muted)">${p.doctor.specialty}</small></td>
-              <td><strong>${p.name}</strong></td>
-              <td>${p.durationMinutes} min</td>
               <td>
-                <input type="number" id="price-${p.id}" value="${p.price}" style="padding:8px; border:1px solid var(--border); border-radius:6px; width:120px;" /> so'm
+                <span class="badge badge-scheduled" style="font-size: 0.85rem; padding: 6px 12px; background: #e0f2fe; color: #0369a1;">
+                  ${g.specialty === 'Stomatolog' ? 'Stomatologiya' : g.specialty}
+                </span>
+              </td>
+              <td><strong>${g.name}</strong></td>
+              <td>${g.durationMinutes} min</td>
+              <td>
+                <input type="number" id="price-group-${idx}" value="${g.price}" style="padding:8px; border:1px solid var(--border); border-radius:6px; width:120px;" /> so'm
               </td>
               <td>
-                <button onclick="saveProcedurePrice('${p.id}')" class="btn" style="padding:8px 12px; font-size:0.8rem; width:auto;">Saqlash</button>
+                <button onclick="saveGroupedProcedurePrice('${g.id}', ${idx})" class="btn" style="padding:8px 12px; font-size:0.8rem; width:auto;">Saqlash</button>
               </td>
             </tr>
           `).join('');
@@ -638,8 +661,8 @@
       }
     }
 
-    async function saveProcedurePrice(id) {
-      const priceStr = document.getElementById(`price-${id}`).value;
+    async function saveGroupedProcedurePrice(id, idx) {
+      const priceStr = document.getElementById(`price-group-${idx}`).value;
       const price = parseInt(priceStr, 10);
       if (isNaN(price) || price < 0) {
         alert("Noto'g'ri narx kiritildi!");
@@ -652,7 +675,8 @@
           body: JSON.stringify({ price })
         });
         if (res.ok) {
-          alert("Narx saqlandi!");
+          alert("Narx barcha shifokorlar uchun saqlandi!");
+          loadProcedures();
         } else {
           alert("Saqlashda xatolik!");
         }
@@ -1223,7 +1247,14 @@
     const ADMIN_INTERVAL = 30;
 
     function getLocalISO(date) {
-      return date.toLocaleDateString('en-CA'); // YYYY-MM-DD
+      const tzOffset = 5 * 60 * 60 * 1000;
+      const utcMs = date.getTime() + (date.getTimezoneOffset() * 60 * 1000);
+      const tTime = new Date(utcMs + tzOffset);
+      return tTime.toISOString().slice(0, 10);
+    }
+
+    function parseTashkentDateTime(isoDateStr, timeStr) {
+      return new Date(`${isoDateStr}T${timeStr}:00+05:00`);
     }
 
     async function loadScheduleTab() {
@@ -1283,9 +1314,12 @@
       const columns = document.getElementById('admin-grid-columns');
       
       const days = [];
+      const now = new Date();
+      const tzOffset = 5 * 60 * 60 * 1000;
+      const utcMs = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
+      const tashkentNow = new Date(utcMs + tzOffset);
       for (let i = 0; i < 7; i++) {
-        const d = new Date();
-        d.setDate(d.getDate() + i);
+        const d = new Date(tashkentNow.getTime() + i * 24 * 60 * 60 * 1000);
         days.push(d);
       }
 
@@ -1339,15 +1373,13 @@
           <div class="day-col">
             ${times.map(t => {
               const key = `${iso}_${t}`;
-              
-              const [h, m] = t.split(':');
-              const slotDateTime = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Number(h), Number(m));
-              const isPast = slotDateTime < new Date();
+              const slotDateTime = parseTashkentDateTime(iso, t);
+              const isPast = slotDateTime.getTime() < Date.now();
 
               const existing = adminAllSlots.find(s => {
-                const sStart = new Date(s.startTime);
-                const sEnd = new Date(sStart.getTime() + s.duration * 60000);
-                return slotDateTime >= sStart && slotDateTime < sEnd;
+                const sStart = new Date(s.startTime).getTime();
+                const sEnd = sStart + s.duration * 60000;
+                return slotDateTime.getTime() >= sStart && slotDateTime.getTime() < sEnd;
               });
               
               let statusClass = '';
@@ -1384,12 +1416,9 @@
       const action = adminPendingChanges[key];
 
       const existing = adminAllSlots.find(s => {
-        const sStart = new Date(s.startTime);
-        const sEnd = new Date(sStart.getTime() + s.duration * 60000);
-        const [h, m] = time.split(':');
-        const [yr, mo, dy] = iso.split('-');
-        const slotDateTime = new Date(yr, mo - 1, dy, h, m);
-        return slotDateTime >= sStart && slotDateTime < sEnd;
+        const sStart = new Date(s.startTime).getTime();
+        const slotDateTime = parseTashkentDateTime(iso, time).getTime();
+        return slotDateTime === sStart;
       });
 
       if (existing) {
@@ -1409,17 +1438,14 @@
 
       for (const [key, action] of Object.entries(adminPendingChanges)) {
         const [iso, time] = key.split('_');
-        const [h, m] = time.split(':');
-        const [yr, mo, dy] = iso.split('-');
-        const dt = new Date(yr, mo - 1, dy, h, m);
+        const dt = parseTashkentDateTime(iso, time);
         
         if (action === 'add') {
           toCreate.push({ startTime: dt.toISOString(), duration: ADMIN_INTERVAL });
         } else if (action === 'remove') {
           const existing = adminAllSlots.find(s => {
-            const sStart = new Date(s.startTime);
-            const sEnd = new Date(sStart.getTime() + s.duration * 60000);
-            return dt >= sStart && dt < sEnd;
+            const sStart = new Date(s.startTime).getTime();
+            return dt.getTime() === sStart;
           });
           if (existing && !toDelete.includes(existing.id)) toDelete.push(existing.id);
         }
@@ -1473,19 +1499,12 @@
       adminCopiedSchedule = [];
       for (const t of times) {
         const key = `${isoDate}_${t}`;
-        const [h_str, m_str] = t.split(':');
-        const slotDateTime = new Date(
-          Number(isoDate.split('-')[0]),
-          Number(isoDate.split('-')[1]) - 1,
-          Number(isoDate.split('-')[2]),
-          Number(h_str),
-          Number(m_str)
-        );
+        const slotDateTime = parseTashkentDateTime(isoDate, t);
 
         const existing = adminAllSlots.find(s => {
-          const sStart = new Date(s.startTime);
-          const sEnd = new Date(sStart.getTime() + s.duration * 60000);
-          return slotDateTime >= sStart && slotDateTime < sEnd;
+          const sStart = new Date(s.startTime).getTime();
+          const sEnd = sStart + s.duration * 60000;
+          return slotDateTime.getTime() >= sStart && slotDateTime.getTime() < sEnd;
         });
 
         const action = adminPendingChanges[key];
@@ -1511,9 +1530,12 @@
       if (!adminCopiedSchedule) return;
       
       const days = [];
+      const now = new Date();
+      const tzOffset = 5 * 60 * 60 * 1000;
+      const utcMs = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
+      const tashkentNow = new Date(utcMs + tzOffset);
       for (let i = 0; i < 7; i++) {
-        const d = new Date();
-        d.setDate(d.getDate() + i);
+        const d = new Date(tashkentNow.getTime() + i * 24 * 60 * 60 * 1000);
         days.push(d);
       }
 
@@ -1533,15 +1555,14 @@
 
         for (const t of times) {
           const key = `${iso}_${t}`;
-          const [h_str, m_str] = t.split(':');
-          const slotDateTime = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Number(h_str), Number(m_str));
+          const slotDateTime = parseTashkentDateTime(iso, t);
           
-          if (slotDateTime < new Date()) continue;
+          if (slotDateTime.getTime() < Date.now()) continue;
 
           const existing = adminAllSlots.find(s => {
-            const sStart = new Date(s.startTime);
-            const sEnd = new Date(sStart.getTime() + s.duration * 60000);
-            return slotDateTime >= sStart && slotDateTime < sEnd;
+            const sStart = new Date(s.startTime).getTime();
+            const sEnd = sStart + s.duration * 60000;
+            return slotDateTime.getTime() >= sStart && slotDateTime.getTime() < sEnd;
           });
 
           if (existing && existing.appointment) continue;
@@ -1580,19 +1601,16 @@
         }
       }
 
-      const [yr, mo, dy] = targetIso.split('-');
-
       for (const t of times) {
         const key = `${targetIso}_${t}`;
-        const [h_str, m_str] = t.split(':');
-        const slotDateTime = new Date(Number(yr), Number(mo) - 1, Number(dy), Number(h_str), Number(m_str));
+        const slotDateTime = parseTashkentDateTime(targetIso, t);
         
-        if (slotDateTime < new Date()) continue;
+        if (slotDateTime.getTime() < Date.now()) continue;
 
         const existing = adminAllSlots.find(s => {
-          const sStart = new Date(s.startTime);
-          const sEnd = new Date(sStart.getTime() + s.duration * 60000);
-          return slotDateTime >= sStart && slotDateTime < sEnd;
+          const sStart = new Date(s.startTime).getTime();
+          const sEnd = sStart + s.duration * 60000;
+          return slotDateTime.getTime() >= sStart && slotDateTime.getTime() < sEnd;
         });
 
         if (existing && existing.appointment) continue;

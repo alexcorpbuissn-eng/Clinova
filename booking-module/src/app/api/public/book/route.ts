@@ -100,20 +100,20 @@ export async function POST(req: NextRequest) {
 
       for (let i = 1; i < N; i++) {
         const chunkStartTime = new Date(baseTime.getTime() + i * 30 * 60 * 1000);
-        
-        // Lock consecutive slot
-        const nextSlots = await tx.$queryRaw<any[]>`
-          SELECT * FROM "Slot"
-          WHERE "doctorId" = ${slot.doctorId}
-            AND "startTime" = ${chunkStartTime}
-            AND "isAvailable" = true
-          FOR UPDATE
-        `;
 
-        if (!nextSlots?.length) {
+        // Lock consecutive slot
+        const nextSlot = await tx.slot.findFirst({
+          where: {
+            doctorId: slot.doctorId,
+            startTime: chunkStartTime,
+            isAvailable: true
+          }
+        });
+
+        if (!nextSlot) {
           throw new Error('SLOT_UNAVAILABLE');
         }
-        consecutiveSlots.push(nextSlots[0]);
+        consecutiveSlots.push(nextSlot);
       }
 
       // 1 booking per patient per day constraint

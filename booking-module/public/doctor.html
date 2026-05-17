@@ -4,101 +4,769 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shifokor Paneli | Habibullo-Hilola</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --navy: #0f172a; --teal: #0d9488; --teal-dark: #0f766e; --teal-light: #f0fdfa;
-      --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --text: #334155; --text-muted: #64748b;
-      --red: #ef4444; --red-bg: #fef2f2; --green: #16a34a; --green-bg: #dcfce7;
+      --bg: #08111D;
+      --navy-dark: #0A1929;
+      --surface: #0F2137;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(29, 158, 117, 0.4);
+      --text: #cdd4dc;
+      --text-bright: #F1EFE8;
+      --text-muted: #666f7a;
+      
+      /* Services Colors */
+      --color-open: #1D9E75;
+      --color-open-bg: rgba(29, 158, 117, 0.15);
+      
+      --color-busy: #185FA5;
+      --color-busy-bg: rgba(24, 95, 165, 0.15);
+      
+      --color-followup: #BA7517;
+      --color-followup-bg: rgba(186, 117, 23, 0.15);
+      
+      --color-break: #64748B;
+      --color-break-bg: rgba(100, 116, 139, 0.15);
+      
+      --red: #ef4444;
+      --red-bg: rgba(239, 68, 68, 0.15);
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-    /* Login */
-    #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 100vh; background: var(--navy); }
-    .login-card { background: var(--surface); padding: 40px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 400px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      min-height: 100vh; 
+      overflow-x: hidden;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--navy-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(29, 158, 117, 0.3);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(29, 158, 117, 0.6);
+    }
+
+    /* Login Screen */
+    #login-screen { 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      width: 100%; 
+      min-height: 100vh; 
+      background: radial-gradient(circle at center, #0F2137 0%, #08111D 100%); 
+    }
+    .login-card { 
+      background: var(--surface); 
+      padding: 40px; 
+      border-radius: 24px; 
+      box-shadow: 0 30px 70px rgba(0,0,0,0.5); 
+      border: 1px solid var(--border);
+      width: 100%; 
+      max-width: 420px; 
+    }
     .login-logo { text-align: center; margin-bottom: 28px; }
-    .login-logo h1 { color: var(--navy); font-size: 1.4rem; }
+    .login-logo h1 { color: var(--text-bright); font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 700; }
     .login-logo p { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
     .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--navy); margin-bottom: 7px; }
-    .form-group input { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
-    .form-group input:focus { border-color: var(--teal); }
-    .btn-full { display: block; width: 100%; background: var(--teal); color: #fff; padding: 13px 20px; border: none; border-radius: 10px; font-family: inherit; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: background 0.2s; }
-    .btn-full:hover { background: var(--teal-dark); }
+    .form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-bright); margin-bottom: 8px; }
+    .form-group input, .form-group select, .form-group textarea { 
+      width: 100%; 
+      padding: 12px 16px; 
+      background: var(--navy-dark);
+      border: 1.5px solid var(--border); 
+      border-radius: 12px; 
+      font-family: inherit; 
+      font-size: 0.95rem; 
+      color: #fff;
+      outline: none; 
+      transition: all 0.25s; 
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { 
+      border-color: var(--color-open); 
+      box-shadow: 0 0 10px var(--border-focus);
+    }
+    .btn-full { 
+      display: block; 
+      width: 100%; 
+      background: var(--color-open); 
+      color: #fff; 
+      padding: 14px 20px; 
+      border: none; 
+      border-radius: 12px; 
+      font-family: inherit; 
+      font-weight: 600; 
+      font-size: 0.95rem; 
+      cursor: pointer; 
+      transition: all 0.2s; 
+    }
+    .btn-full:hover { 
+      background: #178763; 
+      box-shadow: 0 5px 15px rgba(29, 158, 117, 0.4);
+    }
     .err-msg { color: var(--red); font-size: 0.83rem; margin-bottom: 14px; text-align: center; min-height: 20px; }
 
-    /* App layout */
+    /* Layout */
     #app { display: none; }
-    .top-bar { background: var(--navy); color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
-    .top-bar-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-    .doctor-selector-wrap { display: none; align-items: center; gap: 10px; margin-left: 20px; }
-    .doctor-selector { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 12px; border-radius: 8px; font-family: inherit; font-size: 0.85rem; outline: none; cursor: pointer; }
-    .doctor-selector option { background: var(--navy); color: #fff; }
-    .top-bar-actions { display: flex; align-items: center; gap: 14px; }
-    .top-bar-date { font-size: 0.82rem; color: #94a3b8; }
-    .btn-logout { background: none; border: 1px solid #334155; color: #94a3b8; padding: 6px 14px; border-radius: 8px; font-family: inherit; font-size: 0.82rem; cursor: pointer; }
-    .btn-logout:hover { border-color: #64748b; color: #fff; }
+    .top-bar { 
+      background: var(--surface); 
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .top-bar-title { 
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.2rem; 
+      font-weight: 700; 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      color: var(--text-bright);
+    }
+    .doctor-selector-wrap { 
+      display: none; 
+      align-items: center; 
+      gap: 10px; 
+      margin-left: 20px; 
+    }
+    .doctor-selector { 
+      background: var(--navy-dark); 
+      border: 1px solid var(--border); 
+      color: #fff; 
+      padding: 8px 16px; 
+      border-radius: 10px; 
+      font-family: inherit; 
+      font-size: 0.85rem; 
+      outline: none; 
+      cursor: pointer; 
+    }
+    .top-bar-actions { display: flex; align-items: center; gap: 18px; }
+    .top-bar-date { font-size: 0.85rem; color: var(--text-muted); }
+    .btn-logout { 
+      background: none; 
+      border: 1.5px solid var(--border); 
+      color: var(--text); 
+      padding: 8px 18px; 
+      border-radius: 10px; 
+      font-family: inherit; 
+      font-size: 0.85rem; 
+      cursor: pointer; 
+      transition: all 0.25s;
+    }
+    .btn-logout:hover { 
+      border-color: var(--red); 
+      color: #fff; 
+      background: var(--red-bg);
+    }
 
-    .page-body { max-width: 1400px; margin: 0 auto; padding: 30px 20px; display: grid; grid-template-columns: 1fr 380px; gap: 28px; align-items: start; }
-    @media(max-width: 1024px) { .page-body { grid-template-columns: 1fr; } }
+    .page-body { 
+      max-width: 1600px; 
+      margin: 0 auto; 
+      padding: 30px; 
+      display: grid; 
+      grid-template-columns: 1fr 340px; 
+      gap: 30px; 
+      align-items: start; 
+    }
+    @media(max-width: 1200px) { .page-body { grid-template-columns: 1fr; } }
 
     /* Stats */
-    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 28px; }
-    .stat-card { background: var(--surface); border-radius: 16px; padding: 20px; border: 1px solid var(--border); display: flex; align-items: center; gap: 15px; }
-    .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
-    .stat-info h4 { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-    .stat-info p { font-size: 1.25rem; font-weight: 700; color: var(--navy); }
+    .stats-row { 
+      display: grid; 
+      grid-template-columns: repeat(3, 1fr); 
+      gap: 20px; 
+      margin-bottom: 30px; 
+    }
+    .stat-card { 
+      background: var(--surface); 
+      border-radius: 20px; 
+      padding: 24px; 
+      border: 1px solid var(--border); 
+      display: flex; 
+      align-items: center; 
+      gap: 20px; 
+    }
+    .stat-icon { 
+      width: 54px; 
+      height: 54px; 
+      border-radius: 16px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 1.8rem; 
+    }
+    .stat-info h4 { 
+      font-size: 0.75rem; 
+      color: var(--text-muted); 
+      text-transform: uppercase; 
+      letter-spacing: 0.08em; 
+    }
+    .stat-info p { 
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.4rem; 
+      font-weight: 700; 
+      color: var(--text-bright); 
+      margin-top: 4px;
+    }
 
-    /* Weekly Grid */
-    .weekly-container { background: var(--surface); border-radius: 20px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.04); margin-bottom: 28px; }
-    .weekly-header { display: grid; grid-template-columns: 80px repeat(7, 1fr); background: var(--navy); color: #fff; text-align: center; border-bottom: 1px solid #1e293b; }
-    .weekly-header-cell { padding: 15px 5px; border-right: 1px solid #1e293b; }
+    /* Weekly Grid Layout */
+    .weekly-container { 
+      background: var(--surface); 
+      border-radius: 24px; 
+      border: 1px solid var(--border); 
+      overflow: hidden; 
+      box-shadow: 0 15px 40px rgba(0,0,0,0.2); 
+      margin-bottom: 30px; 
+    }
+    .weekly-header { 
+      display: grid; 
+      grid-template-columns: 70px repeat(7, 1fr); 
+      background: var(--navy-dark); 
+      color: #fff; 
+      text-align: center; 
+      border-bottom: 1px solid var(--border); 
+    }
+    .weekly-header-cell { 
+      padding: 16px 5px; 
+      border-right: 1px solid var(--border); 
+    }
     .weekly-header-cell:last-child { border-right: none; }
-    .weekly-header-cell .day-name { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7; font-weight: 700; }
-    .weekly-header-cell .day-date { font-size: 1.1rem; font-weight: 700; display: block; margin-top: 2px; }
-    .weekly-header-cell.today { background: var(--teal); color: #fff; }
+    .weekly-header-cell .day-name { 
+      font-size: 0.72rem; 
+      text-transform: uppercase; 
+      letter-spacing: 0.1em; 
+      color: var(--text-muted);
+      font-weight: 700; 
+    }
+    .weekly-header-cell .day-date { 
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem; 
+      font-weight: 700; 
+      display: block; 
+      margin-top: 3px; 
+      color: var(--text-bright);
+    }
+    .weekly-header-cell.today { 
+      background: var(--color-open-bg); 
+      border-bottom: 3px solid var(--color-open);
+    }
+    .weekly-header-cell.today .day-date {
+      color: var(--color-open);
+    }
 
-    .weekly-grid { display: grid; grid-template-columns: 80px repeat(7, 1fr); max-height: 600px; overflow-y: auto; }
-    .time-col { background: #f1f5f9; border-right: 1px solid var(--border); }
-    .time-cell { height: 50px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    .weekly-grid { 
+      display: grid; 
+      grid-template-columns: 70px repeat(7, 1fr); 
+      max-height: 680px; 
+      overflow-y: auto; 
+      background: var(--bg);
+    }
+    .time-col { 
+      background: var(--navy-dark); 
+      border-right: 1px solid var(--border); 
+    }
+    .time-cell { 
+      height: 48px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 0.78rem; 
+      font-weight: 600; 
+      color: var(--text-muted); 
+      border-bottom: 1px solid var(--border); 
+    }
     
-    .day-col { border-right: 1px solid var(--border); position: relative; }
+    .day-col { 
+      border-right: 1px solid var(--border); 
+      position: relative; 
+    }
     .day-col:last-child { border-right: none; }
-    .grid-cell { height: 50px; border-bottom: 1px solid #f1f5f9; position: relative; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; }
-    .grid-cell:hover { background: var(--teal-light); }
     
-    .slot-btn { width: 100%; height: 100%; border-radius: 8px; border: 1px dashed var(--border); background: none; transition: all 0.2s; cursor: pointer; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); }
-    .slot-btn.active { background: var(--green-bg); border: 1px solid var(--green); color: var(--green); }
-    .slot-btn.pending { background: #fef9c3; border: 1px dashed #ca8a04; color: #854d0e; }
-    .slot-btn.booked { background: #e0f2fe; border: 1px solid #0284c7; color: #0369a1; cursor: not-allowed; }
-    .slot-btn.booked span { display: block; font-size: 0.6rem; opacity: 0.8; }
-    .slot-btn.disabled { opacity: 0.4; cursor: not-allowed; background: #f1f5f9; }
-
-    .grid-footer { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border-top: 1px solid var(--border); }
-    .legend { display: flex; gap: 20px; font-size: 0.8rem; color: var(--text-muted); }
-    .legend-item { display: flex; align-items: center; gap: 6px; }
-    .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
-
-    /* Appointments */
-    .visits-card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
-    .visits-header { padding: 20px 24px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
-    .visits-header h2 { font-size: 1.05rem; color: var(--navy); }
-    .btn-refresh { background: none; border: 1.5px solid var(--border); color: var(--text-muted); padding: 7px 14px; border-radius: 8px; font-family: inherit; font-size: 0.82rem; cursor: pointer; }
-    .btn-refresh:hover { border-color: var(--teal); color: var(--teal); }
+    /* Grid Cells */
+    .grid-cell { 
+      height: 48px; 
+      border-bottom: 1px solid var(--border); 
+      position: relative; 
+      transition: all 0.2s; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 3px; 
+    }
     
-    .appt-grid { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 20px; }
-    .appt-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
-    .appt-time { font-size: 1.1rem; font-weight: 700; color: var(--teal-dark); display: flex; align-items: center; gap: 8px; }
-    .appt-date { font-size: 0.85rem; color: var(--text-muted); }
-    .appt-patient { font-weight: 600; color: var(--navy); font-size: 1.05rem; }
-    .appt-phone { color: var(--text-muted); font-size: 0.9rem; display: flex; align-items: center; gap: 6px; }
-    .empty-state { text-align: center; padding: 40px; color: var(--text-muted); font-size: 0.9rem; width: 100%; }
+    .slot-btn { 
+      width: 100%; 
+      height: 100%; 
+      border-radius: 8px; 
+      border: 1px dashed var(--border); 
+      background: transparent; 
+      transition: all 0.2s; 
+      cursor: pointer; 
+      font-size: 0.72rem; 
+      font-weight: 600; 
+      color: var(--text-muted); 
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      padding: 2px 4px;
+    }
+    .slot-btn:hover:not(.disabled):not(.booked):not(.active) {
+      border-color: var(--color-open);
+      background: rgba(29, 158, 117, 0.05);
+      color: var(--color-open);
+    }
 
-    .btn-submit { background: var(--navy); color: #fff; padding: 10px 24px; border: none; border-radius: 10px; font-family: inherit; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; }
-    .btn-submit:hover { background: #1e293b; }
-    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    /* Active / Available slots */
+    .slot-btn.active { 
+      background: var(--color-open-bg); 
+      border: 1px solid var(--color-open); 
+      color: var(--color-open); 
+    }
+    .slot-btn.pending { 
+      background: rgba(250, 238, 218, 0.15); 
+      border: 1px dashed var(--color-followup); 
+      color: var(--color-followup); 
+    }
+    
+    /* Booked Statuses */
+    .slot-btn.booked { 
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .slot-btn.booked.status-open {
+      background: var(--color-open-bg);
+      border-left: 3px solid var(--color-open);
+      color: var(--color-open);
+    }
+    .slot-btn.booked.status-busy {
+      background: var(--color-busy-bg);
+      border-left: 3px solid var(--color-busy);
+      color: var(--color-busy);
+    }
+    .slot-btn.booked.status-followup {
+      background: var(--color-followup-bg);
+      border-left: 3px solid var(--color-followup);
+      color: var(--color-followup);
+    }
+    .slot-btn.booked.status-break {
+      background: var(--color-break-bg);
+      border-left: 3px solid var(--color-break);
+      color: var(--color-break);
+    }
+
+    .slot-btn.booked span.patient-lbl { 
+      display: block; 
+      font-size: 0.68rem; 
+      font-weight: 700; 
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      width: 100%;
+      text-align: center;
+    }
+    .slot-btn.booked span.procedure-lbl {
+      display: block;
+      font-size: 0.58rem;
+      opacity: 0.75;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      width: 100%;
+      text-align: center;
+      margin-top: 1px;
+    }
+    .slot-btn.disabled { 
+      opacity: 0.3; 
+      cursor: not-allowed; 
+      background: var(--navy-dark); 
+      border: none;
+    }
+
+    .grid-footer { 
+      padding: 22px 28px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      background: var(--navy-dark); 
+      border-top: 1px solid var(--border); 
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .legend { display: flex; gap: 20px; font-size: 0.8rem; color: var(--text); flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 8px; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 4px; }
+
+    /* Upcoming Appointments Sidebar */
+    .visits-card { 
+      background: var(--surface); 
+      border-radius: 20px; 
+      border: 1px solid var(--border); 
+      overflow: hidden; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+    }
+    .visits-header { 
+      padding: 24px 24px 16px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      border-bottom: 1px solid var(--border); 
+    }
+    .visits-header h2 { font-family: 'Outfit', sans-serif; font-size: 1.1rem; color: var(--text-bright); }
+    .btn-refresh { 
+      background: var(--navy-dark); 
+      border: 1.5px solid var(--border); 
+      color: var(--text); 
+      padding: 8px 16px; 
+      border-radius: 8px; 
+      font-family: inherit; 
+      font-size: 0.8rem; 
+      cursor: pointer; 
+      transition: all 0.2s;
+    }
+    .btn-refresh:hover { 
+      border-color: var(--color-open); 
+      color: #fff; 
+    }
+    
+    .appt-grid { 
+      display: grid; 
+      grid-template-columns: 1fr; 
+      gap: 14px; 
+      padding: 24px; 
+    }
+    .appt-card { 
+      background: var(--navy-dark); 
+      border: 1px solid var(--border); 
+      border-radius: 16px; 
+      padding: 18px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 12px; 
+      transition: transform 0.2s;
+    }
+    .appt-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.15);
+    }
+    .appt-time-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .appt-time { 
+      font-size: 1rem; 
+      font-weight: 700; 
+      color: var(--text-bright); 
+      display: flex; 
+      align-items: center; 
+      gap: 6px; 
+    }
+    .appt-date { font-size: 0.78rem; color: var(--text-muted); }
+    .appt-patient { font-weight: 600; color: var(--text-bright); font-size: 1.05rem; }
+    .appt-procedure { font-size: 0.85rem; color: var(--color-open); font-weight: 500; }
+    .appt-phone { color: var(--text); font-size: 0.88rem; display: flex; align-items: center; gap: 6px; }
+    
+    /* Call tracking buttons */
+    .call-tracking-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 5px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+    .btn-call {
+      padding: 6px 8px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .btn-call.btn-called:hover {
+      background: var(--color-open-bg);
+      border-color: var(--color-open);
+      color: var(--color-open);
+    }
+    .btn-call.btn-no-answer:hover {
+      background: var(--red-bg);
+      border-color: var(--red);
+      color: var(--red);
+    }
+    .call-counter {
+      grid-column: 1 / span 2;
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--color-followup);
+      font-weight: 600;
+    }
+    
+    /* Card primary actions */
+    .card-actions-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 5px;
+    }
+    .btn-action-card {
+      padding: 8px 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-action-card.btn-complete {
+      background: var(--color-open);
+      color: #fff;
+    }
+    .btn-action-card.btn-complete:hover { background: #178763; }
+    .btn-action-card.btn-cancel-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-action-card.btn-cancel-card:hover {
+      border-color: var(--red);
+      color: var(--red);
+      background: var(--red-bg);
+    }
+
+    .btn-submit-premium { 
+      background: var(--color-open); 
+      color: #fff; 
+      padding: 12px 24px; 
+      border: none; 
+      border-radius: 12px; 
+      font-family: inherit; 
+      font-weight: 700; 
+      font-size: 0.9rem; 
+      cursor: pointer; 
+      transition: all 0.2s; 
+    }
+    .btn-submit-premium:hover { 
+      background: #178763; 
+      box-shadow: 0 5px 15px rgba(29, 158, 117, 0.3);
+    }
+    .btn-submit-premium:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Modals CSS (Glassmorphism) */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(4, 8, 15, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 20px;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+      overflow: hidden;
+      transform: translateY(30px);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+    .modal-header {
+      padding: 24px 28px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.8rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .modal-close:hover { color: #fff; }
+    .modal-body {
+      padding: 28px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    /* Auto-complete suggestions dropdown */
+    .suggestions-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-top: 6px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 50;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    .suggestion-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      transition: all 0.2s;
+    }
+    .suggestion-item:last-child { border-bottom: none; }
+    .suggestion-item:hover {
+      background: var(--navy-dark);
+      color: #fff;
+    }
+
+    /* Toggle switches */
+    .booking-toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 22px;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--navy-dark);
+      border: 1px solid var(--border);
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px; width: 14px;
+      left: 3px; bottom: 3px;
+      background-color: #fff;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--color-open); }
+    input:checked + .slider:before { transform: translateX(22px); }
+    .toggle-label { font-size: 0.85rem; font-weight: 600; color: var(--text-bright); }
+
+    /* Form grid */
+    .form-row { display: flex; gap: 14px; }
+    .form-row .col { flex: 1; }
+
+    /* Checklist checklist checkbox */
+    .checkbox-label-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-bright);
+    }
+    .checkbox-label-wrap input {
+      width: 16px; height: 16px;
+      accent-color: var(--color-open);
+      cursor: pointer;
+    }
+    .multi-day-checklist {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--navy-dark);
+      padding: 14px;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+      cursor: pointer;
+      color: var(--text);
+    }
+    .checklist-item:last-child { margin-bottom: 0; }
+    .checklist-item input { accent-color: var(--color-open); width: 15px; height: 15px; }
+
+    .btn-cancel {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .btn-cancel:hover {
+      border-color: var(--red);
+      color: var(--red);
+      background: var(--red-bg);
+    }
+
+    /* Details styling */
+    .details-item { margin-bottom: 14px; }
+    .details-item:last-child { margin-bottom: 0; }
+    .details-lbl { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+    .details-val { font-size: 1rem; color: var(--text-bright); font-weight: 500; margin-top: 3px; }
 
     /* Modern Premium Toast Notifications */
     #toast-container {
@@ -115,19 +783,19 @@
       pointer-events: auto;
       min-width: 320px;
       max-width: 450px;
-      background: rgba(15, 23, 42, 0.9); /* Dark navy */
+      background: rgba(15, 33, 55, 0.95);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
       padding: 16px 20px;
       color: #fff;
       font-weight: 500;
       font-size: 0.9rem;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       transform: translateX(120%);
       opacity: 0;
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -136,35 +804,20 @@
       transform: translateX(0);
       opacity: 1;
     }
-    .toast.success {
-      border-left: 4px solid var(--teal);
-    }
-    .toast.error {
-      border-left: 4px solid var(--red);
-    }
-    .toast.info {
-      border-left: 4px solid #3b82f6; /* Blue info color */
-    }
-    .toast-icon {
-      font-size: 1.25rem;
-      flex-shrink: 0;
-    }
-    .toast-content {
-      flex: 1;
-      line-height: 1.4;
-    }
+    .toast.success { border-left: 4px solid var(--color-open); }
+    .toast.error { border-left: 4px solid var(--red); }
+    .toast.info { border-left: 4px solid var(--color-busy); }
+    .toast-icon { font-size: 1.3rem; flex-shrink: 0; }
+    .toast-content { flex: 1; line-height: 1.4; }
     .toast-close {
       background: none;
       border: none;
       color: var(--text-muted);
       cursor: pointer;
-      font-size: 1.1rem;
+      font-size: 1.3rem;
       padding: 4px;
-      transition: color 0.2s;
     }
-    .toast-close:hover {
-      color: #fff;
-    }
+    .toast-close:hover { color: #fff; }
   </style>
 </head>
 <body>
@@ -196,13 +849,15 @@
   </div>
 </div>
 
-<!-- APP -->
+<!-- APP MAIN SCREEN -->
 <div id="app">
   <div class="top-bar">
     <div class="top-bar-title">
-      <span>👨‍⚕️ Shifokor Paneli</span> — <span id="doctor-name" style="margin-left: 5px; color: var(--teal-light);"></span>
+      <span>👨‍⚕️ Shifokor Paneli</span>
+      <span style="color:var(--text-muted); font-weight:300;">|</span>
+      <span id="doctor-name" style="color: var(--color-open);"></span>
       <div id="admin-doc-selector" class="doctor-selector-wrap">
-        <label style="font-size:0.75rem; color:#94a3b8;">Boshqarish:</label>
+        <label style="font-size:0.75rem; color:var(--text-muted);">Boshqarish:</label>
         <select id="doc-select" class="doctor-selector" onchange="switchDoctor(this.value)">
           <option value="">Shifokorni tanlang...</option>
         </select>
@@ -215,25 +870,25 @@
   </div>
 
   <div class="page-body">
-    <!-- Left: Schedule -->
+    <!-- Left column: Grid & stats -->
     <div>
       <div class="stats-row">
         <div class="stat-card">
-          <div class="stat-icon" style="background:#e0f2fe; color:#0284c7;">📅</div>
+          <div class="stat-icon" style="background:var(--color-busy-bg); color:var(--color-busy);">📅</div>
           <div class="stat-info">
             <h4>Bugungi qabullar</h4>
             <p id="stat-today-count">0</p>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" style="background:#dcfce7; color:#16a34a;">💰</div>
+          <div class="stat-icon" style="background:var(--color-open-bg); color:var(--color-open);">💰</div>
           <div class="stat-info">
             <h4>Kutilayotgan tushum</h4>
             <p id="stat-today-revenue">0 so'm</p>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" style="background:#fef2f2; color:#ef4444;">✨</div>
+          <div class="stat-icon" style="background:var(--color-followup-bg); color:var(--color-followup);">📊</div>
           <div class="stat-info">
             <h4>Haftalik bandlik</h4>
             <p id="stat-week-occupancy">0%</p>
@@ -242,19 +897,17 @@
       </div>
 
       <div class="weekly-container">
-        <!-- Shablon Asboblari (Copy/Paste toolbar) -->
-        <div class="schedule-toolbar" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; background:#1e293b; padding:12px 20px; border-bottom:1px solid #334155; color:#fff; font-size:0.85rem; gap:12px;">
+        <!-- Admin-Only shablon / copy tools -->
+        <div id="admin-schedule-tools" class="schedule-toolbar" style="display:none; flex-wrap:wrap; justify-content:space-between; align-items:center; background:var(--navy-dark); padding:12px 20px; border-bottom:1px solid var(--border); color:#fff; font-size:0.85rem; gap:12px;">
           <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-            <span>📋 <strong>Kunlik jadval shabloni:</strong></span>
-            <select id="copy-day-select" style="background:#0f172a; color:#fff; border:1px solid #475569; padding:6px 12px; border-radius:8px; font-family:inherit; font-size:0.8rem; outline:none; cursor:pointer;">
-              <option value="">Kunni tanlang...</option>
-            </select>
-            <button onclick="copySelectedDay()" class="btn-refresh" style="padding:6px 14px; font-size:0.8rem; background:var(--teal); color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:5px;">📋 Nusxalash</button>
+            <span>📋 <strong>Kunlik shablon:</strong></span>
+            <select id="copy-day-select" class="doctor-selector" style="padding:6px 12px; font-size:0.8rem;"></select>
+            <button onclick="copySelectedDay()" class="btn-refresh" style="padding:6px 14px; background:var(--color-open); border:none; color:#fff;">📋 Nusxalash</button>
           </div>
           <div id="paste-actions-wrap" style="display:none; align-items:center; gap:10px; flex-wrap:wrap;">
-            <span id="copied-status-msg" style="color:#2dd4bf; font-weight:600; font-size:0.8rem; margin-right:5px;"></span>
-            <button onclick="applyToAllDays()" class="btn-refresh" style="padding:6px 14px; font-size:0.8rem; background:var(--green); color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:5px;">🔁 Haftaga qo'llash (Barchaga)</button>
-            <button onclick="cancelCopyState()" class="btn-logout" style="padding:6px 12px; font-size:0.8rem; border-color:#475569; color:#94a3b8; border-radius:8px; cursor:pointer; background:none;">Bekor qilish</button>
+            <span id="copied-status-msg" style="color:var(--color-open); font-weight:600; font-size:0.8rem; margin-right:5px;"></span>
+            <button onclick="applyToAllDays()" class="btn-refresh" style="padding:6px 14px; background:var(--color-followup); border:none; color:#fff;">🔁 Barchaga qo'llash</button>
+            <button onclick="cancelCopyState()" class="btn-logout" style="padding:6px 12px; background:none;">Bekor qilish</button>
           </div>
         </div>
 
@@ -263,35 +916,171 @@
           <div class="time-col" id="time-labels"></div>
           <div id="grid-columns" style="display:contents;"></div>
         </div>
+        
         <div class="grid-footer">
           <div class="legend">
             <div class="legend-item"><div class="legend-dot" style="border:1px dashed var(--border)"></div> Bo'sh</div>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--green); border:1px solid var(--green)"></div> Ochiq</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#ca8a04;"></div> Saqlanmoqda</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#0284c7;"></div> Band</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--color-open)"></div> Konsultatsiya / Ochiq</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--color-busy)"></div> Birlamchi qabul</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--color-followup)"></div> Takroriy qabul</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--color-break)"></div> Tanaffus</div>
           </div>
           <div style="display:flex; gap:12px;">
-            <button class="btn-refresh" onclick="loadData()">Yangilash</button>
-            <button class="btn-submit" id="btn-save-grid" onclick="saveGridChanges()">Saqlash</button>
+            <button class="btn-refresh" onclick="loadData()">🔄 Yangilash</button>
+            <button class="btn-submit-premium" id="btn-save-grid" onclick="saveGridChanges()" style="display:none;">Saqlash</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Right: Appointments -->
-    <div class="visits-card" style="height:fit-content; position:sticky; top:20px;">
+    <!-- Right column: Sidebar -->
+    <div class="visits-card" style="height:fit-content; position:sticky; top:100px;">
       <div class="visits-header">
-        <h2>📅 Kelgusi qabullar</h2>
+        <h2>📅 Kelgusi qabullar (Bugun)</h2>
         <button class="btn-refresh" onclick="loadAppointments()">🔄</button>
       </div>
-      <div class="appt-grid" id="appointments-container" style="max-height:800px; overflow-y:auto;">
+      <div class="appt-grid" id="appointments-container" style="max-height:680px; overflow-y:auto;">
         <div class="empty-state">Yuklanmoqda...</div>
       </div>
     </div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<!-- ADVANCED BOOKING MODAL (Glassmorphic Floating) -->
+<div id="booking-modal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="booking-modal-title">📅 Yangi qabul</h3>
+      <button class="modal-close" onclick="closeBookingModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <!-- Dam olish (Break) fast toggle button -->
+      <div class="booking-toggle-row">
+        <label class="toggle-switch">
+          <input type="checkbox" id="modal-break-toggle" onchange="toggleBreakMode(this.checked)" />
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label">☕ Dam olish / Tanaffus</span>
+      </div>
+
+      <div id="booking-fields-wrapper">
+        <!-- New Patient on-the-fly Toggle -->
+        <div class="booking-toggle-row" style="margin-top: 10px;">
+          <label class="toggle-switch">
+            <input type="checkbox" id="modal-new-patient-toggle" onchange="toggleNewPatientMode(this.checked)" />
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-label">👤 Yangi bemor (Ro'yxatdan o'tkazish)</span>
+        </div>
+
+        <!-- Patient Search Autocomplete -->
+        <div id="patient-search-section" class="form-group" style="position:relative; margin-top: 15px;">
+          <label>Bemor qidirish (Ism yoki raqam)</label>
+          <input type="text" id="patient-search-input" placeholder="Qidirish..." oninput="onPatientSearchInput(this.value)" autocomplete="off" />
+          <div id="patient-suggestions" class="suggestions-dropdown" style="display:none;"></div>
+          <input type="hidden" id="selected-patient-id" />
+        </div>
+
+        <!-- Patient Creation on-the-fly -->
+        <div id="patient-create-section" style="display:none; margin-top: 15px; border-left: 2px solid var(--color-open); padding-left: 15px;">
+          <div class="form-row">
+            <div class="form-group col">
+              <label>Ismi *</label>
+              <input type="text" id="patient-first-name" placeholder="Ism" />
+            </div>
+            <div class="form-group col">
+              <label>Familiyasi *</label>
+              <input type="text" id="patient-last-name" placeholder="Familiya" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Telefon raqami *</label>
+            <input type="tel" id="patient-phone-input" placeholder="+998 90 000 00 00" />
+          </div>
+        </div>
+
+        <!-- Service / Procedure -->
+        <div class="form-group" style="margin-top: 15px;">
+          <label>Xizmat / Muolaja</label>
+          <select id="modal-procedure-select">
+            <option value="">Muolajani tanlang...</option>
+          </select>
+        </div>
+
+        <!-- Description/Note -->
+        <div class="form-group" style="margin-top: 15px;">
+          <label>Eslatma / Izoh</label>
+          <textarea id="modal-description-input" rows="2" placeholder="Shifokor eslatmalari..."></textarea>
+        </div>
+
+        <!-- Multi-day Booking -->
+        <div class="form-group" id="multi-day-section" style="margin-top: 15px;">
+          <label class="checkbox-label-wrap">
+            <input type="checkbox" id="modal-multi-day-toggle" onchange="toggleMultiDayList(this.checked)" />
+            <span>🔁 Kurs davolash (Ko'p kunlik qabul)</span>
+          </label>
+          <div id="multi-day-checklist" class="multi-day-checklist" style="display:none; margin-top:10px;"></div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="margin-top: 25px; display:flex; gap:12px; justify-content:flex-end;">
+        <button class="btn-cancel" onclick="closeBookingModal()">Bekor qilish</button>
+        <button class="btn-submit-premium" id="btn-modal-submit" onclick="submitBookingModal()">Band qilish</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOOKED DETAILS / ACTIONS MODAL -->
+<div id="details-modal" class="modal-overlay">
+  <div class="modal-content" style="max-width: 460px;">
+    <div class="modal-header">
+      <h3>📅 Qabul tafsilotlari</h3>
+      <button class="modal-close" onclick="closeDetailsModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="details-item">
+        <div class="details-lbl">Bemor</div>
+        <div class="details-val" id="det-patient-name">-</div>
+      </div>
+      <div class="details-item">
+        <div class="details-lbl">Telefon raqami</div>
+        <div class="details-val" id="det-patient-phone">-</div>
+      </div>
+      <div class="details-item">
+        <div class="details-lbl">Vaqt</div>
+        <div class="details-val" id="det-time">-</div>
+      </div>
+      <div class="details-item">
+        <div class="details-lbl">Muolaja / Xizmat</div>
+        <div class="details-val" id="det-procedure" style="color:var(--color-open); font-weight:700;">-</div>
+      </div>
+      <div class="details-item" id="det-description-wrap">
+        <div class="details-lbl">Izoh</div>
+        <div class="details-val" id="det-description">-</div>
+      </div>
+      
+      <!-- Call attempts tracker info -->
+      <div class="details-item" id="det-calls-wrap" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border);">
+        <div class="details-lbl">Qo'ng'iroqlar</div>
+        <div class="details-val" id="det-calls-count" style="color:var(--color-followup); font-weight:600;">0 marta qo'ng'iroq qilindi</div>
+      </div>
+
+      <!-- Action buttons -->
+      <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border); display:flex; flex-direction:column; gap:10px;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <button class="btn-call btn-called" id="det-btn-called" onclick="trackDetailCall('RESOLVE')">📞 Qo'ng'iroq qilindi</button>
+          <button class="btn-call btn-no-answer" id="det-btn-no-answer" onclick="trackDetailCall('NO_ANSWER')">🔇 Telefonni ko'tarmadi</button>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 5px;">
+          <button class="btn-cancel" id="det-btn-cancel-appt" onclick="cancelDetailAppointment()">Bekor qilish</button>
+          <button class="btn-submit-premium" id="det-btn-complete-appt" onclick="completeDetailAppointment()">Tugallash</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   let doctorToken = null;
   let doctorInfo = null;
@@ -301,14 +1090,44 @@
   let pendingChanges = {}; // key: "isoDate_timeStr", value: 'add' | 'remove'
   let copiedSchedule = null;
   let copiedDayLabel = '';
-
+  
+  let allVerifiedPatients = [];
+  let selectedSlotData = null; // Stores currently clicked slot metadata {iso, time, id}
+  
   const START_HOUR = 8;
   const END_HOUR = 19;
   const INTERVAL = 30; // minutes
 
-  // ---- Utility ----
-  function getLocalISO(date) {
-    return date.toLocaleDateString('en-CA'); // YYYY-MM-DD
+  // ---- Tashkent Timezone Date Helpers ----
+  function getTashkentISO(date) {
+    const tzOffset = 5 * 60 * 60 * 1000;
+    const utcMs = date.getTime() + (date.getTimezoneOffset() * 60 * 1000);
+    const tTime = new Date(utcMs + tzOffset);
+    return tTime.toISOString().slice(0, 10);
+  }
+
+  function parseTashkentDateTime(isoDateStr, timeStr) {
+    // Exact UTC Date constructor for Tashkent timeStr
+    return new Date(`${isoDateStr}T${timeStr}:00+05:00`);
+  }
+
+  function getTashkentDays() {
+    const days = [];
+    const now = new Date();
+    const tzOffset = 5 * 60 * 60 * 1000;
+    const utcMs = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
+    const tashkentNow = new Date(utcMs + tzOffset);
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(tashkentNow.getTime() + i * 24 * 60 * 60 * 1000);
+      days.push({
+        iso: d.toISOString().slice(0, 10),
+        label: d.toLocaleDateString('uz-UZ', { weekday: 'short' }),
+        dateNum: d.getDate(),
+        monthLabel: d.toLocaleDateString('uz-UZ', { month: 'short' })
+      });
+    }
+    return days;
   }
 
   function updateClock() {
@@ -332,9 +1151,11 @@
     });
   }
 
-  // ---- Auth & Init ----
+  // ---- Authentication & Initialisation ----
   window.addEventListener('DOMContentLoaded', async () => {
     applyPhoneFormatter(document.getElementById('telegram-phone'));
+    applyPhoneFormatter(document.getElementById('patient-phone-input'));
+    
     const t = localStorage.getItem('doctor_token');
     if (t) {
       try {
@@ -413,18 +1234,21 @@
     
     if (userRole === 'ADMIN') {
       document.getElementById('admin-doc-selector').style.display = 'flex';
+      document.getElementById('admin-schedule-tools').style.display = 'flex';
+      document.getElementById('btn-save-grid').style.display = 'inline-block';
       await loadAllDoctorsForAdmin();
     }
 
     if (doctorInfo) {
       document.getElementById('doctor-name').textContent = `${doctorInfo.firstName} ${doctorInfo.lastName}`;
     } else {
-      document.getElementById('doctor-name').textContent = "Admin (Tanlang)";
+      document.getElementById('doctor-name').textContent = "Admin";
     }
     
     updateClock();
     setInterval(updateClock, 30000);
     loadData();
+    loadVerifiedPatients();
   }
 
   async function loadAllDoctorsForAdmin() {
@@ -454,7 +1278,22 @@
     loadAppointments();
   }
 
-  // ---- Grid Logic ----
+  // ---- Verified Patients Loader ----
+  async function loadVerifiedPatients() {
+    try {
+      const res = await fetch('/api/admin/patients', {
+        headers: { 'Authorization': `Bearer ${doctorToken}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        allVerifiedPatients = data.patients;
+      }
+    } catch (err) {
+      console.error('Error loading patients:', err);
+    }
+  }
+
+  // ---- Grid Render & Fetch ----
   async function loadGrid() {
     if (!currentDoctorId) {
       allSlots = [];
@@ -473,53 +1312,34 @@
     } catch (e) { console.error(e); }
   }
 
-  function getLocalTimeStr(date) {
-    return date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0');
-  }
-
   function renderGrid() {
     const header = document.getElementById('grid-header');
     const labels = document.getElementById('time-labels');
     const columns = document.getElementById('grid-columns');
     
-    const days = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date();
-      d.setDate(d.getDate() + i);
-      days.push(d);
-    }
+    const days = getTashkentDays();
 
-    // Update copy dropdown dynamically
+    // Update copy shablon select options dynamically
     const copySelect = document.getElementById('copy-day-select');
-    if (copySelect) {
+    if (copySelect && userRole === 'ADMIN') {
       const prevVal = copySelect.value;
       copySelect.innerHTML = '<option value="">Kunni tanlang...</option>' + 
-        days.map(d => {
-          const iso = getLocalISO(d);
-          const name = d.toLocaleDateString('uz-UZ', { weekday: 'long' });
-          const dateStr = d.getDate();
-          const monthStr = d.toLocaleDateString('uz-UZ', { month: 'short' });
-          return `<option value="${iso}">${name} (${dateStr} ${monthStr})</option>`;
-        }).join('');
+        days.map(d => `<option value="${d.iso}">${d.label} (${d.dateNum} ${d.monthLabel})</option>`).join('');
       if (prevVal) copySelect.value = prevVal;
     }
 
-    header.innerHTML = '<div class="weekly-header-cell" style="width:80px"></div>' + 
+    header.innerHTML = '<div class="weekly-header-cell" style="width:70px"></div>' + 
       days.map(d => {
-        const iso = getLocalISO(d);
-        const isToday = iso === getLocalISO(new Date());
-        
-        // Show paste button in the header cell if a schedule is copied and this is NOT the copied day itself
-        const sourceIso = copySelect ? copySelect.value : '';
-        const showPaste = (typeof copiedSchedule !== 'undefined' && copiedSchedule !== null) && iso !== sourceIso;
+        const isToday = d.iso === getTashkentISO(new Date());
+        const showPaste = (copiedSchedule !== null) && d.iso !== (copySelect ? copySelect.value : '') && userRole === 'ADMIN';
         const pasteBtn = showPaste ? `
-          <button onclick="pasteToDay('${iso}', event)" title="Nusxalangan jadvalni shu kunga joylash" style="background:rgba(255,255,255,0.2); color:#fff; border:1px solid rgba(255,255,255,0.3); padding:2px 6px; border-radius:6px; font-size:0.65rem; margin-top:5px; cursor:pointer; display:inline-block; transition:all 0.2s;" onmouseover="this.style.background='var(--teal)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">📥 Joylash</button>
+          <button onclick="pasteToDay('${d.iso}', event)" title="Joylash" style="background:rgba(29, 158, 117, 0.25); color:#fff; border:1px solid var(--color-open); padding:2px 6px; border-radius:6px; font-size:0.6rem; margin-top:5px; cursor:pointer;">📥 Joylash</button>
         ` : '';
 
         return `
-          <div class="weekly-header-cell ${isToday ? 'today' : ''}" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:80px;">
-            <span class="day-name">${d.toLocaleDateString('uz-UZ', { weekday: 'short' })}</span>
-            <span class="day-date" style="font-size:1.1rem; font-weight:700; margin-top:2px;">${d.getDate()}</span>
+          <div class="weekly-header-cell ${isToday ? 'today' : ''}">
+            <span class="day-name">${d.label}</span>
+            <span class="day-date">${d.dateNum}</span>
             ${pasteBtn}
           </div>
         `;
@@ -528,36 +1348,54 @@
     const times = [];
     for (let h = START_HOUR; h <= END_HOUR; h++) {
       for (let m = 0; m < 60; m += INTERVAL) {
-        const t = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-        times.push(t);
+        times.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
       }
     }
     labels.innerHTML = times.map(t => `<div class="time-cell">${t}</div>`).join('');
 
     columns.innerHTML = days.map(d => {
-      const iso = getLocalISO(d);
       return `
         <div class="day-col">
           ${times.map(t => {
-            const key = `${iso}_${t}`;
-            
-            // Check if past
-            const [h, m] = t.split(':');
-            const slotDateTime = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Number(h), Number(m));
-            const isPast = slotDateTime < new Date();
+            const key = `${d.iso}_${t}`;
+            const slotDateTime = parseTashkentDateTime(d.iso, t);
+            const isPast = slotDateTime.getTime() < Date.now();
 
             const existing = allSlots.find(s => {
-              const sStart = new Date(s.startTime);
-              const sEnd = new Date(sStart.getTime() + s.duration * 60000);
-              return slotDateTime >= sStart && slotDateTime < sEnd;
+              const sStart = new Date(s.startTime).getTime();
+              const sEnd = sStart + s.duration * 60000;
+              return slotDateTime.getTime() >= sStart && slotDateTime.getTime() < sEnd;
             });
             
             let statusClass = '';
             let label = '';
-            const isBooked = existing && existing.appointment && existing.appointment.status !== 'CANCELLED';
+            let isBooked = false;
+            let bookedSubclass = '';
+            let apptObj = null;
+
             if (existing) {
-              statusClass = isBooked ? 'booked' : 'active';
-              if (isBooked) label = '<span>Band</span>';
+              statusClass = 'active';
+              isBooked = existing.appointment && existing.appointment.status !== 'CANCELLED';
+              if (isBooked) {
+                statusClass = 'booked';
+                apptObj = existing.appointment;
+                
+                // Color codes
+                const isBreak = apptObj.patientPhone === '+998000000000' || apptObj.patientFirst === 'Tanaffus';
+                if (isBreak) {
+                  bookedSubclass = 'status-break';
+                  label = `<span class="patient-lbl">☕ Tanaffus</span>`;
+                } else if (apptObj.procedure && apptObj.procedure.name.toLowerCase().includes('konsul')) {
+                  bookedSubclass = 'status-open';
+                  label = `<span class="patient-lbl">${apptObj.patientFirst} ${apptObj.patientLast[0]}.</span><span class="procedure-lbl">Konsultatsiya</span>`;
+                } else if (apptObj.description && apptObj.description.toLowerCase().includes('takroriy')) {
+                  bookedSubclass = 'status-followup';
+                  label = `<span class="patient-lbl">${apptObj.patientFirst} ${apptObj.patientLast[0]}.</span><span class="procedure-lbl">Takroriy qabul</span>`;
+                } else {
+                  bookedSubclass = 'status-busy';
+                  label = `<span class="patient-lbl">${apptObj.patientFirst} ${apptObj.patientLast[0]}.</span><span class="procedure-lbl">${apptObj.procedure ? apptObj.procedure.name : 'Birlamchi'}</span>`;
+                }
+              }
             }
             
             if (pendingChanges[key] === 'add') statusClass = 'pending';
@@ -567,11 +1405,13 @@
               statusClass += ' disabled';
             }
 
-            const onClickAttr = isPast ? '' : `onclick="toggleSlot('${iso}', '${t}', '${existing ? existing.id : ''}', ${isBooked ? 'true' : 'false'})"`;
+            const onClickAttr = isPast && !isBooked ? '' : `onclick="handleCellClick('${d.iso}', '${t}', '${existing ? existing.id : ''}', ${isBooked}, ${apptObj ? `'${apptObj.id}'` : 'null'})"`;
 
             return `
-              <div class="grid-cell" ${onClickAttr}>
-                <button class="slot-btn ${statusClass}">${label}</button>
+              <div class="grid-cell">
+                <button class="slot-btn ${statusClass} ${bookedSubclass}" ${onClickAttr}>
+                  ${label}
+                </button>
               </div>
             `;
           }).join('')}
@@ -580,32 +1420,46 @@
     }).join('');
   }
 
-  function toggleSlot(iso, time, existingId, isBooked) {
+  function handleCellClick(iso, time, existingId, isBooked, apptId) {
     if (!currentDoctorId) {
       showToast("Iltimos, avval boshqarish uchun shifokorni tanlang!", "error");
       return;
     }
-    if (isBooked) return;
-    const key = `${iso}_${time}`;
-    const action = pendingChanges[key];
+    
+    selectedSlotData = { iso, time, id: existingId, apptId };
 
-    const existing = allSlots.find(s => {
-      const sStart = new Date(s.startTime);
-      const sEnd = new Date(sStart.getTime() + s.duration * 60000);
-      const [h, m] = time.split(':');
-      const [yr, mo, dy] = iso.split('-');
-      const slotDateTime = new Date(yr, mo - 1, dy, h, m);
-      return slotDateTime >= sStart && slotDateTime < sEnd;
-    });
-
-    if (existing) {
-      if (action === 'remove') delete pendingChanges[key];
-      else pendingChanges[key] = 'remove';
-    } else {
-      if (action === 'add') delete pendingChanges[key];
-      else pendingChanges[key] = 'add';
+    if (isBooked && apptId) {
+      // Open Booked Appointment Details
+      openDetailsModal(apptId);
+      return;
     }
-    renderGrid();
+
+    if (userRole === 'ADMIN') {
+      // Admin clicks normal slot: toggle availability in pendingChanges
+      const key = `${iso}_${time}`;
+      const action = pendingChanges[key];
+      const existing = allSlots.find(s => {
+        const sStart = new Date(s.startTime).getTime();
+        const slotDateTime = parseTashkentDateTime(iso, time).getTime();
+        return slotDateTime === sStart;
+      });
+
+      if (existing) {
+        if (action === 'remove') delete pendingChanges[key];
+        else pendingChanges[key] = 'remove';
+      } else {
+        if (action === 'add') delete pendingChanges[key];
+        else pendingChanges[key] = 'add';
+      }
+      renderGrid();
+    } else {
+      // Doctor clicks active/free slot: open Advanced Booking Modal
+      if (existingId) {
+        openBookingModal(iso, time, existingId);
+      } else {
+        showToast("Ushbu vaqt shifokor ish grafigiga kiritilmagan", "error");
+      }
+    }
   }
 
   async function saveGridChanges() {
@@ -615,26 +1469,20 @@
 
     for (const [key, action] of Object.entries(pendingChanges)) {
       const [iso, time] = key.split('_');
-      const [h, m] = time.split(':');
-      const [yr, mo, dy] = iso.split('-');
-      const dt = new Date(yr, mo - 1, dy, h, m);
+      const dt = parseTashkentDateTime(iso, time);
       
       if (action === 'add') {
         toCreate.push({ startTime: dt.toISOString(), duration: INTERVAL });
       } else if (action === 'remove') {
         const existing = allSlots.find(s => {
-          const sStart = new Date(s.startTime);
-          const sEnd = new Date(sStart.getTime() + s.duration * 60000);
-          return dt >= sStart && dt < sEnd;
+          const sStart = new Date(s.startTime).getTime();
+          return dt.getTime() === sStart;
         });
         if (existing && !toDelete.includes(existing.id)) toDelete.push(existing.id);
       }
     }
 
-    // Har bir 30 daqiqalik vaqt alohida va mustaqil slot sifatida saqlanadi!
-    const mergedCreate = toCreate;
-
-    if (!mergedCreate.length && !toDelete.length) return;
+    if (!toCreate.length && !toDelete.length) return;
     btn.disabled = true; btn.textContent = 'Saqlanmoqda...';
 
     try {
@@ -644,10 +1492,10 @@
           body: JSON.stringify({ slotId: id, doctorId: currentDoctorId })
         });
       }
-      if (mergedCreate.length) {
+      if (toCreate.length) {
         await fetch('/api/doctor/slots', {
           method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${doctorToken}` },
-          body: JSON.stringify({ doctorId: currentDoctorId, slots: mergedCreate })
+          body: JSON.stringify({ doctorId: currentDoctorId, slots: toCreate })
         });
       }
       pendingChanges = {};
@@ -657,7 +1505,400 @@
     btn.disabled = false; btn.textContent = 'Saqlash';
   }
 
-  // ---- Appointments ----
+  // ---- Advanced Booking Modal Logic ----
+  async function openBookingModal(iso, time, slotId) {
+    const modal = document.getElementById('booking-modal');
+    document.getElementById('booking-modal-title').textContent = `📅 Yangi qabul: ${iso}, ${time}`;
+    
+    // Reset inputs
+    document.getElementById('modal-break-toggle').checked = false;
+    document.getElementById('modal-new-patient-toggle').checked = false;
+    document.getElementById('patient-search-input').value = '';
+    document.getElementById('selected-patient-id').value = '';
+    document.getElementById('patient-first-name').value = '';
+    document.getElementById('patient-last-name').value = '';
+    document.getElementById('patient-phone-input').value = '';
+    document.getElementById('modal-description-input').value = '';
+    document.getElementById('modal-multi-day-toggle').checked = false;
+    
+    toggleBreakMode(false);
+    toggleNewPatientMode(false);
+    toggleMultiDayList(false);
+
+    // Fetch and populate procedures
+    await loadProceduresForModal();
+
+    modal.classList.add('active');
+  }
+
+  function closeBookingModal() {
+    document.getElementById('booking-modal').classList.remove('active');
+  }
+
+  function toggleBreakMode(checked) {
+    const wrapper = document.getElementById('booking-fields-wrapper');
+    const submitBtn = document.getElementById('btn-modal-submit');
+    if (checked) {
+      wrapper.style.opacity = '0.4';
+      wrapper.style.pointerEvents = 'none';
+      submitBtn.textContent = '☕ Tanaffus qo\'shish';
+      submitBtn.style.background = 'var(--color-break)';
+    } else {
+      wrapper.style.opacity = '1';
+      wrapper.style.pointerEvents = 'auto';
+      submitBtn.textContent = 'Band qilish';
+      submitBtn.style.background = 'var(--color-open)';
+    }
+  }
+
+  function toggleNewPatientMode(checked) {
+    const searchSection = document.getElementById('patient-search-section');
+    const createSection = document.getElementById('patient-create-section');
+    if (checked) {
+      searchSection.style.display = 'none';
+      createSection.style.display = 'block';
+    } else {
+      searchSection.style.display = 'block';
+      createSection.style.display = 'none';
+    }
+  }
+
+  function toggleMultiDayList(checked) {
+    const checklist = document.getElementById('multi-day-checklist');
+    if (checked) {
+      checklist.style.display = 'block';
+      
+      // Generate checkboxes for the next 5 subsequent days at the same time slot
+      const days = [];
+      const baseIso = selectedSlotData.iso;
+      const baseTime = selectedSlotData.time;
+      const baseDate = parseTashkentDateTime(baseIso, baseTime);
+
+      let html = '';
+      for (let i = 1; i <= 5; i++) {
+        const nextDay = new Date(baseDate.getTime() + i * 24 * 60 * 60 * 1000);
+        const nextIso = getTashkentISO(nextDay);
+        
+        // Find if this slot exists in Ish Grafigi (slots list)
+        const slotExists = allSlots.some(s => {
+          const sStart = new Date(s.startTime).getTime();
+          const targetStart = parseTashkentDateTime(nextIso, baseTime).getTime();
+          return sStart === targetStart && s.isAvailable;
+        });
+
+        const dayName = nextDay.toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'short' });
+        html += `
+          <label class="checklist-item" style="${!slotExists ? 'opacity:0.4; cursor:not-allowed;' : ''}">
+            <input type="checkbox" name="multi-day-chk" value="${nextIso}" ${!slotExists ? 'disabled' : ''} />
+            <span>${dayName} (${baseTime}) ${!slotExists ? '<b style="color:var(--red); font-size:0.7rem;">(Bo\'sh emas / Kiritilmagan)</b>' : ''}</span>
+          </label>
+        `;
+      }
+      checklist.innerHTML = html || '<div style="font-size:0.8rem; color:var(--text-muted);">Keyingi kunlarda ish grafigi topilmadi.</div>';
+    } else {
+      checklist.style.display = 'none';
+      checklist.innerHTML = '';
+    }
+  }
+
+  async function loadProceduresForModal() {
+    const select = document.getElementById('modal-procedure-select');
+    select.innerHTML = '<option value="">Yuklanmoqda...</option>';
+    try {
+      const res = await fetch(`/api/public/doctors/${currentDoctorId}/procedures`);
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (data.procedures.length === 0) {
+          select.innerHTML = '<option value="">Muolajalar topilmadi</option>';
+          return;
+        }
+        select.innerHTML = data.procedures.map(p => `<option value="${p.id}">${p.name} (${p.durationMinutes} daqiqalik)</option>`).join('');
+      } else { select.innerHTML = '<option value="">Yuklashda xatolik</option>'; }
+    } catch { select.innerHTML = '<option value="">Xatolik yuz berdi</option>'; }
+  }
+
+  // fuzzy-search autocompleter
+  function onPatientSearchInput(val) {
+    const list = document.getElementById('patient-suggestions');
+    if (!val.trim()) {
+      list.style.display = 'none';
+      return;
+    }
+    
+    const query = val.toLowerCase().replace(/\s+/g, '');
+    const filtered = allVerifiedPatients.filter(p => {
+      const nameMatch = `${p.firstName} ${p.lastName}`.toLowerCase().replace(/\s+/g, '').includes(query);
+      const phoneMatch = p.phone.replace(/\D/g, '').includes(query) || p.telegramPhone.replace(/\D/g, '').includes(query);
+      return nameMatch || phoneMatch;
+    }).slice(0, 5);
+
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="suggestion-item" style="color:var(--text-muted); cursor:default;">Bemor topilmadi. "Yangi bemor" tugmasini bosing</div>';
+      list.style.display = 'block';
+      return;
+    }
+
+    list.innerHTML = filtered.map(p => `
+      <div class="suggestion-item" onclick="selectPatient('${p.id}', '${p.firstName} ${p.lastName}', '${p.phone}')">
+        👤 <b>${p.firstName} ${p.lastName}</b> (${p.phone})
+      </div>
+    `).join('');
+    list.style.display = 'block';
+  }
+
+  function selectPatient(id, name, phone) {
+    document.getElementById('selected-patient-id').value = id;
+    document.getElementById('patient-search-input').value = `${name} (${phone})`;
+    document.getElementById('patient-suggestions').style.display = 'none';
+  }
+
+  async function ensureBreakPatient() {
+    const res = await fetch('/api/doctor/patients', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${doctorToken}` },
+      body: JSON.stringify({
+        firstName: 'Tanaffus',
+        lastName: '(Dam olish)',
+        phone: '998000000000'
+      })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      return data.patient.id;
+    }
+    throw new Error('Break patient failed');
+  }
+
+  async function submitBookingModal() {
+    const btn = document.getElementById('btn-modal-submit');
+    const isBreak = document.getElementById('modal-break-toggle').checked;
+    
+    btn.disabled = true;
+    
+    try {
+      let patientId = null;
+      let procedureId = null;
+      let description = document.getElementById('modal-description-input').value;
+
+      if (isBreak) {
+        patientId = await ensureBreakPatient();
+        description = "Dam olish (Tanaffus)";
+        // Choose first doctor procedure or a dummy
+        const procSelect = document.getElementById('modal-procedure-select');
+        if (procSelect.options.length > 0) {
+          procedureId = procSelect.options[0].value;
+        }
+      } else {
+        const isNewPatient = document.getElementById('modal-new-patient-toggle').checked;
+        if (isNewPatient) {
+          const fName = document.getElementById('patient-first-name').value;
+          const lName = document.getElementById('patient-last-name').value;
+          const phone = document.getElementById('patient-phone-input').value;
+          if (!fName || !lName || !phone) {
+            showToast("Iltimos, barcha majburiy bemor ma'lumotlarini kiriting!", "error");
+            btn.disabled = false;
+            return;
+          }
+          const res = await fetch('/api/doctor/patients', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${doctorToken}` },
+            body: JSON.stringify({ firstName: fName, lastName: lName, phone })
+          });
+          const pData = await res.json();
+          if (res.ok && pData.success) {
+            patientId = pData.patient.id;
+          } else {
+            showToast(pData.error || "Bemor qo'shishda xato", "error");
+            btn.disabled = false;
+            return;
+          }
+        } else {
+          patientId = document.getElementById('selected-patient-id').value;
+          if (!patientId) {
+            showToast("Iltimos, ro'yxatdan bemorni tanlang yoki yangi bemor kiriting!", "error");
+            btn.disabled = false;
+            return;
+          }
+        }
+        
+        procedureId = document.getElementById('modal-procedure-select').value;
+        if (!procedureId) {
+          showToast("Iltimos, muolajani tanlang!", "error");
+          btn.disabled = false;
+          return;
+        }
+      }
+
+      // 1. Book core selected slot
+      const mainRes = await fetch('/api/doctor/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${doctorToken}` },
+        body: JSON.stringify({ slotId: selectedSlotData.id, procedureId, patientId, description })
+      });
+      const mainData = await mainRes.json();
+      if (!mainRes.ok) {
+        showToast(mainData.error || "Band qilishda xatolik yuz berdi", "error");
+        btn.disabled = false;
+        return;
+      }
+
+      // 2. Book multi-day subsequent slots if selected
+      const isMulti = document.getElementById('modal-multi-day-toggle').checked;
+      if (isMulti && !isBreak) {
+        const checkboxes = document.querySelectorAll('input[name="multi-day-chk"]:checked');
+        for (const chk of checkboxes) {
+          const nextIso = chk.value;
+          const nextSlot = allSlots.find(s => {
+            const sStart = new Date(s.startTime).getTime();
+            const targetStart = parseTashkentDateTime(nextIso, selectedSlotData.time).getTime();
+            return sStart === targetStart;
+          });
+
+          if (nextSlot && nextSlot.isAvailable) {
+            await fetch('/api/doctor/book', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${doctorToken}` },
+              body: JSON.stringify({ slotId: nextSlot.id, procedureId, patientId, description: `${description} (Kurs muolaja)`.trim() })
+            });
+          }
+        }
+      }
+
+      showToast(isBreak ? "Tanaffus muvaffaqiyatli saqlandi!" : "Qabul muvaffaqiyatli band qilindi!", "success");
+      closeBookingModal();
+      loadData();
+      loadVerifiedPatients();
+    } catch (e) {
+      showToast("Tizimda xatolik yuz berdi", "error");
+    }
+    
+    btn.disabled = false;
+  }
+
+  // ---- Booked Details / Actions Modal Logic ----
+  async function openDetailsModal(apptId) {
+    const modal = document.getElementById('details-modal');
+    
+    // Set loading placeholders
+    document.getElementById('det-patient-name').textContent = "Yuklanmoqda...";
+    document.getElementById('det-patient-phone').textContent = "";
+    document.getElementById('det-time').textContent = "";
+    document.getElementById('det-procedure').textContent = "";
+    document.getElementById('det-description').textContent = "";
+    document.getElementById('det-calls-count').textContent = "";
+    
+    modal.classList.add('active');
+
+    try {
+      // Find appointment data from client cache
+      const slotWithAppt = allSlots.find(s => s.appointment && s.appointment.id === apptId);
+      if (slotWithAppt) {
+        const a = slotWithAppt.appointment;
+        const st = new Date(slotWithAppt.startTime);
+        const timeStr = st.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent' });
+        const dateStr = st.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'long', year: 'numeric' });
+        
+        const isBreak = a.patientPhone === '+998000000000' || a.patientFirst === 'Tanaffus';
+
+        document.getElementById('det-patient-name').textContent = isBreak ? "☕ Dam olish (Tanaffus)" : `${a.patientFirst} ${a.patientLast}`;
+        document.getElementById('det-patient-phone').textContent = isBreak ? "-" : (a.patient ? a.patient.phone : a.patientPhone);
+        document.getElementById('det-time').textContent = `🕒 ${timeStr} (${dateStr})`;
+        document.getElementById('det-procedure').textContent = isBreak ? "Dam olish vaqti" : (a.procedure ? a.procedure.name : "Birlamchi qabul");
+        document.getElementById('det-description').textContent = a.description || "Yo'q";
+        
+        // Calls display
+        const attempts = a.callAttempts || 0;
+        document.getElementById('det-calls-count').textContent = `${attempts} marta qo'ng'iroq qilindi ${attempts >= 3 ? '⚠️ (Ulanib bo\'lmadi)' : ''}`;
+        
+        // Hide call action buttons if it is a break
+        if (isBreak) {
+          document.getElementById('det-calls-wrap').style.display = 'none';
+          document.getElementById('det-btn-called').style.display = 'none';
+          document.getElementById('det-btn-no-answer').style.display = 'none';
+        } else {
+          document.getElementById('det-calls-wrap').style.display = 'block';
+          document.getElementById('det-btn-called').style.display = 'inline-block';
+          document.getElementById('det-btn-no-answer').style.display = 'inline-block';
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      showToast("Tafsilotlarni yuklab bo'lmadi", "error");
+    }
+  }
+
+  function closeDetailsModal() {
+    document.getElementById('details-modal').classList.remove('active');
+  }
+
+  async function trackDetailCall(action) {
+    const apptId = selectedSlotData.apptId;
+    if (!apptId) return;
+
+    try {
+      const res = await fetch(`/api/admin/appointments/${apptId}/call-status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${doctorToken}` },
+        body: JSON.stringify({ action })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(action === 'RESOLVE' ? "Mijoz bilan bog'lanildi!" : "Qo'ng'iroq javobsiz qoldi!", "success");
+        closeDetailsModal();
+        loadData();
+      } else {
+        showToast(data.error || "Xatolik yuz berdi", "error");
+      }
+    } catch {
+      showToast("Server bilan bog'lanib bo'lmadi", "error");
+    }
+  }
+
+  async function cancelDetailAppointment() {
+    const apptId = selectedSlotData.apptId;
+    if (!apptId) return;
+    if (!confirm("Haqiqatan ham ushbu qabulni bekor qilmoqchimisiz?")) return;
+
+    try {
+      const res = await fetch(`/api/admin/appointments/${apptId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${doctorToken}` }
+      });
+      if (res.ok) {
+        showToast("Qabul bekor qilindi!", "success");
+        closeDetailsModal();
+        loadData();
+      } else {
+        showToast("Bekor qilishda xatolik yuz berdi", "error");
+      }
+    } catch {
+      showToast("Server bilan bog'lanib bo'lmadi", "error");
+    }
+  }
+
+  async function completeDetailAppointment() {
+    const apptId = selectedSlotData.apptId;
+    if (!apptId) return;
+
+    try {
+      const res = await fetch(`/api/admin/appointments/${apptId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${doctorToken}` },
+        body: JSON.stringify({ action: 'ATTEND' })
+      });
+      if (res.ok) {
+        showToast("Qabul yakunlandi! Tizimga tashrif sifatida yozildi.", "success");
+        closeDetailsModal();
+        loadData();
+      } else {
+        showToast("Xatolik yuz berdi", "error");
+      }
+    } catch {
+      showToast("Server bilan bog'lanib bo'lmadi", "error");
+    }
+  }
+
+  // ---- Appointments list inside sidebar ----
   async function loadAppointments() {
     const container = document.getElementById('appointments-container');
     if (!currentDoctorId) {
@@ -669,22 +1910,51 @@
       const res = await fetch(`/api/doctor/appointments?doctorId=${currentDoctorId}`, { headers: { 'Authorization': `Bearer ${doctorToken}` } });
       const data = await res.json();
       if (res.ok && data.success) {
-        if (data.appointments.length === 0) {
-          container.innerHTML = '<div class="empty-state">Kelgusi qabullar yo\'q</div>';
+        // filter out cancelled
+        const activeAppts = data.appointments.filter(a => a.status === 'SCHEDULED');
+        if (activeAppts.length === 0) {
+          container.innerHTML = '<div class="empty-state">Bugun kelgusi qabullar yo\'q</div>';
           return;
         }
-        container.innerHTML = data.appointments.map(a => {
+
+        container.innerHTML = activeAppts.map(a => {
           const st = new Date(a.slot.startTime);
-          const _uzMonths = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun', 'Iyul', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
-          const dateStr = `${st.getDate()} ${_uzMonths[st.getMonth()]}`;
           const timeStr = st.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent' });
-          const pName = a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : 'Noma\'lum';
+          
+          const isBreak = a.patientPhone === '+998000000000' || a.patientFirst === 'Tanaffus';
+          const patientName = isBreak ? "☕ Tanaffus / Dam olish" : `${a.patientFirst} ${a.patientLast}`;
+          const phone = isBreak ? "-" : (a.patient ? a.patient.phone : a.patientPhone);
+          const procName = isBreak ? "Tanaffus" : (a.procedure ? a.procedure.name : "Birlamchi qabul");
+          const attempts = a.callAttempts || 0;
+
+          // Call tracking section
+          const callSection = isBreak ? '' : `
+            <div class="call-tracking-wrap">
+              <button class="btn-call btn-called" onclick="sidebarTrackCall('${a.id}', 'RESOLVE')">📞 Bog'lanildi</button>
+              <button class="btn-call btn-no-answer" onclick="sidebarTrackCall('${a.id}', 'NO_ANSWER')">🔇 Ulanmadi</button>
+              ${attempts > 0 ? `<div class="call-counter">${attempts} marta qo'ng'iroq qilindi ${attempts >= 3 ? '⚠️' : ''}</div>` : ''}
+            </div>
+          `;
+
+          // Main actions section
+          const actionsSection = `
+            <div class="card-actions-wrap">
+              <button class="btn-action-card btn-cancel-card" onclick="sidebarCancel('${a.id}')">Bekor qilish</button>
+              <button class="btn-action-card btn-complete" onclick="sidebarComplete('${a.id}')">Tugallash</button>
+            </div>
+          `;
+
           return `
-            <div class="appt-card">
-              <div class="appt-time">🕒 ${timeStr}</div>
-              <div class="appt-date">${dateStr}</div>
-              <div class="appt-patient">${pName}</div>
-              <div class="appt-phone">📱 ${a.patient ? a.patient.phone : '-'}</div>
+            <div class="appt-card" style="${isBreak ? 'border-left: 3px solid var(--color-break);' : 'border-left: 3px solid var(--color-busy);'}">
+              <div class="appt-time-wrap">
+                <div class="appt-time">🕒 ${timeStr}</div>
+                <div class="appt-date">Bugun</div>
+              </div>
+              <div class="appt-patient">${patientName}</div>
+              <div class="appt-procedure">${procName}</div>
+              ${isBreak ? '' : `<div class="appt-phone">📱 ${phone}</div>`}
+              ${callSection}
+              ${actionsSection}
             </div>
           `;
         }).join('');
@@ -692,18 +1962,70 @@
     } catch {}
   }
 
+  // Sidebar fast actions
+  async function sidebarTrackCall(apptId, action) {
+    try {
+      const res = await fetch(`/api/admin/appointments/${apptId}/call-status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${doctorToken}` },
+        body: JSON.stringify({ action })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(action === 'RESOLVE' ? "Mijoz bilan bog'lanildi!" : "Qo'ng'iroq javobsiz qoldi!", "success");
+        loadData();
+      } else { showToast(data.error || "Xatolik yuz berdi", "error"); }
+    } catch { showToast("Ulanish xatosi", "error"); }
+  }
+
+  async function sidebarCancel(apptId) {
+    if (!confirm("Haqiqatan ham ushbu qabulni bekor qilmoqchimisiz?")) return;
+    try {
+      const res = await fetch(`/api/admin/appointments/${apptId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${doctorToken}` }
+      });
+      if (res.ok) {
+        showToast("Qabul bekor qilindi!", "success");
+        loadData();
+      } else { showToast("Xatolik yuz berdi", "error"); }
+    } catch { showToast("Ulanish xatosi", "error"); }
+  }
+
+  async function sidebarComplete(apptId) {
+    try {
+      const res = await fetch(`/api/admin/appointments/${apptId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${doctorToken}` },
+        body: JSON.stringify({ action: 'ATTEND' })
+      });
+      if (res.ok) {
+        showToast("Qabul yakunlandi!", "success");
+        loadData();
+      } else { showToast("Xatolik yuz berdi", "error"); }
+    } catch { showToast("Ulanish xatosi", "error"); }
+  }
+
   function updateStats() {
-    const today = getLocalISO(new Date());
-    const todayAppts = allSlots.filter(s => getLocalISO(new Date(s.startTime)) === today && s.appointment);
+    const todayIso = getTashkentISO(new Date());
+    const todaySlots = allSlots.filter(s => {
+      const slotIso = getTashkentISO(new Date(s.startTime));
+      return slotIso === todayIso;
+    });
+
+    const todayAppts = todaySlots.filter(s => s.appointment && s.appointment.status !== 'CANCELLED');
+    const todayRevenue = todayAppts.reduce((sum, s) => sum + (s.appointment.procedure ? s.appointment.procedure.price : 200000), 0);
+
     document.getElementById('stat-today-count').textContent = todayAppts.length;
-    document.getElementById('stat-today-revenue').textContent = (todayAppts.length * 200000).toLocaleString() + " so'm";
+    document.getElementById('stat-today-revenue').textContent = todayRevenue.toLocaleString() + " so'm";
+    
     const weekTotal = allSlots.length;
-    const weekBooked = allSlots.filter(s => s.appointment).length;
+    const weekBooked = allSlots.filter(s => s.appointment && s.appointment.status !== 'CANCELLED').length;
     const occupancy = weekTotal > 0 ? Math.round((weekBooked / weekTotal) * 100) : 0;
     document.getElementById('stat-week-occupancy').textContent = occupancy + "%";
   }
 
-  // ---- Copy/Paste Schedule Shablon ----
+  // ---- Copy/Paste Shablon (Admin Only) ----
   function copySelectedDay() {
     const isoDate = document.getElementById('copy-day-select').value;
     if (!isoDate) {
@@ -714,48 +2036,35 @@
     const select = document.getElementById('copy-day-select');
     copiedDayLabel = select.options[select.selectedIndex].text;
 
-    // Collect all open slots (existing in database OR pending additions, minus pending removals)
     const times = [];
     for (let h = START_HOUR; h <= END_HOUR; h++) {
       for (let m = 0; m < 60; m += INTERVAL) {
-        const t = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-        times.push(t);
+        times.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
       }
     }
 
     copiedSchedule = [];
     for (const t of times) {
       const key = `${isoDate}_${t}`;
-      const [h_str, m_str] = t.split(':');
-      const slotDateTime = new Date(
-        Number(isoDate.split('-')[0]),
-        Number(isoDate.split('-')[1]) - 1,
-        Number(isoDate.split('-')[2]),
-        Number(h_str),
-        Number(m_str)
-      );
+      const dt = parseTashkentDateTime(isoDate, t);
 
       const existing = allSlots.find(s => {
-        const sStart = new Date(s.startTime);
-        const sEnd = new Date(sStart.getTime() + s.duration * 60000);
-        return slotDateTime >= sStart && slotDateTime < sEnd;
+        const sStart = new Date(s.startTime).getTime();
+        return dt.getTime() === sStart;
       });
 
       const action = pendingChanges[key];
       let isOpen = false;
 
       if (existing) {
-        if (action !== 'remove' && !existing.appointment) isOpen = true;
+        if (action !== 'remove' && (!existing.appointment || existing.appointment.status === 'CANCELLED')) isOpen = true;
       } else {
         if (action === 'add') isOpen = true;
       }
 
-      if (isOpen) {
-        copiedSchedule.push(t);
-      }
+      if (isOpen) copiedSchedule.push(t);
     }
 
-    // Show paste actions
     document.getElementById('copied-status-msg').textContent = `📋 ${copiedDayLabel} nusxalandi (${copiedSchedule.length} ta ochiq soat)`;
     document.getElementById('paste-actions-wrap').style.display = 'flex';
     renderGrid();
@@ -764,42 +2073,31 @@
   function applyToAllDays() {
     if (!copiedSchedule) return;
     
-    // Find all days in the grid
-    const days = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date();
-      d.setDate(d.getDate() + i);
-      days.push(d);
-    }
-
+    const days = getTashkentDays();
     const times = [];
     for (let h = START_HOUR; h <= END_HOUR; h++) {
       for (let m = 0; m < 60; m += INTERVAL) {
-        const t = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-        times.push(t);
+        times.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
       }
     }
 
     const sourceIso = document.getElementById('copy-day-select').value;
 
     for (const d of days) {
-      const iso = getLocalISO(d);
-      if (iso === sourceIso) continue;
+      if (d.iso === sourceIso) continue;
 
       for (const t of times) {
-        const key = `${iso}_${t}`;
-        const [h_str, m_str] = t.split(':');
-        const slotDateTime = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Number(h_str), Number(m_str));
+        const key = `${d.iso}_${t}`;
+        const dt = parseTashkentDateTime(d.iso, t);
         
-        if (slotDateTime < new Date()) continue;
+        if (dt.getTime() < Date.now()) continue;
 
         const existing = allSlots.find(s => {
-          const sStart = new Date(s.startTime);
-          const sEnd = new Date(sStart.getTime() + s.duration * 60000);
-          return slotDateTime >= sStart && slotDateTime < sEnd;
+          const sStart = new Date(s.startTime).getTime();
+          return dt.getTime() === sStart;
         });
 
-        if (existing && existing.appointment) continue;
+        if (existing && existing.appointment && existing.appointment.status !== 'CANCELLED') continue;
 
         const shouldBeOpen = copiedSchedule.includes(t);
 
@@ -820,7 +2118,7 @@
     }
 
     renderGrid();
-    showToast("Nusxalangan shablon haftadagi barcha kunlarga qo'llandi! Tasdiqlash uchun pastdagi 'Saqlash' tugmasini bosing.", "info");
+    showToast("Nusxalangan shablon haftadagi barcha kunlarga qo'llandi! Saqlash tugmasini bosing.", "info");
   }
 
   function pasteToDay(targetIso, event) {
@@ -830,27 +2128,22 @@
     const times = [];
     for (let h = START_HOUR; h <= END_HOUR; h++) {
       for (let m = 0; m < 60; m += INTERVAL) {
-        const t = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-        times.push(t);
+        times.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
       }
     }
 
-    const [yr, mo, dy] = targetIso.split('-');
-
     for (const t of times) {
       const key = `${targetIso}_${t}`;
-      const [h_str, m_str] = t.split(':');
-      const slotDateTime = new Date(Number(yr), Number(mo) - 1, Number(dy), Number(h_str), Number(m_str));
+      const dt = parseTashkentDateTime(targetIso, t);
       
-      if (slotDateTime < new Date()) continue;
+      if (dt.getTime() < Date.now()) continue;
 
       const existing = allSlots.find(s => {
-        const sStart = new Date(s.startTime);
-        const sEnd = new Date(sStart.getTime() + s.duration * 60000);
-        return slotDateTime >= sStart && slotDateTime < sEnd;
+        const sStart = new Date(s.startTime).getTime();
+        return dt.getTime() === sStart;
       });
 
-      if (existing && existing.appointment) continue;
+      if (existing && existing.appointment && existing.appointment.status !== 'CANCELLED') continue;
 
       const shouldBeOpen = copiedSchedule.includes(t);
 
@@ -869,6 +2162,17 @@
       }
     }
 
+    renderGrid();
+    showToast(`${targetIso} kuniga shablon qo'yildi!`, "info");
+  }
+
+  function cancelCopyState() {
+    copiedSchedule = null;
+    copiedDayLabel = '';
+    const select = document.getElementById('copy-day-select');
+    if (select) select.value = '';
+    const wrap = document.getElementById('paste-actions-wrap');
+    if (wrap) wrap.style.display = 'none';
     renderGrid();
   }
 
@@ -891,25 +2195,12 @@
     `;
 
     container.appendChild(toast);
-
-    // Trigger animation
     setTimeout(() => toast.classList.add('show'), 10);
 
-    // Auto dismiss
     setTimeout(() => {
       toast.classList.remove('show');
       setTimeout(() => toast.remove(), 400);
-    }, 4000);
-  }
-
-  function cancelCopyState() {
-    copiedSchedule = null;
-    copiedDayLabel = '';
-    const select = document.getElementById('copy-day-select');
-    if (select) select.value = '';
-    const wrap = document.getElementById('paste-actions-wrap');
-    if (wrap) wrap.style.display = 'none';
-    renderGrid();
+    }, 4500);
   }
 </script>
 <div id="toast-container"></div>
