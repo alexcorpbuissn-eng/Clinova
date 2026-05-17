@@ -26,8 +26,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, slots: [] });
   }
 
+  // Get start of today (00:00:00) in Tashkent (UTC+5) to show today's past slots in grid
+  const todayStart = new Date();
+  todayStart.setUTCHours(todayStart.getUTCHours() + 5);
+  todayStart.setUTCHours(0, 0, 0, 0);
+  todayStart.setUTCHours(todayStart.getUTCHours() - 5);
+
   const slots = await prisma.slot.findMany({
-    where: { doctorId, startTime: { gte: new Date() } },
+    where: { doctorId, startTime: { gte: todayStart } },
     include: { appointment: { select: { status: true, patientFirst: true, patientLast: true, patientPhone: true, patient: { select: { firstName: true, lastName: true, phone: true } } } } },
     orderBy: { startTime: 'asc' },
   });
