@@ -20,15 +20,30 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   const appointment = await prisma.appointment.findFirst({
     where: { id, doctorId },
-    include: { slot: true, doctor: true, patient: true },
+    include: { slot: true, doctor: true, patient: true, procedure: true },
   });
 
   if (!appointment) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
+  const N = Math.ceil(appointment.procedure.durationMinutes / 30);
+  const baseTime = new Date(appointment.slot.startTime);
+  const slotTimesToFree = [];
+  for (let i = 0; i < N; i++) {
+    slotTimesToFree.push(new Date(baseTime.getTime() + i * 30 * 60 * 1000));
+  }
+
   await prisma.$transaction([
     prisma.appointment.update({ where: { id }, data: { status, cancelToken: null } }),
     ...(status === 'CANCELLED'
-      ? [prisma.slot.update({ where: { id: appointment.slotId }, data: { isAvailable: true } })]
+      ? [
+          prisma.slot.updateMany({
+            where: {
+              doctorId: appointment.doctorId,
+              startTime: { in: slotTimesToFree }
+            },
+            data: { isAvailable: true }
+          })
+        ]
       : []),
   ]);
 

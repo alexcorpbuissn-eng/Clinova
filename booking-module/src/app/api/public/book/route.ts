@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await prisma.$transaction(async (tx: any) => {
-      // Lock the slot row against concurrent booking
+      // Lock the first slot row against concurrent booking
       const slots = await tx.$queryRaw<any[]>`
         SELECT s.*, d."firstName" as "doctorFirst", d."lastName" as "doctorLast"
         FROM "Slot" s
@@ -93,8 +93,27 @@ export async function POST(req: NextRequest) {
 
       if (!procedure) throw new Error('PROCEDURE_NOT_FOUND');
 
-      if (procedure.durationMinutes > slot.duration) {
-        throw new Error('PROCEDURE_TOO_LONG');
+      // Find and lock all consecutive slots required
+      const N = Math.ceil(procedure.durationMinutes / 30);
+      const baseTime = new Date(slot.startTime);
+      const consecutiveSlots = [slot];
+
+      for (let i = 1; i < N; i++) {
+        const chunkStartTime = new Date(baseTime.getTime() + i * 30 * 60 * 1000);
+        
+        // Lock consecutive slot
+        const nextSlots = await tx.$queryRaw<any[]>`
+          SELECT * FROM "Slot"
+          WHERE "doctorId" = ${slot.doctorId}
+            AND "startTime" = ${chunkStartTime}
+            AND "isAvailable" = true
+          FOR UPDATE
+        `;
+
+        if (!nextSlots?.length) {
+          throw new Error('SLOT_UNAVAILABLE');
+        }
+        consecutiveSlots.push(nextSlots[0]);
       }
 
       // 1 booking per patient per day constraint
@@ -114,8 +133,10 @@ export async function POST(req: NextRequest) {
 
       if (existing) throw new Error('DUPLICATE_BOOKING');
 
-      // Lock slot
-      await tx.slot.update({ where: { id: slotId }, data: { isAvailable: false } });
+      // Mark all consecutive slots as unavailable
+      for (const cs of consecutiveSlots) {
+        await tx.slot.update({ where: { id: cs.id }, data: { isAvailable: false } });
+      }
 
       // Create appointment
       const appointment = await tx.appointment.create({

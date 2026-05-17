@@ -59,9 +59,19 @@ export async function POST(req: NextRequest) {
         data: { status: 'CANCELLED', cancelledBy: 'PATIENT' }
       });
 
-      // Free the slot
-      await tx.slot.update({
-        where: { id: appointment.slotId },
+      // Free all consecutive slots
+      const N = Math.ceil(appointment.procedure.durationMinutes / 30);
+      const baseTime = new Date(appointment.slot.startTime);
+      const slotTimesToFree = [];
+      for (let i = 0; i < N; i++) {
+        slotTimesToFree.push(new Date(baseTime.getTime() + i * 30 * 60 * 1000));
+      }
+
+      await tx.slot.updateMany({
+        where: {
+          doctorId: appointment.doctorId,
+          startTime: { in: slotTimesToFree }
+        },
         data: { isAvailable: true }
       });
 

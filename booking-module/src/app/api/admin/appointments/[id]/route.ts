@@ -23,21 +23,31 @@ export async function DELETE(
   try {
     const appointment = await prisma.appointment.findUnique({
       where: { id },
-      include: { slot: true },
+      include: { slot: true, procedure: true },
     });
 
     if (!appointment) {
       return NextResponse.json({ error: 'Topilmadi' }, { status: 404 });
     }
 
-    // Cancel appointment and free the slot instead of deleting it
+    const N = Math.ceil(appointment.procedure.durationMinutes / 30);
+    const baseTime = new Date(appointment.slot.startTime);
+    const slotTimesToFree = [];
+    for (let i = 0; i < N; i++) {
+      slotTimesToFree.push(new Date(baseTime.getTime() + i * 30 * 60 * 1000));
+    }
+
+    // Cancel appointment and free the slots instead of deleting it
     await prisma.$transaction([
       prisma.appointment.update({ 
         where: { id },
         data: { status: 'CANCELLED', cancelledBy: 'ADMIN' } 
       }),
-      prisma.slot.update({
-        where: { id: appointment.slotId },
+      prisma.slot.updateMany({
+        where: {
+          doctorId: appointment.doctorId,
+          startTime: { in: slotTimesToFree }
+        },
         data: { isAvailable: true },
       }),
     ]);
@@ -88,14 +98,24 @@ export async function PATCH(
     }
 
     if (body.action === 'NOSHOW') {
+      const N = Math.ceil(appointment.procedure.durationMinutes / 30);
+      const baseTime = new Date(appointment.slot.startTime);
+      const slotTimesToFree = [];
+      for (let i = 0; i < N; i++) {
+        slotTimesToFree.push(new Date(baseTime.getTime() + i * 30 * 60 * 1000));
+      }
+
       await prisma.$transaction([
         prisma.appointment.update({
           where: { id },
           data: { status: 'CANCELLED', cancelledBy: 'NOSHOW' },
         }),
-        prisma.slot.update({
-          where: { id: appointment.slotId },
-          data: { isAvailable: true },
+        prisma.slot.updateMany({
+          where: {
+            doctorId: appointment.doctorId,
+            startTime: { in: slotTimesToFree }
+          },
+          data: { isAvailable: true }
         }),
       ]);
       return NextResponse.json({ success: true });

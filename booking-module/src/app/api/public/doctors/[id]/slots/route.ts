@@ -33,20 +33,35 @@ export async function GET(
       doctorId: id,
       isAvailable: true,
       startTime: { gt: new Date() },
-      // If a procedure was selected, only return slots long enough
-      ...(procedureDuration !== null
-        ? { duration: { gte: procedureDuration } }
-        : {}),
     },
     orderBy: { startTime: 'asc' },
   });
 
+  // Filter slots if a procedure is selected to ensure we have enough consecutive slots
+  let filteredSlots = slots;
+  if (procedureDuration !== null) {
+    const N = Math.ceil(procedureDuration / 30);
+    filteredSlots = slots.filter(slot => {
+      let canFit = true;
+      const baseTime = new Date(slot.startTime).getTime();
+      for (let i = 1; i < N; i++) {
+        const nextTime = new Date(baseTime + i * 30 * 60 * 1000);
+        const hasNext = slots.some(s => new Date(s.startTime).getTime() === nextTime.getTime());
+        if (!hasNext) {
+          canFit = false;
+          break;
+        }
+      }
+      return canFit;
+    });
+  }
+
   // Enrich with computed endTime for display purposes
-  const enriched = slots.map((s: any) => ({
+  const enriched = filteredSlots.map((s: any) => ({
     id: s.id,
     startTime: s.startTime,
-    endTime: new Date(s.startTime.getTime() + s.duration * 60_000),
-    duration: s.duration,
+    endTime: new Date(s.startTime.getTime() + (procedureDuration || s.duration) * 60_000),
+    duration: procedureDuration || s.duration,
   }));
 
   return NextResponse.json({ success: true, slots: enriched });

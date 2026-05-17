@@ -52,8 +52,27 @@ export async function POST(req: NextRequest) {
       });
       if (!procedure) throw new Error('PROCEDURE_NOT_FOUND');
 
-      if (procedure.durationMinutes > slot.duration) {
-        throw new Error('PROCEDURE_TOO_LONG');
+      // Find and lock all consecutive slots required
+      const N = Math.ceil(procedure.durationMinutes / 30);
+      const baseTime = new Date(slot.startTime);
+      const consecutiveSlots = [slot];
+
+      for (let i = 1; i < N; i++) {
+        const chunkStartTime = new Date(baseTime.getTime() + i * 30 * 60 * 1000);
+        
+        // Find consecutive slot
+        const nextSlot = await tx.slot.findFirst({
+          where: {
+            doctorId: slot.doctorId,
+            startTime: chunkStartTime,
+            isAvailable: true
+          }
+        });
+
+        if (!nextSlot) {
+          throw new Error('SLOT_UNAVAILABLE');
+        }
+        consecutiveSlots.push(nextSlot);
       }
 
       // 3. Fetch patient
@@ -62,11 +81,13 @@ export async function POST(req: NextRequest) {
       });
       if (!patient) throw new Error('PATIENT_NOT_FOUND');
 
-      // 4. Update slot availability to false
-      await tx.slot.update({
-        where: { id: slotId },
-        data: { isAvailable: false }
-      });
+      // 4. Update all consecutive slots availability to false
+      for (const cs of consecutiveSlots) {
+        await tx.slot.update({
+          where: { id: cs.id },
+          data: { isAvailable: false }
+        });
+      }
 
       // 5. Create appointment
       const appointment = await tx.appointment.create({

@@ -51,7 +51,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   try {
     const appointment = await prisma.appointment.findUnique({
       where: { cancelToken: token },
-      include: { doctor: true, slot: true, patient: true },
+      include: { doctor: true, slot: true, patient: true, procedure: true },
     });
 
     if (!appointment || appointment.status !== 'SCHEDULED') {
@@ -66,15 +66,25 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
       return NextResponse.json({ success: false, error: 'Qabulni faqatgina bron qilinganidan so\'ng 15 daqiqa ichida bekor qilish mumkin.' }, { status: 410 });
     }
 
-    // Cancel: free slot + update status + invalidate token
+    const N = Math.ceil(appointment.procedure.durationMinutes / 30);
+    const baseTime = new Date(appointment.slot.startTime);
+    const slotTimesToFree = [];
+    for (let i = 0; i < N; i++) {
+      slotTimesToFree.push(new Date(baseTime.getTime() + i * 30 * 60 * 1000));
+    }
+
+    // Cancel: free all slots + update status + invalidate token
     await prisma.$transaction([
       prisma.appointment.update({
         where: { id: appointment.id },
         data: { status: 'CANCELLED', cancelToken: null, cancelledBy: 'PATIENT' },
       }),
-      prisma.slot.update({
-        where: { id: appointment.slotId },
-        data: { isAvailable: true },
+      prisma.slot.updateMany({
+        where: {
+          doctorId: appointment.doctorId,
+          startTime: { in: slotTimesToFree }
+        },
+        data: { isAvailable: true }
       }),
     ]);
 
