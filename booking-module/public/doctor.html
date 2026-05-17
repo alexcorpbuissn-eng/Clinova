@@ -498,8 +498,6 @@
             
             if (isPast && !existing) {
               statusClass += ' disabled';
-            } else if (isPast && existing) {
-               statusClass += ' disabled';
             }
 
             const onClickAttr = isPast ? '' : `onclick="toggleSlot('${iso}', '${t}', '${existing ? existing.id : ''}', ${existing && existing.appointment ? 'true' : 'false'})"`;
