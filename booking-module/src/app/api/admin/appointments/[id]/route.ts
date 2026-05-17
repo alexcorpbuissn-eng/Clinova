@@ -37,11 +37,17 @@ export async function DELETE(
       slotTimesToFree.push(new Date(baseTime.getTime() + i * 30 * 60 * 1000));
     }
 
+    // Determine target cancelledBy value
+    let newCancelledBy = 'ADMIN';
+    if (appointment.status === 'CANCELLED' && appointment.cancelledBy === 'NOSHOW') {
+      newCancelledBy = 'NOSHOW_UNREACHABLE';
+    }
+
     // Cancel appointment and free the slots instead of deleting it
     await prisma.$transaction([
       prisma.appointment.update({ 
         where: { id },
-        data: { status: 'CANCELLED', cancelledBy: 'ADMIN' } 
+        data: { status: 'CANCELLED', cancelledBy: newCancelledBy } 
       }),
       prisma.slot.updateMany({
         where: {

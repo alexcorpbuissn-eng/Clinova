@@ -115,6 +115,73 @@
     .btn-action:hover { opacity: 0.8; }
     .btn-start { background: var(--teal); color: #fff; }
     .btn-cancel { background: var(--red-bg); color: var(--red); }
+    .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Modern Premium Toast Notifications */
+    #toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: none;
+    }
+    .toast {
+      pointer-events: auto;
+      min-width: 320px;
+      max-width: 450px;
+      background: rgba(15, 23, 42, 0.9); /* Dark navy */
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px 20px;
+      color: #fff;
+      font-weight: 500;
+      font-size: 0.9rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transform: translateX(120%);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    .toast.success {
+      border-left: 4px solid var(--teal);
+    }
+    .toast.error {
+      border-left: 4px solid var(--red);
+    }
+    .toast.info {
+      border-left: 4px solid #3b82f6; /* Blue info color */
+    }
+    .toast-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    .toast-content {
+      flex: 1;
+      line-height: 1.4;
+    }
+    .toast-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+    .toast-close:hover {
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -521,7 +588,13 @@
       const time = new Date(a.slot.startTime).toLocaleTimeString('uz-UZ', { hour:'2-digit', minute:'2-digit' });
       const pName = a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : (a.patientFirst ? `${a.patientFirst} ${a.patientLast}` : 'Noma\'lum');
       const pPhone = a.patient ? a.patient.phone : (a.patientPhone || 'Yo\'q');
+      const attempts = a.callAttempts || 0;
       
+      const isDeleteDisabled = attempts < 3;
+      const deleteTooltip = isDeleteDisabled 
+        ? "Kamida 3 marta qo'ng'iroq qilinishi shart!" 
+        : "Qabulni o'chirish";
+
       return `<tr style="background:#fff5f5;">
         <td>
           <strong style="color:var(--red);">${pName}</strong><br>
@@ -530,7 +603,18 @@
         <td><div style="font-size:0.8rem">Dr. ${a.doctor.lastName}<br><span style="color:var(--text-muted)">${a.procedure?.name || 'Ko\'rik'}</span></div></td>
         <td><div style="font-size:0.8rem; color:var(--red)"><strong>${date}</strong><br>${time}</div></td>
         <td>
-          <button class="btn-action btn-cancel" style="background:#e2e8f0; color:var(--text);" onclick="deleteAppt('${a.id}')">O'chirish</button>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn-action btn-start" style="background:#10b981;" onclick="updateCallStatus('${a.id}', 'RESOLVE')">
+              📞 Bog'lanildi
+            </button>
+            <button class="btn-action" style="background:#f59e0b; color:white;" onclick="updateCallStatus('${a.id}', 'NO_ANSWER')">
+              Javob bermadi (${attempts}/3)
+            </button>
+            <button class="btn-action btn-cancel" style="background:${isDeleteDisabled ? '#cbd5e1' : '#ef4444'}; color:${isDeleteDisabled ? '#64748b' : '#fff'};" 
+                    onclick="deleteAppt('${a.id}', ${attempts})" title="${deleteTooltip}">
+              O'chirish
+            </button>
+          </div>
         </td>
       </tr>`;
     }).join('');
@@ -598,15 +682,53 @@
     }
   }
 
-  async function deleteAppt(id) {
+  async function deleteAppt(id, callAttempts = 3) {
+    if (callAttempts < 3) {
+      showToast("Bemorga kamida 3 marta qo'ng'iroq qilinishi shart! (Joriy: " + callAttempts + "/3)", "error");
+      return;
+    }
     if (!confirm("Haqiqatan ham bu qabulni bekor qilmoqchimisiz?")) return;
     try {
       const res = await fetch(`/api/admin/appointments/${id}`, { 
         method: 'DELETE', 
         headers: { 'Authorization': `Bearer ${adminToken}` } 
       });
-      if (res.ok) loadAppointments();
-    } catch {}
+      if (res.ok) {
+        showToast("Qabul muvaffaqiyatli o'chirildi!", "success");
+        loadAppointments();
+      } else {
+        const data = await res.json();
+        showToast(data.error || "O'chirishda xatolik yuz berdi", "error");
+      }
+    } catch {
+      showToast("Tarmoq xatosi", "error");
+    }
+  }
+
+  async function updateCallStatus(id, action) {
+    try {
+      const res = await fetch(`/api/admin/appointments/${id}/call-status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({ action })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        if (action === 'RESOLVE') {
+          showToast("Bemor bilan bog'lanildi va ro'yxatdan olindi!", "success");
+        } else {
+          showToast("Javob bermadi deb belgilandi! (Joriy: " + data.appointment.callAttempts + "/3)", "info");
+        }
+        loadAppointments();
+      } else {
+        showToast(data.error || "Xatolik yuz berdi", "error");
+      }
+    } catch {
+      showToast("Tarmoq xatoligi", "error");
+    }
   }
 
   async function resolvePastAppointment(id, answer) {
@@ -1039,6 +1161,37 @@
     });
   }
   document.querySelectorAll('input[type="tel"]').forEach(applyPhoneFormatter);
+
+  function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    let icon = '✨';
+    if (type === 'success') icon = '✅';
+    else if (type === 'error') icon = '❌';
+    else if (type === 'info') icon = 'ℹ️';
+
+    toast.innerHTML = `
+      <div class="toast-icon">${icon}</div>
+      <div class="toast-content">${message}</div>
+      <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+    `;
+
+    container.appendChild(toast);
+
+    // Trigger animation
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // Auto dismiss
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 400);
+    }, 4000);
+  }
 </script>
+<div id="toast-container"></div>
 </body>
 </html>

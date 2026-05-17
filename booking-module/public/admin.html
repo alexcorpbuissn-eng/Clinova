@@ -862,7 +862,12 @@
             const isCancelledAdmin = a.status === 'CANCELLED' && a.cancelledBy === 'ADMIN';
             const isCancelledPatient = a.status === 'CANCELLED' && a.cancelledBy === 'PATIENT';
             const isNoShow = a.status === 'CANCELLED' && a.cancelledBy === 'NOSHOW';
-            const rowClass = isCancelledAdmin ? 'row-cancelled-admin' : (isCancelledPatient ? 'row-cancelled-patient' : (isNoShow ? 'row-noshow' : ''));
+            const isNoShowResolved = a.status === 'CANCELLED' && a.cancelledBy === 'NOSHOW_RESOLVED';
+            const isNoShowUnreachable = a.status === 'CANCELLED' && a.cancelledBy === 'NOSHOW_UNREACHABLE';
+
+            const rowClass = isCancelledAdmin ? 'row-cancelled-admin' : 
+                             (isCancelledPatient ? 'row-cancelled-patient' : 
+                             (isNoShow || isNoShowResolved || isNoShowUnreachable ? 'row-noshow' : ''));
             
             let statusCell = `<span class="badge badge-${a.status.toLowerCase()}">${a.status}</span>`;
             if (isCancelledAdmin) {
@@ -870,7 +875,11 @@
             } else if (isCancelledPatient) {
               statusCell += ` <span class="badge badge-cancelled-patient" title="Bemor tomonidan bekor qilindi">👤 Bemor</span>`;
             } else if (isNoShow) {
-              statusCell += ` <span class="badge badge-noshow" title="Bemor kelmadi">⚠️ Kelmadi</span>`;
+              statusCell += ` <span class="badge badge-noshow" title="Bemor kelmadi (Bog'lanish kutilmoqda)">⚠️ Kelmadi (Kutilmoqda)</span>`;
+            } else if (isNoShowResolved) {
+              statusCell += ` <span class="badge badge-noshow" style="background:#dcfce7; color:#15803d; border: 1px solid #bbf7d0;" title="Bemor kelmadi (Telefon orqali bog'lanildi)">✅ Kelmadi (Bog'lanildi)</span>`;
+            } else if (isNoShowUnreachable) {
+              statusCell += ` <span class="badge badge-noshow" style="background:#fee2e2; color:#b91c1c; border: 1px solid #fecaca;" title="Bemor kelmadi (Javob bermadi)">📵 Kelmadi (Javobsiz, ${a.callAttempts || 0} marta)</span>`;
             }
 
             let actions = '';
