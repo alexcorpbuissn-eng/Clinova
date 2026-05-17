@@ -437,9 +437,15 @@
   }
 
   // ── Load Appointments ─────────────────────────────────────────
+  function formatShortDate(dateInput) {
+    const d = new Date(dateInput);
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    return `${months[d.getMonth()]} ${d.getDate()}`;
+  }
+
   function renderAppointmentTable(list, isOverdue) {
     const tbody = list.map(a => {
-      const date = new Date(a.slot.startTime).toLocaleDateString('uz-UZ', { day:'numeric', month:'short' });
+      const date = formatShortDate(a.slot.startTime);
       const time = new Date(a.slot.startTime).toLocaleTimeString('uz-UZ', { hour:'2-digit', minute:'2-digit' });
       const pName = a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : (a.patientFirst ? `${a.patientFirst} ${a.patientLast}` : 'Noma\'lum');
       const pPhone = a.patient ? a.patient.phone : (a.patientPhone || 'Yo\'q');
@@ -480,7 +486,7 @@
 
   function renderMissedTable(list) {
     const tbody = list.map(a => {
-      const date = new Date(a.slot.startTime).toLocaleDateString('uz-UZ', { day:'numeric', month:'short' });
+      const date = formatShortDate(a.slot.startTime);
       const time = new Date(a.slot.startTime).toLocaleTimeString('uz-UZ', { hour:'2-digit', minute:'2-digit' });
       const pName = a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : (a.patientFirst ? `${a.patientFirst} ${a.patientLast}` : 'Noma\'lum');
       const pPhone = a.patient ? a.patient.phone : (a.patientPhone || 'Yo\'q');
