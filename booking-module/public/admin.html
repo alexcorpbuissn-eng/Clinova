@@ -195,10 +195,11 @@
                 <th>Telegram Username</th>
                 <th>Bekor qilishlar (Bugun)</th>
                 <th>Jami Qabullar</th>
+                <th>Amal</th>
               </tr>
             </thead>
             <tbody id="pat-tbody">
-              <tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>
+              <tr><td colspan="6" style="text-align:center">Yuklanmoqda...</td></tr>
             </tbody>
           </table>
         </div>
@@ -349,6 +350,38 @@
     </div>
   </div>
 
+  <!-- Modal for Promoting Patient -->
+  <div id="role-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:white; padding:32px; border-radius:24px; max-width:450px; width:90%; position:relative;">
+      <button onclick="closeRoleModal()" style="position:absolute; top:16px; right:16px; font-size:1.5rem; background:none; border:none; cursor:pointer;">&times;</button>
+      <h3 style="margin-bottom:8px; color:var(--navy)">Lavozim Belgilash</h3>
+      <p id="role-patient-name" style="font-weight:600; color:var(--text-muted); margin-bottom:20px;"></p>
+      
+      <div class="form-group" style="margin-bottom: 20px;">
+        <label>Rol</label>
+        <select id="role-select" onchange="toggleRoleModalDoctorSelect()" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem; background: white;">
+          <option value="RECEPTION">Qabulxona (Reception)</option>
+          <option value="DOCTOR">Shifokor (Doctor)</option>
+          <option value="ADMIN">Admin</option>
+        </select>
+      </div>
+      
+      <div class="form-group" style="margin-bottom: 20px; display: none;" id="role-doctor-select-group">
+        <label>Tegishli Shifokor</label>
+        <select id="role-doctor-select" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem; background: white;">
+          <option value="">Shifokorni tanlang...</option>
+        </select>
+      </div>
+
+      <div id="role-error" class="err-msg" style="text-align: left; min-height: 20px; margin-bottom: 15px; display: none;"></div>
+      
+      <div style="display:flex; justify-content:flex-end; gap:12px;">
+        <button class="btn" style="background:#e2e8f0; color:var(--text); border-color:#e2e8f0; width:auto;" onclick="closeRoleModal()">Bekor qilish</button>
+        <button class="btn" style="width:auto;" id="btn-save-role" onclick="savePatientRole()">Saqlash</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     function closeModal() { document.getElementById('history-modal').style.display = 'none'; }
     function showHistory(name, historyJson) {
@@ -363,6 +396,70 @@
         </tr>
       `).join('');
       document.getElementById('history-modal').style.display = 'flex';
+    }
+
+    let currentPromotePhone = null;
+    function closeRoleModal() {
+      document.getElementById('role-modal').style.display = 'none';
+      document.getElementById('role-error').style.display = 'none';
+      currentPromotePhone = null;
+    }
+    function promotePatient(phone, name) {
+      currentPromotePhone = phone;
+      document.getElementById('role-patient-name').textContent = name;
+      
+      // Copy doctors from new-user-doctor select
+      const srcSelect = document.getElementById('new-user-doctor');
+      const destSelect = document.getElementById('role-doctor-select');
+      if (srcSelect && destSelect) {
+        destSelect.innerHTML = srcSelect.innerHTML;
+      }
+      
+      document.getElementById('role-select').value = 'RECEPTION';
+      document.getElementById('role-doctor-select-group').style.display = 'none';
+      document.getElementById('role-modal').style.display = 'flex';
+    }
+    function toggleRoleModalDoctorSelect() {
+      const role = document.getElementById('role-select').value;
+      document.getElementById('role-doctor-select-group').style.display = role === 'DOCTOR' ? 'block' : 'none';
+    }
+    async function savePatientRole() {
+      const role = document.getElementById('role-select').value;
+      const doctorId = document.getElementById('role-doctor-select').value;
+      const btn = document.getElementById('btn-save-role');
+      const errEl = document.getElementById('role-error');
+      
+      if (role === 'DOCTOR' && !doctorId) {
+        errEl.textContent = 'Shifokor roli uchun shifokorni tanlash majburiy';
+        errEl.style.display = 'block';
+        return;
+      }
+      
+      btn.disabled = true;
+      errEl.style.display = 'none';
+      
+      try {
+        const data = await apiPost('/api/admin/users', {
+          telegramPhone: currentPromotePhone,
+          role,
+          doctorId: role === 'DOCTOR' ? doctorId : null
+        });
+        if (data.success) {
+          alert("Lavozim muvaffaqiyatli belgilandi va Telegram orqali xabar yuborildi!");
+          closeRoleModal();
+          if (document.getElementById('tab-users').style.display !== 'none') {
+            loadUsers();
+          }
+        } else {
+          errEl.textContent = data.error || 'Xatolik yuz berdi';
+          errEl.style.display = 'block';
+        }
+      } catch (e) {
+        errEl.textContent = 'Tarmoq xatosi';
+        errEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+      }
     }
 
     // ---- PROCEDURES (XIZMATLAR) ----
@@ -679,26 +776,35 @@
     // Fetch Patients
     async function loadPatients() {
       const tbody = document.getElementById('pat-tbody');
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Yuklanmoqda...</td></tr>';
       try {
         const data = await apiGet('/api/admin/patients');
         if (data.success) {
           if (data.patients.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Bemorlar mavjud emas</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Bemorlar mavjud emas</td></tr>';
             return;
           }
-          tbody.innerHTML = data.patients.map(p => `
-            <tr>
-              <td><strong>${p.firstName} ${p.lastName}</strong></td>
-              <td>${p.phone}</td>
-              <td>${p.telegramUsername ? '@' + p.telegramUsername : (p.telegramChatId || 'Yo\'q')}</td>
-              <td>${p.cancellationsToday > 0 ? `<span style="color:var(--red)">${p.cancellationsToday}</span>` : '0'}</td>
-              <td>${p._count.appointments}</td>
-            </tr>
-          `).join('');
+          tbody.innerHTML = data.patients.map(p => {
+            const escapedName = `${p.firstName.replace(/'/g, "\\'")} ${p.lastName.replace(/'/g, "\\'")}`;
+            return `
+              <tr>
+                <td><strong>${p.firstName} ${p.lastName}</strong></td>
+                <td>${p.phone}</td>
+                <td>${p.telegramUsername ? '@' + p.telegramUsername : (p.telegramChatId || 'Yo\'q')}</td>
+                <td>${p.cancellationsToday > 0 ? `<span style="color:var(--red)">${p.cancellationsToday}</span>` : '0'}</td>
+                <td>${p._count.appointments}</td>
+                <td>
+                  <button class="btn" style="padding:6px 12px; font-size:0.8rem; width:auto; background:var(--navy); border-color:var(--navy)" 
+                          onclick="promotePatient('${p.telegramPhone}', '${escapedName}')">
+                    🔑 Lavozim
+                  </button>
+                </td>
+              </tr>
+            `;
+          }).join('');
         }
       } catch (err) {
-        if(err.message !== 'Unauthorized') tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:red">Xatolik yuz berdi</td></tr>';
+        if(err.message !== 'Unauthorized') tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red">Xatolik yuz berdi</td></tr>';
       }
     }
     // Fetch Doctors with Stats
