@@ -69,14 +69,14 @@ export async function PATCH(
   const { id } = await params;
   const body = await request.json();
 
-  if (body.action !== 'ATTEND') {
+  if (body.action !== 'ATTEND' && body.action !== 'NOSHOW') {
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   }
 
   try {
     const appointment = await prisma.appointment.findUnique({
       where: { id },
-      include: { patient: true, procedure: true },
+      include: { patient: true, procedure: true, slot: true },
     });
 
     if (!appointment) {
@@ -85,6 +85,20 @@ export async function PATCH(
 
     if (appointment.status === 'COMPLETED') {
       return NextResponse.json({ error: 'Allaqachon tugallangan' }, { status: 400 });
+    }
+
+    if (body.action === 'NOSHOW') {
+      await prisma.$transaction([
+        prisma.appointment.update({
+          where: { id },
+          data: { status: 'CANCELLED', cancelledBy: 'NOSHOW' },
+        }),
+        prisma.slot.update({
+          where: { id: appointment.slotId },
+          data: { isAvailable: true },
+        }),
+      ]);
+      return NextResponse.json({ success: true });
     }
 
     // Mark as completed and log to Visit table

@@ -437,6 +437,73 @@
   }
 
   // ── Load Appointments ─────────────────────────────────────────
+  function renderAppointmentTable(list, isOverdue) {
+    const tbody = list.map(a => {
+      const date = new Date(a.slot.startTime).toLocaleDateString('uz-UZ', { day:'numeric', month:'short' });
+      const time = new Date(a.slot.startTime).toLocaleTimeString('uz-UZ', { hour:'2-digit', minute:'2-digit' });
+      const pName = a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : (a.patientFirst ? `${a.patientFirst} ${a.patientLast}` : 'Noma\'lum');
+      const pPhone = a.patient ? a.patient.phone : (a.patientPhone || 'Yo\'q');
+      
+      let actionButtons = '';
+      if (isOverdue) {
+        actionButtons = `
+          <div style="display:flex;gap:6px">
+            <button class="btn-action btn-start" style="background:var(--teal);" onclick="resolvePastAppointment('${a.id}', 'YES')">Keldi</button>
+            <button class="btn-action btn-cancel" style="background:#fee2e2; color:#ef4444;" onclick="resolvePastAppointment('${a.id}', 'NO')">Kelmadi</button>
+          </div>
+        `;
+      } else {
+        actionButtons = `
+          <div style="display:flex;gap:6px">
+            <button class="btn-action btn-start" onclick="startAppointment('${a.id}', this)">Boshlash</button>
+            <button class="btn-action btn-cancel" onclick="deleteAppt('${a.id}')">Bekor</button>
+          </div>
+        `;
+      }
+      
+      return `<tr>
+        <td>
+          <strong>${pName}</strong><br>
+          <a href="tel:${pPhone}" style="color: var(--teal); font-size: 0.8rem; text-decoration: none; font-weight: 500;">📞 ${pPhone}</a>
+        </td>
+        <td><div style="font-size:0.8rem">Dr. ${a.doctor.lastName}<br><span style="color:var(--text-muted)">${a.procedure?.name || 'Ko\'rik'}</span></div></td>
+        <td><div style="font-size:0.8rem; color:${isOverdue ? '#c2410c' : 'inherit'}"><strong>${date}</strong><br>${time}</div></td>
+        <td>${actionButtons}</td>
+      </tr>`;
+    }).join('');
+
+    return `<table>
+      <thead><tr><th>Bemor</th><th>Shifokor / Xizmat</th><th>Sana / Vaqt</th><th>Amal</th></tr></thead>
+      <tbody>${tbody}</tbody>
+    </table>`;
+  }
+
+  function renderMissedTable(list) {
+    const tbody = list.map(a => {
+      const date = new Date(a.slot.startTime).toLocaleDateString('uz-UZ', { day:'numeric', month:'short' });
+      const time = new Date(a.slot.startTime).toLocaleTimeString('uz-UZ', { hour:'2-digit', minute:'2-digit' });
+      const pName = a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : (a.patientFirst ? `${a.patientFirst} ${a.patientLast}` : 'Noma\'lum');
+      const pPhone = a.patient ? a.patient.phone : (a.patientPhone || 'Yo\'q');
+      
+      return `<tr style="background:#fff5f5;">
+        <td>
+          <strong style="color:var(--red);">${pName}</strong><br>
+          <a href="tel:${pPhone}" style="color: var(--red); font-size: 0.85rem; text-decoration: underline; font-weight: 600;">📞 ${pPhone}</a>
+        </td>
+        <td><div style="font-size:0.8rem">Dr. ${a.doctor.lastName}<br><span style="color:var(--text-muted)">${a.procedure?.name || 'Ko\'rik'}</span></div></td>
+        <td><div style="font-size:0.8rem; color:var(--red)"><strong>${date}</strong><br>${time}</div></td>
+        <td>
+          <button class="btn-action btn-cancel" style="background:#e2e8f0; color:var(--text);" onclick="deleteAppt('${a.id}')">O'chirish</button>
+        </td>
+      </tr>`;
+    }).join('');
+
+    return `<table>
+      <thead><tr><th>Bemor</th><th>Shifokor / Xizmat</th><th>Sana / Vaqt</th><th>Amal</th></tr></thead>
+      <tbody>${tbody}</tbody>
+    </table>`;
+  }
+
   async function loadAppointments() {
     const container = document.getElementById('appointments-container');
     try {
@@ -444,35 +511,52 @@
       const data = await res.json();
       if (!data.success) return;
 
-      const upcoming = data.appointments.filter(a => a.status === 'SCHEDULED');
+      const now = new Date();
+      const scheduled = data.appointments.filter(a => a.status === 'SCHEDULED');
+      
+      const upcoming = [];
+      const overdue = [];
+      
+      scheduled.forEach(a => {
+        const slotTime = new Date(a.slot.startTime);
+        if (slotTime < now) {
+          overdue.push(a);
+        } else {
+          upcoming.push(a);
+        }
+      });
+      
+      const missed = data.appointments.filter(a => a.status === 'CANCELLED' && a.cancelledBy === 'NOSHOW');
+
+      let html = '';
+      
+      // 1. Upcoming Appointments
+      html += `<h3 style="font-size: 1rem; color: var(--navy); margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">📅 Bugungi / Kutilayotgan Qabullar</h3>`;
       if (upcoming.length === 0) {
-        container.innerHTML = '<div class="empty-state">Bugun uchun qabullar yo\'q.</div>';
-        return;
+        html += `<div class="empty-state" style="padding: 20px;">Kutilayotgan qabullar yo'q.</div>`;
+      } else {
+        html += renderAppointmentTable(upcoming, false);
       }
-
-      const tbody = upcoming.map(a => {
-        const date = new Date(a.slot.startTime).toLocaleDateString('uz-UZ', { day:'numeric', month:'short' });
-        const time = new Date(a.slot.startTime).toLocaleTimeString('uz-UZ', { hour:'2-digit', minute:'2-digit' });
-        const pName = a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : (a.patientFirst ? `${a.patientFirst} ${a.patientLast}` : 'Noma\'lum');
-        
-        return `<tr>
-          <td><strong>${pName}</strong></td>
-          <td><div style="font-size:0.8rem">Dr. ${a.doctor.lastName}<br><span style="color:var(--text-muted)">${a.procedure?.name || 'Ko\'rik'}</span></div></td>
-          <td><div style="font-size:0.8rem"><strong>${date}</strong><br>${time}</div></td>
-          <td>
-            <div style="display:flex;gap:6px">
-              <button class="btn-action btn-start" onclick="startAppointment('${a.id}', this)">Boshlash</button>
-              <button class="btn-action btn-cancel" onclick="deleteAppt('${a.id}')">Bekor</button>
-            </div>
-          </td>
-        </tr>`;
-      }).join('');
-
-      container.innerHTML = `<table>
-        <thead><tr><th>Bemor</th><th>Shifokor / Xizmat</th><th>Sana / Vaqt</th><th>Amal</th></tr></thead>
-        <tbody>${tbody}</tbody>
-      </table>`;
-    } catch {
+      
+      // 2. Overdue/Forgot Appointments
+      html += `<h3 style="font-size: 1rem; color: #c2410c; margin: 30px 0 10px 0; display: flex; align-items: center; gap: 8px;">⚠️ Kechikkan / Unutilgan Qabullar</h3>`;
+      if (overdue.length === 0) {
+        html += `<div class="empty-state" style="padding: 20px; color: var(--text-muted);">Kechikkan qabullar yo'q.</div>`;
+      } else {
+        html += renderAppointmentTable(overdue, true);
+      }
+      
+      // 3. No Shows (Bog'lanish kerak)
+      html += `<h3 style="font-size: 1rem; color: var(--red); margin: 30px 0 10px 0; display: flex; align-items: center; gap: 8px;">📞 Kelmadi (Telefon qilish kerak)</h3>`;
+      if (missed.length === 0) {
+        html += `<div class="empty-state" style="padding: 20px; color: var(--text-muted);">Ro'yxat bo'sh.</div>`;
+      } else {
+        html += renderMissedTable(missed);
+      }
+      
+      container.innerHTML = html;
+    } catch (err) {
+      console.error(err);
       container.innerHTML = '<div class="empty-state" style="color:red;">Xatolik yuz berdi.</div>';
     }
   }
@@ -488,7 +572,30 @@
     } catch {}
   }
 
-  async function startAppointment(id, btnElement) {
+  async function resolvePastAppointment(id, answer) {
+    if (answer === 'NO') {
+      if (!confirm("Haqiqatan ham bemor kelmadi deb belgilamoqchimisiz? Kelmadi ro'yxatiga tushadi va telefon raqami ko'rsatiladi.")) return;
+      try {
+        const res = await fetch(`/api/admin/appointments/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ action: 'NOSHOW' })
+        });
+        if (res.ok) {
+          loadAppointments();
+        } else {
+          const data = await res.json();
+          alert(data.error || "Xatolik yuz berdi");
+        }
+      } catch {
+        alert("Tarmoq xatosi");
+      }
+    } else if (answer === 'YES') {
+      await startAppointment(id, null, true);
+    }
+  }
+
+  async function startAppointment(id, btnElement, isPast = false) {
     if (btnElement) {
       btnElement.disabled = true;
       btnElement.textContent = '...';
@@ -502,15 +609,18 @@
 
       const apptDate = new Date(a.slot.startTime);
       const today = new Date();
-      if (apptDate.getFullYear() !== today.getFullYear() || 
-          apptDate.getMonth() !== today.getMonth() || 
-          apptDate.getDate() !== today.getDate()) {
-        alert("Faqat bugungi qabullarni boshlash mumkin!");
-        if (btnElement) {
-          btnElement.disabled = false;
-          btnElement.textContent = 'Boshlash';
+      
+      if (!isPast) {
+        if (apptDate.getFullYear() !== today.getFullYear() || 
+            apptDate.getMonth() !== today.getMonth() || 
+            apptDate.getDate() !== today.getDate()) {
+          alert("Faqat bugungi qabullarni boshlash mumkin!");
+          if (btnElement) {
+            btnElement.disabled = false;
+            btnElement.textContent = 'Boshlash';
+          }
+          return;
         }
-        return;
       }
 
       const pName = a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : (a.patientFirst ? `${a.patientFirst} ${a.patientLast}` : 'Bemor');
@@ -525,11 +635,13 @@
           serviceName: a.procedure?.name || 'Ko\'rik',
           price: a.procedure?.price || 0,
           source: 'BOOKED',
-          status: 'IN_PROGRESS'
+          status: 'IN_PROGRESS',
+          startTime: a.slot.startTime
         })
       });
 
       if (vRes.ok) {
+        const vData = await vRes.json();
         // 3. Mark appointment as COMPLETED
         await fetch(`/api/admin/appointments/${id}`, {
           method: 'PATCH',
@@ -537,7 +649,12 @@
           body: JSON.stringify({ action: 'ATTEND' })
         });
         
-        switchMainTab('tab-active');
+        if (isPast) {
+          await loadActiveVisits();
+          finishVisit(vData.visit.id);
+        } else {
+          switchMainTab('tab-active');
+        }
       }
     } catch (e) {
       console.error(e);
