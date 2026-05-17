@@ -176,6 +176,22 @@
       </div>
 
       <div class="weekly-container">
+        <!-- Shablon Asboblari (Copy/Paste toolbar) -->
+        <div class="schedule-toolbar" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; background:#1e293b; padding:12px 20px; border-bottom:1px solid #334155; color:#fff; font-size:0.85rem; gap:12px;">
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <span>📋 <strong>Kunlik jadval shabloni:</strong></span>
+            <select id="copy-day-select" style="background:#0f172a; color:#fff; border:1px solid #475569; padding:6px 12px; border-radius:8px; font-family:inherit; font-size:0.8rem; outline:none; cursor:pointer;">
+              <option value="">Kunni tanlang...</option>
+            </select>
+            <button onclick="copySelectedDay()" class="btn-refresh" style="padding:6px 14px; font-size:0.8rem; background:var(--teal); color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:5px;">📋 Nusxalash</button>
+          </div>
+          <div id="paste-actions-wrap" style="display:none; align-items:center; gap:10px; flex-wrap:wrap;">
+            <span id="copied-status-msg" style="color:#2dd4bf; font-weight:600; font-size:0.8rem; margin-right:5px;"></span>
+            <button onclick="applyToAllDays()" class="btn-refresh" style="padding:6px 14px; font-size:0.8rem; background:var(--green); color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:5px;">🔁 Haftaga qo'llash (Barchaga)</button>
+            <button onclick="cancelCopyState()" class="btn-logout" style="padding:6px 12px; font-size:0.8rem; border-color:#475569; color:#94a3b8; border-radius:8px; cursor:pointer; background:none;">Bekor qilish</button>
+          </div>
+        </div>
+
         <div class="weekly-header" id="grid-header"></div>
         <div class="weekly-grid">
           <div class="time-col" id="time-labels"></div>
@@ -217,6 +233,8 @@
   let currentDoctorId = null;
   let allSlots = [];
   let pendingChanges = {}; // key: "isoDate_timeStr", value: 'add' | 'remove'
+  let copiedSchedule = null;
+  let copiedDayLabel = '';
 
   const START_HOUR = 8;
   const END_HOUR = 19;
@@ -361,6 +379,7 @@
     const select = document.getElementById('doc-select');
     document.getElementById('doctor-name').textContent = select.options[select.selectedIndex].text;
     pendingChanges = {};
+    if (typeof cancelCopyState === 'function') cancelCopyState();
     loadData();
   }
 
@@ -404,13 +423,38 @@
       days.push(d);
     }
 
+    // Update copy dropdown dynamically
+    const copySelect = document.getElementById('copy-day-select');
+    if (copySelect) {
+      const prevVal = copySelect.value;
+      copySelect.innerHTML = '<option value="">Kunni tanlang...</option>' + 
+        days.map(d => {
+          const iso = getLocalISO(d);
+          const name = d.toLocaleDateString('uz-UZ', { weekday: 'long' });
+          const dateStr = d.getDate();
+          const monthStr = d.toLocaleDateString('uz-UZ', { month: 'short' });
+          return `<option value="${iso}">${name} (${dateStr} ${monthStr})</option>`;
+        }).join('');
+      if (prevVal) copySelect.value = prevVal;
+    }
+
     header.innerHTML = '<div class="weekly-header-cell" style="width:80px"></div>' + 
       days.map(d => {
-        const isToday = getLocalISO(d) === getLocalISO(new Date());
+        const iso = getLocalISO(d);
+        const isToday = iso === getLocalISO(new Date());
+        
+        // Show paste button in the header cell if a schedule is copied and this is NOT the copied day itself
+        const sourceIso = copySelect ? copySelect.value : '';
+        const showPaste = (typeof copiedSchedule !== 'undefined' && copiedSchedule !== null) && iso !== sourceIso;
+        const pasteBtn = showPaste ? `
+          <button onclick="pasteToDay('${iso}', event)" title="Nusxalangan jadvalni shu kunga joylash" style="background:rgba(255,255,255,0.2); color:#fff; border:1px solid rgba(255,255,255,0.3); padding:2px 6px; border-radius:6px; font-size:0.65rem; margin-top:5px; cursor:pointer; display:inline-block; transition:all 0.2s;" onmouseover="this.style.background='var(--teal)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">📥 Joylash</button>
+        ` : '';
+
         return `
-          <div class="weekly-header-cell ${isToday ? 'today' : ''}">
+          <div class="weekly-header-cell ${isToday ? 'today' : ''}" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:80px;">
             <span class="day-name">${d.toLocaleDateString('uz-UZ', { weekday: 'short' })}</span>
-            <span class="day-date">${d.getDate()}</span>
+            <span class="day-date" style="font-size:1.1rem; font-weight:700; margin-top:2px;">${d.getDate()}</span>
+            ${pasteBtn}
           </div>
         `;
       }).join('');
@@ -600,6 +644,185 @@
     const weekBooked = allSlots.filter(s => s.appointment).length;
     const occupancy = weekTotal > 0 ? Math.round((weekBooked / weekTotal) * 100) : 0;
     document.getElementById('stat-week-occupancy').textContent = occupancy + "%";
+  }
+
+  // ---- Copy/Paste Schedule Shablon ----
+  function copySelectedDay() {
+    const isoDate = document.getElementById('copy-day-select').value;
+    if (!isoDate) {
+      alert("Iltimos, nusxalash uchun kunni tanlang!");
+      return;
+    }
+
+    const select = document.getElementById('copy-day-select');
+    copiedDayLabel = select.options[select.selectedIndex].text;
+
+    // Collect all open slots (existing in database OR pending additions, minus pending removals)
+    const times = [];
+    for (let h = START_HOUR; h <= END_HOUR; h++) {
+      for (let m = 0; m < 60; m += INTERVAL) {
+        const t = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+        times.push(t);
+      }
+    }
+
+    copiedSchedule = [];
+    for (const t of times) {
+      const key = `${isoDate}_${t}`;
+      const [h_str, m_str] = t.split(':');
+      const slotDateTime = new Date(
+        Number(isoDate.split('-')[0]),
+        Number(isoDate.split('-')[1]) - 1,
+        Number(isoDate.split('-')[2]),
+        Number(h_str),
+        Number(m_str)
+      );
+
+      const existing = allSlots.find(s => {
+        const sStart = new Date(s.startTime);
+        const sEnd = new Date(sStart.getTime() + s.duration * 60000);
+        return slotDateTime >= sStart && slotDateTime < sEnd;
+      });
+
+      const action = pendingChanges[key];
+      let isOpen = false;
+
+      if (existing) {
+        if (action !== 'remove' && !existing.appointment) isOpen = true;
+      } else {
+        if (action === 'add') isOpen = true;
+      }
+
+      if (isOpen) {
+        copiedSchedule.push(t);
+      }
+    }
+
+    // Show paste actions
+    document.getElementById('copied-status-msg').textContent = `📋 ${copiedDayLabel} nusxalandi (${copiedSchedule.length} ta ochiq soat)`;
+    document.getElementById('paste-actions-wrap').style.display = 'flex';
+    renderGrid();
+  }
+
+  function applyToAllDays() {
+    if (!copiedSchedule) return;
+    
+    // Find all days in the grid
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      days.push(d);
+    }
+
+    const times = [];
+    for (let h = START_HOUR; h <= END_HOUR; h++) {
+      for (let m = 0; m < 60; m += INTERVAL) {
+        const t = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+        times.push(t);
+      }
+    }
+
+    const sourceIso = document.getElementById('copy-day-select').value;
+
+    for (const d of days) {
+      const iso = getLocalISO(d);
+      if (iso === sourceIso) continue;
+
+      for (const t of times) {
+        const key = `${iso}_${t}`;
+        const [h_str, m_str] = t.split(':');
+        const slotDateTime = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Number(h_str), Number(m_str));
+        
+        if (slotDateTime < new Date()) continue;
+
+        const existing = allSlots.find(s => {
+          const sStart = new Date(s.startTime);
+          const sEnd = new Date(sStart.getTime() + s.duration * 60000);
+          return slotDateTime >= sStart && slotDateTime < sEnd;
+        });
+
+        if (existing && existing.appointment) continue;
+
+        const shouldBeOpen = copiedSchedule.includes(t);
+
+        if (shouldBeOpen) {
+          if (existing) {
+            if (pendingChanges[key] === 'remove') delete pendingChanges[key];
+          } else {
+            pendingChanges[key] = 'add';
+          }
+        } else {
+          if (existing) {
+            pendingChanges[key] = 'remove';
+          } else {
+            if (pendingChanges[key] === 'add') delete pendingChanges[key];
+          }
+        }
+      }
+    }
+
+    renderGrid();
+    alert("Nusxalangan shablon haftadagi barcha kunlarga qo'llandi! Tasdiqlash uchun pastdagi 'Saqlash' tugmasini bosing.");
+  }
+
+  function pasteToDay(targetIso, event) {
+    if (event) event.stopPropagation();
+    if (!copiedSchedule) return;
+
+    const times = [];
+    for (let h = START_HOUR; h <= END_HOUR; h++) {
+      for (let m = 0; m < 60; m += INTERVAL) {
+        const t = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+        times.push(t);
+      }
+    }
+
+    const [yr, mo, dy] = targetIso.split('-');
+
+    for (const t of times) {
+      const key = `${targetIso}_${t}`;
+      const [h_str, m_str] = t.split(':');
+      const slotDateTime = new Date(Number(yr), Number(mo) - 1, Number(dy), Number(h_str), Number(m_str));
+      
+      if (slotDateTime < new Date()) continue;
+
+      const existing = allSlots.find(s => {
+        const sStart = new Date(s.startTime);
+        const sEnd = new Date(sStart.getTime() + s.duration * 60000);
+        return slotDateTime >= sStart && slotDateTime < sEnd;
+      });
+
+      if (existing && existing.appointment) continue;
+
+      const shouldBeOpen = copiedSchedule.includes(t);
+
+      if (shouldBeOpen) {
+        if (existing) {
+          if (pendingChanges[key] === 'remove') delete pendingChanges[key];
+        } else {
+          pendingChanges[key] = 'add';
+        }
+      } else {
+        if (existing) {
+          pendingChanges[key] = 'remove';
+        } else {
+          if (pendingChanges[key] === 'add') delete pendingChanges[key];
+        }
+      }
+    }
+
+    renderGrid();
+  }
+
+  function cancelCopyState() {
+    copiedSchedule = null;
+    copiedDayLabel = '';
+    const select = document.getElementById('copy-day-select');
+    if (select) select.value = '';
+    const wrap = document.getElementById('paste-actions-wrap');
+    if (wrap) wrap.style.display = 'none';
+    renderGrid();
   }
 </script>
 </body>
