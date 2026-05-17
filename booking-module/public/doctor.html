@@ -554,9 +554,10 @@
             
             let statusClass = '';
             let label = '';
+            const isBooked = existing && existing.appointment && existing.appointment.status !== 'CANCELLED';
             if (existing) {
-              statusClass = existing.appointment ? 'booked' : 'active';
-              if (existing.appointment) label = '<span>Band</span>';
+              statusClass = isBooked ? 'booked' : 'active';
+              if (isBooked) label = '<span>Band</span>';
             }
             
             if (pendingChanges[key] === 'add') statusClass = 'pending';
@@ -566,7 +567,7 @@
               statusClass += ' disabled';
             }
 
-            const onClickAttr = isPast ? '' : `onclick="toggleSlot('${iso}', '${t}', '${existing ? existing.id : ''}', ${existing && existing.appointment ? 'true' : 'false'})"`;
+            const onClickAttr = isPast ? '' : `onclick="toggleSlot('${iso}', '${t}', '${existing ? existing.id : ''}', ${isBooked ? 'true' : 'false'})"`;
 
             return `
               <div class="grid-cell" ${onClickAttr}>
