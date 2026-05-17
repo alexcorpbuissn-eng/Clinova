@@ -1415,16 +1415,8 @@
         }
       }
 
-      toCreate.sort((a,b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
-      const mergedCreate = [];
-      for (const slot of toCreate) {
-        const prev = mergedCreate[mergedCreate.length - 1];
-        if (prev && new Date(prev.startTime).getTime() + prev.duration * 60000 === new Date(slot.startTime).getTime()) {
-          prev.duration += ADMIN_INTERVAL;
-        } else {
-          mergedCreate.push({...slot});
-        }
-      }
+      // Har bir 30 daqiqalik vaqt alohida va mustaqil slot sifatida saqlanadi!
+      const mergedCreate = toCreate;
 
       if (!mergedCreate.length && !toDelete.length) return;
       btn.disabled = true; btn.textContent = 'Saqlanmoqda...';
