@@ -166,13 +166,15 @@
               <div class="form-group"><label>Ism *</label><input id="fFirst" type="text" required placeholder="Ism"/></div>
               <div class="form-group"><label>Familiya *</label><input id="fLast" type="text" required placeholder="Familiya"/></div>
             </div>
-            <div class="form-group">
-              <label>Telefon *</label>
-              <input id="fPhone" type="tel" required placeholder="+998 90 000 00 00" pattern="^\+998 \d{2} \d{3} \d{2} \d{2}$"/>
-              <label class="checkbox-label" style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:0.85rem; color:var(--text-muted); cursor:pointer; font-weight: 500;">
-                <input type="checkbox" id="fAltPhoneCheck" style="width:16px; height:16px; cursor:pointer;" />
-                Bog'lanish uchun boshqa raqam ko'rsatish
-              </label>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Telegram raqam (Tasdiqlangan)</label>
+                <input id="fTgPhoneShow" type="text" disabled style="background:#f1f5f9; color:#64748b; cursor:not-allowed; border:1px solid var(--border); font-weight: 500;" />
+              </div>
+              <div class="form-group">
+                <label>Aloqa telefon raqamingiz *</label>
+                <input id="fPhone" type="tel" required placeholder="+998 90 000 00 00" pattern="^\+998 \d{2} \d{3} \d{2} \d{2}$"/>
+              </div>
             </div>
             <div class="form-group">
               <label>Muammo tavsifi (ixtiyoriy)</label>
@@ -541,47 +543,18 @@ async function loadPatientProfile() {
         }
       }
       
-      // Prefill phone input if empty
+      // Fill the Telegram read-only display
+      document.getElementById('fTgPhoneShow').value = originalVerifiedPhone;
+      
+      // Prefill contact phone input if empty
       const phoneInput = document.getElementById('fPhone');
       if (!phoneInput.value && originalVerifiedPhone) {
         phoneInput.value = originalVerifiedPhone;
       }
-      
-      updatePhoneInputState();
     }
   } catch (err) {
     console.error("Error loading patient profile:", err);
   }
-}
-
-function updatePhoneInputState() {
-  const phoneInput = document.getElementById('fPhone');
-  const checkbox = document.getElementById('fAltPhoneCheck');
-  
-  if (!checkbox) return;
-  
-  if (checkbox.checked) {
-    // Enable input to let them type their alternative number
-    phoneInput.disabled = false;
-    phoneInput.style.background = '#fff';
-    phoneInput.style.color = 'var(--navy)';
-    phoneInput.style.cursor = 'text';
-    phoneInput.placeholder = "+998 90 000 00 00";
-    phoneInput.focus();
-  } else {
-    // Disable input and pre-fill with verified number
-    phoneInput.disabled = true;
-    phoneInput.style.background = '#f1f5f9'; // Slate 100
-    phoneInput.style.color = '#64748b'; // Slate 500
-    phoneInput.style.cursor = 'not-allowed';
-    if (originalVerifiedPhone) {
-      phoneInput.value = originalVerifiedPhone;
-    }
-  }
-}
-
-if (document.getElementById('fAltPhoneCheck')) {
-  document.getElementById('fAltPhoneCheck').addEventListener('change', updatePhoneInputState);
 }
 
 // ── Navigation ───────────────────────────────────────────────────────────
