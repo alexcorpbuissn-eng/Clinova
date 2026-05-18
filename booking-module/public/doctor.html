@@ -1067,7 +1067,7 @@
       </div>
 
       <!-- Action buttons -->
-      <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border); display:flex; flex-direction:column; gap:10px;">
+      <div id="det-actions-container" style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border); display:flex; flex-direction:column; gap:10px;">
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
           <button class="btn-call btn-called" id="det-btn-called" onclick="trackDetailCall('RESOLVE')">📞 Qo'ng'iroq qilindi</button>
           <button class="btn-call btn-no-answer" id="det-btn-no-answer" onclick="trackDetailCall('NO_ANSWER')">🔇 Telefonni ko'tarmadi</button>
@@ -1453,11 +1453,15 @@
       }
       renderGrid();
     } else {
-      // Doctor clicks active/free slot: open Advanced Booking Modal
-      if (existingId) {
-        openBookingModal(iso, time, existingId);
+      // Doctor clicks active/free slot: visual read-only toast
+      if (userRole === 'DOCTOR') {
+        showToast("Qabullarni faqat admin yoki retseptsiya yozishi mumkin", "info");
       } else {
-        showToast("Ushbu vaqt shifokor ish grafigiga kiritilmagan", "error");
+        if (existingId) {
+          openBookingModal(iso, time, existingId);
+        } else {
+          showToast("Ushbu vaqt shifokor ish grafigiga kiritilmagan", "error");
+        }
       }
     }
   }
@@ -1820,6 +1824,13 @@
           document.getElementById('det-btn-called').style.display = 'inline-block';
           document.getElementById('det-btn-no-answer').style.display = 'inline-block';
         }
+
+        // Hide action buttons altogether if doctor
+        if (userRole === 'DOCTOR') {
+          document.getElementById('det-actions-container').style.display = 'none';
+        } else {
+          document.getElementById('det-actions-container').style.display = 'flex';
+        }
       }
     } catch (e) {
       console.error(e);
@@ -1928,7 +1939,7 @@
           const attempts = a.callAttempts || 0;
 
           // Call tracking section
-          const callSection = isBreak ? '' : `
+          const callSection = (isBreak || userRole === 'DOCTOR') ? '' : `
             <div class="call-tracking-wrap">
               <button class="btn-call btn-called" onclick="sidebarTrackCall('${a.id}', 'RESOLVE')">📞 Bog'lanildi</button>
               <button class="btn-call btn-no-answer" onclick="sidebarTrackCall('${a.id}', 'NO_ANSWER')">🔇 Ulanmadi</button>
@@ -1937,7 +1948,7 @@
           `;
 
           // Main actions section
-          const actionsSection = `
+          const actionsSection = (userRole === 'DOCTOR') ? '' : `
             <div class="card-actions-wrap">
               <button class="btn-action-card btn-cancel-card" onclick="sidebarCancel('${a.id}')">Bekor qilish</button>
               <button class="btn-action-card btn-complete" onclick="sidebarComplete('${a.id}')">Tugallash</button>

@@ -182,6 +182,23 @@
     .toast-close:hover {
       color: #fff;
     }
+
+    /* Available Slots Styles */
+    .slot-pill {
+      padding: 6px 12px;
+      border: 1.5px solid var(--teal);
+      background: #fff;
+      color: var(--teal-dark);
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      outline: none;
+    }
+    .slot-pill:hover {
+      background: var(--teal-light);
+    }
   </style>
 </head>
 <body>
@@ -262,6 +279,18 @@
           <span class="price-suffix">so'm</span>
         </div>
       </div>
+
+      <!-- Available Slots Container -->
+      <div class="form-group" id="free-slots-group" style="display:none; margin-bottom: 18px;">
+        <label style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-weight: 600; color: var(--navy); font-size: 0.85rem;">Shifokorning bo'sh vaqtlari (Tashkent vaqti)</span>
+          <span id="free-slots-loading" style="font-size:0.75rem; color:var(--teal); font-weight:normal; display:none;">Yuklanmoqda...</span>
+        </label>
+        <div id="free-slots-list" style="max-height: 180px; overflow-y: auto; padding: 12px; border: 1.5px solid var(--border); border-radius: 12px; background: #f8fafc; display: flex; flex-direction: column; gap: 12px;">
+          <!-- Dynamic slots grouped by day -->
+        </div>
+      </div>
+
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
         <div class="form-group">
           <label>Boshlanish vaqti</label>
@@ -270,6 +299,19 @@
         <div class="form-group">
           <label>Tugash vaqti</label>
           <input type="text" id="f-end-date" style="width:100%; padding:12px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.93rem; outline:none;" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label style="font-weight: 600; color: var(--navy); font-size: 0.85rem; margin-bottom: 8px; display: block;">Qabul turi</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <label style="display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--border); padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 0.88rem; font-weight: 500; background: #fff;">
+            <input type="radio" name="f-visit-type" value="new" checked style="accent-color: var(--teal); cursor: pointer;" />
+            <span>Yangi qabul</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--border); padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 0.88rem; font-weight: 500; background: #fff;">
+            <input type="radio" name="f-visit-type" value="repeat" style="accent-color: var(--teal); cursor: pointer;" />
+            <span>Takroriy qabul</span>
+          </label>
         </div>
       </div>
       <div class="form-group">
@@ -848,7 +890,10 @@
           opt.dataset.docId = d.id;
           sel.appendChild(opt);
         });
-        sel.addEventListener('change', () => loadProceduresForDoctor(sel.value));
+        sel.addEventListener('change', () => {
+          loadProceduresForDoctor(sel.value);
+          loadAvailableSlots();
+        });
       }
     } catch {}
   }
@@ -867,6 +912,8 @@
           opt.value = p.name;
           opt.textContent = `${p.name} (${p.durationMinutes} min)`;
           opt.dataset.duration = p.durationMinutes;
+          opt.dataset.id = p.id;
+          opt.dataset.price = p.price;
           sel.appendChild(opt);
         });
       }
@@ -890,6 +937,14 @@
       const end = new Date(start.getTime() + duration * 60000);
       endPicker.setDate(end);
     }
+
+    // Auto-fill price
+    const price = selected.dataset.price;
+    if (price) {
+      document.getElementById('f-price').value = parseInt(price).toLocaleString('uz-UZ').replace(/,/g, '.');
+    }
+
+    loadAvailableSlots();
   });
 
   // ── Submit visit ─────────────────────────────────────────────
@@ -910,7 +965,12 @@
     const price = parseInt(priceStr, 10);
     const startTime = document.getElementById('f-start-date').value;
     const endTime = document.getElementById('f-end-date').value;
-    const note = document.getElementById('f-note').value.trim();
+    
+    const visitType = document.querySelector('input[name="f-visit-type"]:checked').value;
+    let note = document.getElementById('f-note').value.trim();
+    if (visitType === 'repeat') {
+      note = `Takroriy qabul. ${note}`.trim();
+    }
 
     if (!doctorId || !patientName || !serviceName || !price) {
       errEl.textContent = 'Iltimos, barcha majburiy maydonlarni to\'ldiring.';
@@ -940,11 +1000,13 @@
         document.getElementById('f-phone').value = '';
         document.getElementById('f-price').value = '';
         document.getElementById('f-note').value = '';
+        document.querySelector('input[name="f-visit-type"][value="new"]').checked = true;
         document.getElementById('f-service').selectedIndex = 0;
         document.getElementById('f-service-custom').style.display = 'none';
         setDefaultDate();
         loadActiveVisits();
         loadVisits();
+        loadAvailableSlots();
       } else {
         errEl.textContent = data.error || 'Xatolik yuz berdi';
         errEl.style.display = 'block';
@@ -1190,6 +1252,138 @@
       toast.classList.remove('show');
       setTimeout(() => toast.remove(), 400);
     }, 4000);
+  }
+
+  async function loadAvailableSlots() {
+    const docId = document.getElementById('f-doctor').value;
+    const serviceSel = document.getElementById('f-service');
+    const groupEl = document.getElementById('free-slots-group');
+    const listEl = document.getElementById('free-slots-list');
+    const loadingEl = document.getElementById('free-slots-loading');
+
+    if (!docId) {
+      groupEl.style.display = 'none';
+      return;
+    }
+
+    groupEl.style.display = 'block';
+    listEl.innerHTML = '<div style="font-size:0.85rem; color:var(--text-muted); text-align:center; padding:10px;">Yuklanmoqda...</div>';
+    loadingEl.style.display = 'inline';
+
+    try {
+      const selectedOpt = serviceSel.options[serviceSel.selectedIndex];
+      const procId = (selectedOpt && selectedOpt.value !== '__custom__') ? (selectedOpt.dataset.id || '') : '';
+      
+      let url = `/api/public/doctors/${docId}/slots`;
+      if (procId) {
+        url += `?procedureId=${procId}`;
+      }
+
+      const res = await fetch(url);
+      const data = await res.json();
+      loadingEl.style.display = 'none';
+
+      if (!data.success || !data.slots || data.slots.length === 0) {
+        listEl.innerHTML = '<div style="font-size:0.85rem; color:var(--red); text-align:center; padding:10px;">Bo\'sh vaqtlar topilmadi. Avval shifokor uchun yangi ish soatlari yarating.</div>';
+        return;
+      }
+
+      // Group slots by Tashkent day
+      const grouped = {};
+      const tzOffset = 5 * 60 * 60 * 1000;
+
+      data.slots.forEach(s => {
+        const utcMs = new Date(s.startTime).getTime();
+        const tNow = new Date(utcMs + tzOffset);
+        const dayIso = tNow.toISOString().slice(0, 10); // YYYY-MM-DD in Tashkent timezone
+
+        if (!grouped[dayIso]) {
+          grouped[dayIso] = [];
+        }
+        grouped[dayIso].push(s);
+      });
+
+      // Render grouped slots
+      const sortedDays = Object.keys(grouped).sort();
+      
+      // Get relative day names for Tashkent today & tomorrow
+      const now = new Date();
+      const utcNowMs = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
+      const tashkentToday = new Date(utcNowMs + tzOffset).toISOString().slice(0, 10);
+      
+      const tomorrowDate = new Date(utcNowMs + tzOffset + 24 * 60 * 60 * 1000);
+      const tashkentTomorrow = tomorrowDate.toISOString().slice(0, 10);
+
+      listEl.innerHTML = sortedDays.map(dayIso => {
+        let dayTitle = '';
+        const dObj = new Date(dayIso);
+        const formattedDate = dObj.toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' });
+        
+        if (dayIso === tashkentToday) {
+          dayTitle = `Bugun (${formattedDate})`;
+        } else if (dayIso === tashkentTomorrow) {
+          dayTitle = `Ertaga (${formattedDate})`;
+        } else {
+          const weekday = dObj.toLocaleDateString('uz-UZ', { weekday: 'long' });
+          dayTitle = `${weekday.charAt(0).toUpperCase() + weekday.slice(1)} (${formattedDate})`;
+        }
+
+        const slotsHtml = grouped[dayIso].map(s => {
+          const sDate = new Date(s.startTime);
+          const tTimeStr = sDate.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent' });
+          
+          return `
+            <button type="button" class="slot-pill" data-start="${s.startTime}" data-duration="${s.duration}" onclick="selectFreeSlot('${s.startTime}', ${s.duration}, this)">
+              ${tTimeStr}
+            </button>
+          `;
+        }).join('');
+
+        return `
+          <div class="free-day-group" style="border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+            <div style="font-size: 0.72rem; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display:flex; align-items:center; gap:6px;">
+              <span>📅 ${dayTitle}</span>
+            </div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+              ${slotsHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Remove border-bottom from the last group
+      const groups = listEl.querySelectorAll('.free-day-group');
+      if (groups.length > 0) {
+        groups[groups.length - 1].style.borderBottom = 'none';
+        groups[groups.length - 1].style.paddingBottom = '0';
+      }
+
+    } catch (err) {
+      console.error(err);
+      loadingEl.style.display = 'none';
+      listEl.innerHTML = '<div style="font-size:0.85rem; color:var(--red); text-align:center; padding:10px;">Yuklashda xatolik yuz berdi</div>';
+    }
+  }
+
+  function selectFreeSlot(startTimeISO, durationMinutes, btnEl) {
+    const startVal = new Date(startTimeISO);
+    const endVal = new Date(startVal.getTime() + durationMinutes * 60000);
+
+    if (startPicker) startPicker.setDate(startVal);
+    if (endPicker) endPicker.setDate(endVal);
+
+    // Highlight the clicked button, unhighlight others
+    document.querySelectorAll('.slot-pill').forEach(b => {
+      b.style.background = '#fff';
+      b.style.color = 'var(--teal-dark)';
+    });
+
+    if (btnEl) {
+      btnEl.style.background = 'var(--teal)';
+      btnEl.style.color = '#fff';
+    }
+
+    showToast("Vaqt muvaffaqiyatli tanlandi: " + startVal.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent' }), "success");
   }
 </script>
 <div id="toast-container"></div>

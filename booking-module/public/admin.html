@@ -468,8 +468,9 @@
               <div class="legend-item"><div class="legend-dot" style="background:#fef9c3; border:1px dashed #ca8a04;"></div> Saqlanmoqda</div>
               <div class="legend-item"><div class="legend-dot" style="background:#e0f2fe; border:1px solid #0284c7;"></div> Band</div>
             </div>
-            <div style="display:flex; gap:12px;">
+            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
               <button class="btn" onclick="loadAdminScheduleGrid()" style="width:auto; background:none; border:1.5px solid var(--border); color:var(--text-muted); margin:0;">Yangilash</button>
+              <button class="btn" id="admin-btn-auto-fill" onclick="adminAutoFillFromClinicSchedule()" style="width:auto; background:var(--teal); color:#fff; margin:0; display:flex; align-items:center; gap:6px;">⚡ Tizim bo'yicha to'ldirish</button>
               <button class="btn" id="admin-btn-save-grid" onclick="saveAdminGridChanges()" style="width:auto; background:var(--navy); color:#fff; margin:0;">Saqlash</button>
             </div>
           </div>
@@ -1476,6 +1477,66 @@
         showToast("Muvaffaqiyatli saqlandi!", "success");
       } catch (e) { showToast("Xatolik yuz berdi", "error"); }
       btn.disabled = false; btn.textContent = 'Saqlash';
+    }
+
+    function adminAutoFillFromClinicSchedule() {
+      if (!adminCurrentDoctorId) {
+        showToast("Iltimos, avval shifokorni tanlang!", "error");
+        return;
+      }
+
+      const days = [];
+      const now = new Date();
+      const tzOffset = 5 * 60 * 60 * 1000;
+      const utcMs = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
+      const tashkentNow = new Date(utcMs + tzOffset);
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(tashkentNow.getTime() + i * 24 * 60 * 60 * 1000);
+        days.push(d);
+      }
+
+      const times = [];
+      // Monday to Saturday: 9:00 - 18:00
+      // Lunch break: 13:00 - 14:00 (no slots starting at 13:00 or 13:30)
+      for (let h = 9; h < 18; h++) {
+        if (h === 13) continue; // Skip lunch hour 13:00 - 14:00
+        for (let m = 0; m < 60; m += ADMIN_INTERVAL) {
+          const t = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+          times.push(t);
+        }
+      }
+
+      let addedCount = 0;
+
+      for (const d of days) {
+        const dayOfWeek = d.getDay(); // 0 = Sun, 1 = Mon ... 6 = Sat
+        if (dayOfWeek === 0) continue; // Skip Sunday (Yakshanba)
+
+        const iso = getLocalISO(d);
+
+        for (const t of times) {
+          const key = `${iso}_${t}`;
+          const slotDateTime = parseTashkentDateTime(iso, t);
+
+          if (slotDateTime.getTime() < Date.now()) continue; // Skip past times
+
+          const existing = adminAllSlots.find(s => {
+            const sStart = new Date(s.startTime).getTime();
+            const sEnd = sStart + s.duration * 60000;
+            return slotDateTime.getTime() >= sStart && slotDateTime.getTime() < sEnd;
+          });
+
+          if (existing && existing.appointment) continue; // Don't touch booked times
+
+          if (!existing) {
+            adminPendingChanges[key] = 'add';
+            addedCount++;
+          }
+        }
+      }
+
+      renderAdminGrid();
+      showToast(`Klinika jadvali bo'yicha ${addedCount} ta yangi slot qo'shildi! Tasdiqlash uchun 'Saqlash' tugmasini bosing.`, "success");
     }
 
     function adminCopySelectedDay() {

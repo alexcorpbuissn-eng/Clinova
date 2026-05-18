@@ -34,7 +34,20 @@ export async function GET(request: NextRequest) {
 
   const slots = await prisma.slot.findMany({
     where: { doctorId, startTime: { gte: todayStart } },
-    include: { appointment: { select: { status: true, patientFirst: true, patientLast: true, patientPhone: true, patient: { select: { firstName: true, lastName: true, phone: true } } } } },
+    include: {
+      appointment: {
+        select: {
+          id: true,
+          status: true,
+          patientFirst: true,
+          patientLast: true,
+          patientPhone: true,
+          description: true,
+          procedure: { select: { name: true } },
+          patient: { select: { firstName: true, lastName: true, phone: true } }
+        }
+      }
+    },
     orderBy: { startTime: 'asc' },
   });
 
