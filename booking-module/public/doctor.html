@@ -1100,10 +1100,12 @@
 
   // ---- Tashkent Timezone Date Helpers ----
   function getTashkentISO(date) {
-    const tzOffset = 5 * 60 * 60 * 1000;
-    const utcMs = date.getTime() + (date.getTimezoneOffset() * 60 * 1000);
-    const tTime = new Date(utcMs + tzOffset);
-    return tTime.toISOString().slice(0, 10);
+    // Add UTC+5 to get Tashkent local time, then extract date parts
+    const tashkent = new Date(date.getTime() + 5 * 60 * 60 * 1000);
+    const year = tashkent.getUTCFullYear();
+    const month = String(tashkent.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(tashkent.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   function parseTashkentDateTime(isoDateStr, timeStr) {
@@ -1114,17 +1116,29 @@
   function getTashkentDays() {
     const days = [];
     const now = new Date();
-    const tzOffset = 5 * 60 * 60 * 1000;
-    const utcMs = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
-    const tashkentNow = new Date(utcMs + tzOffset);
+    // Get current Tashkent time (UTC+5)
+    const tashkentNow = new Date(now.getTime() + 5 * 60 * 60 * 1000);
+    // Zero out to start of day in Tashkent
+    const tashkentToday = new Date(Date.UTC(
+      tashkentNow.getUTCFullYear(),
+      tashkentNow.getUTCMonth(),
+      tashkentNow.getUTCDate()
+    ));
 
     for (let i = 0; i < 7; i++) {
-      const d = new Date(tashkentNow.getTime() + i * 24 * 60 * 60 * 1000);
+      const d = new Date(tashkentToday.getTime() + i * 24 * 60 * 60 * 1000);
+      const year = d.getUTCFullYear();
+      const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      const iso = `${year}-${month}-${day}`;
+      
+      // Use Tashkent-aware date for display labels
+      const displayDate = new Date(`${iso}T12:00:00+05:00`);
       days.push({
-        iso: d.toISOString().slice(0, 10),
-        label: d.toLocaleDateString('uz-UZ', { weekday: 'short' }),
-        dateNum: d.getDate(),
-        monthLabel: d.toLocaleDateString('uz-UZ', { month: 'short' })
+        iso,
+        label: displayDate.toLocaleDateString('uz-UZ', { weekday: 'short', timeZone: 'Asia/Tashkent' }),
+        dateNum: d.getUTCDate(),
+        monthLabel: displayDate.toLocaleDateString('uz-UZ', { month: 'short', timeZone: 'Asia/Tashkent' })
       });
     }
     return days;

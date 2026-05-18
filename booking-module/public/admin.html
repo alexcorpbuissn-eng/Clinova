@@ -1295,10 +1295,12 @@
     const ADMIN_INTERVAL = 30;
 
     function getLocalISO(date) {
-      const tzOffset = 5 * 60 * 60 * 1000;
-      const utcMs = date.getTime() + (date.getTimezoneOffset() * 60 * 1000);
-      const tTime = new Date(utcMs + tzOffset);
-      return tTime.toISOString().slice(0, 10);
+      // Shift to Tashkent (UTC+5) and extract date parts
+      const tashkent = new Date(date.getTime() + 5 * 60 * 60 * 1000);
+      const year = tashkent.getUTCFullYear();
+      const month = String(tashkent.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(tashkent.getUTCDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     }
 
     function parseTashkentDateTime(isoDateStr, timeStr) {
@@ -1529,18 +1531,25 @@
       
       const days = [];
       const now = new Date();
-      const tzOffset = 5 * 60 * 60 * 1000;
-      const utcMs = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
-      const tashkentNow = new Date(utcMs + tzOffset);
+      // Use Tashkent time (UTC+5) for correct day-of-week
+      const tashkentNow = new Date(now.getTime() + 5 * 60 * 60 * 1000);
       
-      const baseDate = adminSelectedStartDate || tashkentNow;
-      // Get Monday of the week containing baseDate
-      const dayOfWeek = baseDate.getDay(); // 0 = Sun, 1 = Mon
+      const baseDate = adminSelectedStartDate
+        ? new Date(adminSelectedStartDate.getTime() + 5 * 60 * 60 * 1000)
+        : tashkentNow;
+      
+      // Get Monday of the week containing baseDate (Tashkent day-of-week)
+      const dayOfWeek = baseDate.getUTCDay(); // 0 = Sun, 1 = Mon
       const distanceToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-      const monday = new Date(baseDate.getTime() + distanceToMonday * 24 * 60 * 60 * 1000);
+      // Build Monday as a UTC midnight date for arithmetic
+      const mondayUTC = new Date(Date.UTC(
+        baseDate.getUTCFullYear(),
+        baseDate.getUTCMonth(),
+        baseDate.getUTCDate() + distanceToMonday
+      ));
 
       for (let i = 0; i < 7; i++) {
-        const d = new Date(monday.getTime() + i * 24 * 60 * 60 * 1000);
+        const d = new Date(mondayUTC.getTime() + i * 24 * 60 * 60 * 1000);
         days.push(d);
       }
 
@@ -1549,11 +1558,12 @@
       if (copySelect) {
         const prevVal = copySelect.value;
         copySelect.innerHTML = '<option value="">Kunni tanlang...</option>' + 
-          days.filter(d => d.getDay() !== 0).map(d => {
+          days.filter(d => d.getUTCDay() !== 0).map(d => {
             const iso = getLocalISO(d);
-            const name = d.toLocaleDateString('uz-UZ', { weekday: 'long' });
-            const dateStr = d.getDate();
-            const monthStr = d.toLocaleDateString('uz-UZ', { month: 'short' });
+            const displayDate = new Date(`${iso}T12:00:00+05:00`);
+            const name = displayDate.toLocaleDateString('uz-UZ', { weekday: 'long', timeZone: 'Asia/Tashkent' });
+            const dateStr = d.getUTCDate();
+            const monthStr = displayDate.toLocaleDateString('uz-UZ', { month: 'short', timeZone: 'Asia/Tashkent' });
             return `<option value="${iso}">${name} (${dateStr} ${monthStr})</option>`;
           }).join('');
         if (prevVal) copySelect.value = prevVal;
@@ -1563,8 +1573,9 @@
         days.map(d => {
           const iso = getLocalISO(d);
           const isToday = iso === getLocalISO(new Date());
-          const isSunday = d.getDay() === 0;
+          const isSunday = d.getUTCDay() === 0;
           
+          const displayDate = new Date(`${iso}T12:00:00+05:00`);
           const sourceIso = copySelect ? copySelect.value : '';
           const showPaste = (adminCopiedSchedule !== null) && iso !== sourceIso && !isSunday;
           const pasteBtn = showPaste ? `
@@ -1573,8 +1584,8 @@
 
           return `
             <div class="weekly-header-cell ${isToday ? 'today' : ''} ${isSunday ? 'sunday-header' : ''}" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:80px; ${isSunday ? 'background:#f8fafc;' : ''}">
-              <span class="day-name" style="${isSunday ? 'color:#94a3b8;' : ''}">${d.toLocaleDateString('uz-UZ', { weekday: 'short' })}</span>
-              <span class="day-date" style="font-size:1.1rem; font-weight:700; margin-top:2px; ${isSunday ? 'color:#94a3b8;' : ''}">${d.getDate()}</span>
+              <span class="day-name" style="${isSunday ? 'color:#94a3b8;' : ''}">${displayDate.toLocaleDateString('uz-UZ', { weekday: 'short', timeZone: 'Asia/Tashkent' })}</span>
+              <span class="day-date" style="font-size:1.1rem; font-weight:700; margin-top:2px; ${isSunday ? 'color:#94a3b8;' : ''}">${d.getUTCDate()}</span>
               ${pasteBtn}
             </div>
           `;
@@ -1604,7 +1615,7 @@
                 return slotDateTime.getTime() >= sStart && slotDateTime.getTime() < sEnd;
               });
               
-              const isSunday = d.getDay() === 0;
+              const isSunday = d.getUTCDay() === 0;
               const isPastOrSunday = isPast || isSunday;
               
               let statusClass = '';
@@ -1723,10 +1734,11 @@
       
       grid.innerHTML = '';
       
-      const firstDay = new Date(year, month, 1);
-      const startDow = firstDay.getDay(); // 0 = Sun, 1 = Mon ...
+      // Build firstDay as UTC noon to avoid any timezone-day drift
+      const firstDayUTC = new Date(Date.UTC(year, month, 1, 12, 0, 0));
+      const startDow = firstDayUTC.getUTCDay(); // 0 = Sun, 1 = Mon ...
       const startDowIso = startDow === 0 ? 6 : startDow - 1;
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
       
       // Render leading empty cells
       for (let i = 0; i < startDowIso; i++) {
@@ -1737,18 +1749,21 @@
       
       const todayISO = getLocalISO(new Date());
       const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
+      // Today start in UTC (compare against UTC midnight for date cells)
+      const todayUTCStart = new Date(Date.UTC(
+        new Date(Date.now() + 5*60*60*1000).getUTCFullYear(),
+        new Date(Date.now() + 5*60*60*1000).getUTCMonth(),
+        new Date(Date.now() + 5*60*60*1000).getUTCDate()
+      ));
       
       // Render days of the month
       for (let d = 1; d <= daysInMonth; d++) {
-        const cellDate = new Date(year, month, d);
-        const iso = getLocalISO(cellDate);
+        const cellDate = new Date(Date.UTC(year, month, d));
+        const iso = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
         const isToday = iso === todayISO;
         const isSelected = adminSelectedStartDate && getLocalISO(adminSelectedStartDate) === iso;
         
-        const cellDateCompare = new Date(year, month, d);
-        cellDateCompare.setHours(0, 0, 0, 0);
-        const isPastDay = cellDateCompare < todayStart;
+        const isPastDay = cellDate < todayUTCStart;
         
         const daySlots = adminAllSlots.filter(s => getLocalISO(new Date(s.startTime)) === iso);
         const openSlots = daySlots.filter(s => s.isAvailable && new Date(s.startTime).getTime() > Date.now());
@@ -1848,12 +1863,15 @@
       const year = adminCalendarCurrentDate.getFullYear();
       const month = adminCalendarCurrentDate.getMonth();
       
-      const startOf = new Date(year, month, 1);
-      const endOf = new Date(year, month + 1, 0);
+      // Get Tashkent today for fromDate calculation
+      const tashkentNowFill = new Date(Date.now() + 5 * 60 * 60 * 1000);
+      const startOf = new Date(Date.UTC(year, month, 1));
+      const endOf = new Date(Date.UTC(year, month + 1, 0));
+      const todayUTC = new Date(Date.UTC(tashkentNowFill.getUTCFullYear(), tashkentNowFill.getUTCMonth(), tashkentNowFill.getUTCDate()));
       
-      const now = new Date();
-      const fromDateStr = (startOf < now ? now : startOf).toISOString().slice(0, 10);
-      const toDateStr = endOf.toISOString().slice(0, 10);
+      const fromBase = startOf < todayUTC ? todayUTC : startOf;
+      const fromDateStr = `${fromBase.getUTCFullYear()}-${String(fromBase.getUTCMonth()+1).padStart(2,'0')}-${String(fromBase.getUTCDate()).padStart(2,'0')}`;
+      const toDateStr = `${endOf.getUTCFullYear()}-${String(endOf.getUTCMonth()+1).padStart(2,'0')}-${String(endOf.getUTCDate()).padStart(2,'0')}`;
       
       const adminTokenVal = localStorage.getItem('admin_token');
       
@@ -1913,11 +1931,11 @@
 
       const days = [];
       const now = new Date();
-      const tzOffset = 5 * 60 * 60 * 1000;
-      const utcMs = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
-      const tashkentNow = new Date(utcMs + tzOffset);
+      // Use Tashkent UTC offset for correct day calculation
+      const tashkentNow = new Date(now.getTime() + 5 * 60 * 60 * 1000);
+      const tashkentToday = new Date(Date.UTC(tashkentNow.getUTCFullYear(), tashkentNow.getUTCMonth(), tashkentNow.getUTCDate()));
       for (let i = 0; i < 7; i++) {
-        const d = new Date(tashkentNow.getTime() + i * 24 * 60 * 60 * 1000);
+        const d = new Date(tashkentToday.getTime() + i * 24 * 60 * 60 * 1000);
         days.push(d);
       }
 
@@ -1935,7 +1953,7 @@
       let addedCount = 0;
 
       for (const d of days) {
-        const dayOfWeek = d.getDay(); // 0 = Sun, 1 = Mon ... 6 = Sat
+        const dayOfWeek = d.getUTCDay(); // 0 = Sun, 1 = Mon ... 6 = Sat
         if (dayOfWeek === 0) continue; // Skip Sunday (Yakshanba)
 
         const iso = getLocalISO(d);
@@ -2037,7 +2055,7 @@
       const sourceIso = document.getElementById('admin-copy-day-select').value;
 
       for (const d of days) {
-        if (d.getDay() === 0) continue; // Skip Sunday (Yakshanba)
+        if (d.getUTCDay() === 0) continue; // Skip Sunday (Yakshanba)
         const iso = getLocalISO(d);
         if (iso === sourceIso) continue;
 
@@ -2081,8 +2099,9 @@
       if (event) event.stopPropagation();
       if (!adminCopiedSchedule) return;
 
-      const targetDate = new Date(targetIso + 'T00:00:00');
-      if (targetDate.getDay() === 0) {
+      // Parse as UTC midnight (our days are built as UTC midnight objects)
+      const targetDate = new Date(targetIso + 'T00:00:00Z');
+      if (targetDate.getUTCDay() === 0) {
         showToast("Yakshanba kuni dam olish kuni, jadval nusxalab bo'lmaydi!", "error");
         return;
       }

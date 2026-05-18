@@ -1308,11 +1308,17 @@
       
       // Get relative day names for Tashkent today & tomorrow
       const now = new Date();
-      const utcNowMs = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
-      const tashkentToday = new Date(utcNowMs + tzOffset).toISOString().slice(0, 10);
+      const tashkentShift = new Date(now.getTime() + 5 * 60 * 60 * 1000);
+      const ty = tashkentShift.getUTCFullYear();
+      const tm = String(tashkentShift.getUTCMonth() + 1).padStart(2, '0');
+      const td = String(tashkentShift.getUTCDate()).padStart(2, '0');
+      const tashkentToday = `${ty}-${tm}-${td}`;
       
-      const tomorrowDate = new Date(utcNowMs + tzOffset + 24 * 60 * 60 * 1000);
-      const tashkentTomorrow = tomorrowDate.toISOString().slice(0, 10);
+      const tomorrowShift = new Date(tashkentShift.getTime() + 24 * 60 * 60 * 1000);
+      const ty2 = tomorrowShift.getUTCFullYear();
+      const tm2 = String(tomorrowShift.getUTCMonth() + 1).padStart(2, '0');
+      const td2 = String(tomorrowShift.getUTCDate()).padStart(2, '0');
+      const tashkentTomorrow = `${ty2}-${tm2}-${td2}`;
 
       listEl.innerHTML = sortedDays.map(dayIso => {
         let dayTitle = '';
