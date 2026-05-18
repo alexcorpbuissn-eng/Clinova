@@ -439,6 +439,42 @@
           </div>
         </div>
 
+        <!-- MONTHLY CALENDAR CONTAINER -->
+        <div id="admin-month-calendar-wrap" style="display:none; margin-top:20px; background:#fff; border:1.5px solid var(--border); border-radius:20px; padding:22px; box-shadow:0 4px 20px rgba(0,0,0,0.03);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+            <div style="display:flex; align-items:center; gap:16px;">
+              <h2 id="admin-cal-month-label" style="font-size:1.25rem; font-weight:700; color:var(--navy); margin:0;">May, 2026</h2>
+              <div style="display:flex; gap:6px;">
+                <button onclick="navAdminCalendarMonth(-1)" class="btn" style="padding:6px 12px; font-size:0.85rem; border:1.5px solid var(--border); background:none; color:var(--navy); border-radius:10px; cursor:pointer; width:auto; margin:0; transition:all 0.2s;">◀</button>
+                <button onclick="navAdminCalendarMonth(1)" class="btn" style="padding:6px 12px; font-size:0.85rem; border:1.5px solid var(--border); background:none; color:var(--navy); border-radius:10px; cursor:pointer; width:auto; margin:0; transition:all 0.2s;">▶</button>
+              </div>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <button onclick="adminAutoFillEntireMonth()" class="btn" style="background:var(--teal); color:#fff; border:none; padding:10px 18px; border-radius:12px; font-size:0.85rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; width:auto; margin:0; box-shadow: 0 4px 12px rgba(20,184,166,0.2);">⚡ Butun oyni avtomatik to'ldirish</button>
+            </div>
+          </div>
+          
+          <div style="display:grid; grid-template-columns: repeat(7, 1fr); gap:10px; text-align:center; font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-bottom:12px;" id="admin-cal-headers">
+            <div>DUSH</div>
+            <div>SESH</div>
+            <div>CHOR</div>
+            <div>PAY</div>
+            <div>JUM</div>
+            <div>SHAN</div>
+            <div>YAK</div>
+          </div>
+          
+          <div style="display:grid; grid-template-columns: repeat(7, 1fr); gap:12px;" id="admin-cal-days-grid">
+            <!-- Calendar days go here dynamically -->
+          </div>
+
+          <div style="display:flex; gap:16px; margin-top:20px; padding-top:15px; border-top:1px solid var(--border); font-size:0.8rem; color:var(--text-muted); flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:6px;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#10b981;"></span> Ochiq slotlar mavjud</div>
+            <div style="display:flex; align-items:center; gap:6px;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#3b82f6;"></span> To'liq band qilingan</div>
+            <div style="display:flex; align-items:center; gap:6px;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; border:1px dashed #94a3b8; background:#f8fafc;"></span> Jadval belgilanmagan</div>
+          </div>
+        </div>
+
         <div class="weekly-container" id="admin-schedule-container" style="display:none; margin-top:20px;">
           <!-- Shablon Asboblari (Copy/Paste toolbar) -->
           <div class="schedule-toolbar" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; background:#1e293b; padding:12px 20px; border-bottom:1px solid #334155; color:#fff; font-size:0.85rem; gap:12px; border-radius: 12px 12px 0 0;">
@@ -1243,6 +1279,10 @@
     let adminCopiedDayLabel = '';
     let adminCurrentDoctorId = null;
 
+    // Monthly Calendar State
+    let adminCalendarCurrentDate = new Date();
+    let adminSelectedStartDate = null;
+
     const ADMIN_START_HOUR = 8;
     const ADMIN_END_HOUR = 19;
     const ADMIN_INTERVAL = 30;
@@ -1268,9 +1308,11 @@
             data.doctors.map(d => `<option value="${d.id}" ${adminCurrentDoctorId === d.id ? 'selected' : ''}>Dr. ${d.firstName} ${d.lastName} (${d.specialty})</option>`).join('');
           
           if (adminCurrentDoctorId) {
+            document.getElementById('admin-month-calendar-wrap').style.display = 'block';
             document.getElementById('admin-schedule-container').style.display = 'block';
             loadAdminScheduleGrid();
           } else {
+            document.getElementById('admin-month-calendar-wrap').style.display = 'none';
             document.getElementById('admin-schedule-container').style.display = 'none';
           }
         }
@@ -1285,9 +1327,11 @@
       adminCancelCopyState();
       
       if (adminCurrentDoctorId) {
+        document.getElementById('admin-month-calendar-wrap').style.display = 'block';
         document.getElementById('admin-schedule-container').style.display = 'block';
         loadAdminScheduleGrid();
       } else {
+        document.getElementById('admin-month-calendar-wrap').style.display = 'none';
         document.getElementById('admin-schedule-container').style.display = 'none';
       }
     }
@@ -1299,9 +1343,16 @@
       container.innerHTML = '<div style="grid-column: 1 / span 8; text-align: center; padding: 40px; color: var(--text-muted);">Yuklanmoqda...</div>';
       
       try {
-        const data = await apiGet(`/api/doctor/slots?doctorId=${adminCurrentDoctorId}`);
+        const year = adminCalendarCurrentDate.getFullYear();
+        const month = adminCalendarCurrentDate.getMonth();
+        // Fetch slots from 1st of current month to end of next month (approx 60 days) to populate calendar and grid
+        const rangeStart = new Date(year, month, 1);
+        const rangeEnd = new Date(year, month + 2, 0);
+        
+        const data = await apiGet(`/api/admin/slots?doctorId=${adminCurrentDoctorId}&from=${rangeStart.toISOString()}&to=${rangeEnd.toISOString()}`);
         if (data.success) {
           adminAllSlots = data.slots;
+          renderAdminCalendar();
           renderAdminGrid();
         }
       } catch (err) {
@@ -1319,8 +1370,15 @@
       const tzOffset = 5 * 60 * 60 * 1000;
       const utcMs = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
       const tashkentNow = new Date(utcMs + tzOffset);
+      
+      const baseDate = adminSelectedStartDate || tashkentNow;
+      // Get Monday of the week containing baseDate
+      const dayOfWeek = baseDate.getDay(); // 0 = Sun, 1 = Mon
+      const distanceToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      const monday = new Date(baseDate.getTime() + distanceToMonday * 24 * 60 * 60 * 1000);
+
       for (let i = 0; i < 7; i++) {
-        const d = new Date(tashkentNow.getTime() + i * 24 * 60 * 60 * 1000);
+        const d = new Date(monday.getTime() + i * 24 * 60 * 60 * 1000);
         days.push(d);
       }
 
@@ -1477,6 +1535,194 @@
         showToast("Muvaffaqiyatli saqlandi!", "success");
       } catch (e) { showToast("Xatolik yuz berdi", "error"); }
       btn.disabled = false; btn.textContent = 'Saqlash';
+    }
+
+    function renderAdminCalendar() {
+      const label = document.getElementById('admin-cal-month-label');
+      const grid = document.getElementById('admin-cal-days-grid');
+      if (!label || !grid) return;
+      
+      const year = adminCalendarCurrentDate.getFullYear();
+      const month = adminCalendarCurrentDate.getMonth();
+      
+      const monthNames = [
+        "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", 
+        "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"
+      ];
+      label.textContent = `${monthNames[month]}, ${year}`;
+      
+      grid.innerHTML = '';
+      
+      const firstDay = new Date(year, month, 1);
+      const startDow = firstDay.getDay(); // 0 = Sun, 1 = Mon ...
+      const startDowIso = startDow === 0 ? 6 : startDow - 1;
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      
+      // Render leading empty cells
+      for (let i = 0; i < startDowIso; i++) {
+        const empty = document.createElement('div');
+        empty.style.height = '75px';
+        grid.appendChild(empty);
+      }
+      
+      const todayISO = getLocalISO(new Date());
+      
+      // Render days of the month
+      for (let d = 1; d <= daysInMonth; d++) {
+        const cellDate = new Date(year, month, d);
+        const iso = getLocalISO(cellDate);
+        const isToday = iso === todayISO;
+        const isSelected = adminSelectedStartDate && getLocalISO(adminSelectedStartDate) === iso;
+        
+        const daySlots = adminAllSlots.filter(s => getLocalISO(new Date(s.startTime)) === iso);
+        const openSlots = daySlots.filter(s => s.isAvailable);
+        const bookedSlots = daySlots.filter(s => !s.isAvailable);
+        
+        const dayCard = document.createElement('div');
+        dayCard.style.height = '75px';
+        dayCard.style.borderRadius = '16px';
+        dayCard.style.border = isSelected 
+          ? '2.5px solid var(--teal)' 
+          : (isToday ? '2.5px solid var(--navy)' : '1.5px solid var(--border)');
+        dayCard.style.padding = '10px';
+        dayCard.style.display = 'flex';
+        dayCard.style.flexDirection = 'column';
+        dayCard.style.justifyContent = 'space-between';
+        dayCard.style.cursor = 'pointer';
+        dayCard.style.transition = 'all 0.2s';
+        dayCard.style.boxSizing = 'border-box';
+        
+        if (daySlots.length === 0) {
+          dayCard.style.background = '#f8fafc';
+          dayCard.style.borderStyle = 'dashed';
+        } else if (openSlots.length > 0) {
+          dayCard.style.background = 'rgba(16,185,129,0.06)';
+        } else {
+          dayCard.style.background = 'rgba(59,130,246,0.06)';
+        }
+        
+        dayCard.onmouseover = () => {
+          dayCard.style.transform = 'translateY(-2px)';
+          if (!isSelected) dayCard.style.borderColor = 'var(--teal)';
+        };
+        dayCard.onmouseout = () => {
+          dayCard.style.transform = 'none';
+          if (!isSelected) {
+            dayCard.style.borderColor = isToday ? 'var(--navy)' : 'var(--border)';
+          }
+        };
+        
+        dayCard.onclick = () => {
+          adminSelectedStartDate = cellDate;
+          renderAdminCalendar();
+          renderAdminGrid();
+        };
+        
+        const numSpan = document.createElement('span');
+        numSpan.style.fontWeight = '700';
+        numSpan.style.fontSize = '0.95rem';
+        numSpan.style.color = isToday ? 'var(--navy)' : 'var(--text-main)';
+        numSpan.style.textAlign = 'left';
+        numSpan.textContent = d;
+        dayCard.appendChild(numSpan);
+        
+        const badge = document.createElement('div');
+        badge.style.fontSize = '0.72rem';
+        badge.style.fontWeight = '600';
+        badge.style.borderRadius = '8px';
+        badge.style.padding = '3px 6px';
+        badge.style.textAlign = 'center';
+        badge.style.marginTop = '4px';
+        
+        if (daySlots.length === 0) {
+          badge.textContent = "Bo'sh";
+          badge.style.color = '#94a3b8';
+        } else if (openSlots.length > 0) {
+          badge.textContent = `🟢 ${openSlots.length} ta`;
+          badge.style.color = '#10b981';
+          badge.style.background = 'rgba(16,185,129,0.1)';
+        } else {
+          badge.textContent = `🔵 Band`;
+          badge.style.color = '#3b82f6';
+          badge.style.background = 'rgba(59,130,246,0.1)';
+        }
+        dayCard.appendChild(badge);
+        
+        grid.appendChild(dayCard);
+      }
+    }
+
+    function navAdminCalendarMonth(dir) {
+      adminCalendarCurrentDate.setMonth(adminCalendarCurrentDate.getMonth() + dir);
+      adminSelectedStartDate = null; // reset selected day when changing months
+      loadAdminScheduleGrid();
+    }
+
+    async function adminAutoFillEntireMonth() {
+      if (!adminCurrentDoctorId) {
+        showToast("Iltimos, avval shifokorni tanlang!", "error");
+        return;
+      }
+      
+      const confirmFill = confirm("Ushbu oy uchun dushanba-shanba kunlariga soat 9:00 dan 18:00 gacha (13:00-14:00 tushlikdan tashqari) avtomatik ish vaqti yaratilsinmi?");
+      if (!confirmFill) return;
+      
+      const year = adminCalendarCurrentDate.getFullYear();
+      const month = adminCalendarCurrentDate.getMonth();
+      
+      const startOf = new Date(year, month, 1);
+      const endOf = new Date(year, month + 1, 0);
+      
+      const now = new Date();
+      const fromDateStr = (startOf < now ? now : startOf).toISOString().slice(0, 10);
+      const toDateStr = endOf.toISOString().slice(0, 10);
+      
+      try {
+        showToast("Jadval yaratilmoqda, iltimos kuting...", "info");
+        
+        const res1 = await fetch('/api/admin/slots', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({
+            doctorId: adminCurrentDoctorId,
+            bulk: true,
+            days: [1, 2, 3, 4, 5, 6],
+            startHour: 9,
+            endHour: 13,
+            interval: 30,
+            fromDate: fromDateStr,
+            toDate: toDateStr
+          })
+        });
+        
+        const res2 = await fetch('/api/admin/slots', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({
+            doctorId: adminCurrentDoctorId,
+            bulk: true,
+            days: [1, 2, 3, 4, 5, 6],
+            startHour: 14,
+            endHour: 18,
+            interval: 30,
+            fromDate: fromDateStr,
+            toDate: toDateStr
+          })
+        });
+        
+        const data1 = await res1.json();
+        const data2 = await res2.json();
+        
+        if (res1.ok && res2.ok) {
+          const totalCreated = (data1.created || 0) + (data2.created || 0);
+          showToast(`Butun oy uchun ${totalCreated} ta yangi ish vaqtlari muvaffaqiyatli yaratildi!`, "success");
+          await loadAdminScheduleGrid();
+        } else {
+          showToast("Jadval yaratishda xatolik yuz berdi", "error");
+        }
+      } catch (e) {
+        showToast("Tarmoq xatosi yuz berdi", "error");
+      }
     }
 
     function adminAutoFillFromClinicSchedule() {
