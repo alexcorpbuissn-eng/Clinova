@@ -1304,6 +1304,7 @@
       const res = await fetch('/api/admin/patients', {
         headers: { 'Authorization': `Bearer ${doctorToken}` }
       });
+      if (res.status === 401) return logout();
       const data = await res.json();
       if (res.ok && data.success) {
         allVerifiedPatients = data.patients;
@@ -1323,6 +1324,7 @@
     }
     try {
       const res = await fetch(`/api/doctor/slots?doctorId=${currentDoctorId}`, { headers: { 'Authorization': `Bearer ${doctorToken}` } });
+      if (res.status === 401) return logout();
       const data = await res.json();
       if (res.ok && data.success) {
         allSlots = data.slots;
@@ -1929,6 +1931,7 @@
     container.innerHTML = '<div class="empty-state">Yuklanmoqda...</div>';
     try {
       const res = await fetch(`/api/doctor/appointments?doctorId=${currentDoctorId}`, { headers: { 'Authorization': `Bearer ${doctorToken}` } });
+      if (res.status === 401) return logout();
       const data = await res.json();
       if (res.ok && data.success) {
         // filter out cancelled
