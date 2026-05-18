@@ -1060,21 +1060,11 @@
         <div class="details-val" id="det-description">-</div>
       </div>
       
-      <!-- Call attempts tracker info -->
-      <div class="details-item" id="det-calls-wrap" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border);">
-        <div class="details-lbl">Qo'ng'iroqlar</div>
-        <div class="details-val" id="det-calls-count" style="color:var(--color-followup); font-weight:600;">0 marta qo'ng'iroq qilindi</div>
-      </div>
-
       <!-- Action buttons -->
       <div id="det-actions-container" style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border); display:flex; flex-direction:column; gap:10px;">
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-          <button class="btn-call btn-called" id="det-btn-called" onclick="trackDetailCall('RESOLVE')">📞 Qo'ng'iroq qilindi</button>
-          <button class="btn-call btn-no-answer" id="det-btn-no-answer" onclick="trackDetailCall('NO_ANSWER')">🔇 Telefonni ko'tarmadi</button>
-        </div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 5px;">
-          <button class="btn-cancel" id="det-btn-cancel-appt" onclick="cancelDetailAppointment()">Bekor qilish</button>
-          <button class="btn-submit-premium" id="det-btn-complete-appt" onclick="completeDetailAppointment()">Tugallash</button>
+          <button class="btn-cancel" id="det-btn-cancel-appt" onclick="cancelDetailAppointment()">Kelmadi</button>
+          <button class="btn-submit-premium" id="det-btn-complete-appt" onclick="completeDetailAppointment()">Keldi</button>
         </div>
       </div>
     </div>
@@ -1801,8 +1791,6 @@
     document.getElementById('det-time').textContent = "";
     document.getElementById('det-procedure').textContent = "";
     document.getElementById('det-description').textContent = "";
-    document.getElementById('det-calls-count').textContent = "";
-    
     modal.classList.add('active');
 
     try {
@@ -1822,23 +1810,7 @@
         document.getElementById('det-procedure').textContent = isBreak ? "Dam olish vaqti" : (a.procedure ? a.procedure.name : "Birlamchi qabul");
         document.getElementById('det-description').textContent = a.description || "Yo'q";
         
-        // Calls display
-        const attempts = a.callAttempts || 0;
-        document.getElementById('det-calls-count').textContent = `${attempts} marta qo'ng'iroq qilindi ${attempts >= 3 ? '⚠️ (Ulanib bo\'lmadi)' : ''}`;
-        
-        // Hide call action buttons if it is a break
         if (isBreak) {
-          document.getElementById('det-calls-wrap').style.display = 'none';
-          document.getElementById('det-btn-called').style.display = 'none';
-          document.getElementById('det-btn-no-answer').style.display = 'none';
-        } else {
-          document.getElementById('det-calls-wrap').style.display = 'block';
-          document.getElementById('det-btn-called').style.display = 'inline-block';
-          document.getElementById('det-btn-no-answer').style.display = 'inline-block';
-        }
-
-        // Hide action buttons altogether if doctor
-        if (userRole === 'DOCTOR') {
           document.getElementById('det-actions-container').style.display = 'none';
         } else {
           document.getElementById('det-actions-container').style.display = 'flex';
@@ -1854,28 +1826,7 @@
     document.getElementById('details-modal').classList.remove('active');
   }
 
-  async function trackDetailCall(action) {
-    const apptId = selectedSlotData.apptId;
-    if (!apptId) return;
 
-    try {
-      const res = await fetch(`/api/admin/appointments/${apptId}/call-status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${doctorToken}` },
-        body: JSON.stringify({ action })
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        showToast(action === 'RESOLVE' ? "Mijoz bilan bog'lanildi!" : "Qo'ng'iroq javobsiz qoldi!", "success");
-        closeDetailsModal();
-        loadData();
-      } else {
-        showToast(data.error || "Xatolik yuz berdi", "error");
-      }
-    } catch {
-      showToast("Server bilan bog'lanib bo'lmadi", "error");
-    }
-  }
 
   async function cancelDetailAppointment() {
     const apptId = selectedSlotData.apptId;
@@ -1951,20 +1902,11 @@
           const procName = isBreak ? "Tanaffus" : (a.procedure ? a.procedure.name : "Birlamchi qabul");
           const attempts = a.callAttempts || 0;
 
-          // Call tracking section
-          const callSection = (isBreak || userRole === 'DOCTOR') ? '' : `
-            <div class="call-tracking-wrap">
-              <button class="btn-call btn-called" onclick="sidebarTrackCall('${a.id}', 'RESOLVE')">📞 Bog'lanildi</button>
-              <button class="btn-call btn-no-answer" onclick="sidebarTrackCall('${a.id}', 'NO_ANSWER')">🔇 Ulanmadi</button>
-              ${attempts > 0 ? `<div class="call-counter">${attempts} marta qo'ng'iroq qilindi ${attempts >= 3 ? '⚠️' : ''}</div>` : ''}
-            </div>
-          `;
-
           // Main actions section
-          const actionsSection = (userRole === 'DOCTOR') ? '' : `
+          const actionsSection = isBreak ? '' : `
             <div class="card-actions-wrap">
-              <button class="btn-action-card btn-cancel-card" onclick="sidebarCancel('${a.id}')">Bekor qilish</button>
-              <button class="btn-action-card btn-complete" onclick="sidebarComplete('${a.id}')">Tugallash</button>
+              <button class="btn-action-card btn-cancel-card" onclick="sidebarCancel('${a.id}')">Kelmadi</button>
+              <button class="btn-action-card btn-complete" onclick="sidebarComplete('${a.id}')">Keldi</button>
             </div>
           `;
 
@@ -1977,7 +1919,6 @@
               <div class="appt-patient">${patientName}</div>
               <div class="appt-procedure">${procName}</div>
               ${isBreak ? '' : `<div class="appt-phone">📱 ${phone}</div>`}
-              ${callSection}
               ${actionsSection}
             </div>
           `;
@@ -1992,20 +1933,7 @@
   }
 
   // Sidebar fast actions
-  async function sidebarTrackCall(apptId, action) {
-    try {
-      const res = await fetch(`/api/admin/appointments/${apptId}/call-status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${doctorToken}` },
-        body: JSON.stringify({ action })
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        showToast(action === 'RESOLVE' ? "Mijoz bilan bog'lanildi!" : "Qo'ng'iroq javobsiz qoldi!", "success");
-        loadData();
-      } else { showToast(data.error || "Xatolik yuz berdi", "error"); }
-    } catch { showToast("Ulanish xatosi", "error"); }
-  }
+
 
   async function sidebarCancel(apptId) {
     if (!confirm("Haqiqatan ham ushbu qabulni bekor qilmoqchimisiz?")) return;
