@@ -1328,8 +1328,18 @@
         allSlots = data.slots;
         renderGrid();
         updateStats();
+      } else {
+        console.error("Grid fetch failed", data);
+        allSlots = [];
+        renderGrid();
+        updateStats();
       }
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      console.error(e); 
+      allSlots = [];
+      renderGrid();
+      updateStats();
+    }
   }
 
   function renderGrid() {
@@ -1969,8 +1979,13 @@
             </div>
           `;
         }).join('');
+      } else {
+        container.innerHTML = `<div class="empty-state" style="color:var(--red);">❌ Xatolik: ${data.error || 'Noma\\'lum xato'}</div>`;
       }
-    } catch {}
+    } catch (err) {
+      console.error('loadAppointments xatosi:', err);
+      container.innerHTML = '<div class="empty-state" style="color:var(--red);">❌ Ulanishda xatolik yuz berdi</div>';
+    }
   }
 
   // Sidebar fast actions
