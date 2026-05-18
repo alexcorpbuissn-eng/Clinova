@@ -6,6 +6,10 @@
   <title>Admin Dashboard | Habibullo-Hilola</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
     :root {
       --navy: #0f172a; --teal: #0d9488; --teal-dark: #0f766e; --teal-light: #f0fdfa;
       --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --text: #334155; --text-muted: #64748b;
@@ -438,6 +442,9 @@
             </select>
           </div>
         </div>
+
+        <!-- OVERVIEW STATS DASHBOARD -->
+        <div id="admin-schedule-overview-dashboard" style="margin-top:20px; display:none;"></div>
 
         <!-- MONTHLY CALENDAR CONTAINER -->
         <div id="admin-month-calendar-wrap" style="display:none; margin-top:20px; background:#fff; border:1.5px solid var(--border); border-radius:20px; padding:22px; box-shadow:0 4px 20px rgba(0,0,0,0.03);">
@@ -1308,12 +1315,15 @@
             data.doctors.map(d => `<option value="${d.id}" ${adminCurrentDoctorId === d.id ? 'selected' : ''}>Dr. ${d.firstName} ${d.lastName} (${d.specialty})</option>`).join('');
           
           if (adminCurrentDoctorId) {
+            document.getElementById('admin-schedule-overview-dashboard').style.display = 'none';
             document.getElementById('admin-month-calendar-wrap').style.display = 'block';
             document.getElementById('admin-schedule-container').style.display = 'block';
             loadAdminScheduleGrid();
           } else {
+            document.getElementById('admin-schedule-overview-dashboard').style.display = 'block';
             document.getElementById('admin-month-calendar-wrap').style.display = 'none';
             document.getElementById('admin-schedule-container').style.display = 'none';
+            loadAdminScheduleDashboard();
           }
         }
       } catch (err) {
@@ -1327,12 +1337,164 @@
       adminCancelCopyState();
       
       if (adminCurrentDoctorId) {
+        document.getElementById('admin-schedule-overview-dashboard').style.display = 'none';
         document.getElementById('admin-month-calendar-wrap').style.display = 'block';
         document.getElementById('admin-schedule-container').style.display = 'block';
         loadAdminScheduleGrid();
       } else {
+        document.getElementById('admin-schedule-overview-dashboard').style.display = 'block';
         document.getElementById('admin-month-calendar-wrap').style.display = 'none';
         document.getElementById('admin-schedule-container').style.display = 'none';
+        loadAdminScheduleDashboard();
+      }
+    }
+
+    async function loadAdminScheduleDashboard() {
+      const dashboard = document.getElementById('admin-schedule-overview-dashboard');
+      if (!dashboard) return;
+      
+      dashboard.innerHTML = `
+        <div style="display:flex; justify-content:center; align-items:center; padding:60px; color:var(--text-muted); background:#fff; border-radius:20px; border:1.5px solid var(--border);">
+          <div style="text-align:center;">
+            <div style="font-size:2rem; margin-bottom:12px; display:inline-block; animation: spin 1s linear infinite;">🔄</div>
+            <div style="font-weight:600;">Umumiy jadval statistikasi yuklanmoqda...</div>
+          </div>
+        </div>
+      `;
+      
+      try {
+        const [docsData, slotsData] = await Promise.all([
+          apiGet('/api/admin/doctors'),
+          (async () => {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const from = new Date(year, month, 1).toISOString();
+            const to = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
+            return apiGet(`/api/admin/slots?from=${from}&to=${to}`);
+          })()
+        ]);
+        
+        if (!docsData.success || !slotsData.success) {
+          dashboard.innerHTML = '<div style="text-align:center; padding:40px; color:var(--red); background:#fff; border-radius:20px; border:1.5px solid var(--border);">Statistikani yuklab bo\'lmadi</div>';
+          return;
+        }
+        
+        const doctors = docsData.doctors;
+        const slots = slotsData.slots;
+        const nowMonthName = new Date().toLocaleDateString('uz-UZ', { month: 'long', year: 'numeric' });
+        
+        if (doctors.length === 0) {
+          dashboard.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted); background:#fff; border-radius:20px; border:1.5px solid var(--border);">Shifokorlar topilmadi</div>';
+          return;
+        }
+        
+        let html = `
+          <div style="margin-bottom: 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+            <div>
+              <h2 style="font-size: 1.4rem; color: var(--navy); margin-bottom: 6px;">📊 Shifokorlar ish yuklamasi</h2>
+              <p style="color: var(--text-muted); font-size: 0.9rem;">${nowMonthName} oyi uchun shifokorlar jadvali va bandlik darajasi bo'yicha umumiy ko'rinish.</p>
+            </div>
+            <button onclick="loadAdminScheduleDashboard()" class="btn" style="width:auto; background:none; border:1.5px solid var(--border); color:var(--navy); padding:8px 16px; border-radius:10px; font-weight:600; display:flex; align-items:center; gap:8px;">🔄 Yangilash</button>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+        `;
+        
+        for (const doc of doctors) {
+          const docSlots = slots.filter(s => s.doctorId === doc.id);
+          const total = docSlots.length;
+          const booked = docSlots.filter(s => s.appointment && s.appointment.status !== 'CANCELLED').length;
+          const free = total - booked;
+          const pct = total > 0 ? Math.round((booked / total) * 100) : 0;
+          
+          let pctColor = 'var(--teal)';
+          let badgeBg = 'var(--teal-light)';
+          let badgeText = 'var(--teal-dark)';
+          if (pct > 60) {
+            pctColor = '#3b82f6';
+            badgeBg = '#eff6ff';
+            badgeText = '#1d4ed8';
+          }
+          if (pct > 85) {
+            pctColor = '#8b5cf6';
+            badgeBg = '#f5f3ff';
+            badgeText = '#6d28d9';
+          }
+          
+          const progressBg = total > 0 ? `linear-gradient(to right, ${pctColor} ${pct}%, #f1f5f9 ${pct}%)` : '#f1f5f9';
+          
+          html += `
+            <div style="background: #fff; border: 1.5px solid var(--border); border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; min-height: 260px;" onmouseover="this.style.borderColor='var(--teal)'; this.style.boxShadow='0 10px 30px rgba(13,148,136,0.06)';" onmouseout="this.style.borderColor='var(--border)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.02)';">
+              <div>
+                <!-- Header -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                  <div>
+                    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--navy); margin-bottom: 6px;">Dr. ${doc.firstName} ${doc.lastName}</h3>
+                    <span style="font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; background: ${badgeBg}; color: ${badgeText}; display: inline-block;">
+                      ${doc.specialty === 'Stomatolog' ? 'Stomatologiya' : doc.specialty}
+                    </span>
+                  </div>
+                  ${total > 0 ? `
+                    <div style="text-align: right;">
+                      <span style="font-size: 1.3rem; font-weight: 700; color: ${pctColor};">${pct}%</span>
+                      <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Bandlik</div>
+                    </div>
+                  ` : ''}
+                </div>
+                
+                <!-- Progress bar -->
+                <div style="margin-bottom: 24px;">
+                  ${total > 0 ? `
+                    <div style="width: 100%; height: 8px; border-radius: 4px; background: ${progressBg}; margin-bottom: 8px;"></div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">
+                      <span>Qabul bandligi</span>
+                      <span>${booked} / ${total} slot band</span>
+                    </div>
+                  ` : `
+                    <div style="background: #f8fafc; border: 1px dashed var(--border); border-radius: 12px; padding: 16px; text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">
+                      📭 Ushbu oy uchun jadval belgilanmagan
+                    </div>
+                  `}
+                </div>
+              </div>
+              
+              <!-- Stats Row & Action Button -->
+              <div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; background: #f8fafc; padding: 12px; border-radius: 12px; text-align: center;">
+                  <div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--navy);">${total}</div>
+                    <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600;">Jami slot</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--teal-dark);">${free}</div>
+                    <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600;">Bo'sh slot</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: ${booked > 0 ? 'var(--navy)' : 'var(--text-muted)'};">${booked}</div>
+                    <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600;">Band slot</div>
+                  </div>
+                </div>
+                
+                <button onclick="selectDoctorFromDashboard('${doc.id}')" class="btn" style="background: var(--navy); color: #fff; border: none; border-radius: 12px; padding: 12px; font-size: 0.85rem; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.background='var(--teal)'" onmouseout="this.style.background='var(--navy)'">
+                  🗓️ Jadvalni boshqarish
+                </button>
+              </div>
+            </div>
+          `;
+        }
+        
+        html += `</div>`;
+        dashboard.innerHTML = html;
+      } catch (err) {
+        dashboard.innerHTML = '<div style="text-align:center; padding:40px; color:var(--red); background:#fff; border-radius:20px; border:1.5px solid var(--border);">Xatolik yuz berdi. Iltimos qayta urunib ko\'ring.</div>';
+      }
+    }
+
+    function selectDoctorFromDashboard(docId) {
+      const select = document.getElementById('schedule-doc-select');
+      if (select) {
+        select.value = docId;
+        switchScheduleDoctor(docId);
       }
     }
 
@@ -1387,7 +1549,7 @@
       if (copySelect) {
         const prevVal = copySelect.value;
         copySelect.innerHTML = '<option value="">Kunni tanlang...</option>' + 
-          days.map(d => {
+          days.filter(d => d.getDay() !== 0).map(d => {
             const iso = getLocalISO(d);
             const name = d.toLocaleDateString('uz-UZ', { weekday: 'long' });
             const dateStr = d.getDate();
@@ -1401,17 +1563,18 @@
         days.map(d => {
           const iso = getLocalISO(d);
           const isToday = iso === getLocalISO(new Date());
+          const isSunday = d.getDay() === 0;
           
           const sourceIso = copySelect ? copySelect.value : '';
-          const showPaste = (adminCopiedSchedule !== null) && iso !== sourceIso;
+          const showPaste = (adminCopiedSchedule !== null) && iso !== sourceIso && !isSunday;
           const pasteBtn = showPaste ? `
             <button onclick="adminPasteToDay('${iso}', event)" title="Nusxalangan jadvalni shu kunga joylash" style="background:rgba(255,255,255,0.2); color:#fff; border:1px solid rgba(255,255,255,0.3); padding:2px 6px; border-radius:6px; font-size:0.65rem; margin-top:5px; cursor:pointer; display:inline-block; transition:all 0.2s;" onmouseover="this.style.background='var(--teal)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">📥 Joylash</button>
           ` : '';
 
           return `
-            <div class="weekly-header-cell ${isToday ? 'today' : ''}" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:80px;">
-              <span class="day-name">${d.toLocaleDateString('uz-UZ', { weekday: 'short' })}</span>
-              <span class="day-date" style="font-size:1.1rem; font-weight:700; margin-top:2px;">${d.getDate()}</span>
+            <div class="weekly-header-cell ${isToday ? 'today' : ''} ${isSunday ? 'sunday-header' : ''}" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:80px; ${isSunday ? 'background:#f8fafc;' : ''}">
+              <span class="day-name" style="${isSunday ? 'color:#94a3b8;' : ''}">${d.toLocaleDateString('uz-UZ', { weekday: 'short' })}</span>
+              <span class="day-date" style="font-size:1.1rem; font-weight:700; margin-top:2px; ${isSunday ? 'color:#94a3b8;' : ''}">${d.getDate()}</span>
               ${pasteBtn}
             </div>
           `;
@@ -1441,6 +1604,9 @@
                 return slotDateTime.getTime() >= sStart && slotDateTime.getTime() < sEnd;
               });
               
+              const isSunday = d.getDay() === 0;
+              const isPastOrSunday = isPast || isSunday;
+              
               let statusClass = '';
               let label = '';
               const isBooked = existing && existing.appointment && existing.appointment.status !== 'CANCELLED';
@@ -1452,15 +1618,19 @@
               if (adminPendingChanges[key] === 'add') statusClass = 'pending';
               if (adminPendingChanges[key] === 'remove') statusClass = '';
               
-              if (isPast && !existing) {
+              if (isPastOrSunday && !existing) {
                 statusClass += ' disabled';
               }
+              if (isSunday) {
+                statusClass = 'disabled';
+                label = '<span>-</span>';
+              }
 
-              const onClickAttr = isPast ? '' : `onclick="toggleAdminSlot('${iso}', '${t}', '${existing ? existing.id : ''}', ${isBooked ? 'true' : 'false'})"`;
+              const onClickAttr = isPastOrSunday ? '' : `onclick="toggleAdminSlot('${iso}', '${t}', '${existing ? existing.id : ''}', ${isBooked ? 'true' : 'false'})"`;
 
               return `
-                <div class="grid-cell" ${onClickAttr}>
-                  <button class="slot-btn ${statusClass}">${label}</button>
+                <div class="grid-cell" ${onClickAttr} style="${isSunday ? 'background:#f8fafc;' : ''}">
+                  <button class="slot-btn ${statusClass}" style="${isSunday ? 'opacity:0.4; cursor:not-allowed;' : ''}">${label}</button>
                 </div>
               `;
             }).join('')}
@@ -1575,8 +1745,8 @@
         const isSelected = adminSelectedStartDate && getLocalISO(adminSelectedStartDate) === iso;
         
         const daySlots = adminAllSlots.filter(s => getLocalISO(new Date(s.startTime)) === iso);
-        const openSlots = daySlots.filter(s => s.isAvailable);
-        const bookedSlots = daySlots.filter(s => !s.isAvailable);
+        const openSlots = daySlots.filter(s => s.isAvailable && new Date(s.startTime).getTime() > Date.now());
+        const bookedSlots = daySlots.filter(s => !s.isAvailable || new Date(s.startTime).getTime() <= Date.now());
         
         const dayCard = document.createElement('div');
         dayCard.style.height = '75px';
@@ -1677,12 +1847,14 @@
       const fromDateStr = (startOf < now ? now : startOf).toISOString().slice(0, 10);
       const toDateStr = endOf.toISOString().slice(0, 10);
       
+      const adminTokenVal = localStorage.getItem('admin_token');
+      
       try {
         showToast("Jadval yaratilmoqda, iltimos kuting...", "info");
         
         const res1 = await fetch('/api/admin/slots', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminTokenVal}` },
           body: JSON.stringify({
             doctorId: adminCurrentDoctorId,
             bulk: true,
@@ -1697,7 +1869,7 @@
         
         const res2 = await fetch('/api/admin/slots', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminTokenVal}` },
           body: JSON.stringify({
             doctorId: adminCurrentDoctorId,
             bulk: true,
@@ -1857,6 +2029,7 @@
       const sourceIso = document.getElementById('admin-copy-day-select').value;
 
       for (const d of days) {
+        if (d.getDay() === 0) continue; // Skip Sunday (Yakshanba)
         const iso = getLocalISO(d);
         if (iso === sourceIso) continue;
 
@@ -1899,6 +2072,12 @@
     function adminPasteToDay(targetIso, event) {
       if (event) event.stopPropagation();
       if (!adminCopiedSchedule) return;
+
+      const targetDate = new Date(targetIso + 'T00:00:00');
+      if (targetDate.getDay() === 0) {
+        showToast("Yakshanba kuni dam olish kuni, jadval nusxalab bo'lmaydi!", "error");
+        return;
+      }
 
       const times = [];
       for (let h = ADMIN_START_HOUR; h <= ADMIN_END_HOUR; h++) {

@@ -19,7 +19,6 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const doctorId = searchParams.get('doctorId');
-  if (!doctorId) return NextResponse.json({ error: 'doctorId required' }, { status: 400 });
 
   const from = searchParams.get('from')
     ? new Date(searchParams.get('from')!)
@@ -29,11 +28,15 @@ export async function GET(request: NextRequest) {
     : new Date(Date.now() + 60 * 24 * 60 * 60 * 1000); // 60 days ahead
 
   try {
+    const whereClause: any = {
+      startTime: { gte: from, lte: to },
+    };
+    if (doctorId) {
+      whereClause.doctorId = doctorId;
+    }
+
     const slots = await prisma.slot.findMany({
-      where: {
-        doctorId,
-        startTime: { gte: from, lte: to },
-      },
+      where: whereClause,
       include: {
         appointment: {
           select: {
@@ -120,6 +123,10 @@ export async function POST(request: NextRequest) {
 
     while (cursor <= to) {
       const dayOfWeek = cursor.getDay(); // 0 Sun … 6 Sat
+      if (dayOfWeek === 0) {
+        cursor.setDate(cursor.getDate() + 1);
+        continue;
+      }
       if (days.includes(dayOfWeek)) {
         let hour = startHour;
         let minute = 0;
@@ -163,6 +170,9 @@ export async function POST(request: NextRequest) {
   const start = new Date(startTime);
   if (isNaN(start.getTime())) {
     return NextResponse.json({ error: 'Invalid startTime' }, { status: 400 });
+  }
+  if (start.getDay() === 0) {
+    return NextResponse.json({ error: 'Yakshanba kuni slot yaratish taqiqlangan' }, { status: 400 });
   }
 
   try {
