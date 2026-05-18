@@ -119,24 +119,41 @@ export async function POST(request: NextRequest) {
     // Generate candidate slots
     const toCreate: { doctorId: string; startTime: Date; duration: number }[] = [];
     const cursor = new Date(from);
-    cursor.setHours(0, 0, 0, 0);
+    cursor.setUTCHours(0, 0, 0, 0);
 
-    while (cursor <= to) {
-      const dayOfWeek = cursor.getDay(); // 0 Sun … 6 Sat
+    const targetTo = new Date(to);
+    targetTo.setUTCHours(23, 59, 59, 999);
+
+    while (cursor <= targetTo) {
+      const dayOfWeek = cursor.getUTCDay(); // 0 Sun … 6 Sat
       if (dayOfWeek === 0) {
-        cursor.setDate(cursor.getDate() + 1);
+        cursor.setUTCDate(cursor.getUTCDate() + 1);
         continue;
       }
       if (days.includes(dayOfWeek)) {
-        let hour = startHour;
-        let minute = 0;
+        let hour: number = startHour;
+        let minute: number = 0;
+
+        const year = cursor.getUTCFullYear();
+        const month = String(cursor.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(cursor.getUTCDate()).padStart(2, '0');
+        const datePart = `${year}-${month}-${day}`;
 
         while (hour < endHour || (hour === endHour && minute === 0)) {
-          const slotStart = new Date(cursor);
-          slotStart.setHours(hour, minute, 0, 0);
+          const hourStr: string = String(hour).padStart(2, '0');
+          const minStr: string = String(minute).padStart(2, '0');
+          // Create slot in Tashkent timezone (+05:00)
+          const slotStart = new Date(`${datePart}T${hourStr}:${minStr}:00+05:00`);
 
           const slotEnd = new Date(slotStart.getTime() + interval * 60000);
-          if (slotEnd.getHours() > endHour || (slotEnd.getHours() === endHour && slotEnd.getMinutes() > 0)) break;
+          
+          // Calculate end hour and minute in Tashkent (+05:00)
+          // Add 5 hours to get exact Tashkent local time representation in UTC methods
+          const slotEndTashkent = new Date(slotEnd.getTime() + 5 * 60 * 60 * 1000);
+          const slotEndHour = slotEndTashkent.getUTCHours();
+          const slotEndMin = slotEndTashkent.getUTCMinutes();
+
+          if (slotEndHour > endHour || (slotEndHour === endHour && slotEndMin > 0)) break;
 
           if (!existingSet.has(slotStart.toISOString())) {
             toCreate.push({ doctorId, startTime: slotStart, duration: interval });
@@ -149,7 +166,7 @@ export async function POST(request: NextRequest) {
           if (hour >= endHour) break;
         }
       }
-      cursor.setDate(cursor.getDate() + 1);
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
     }
 
     if (toCreate.length === 0) {
@@ -171,7 +188,10 @@ export async function POST(request: NextRequest) {
   if (isNaN(start.getTime())) {
     return NextResponse.json({ error: 'Invalid startTime' }, { status: 400 });
   }
-  if (start.getDay() === 0) {
+  
+  // Check day of week in Tashkent timezone (+05:00)
+  const startTashkent = new Date(start.getTime() + 5 * 60 * 60 * 1000);
+  if (startTashkent.getUTCDay() === 0) {
     return NextResponse.json({ error: 'Yakshanba kuni slot yaratish taqiqlangan' }, { status: 400 });
   }
 

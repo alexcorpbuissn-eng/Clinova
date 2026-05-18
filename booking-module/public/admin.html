@@ -1736,6 +1736,8 @@
       }
       
       const todayISO = getLocalISO(new Date());
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
       
       // Render days of the month
       for (let d = 1; d <= daysInMonth; d++) {
@@ -1743,6 +1745,10 @@
         const iso = getLocalISO(cellDate);
         const isToday = iso === todayISO;
         const isSelected = adminSelectedStartDate && getLocalISO(adminSelectedStartDate) === iso;
+        
+        const cellDateCompare = new Date(year, month, d);
+        cellDateCompare.setHours(0, 0, 0, 0);
+        const isPastDay = cellDateCompare < todayStart;
         
         const daySlots = adminAllSlots.filter(s => getLocalISO(new Date(s.startTime)) === iso);
         const openSlots = daySlots.filter(s => s.isAvailable && new Date(s.startTime).getTime() > Date.now());
@@ -1762,13 +1768,44 @@
         dayCard.style.transition = 'all 0.2s';
         dayCard.style.boxSizing = 'border-box';
         
-        if (daySlots.length === 0) {
+        const numSpan = document.createElement('span');
+        numSpan.style.fontWeight = '700';
+        numSpan.style.fontSize = '0.95rem';
+        numSpan.style.color = isToday ? 'var(--navy)' : 'var(--text-main)';
+        numSpan.style.textAlign = 'left';
+        numSpan.textContent = d;
+        dayCard.appendChild(numSpan);
+        
+        const badge = document.createElement('div');
+        badge.style.fontSize = '0.72rem';
+        badge.style.fontWeight = '600';
+        badge.style.borderRadius = '8px';
+        badge.style.padding = '3px 6px';
+        badge.style.textAlign = 'center';
+        badge.style.marginTop = '4px';
+        
+        if (isPastDay) {
+          dayCard.style.background = '#f1f5f9';
+          dayCard.style.opacity = '0.65';
+          badge.textContent = "O'tgan";
+          badge.style.color = '#64748b';
+          badge.style.background = '#e2e8f0';
+        } else if (daySlots.length === 0) {
           dayCard.style.background = '#f8fafc';
           dayCard.style.borderStyle = 'dashed';
+          badge.textContent = "Bo'sh";
+          badge.style.color = '#94a3b8';
+          badge.style.background = 'transparent';
         } else if (openSlots.length > 0) {
           dayCard.style.background = 'rgba(16,185,129,0.06)';
+          badge.textContent = `🟢 ${openSlots.length} ta`;
+          badge.style.color = '#10b981';
+          badge.style.background = 'rgba(16,185,129,0.1)';
         } else {
           dayCard.style.background = 'rgba(59,130,246,0.06)';
+          badge.textContent = `🔵 Band`;
+          badge.style.color = '#3b82f6';
+          badge.style.background = 'rgba(59,130,246,0.1)';
         }
         
         dayCard.onmouseover = () => {
@@ -1788,36 +1825,7 @@
           renderAdminGrid();
         };
         
-        const numSpan = document.createElement('span');
-        numSpan.style.fontWeight = '700';
-        numSpan.style.fontSize = '0.95rem';
-        numSpan.style.color = isToday ? 'var(--navy)' : 'var(--text-main)';
-        numSpan.style.textAlign = 'left';
-        numSpan.textContent = d;
-        dayCard.appendChild(numSpan);
-        
-        const badge = document.createElement('div');
-        badge.style.fontSize = '0.72rem';
-        badge.style.fontWeight = '600';
-        badge.style.borderRadius = '8px';
-        badge.style.padding = '3px 6px';
-        badge.style.textAlign = 'center';
-        badge.style.marginTop = '4px';
-        
-        if (daySlots.length === 0) {
-          badge.textContent = "Bo'sh";
-          badge.style.color = '#94a3b8';
-        } else if (openSlots.length > 0) {
-          badge.textContent = `🟢 ${openSlots.length} ta`;
-          badge.style.color = '#10b981';
-          badge.style.background = 'rgba(16,185,129,0.1)';
-        } else {
-          badge.textContent = `🔵 Band`;
-          badge.style.color = '#3b82f6';
-          badge.style.background = 'rgba(59,130,246,0.1)';
-        }
         dayCard.appendChild(badge);
-        
         grid.appendChild(dayCard);
       }
     }

@@ -856,10 +856,10 @@
       <span>👨‍⚕️ Shifokor Paneli</span>
       <span style="color:var(--text-muted); font-weight:300;">|</span>
       <span id="doctor-name" style="color: var(--color-open);"></span>
-      <div id="admin-doc-selector" class="doctor-selector-wrap">
-        <label style="font-size:0.75rem; color:var(--text-muted);">Boshqarish:</label>
-        <select id="doc-select" class="doctor-selector" onchange="switchDoctor(this.value)">
-          <option value="">Shifokorni tanlang...</option>
+      <div id="admin-doc-selector" class="doctor-selector-wrap" style="display:none; align-items:center; gap:8px;">
+        <label style="font-size:0.8rem; color:var(--text-muted); font-weight:500;">Shifokor:</label>
+        <select id="doc-select" class="doctor-selector" onchange="switchDoctor(this.value)" style="border:1px solid var(--border-focus); background:var(--navy-dark); font-weight:600; padding:6px 12px; border-radius:10px;">
+          <option value="">Tanlang...</option>
         </select>
       </div>
     </div>
@@ -1234,8 +1234,9 @@
     
     if (userRole === 'ADMIN') {
       document.getElementById('admin-doc-selector').style.display = 'flex';
-      document.getElementById('admin-schedule-tools').style.display = 'flex';
-      document.getElementById('btn-save-grid').style.display = 'inline-block';
+      // Hide admin schedule editing & templating tools on the doctor panel
+      document.getElementById('admin-schedule-tools').style.display = 'none';
+      document.getElementById('btn-save-grid').style.display = 'none';
       await loadAllDoctorsForAdmin();
     }
 
@@ -1255,10 +1256,15 @@
     try {
       const res = await fetch('/api/public/doctors');
       const data = await res.json();
-      if (data.success) {
+      if (data.success && data.doctors.length > 0) {
         const select = document.getElementById('doc-select');
         select.innerHTML = '<option value="">Shifokorni tanlang...</option>' + 
           data.doctors.map(d => `<option value="${d.id}" ${currentDoctorId === d.id ? 'selected' : ''}>${d.firstName} ${d.lastName}</option>`).join('');
+        
+        // Auto-select first doctor for testing if none is currently selected
+        if (!currentDoctorId) {
+          switchDoctor(data.doctors[0].id);
+        }
       }
     } catch {}
   }
@@ -1422,7 +1428,7 @@
 
   function handleCellClick(iso, time, existingId, isBooked, apptId) {
     if (!currentDoctorId) {
-      showToast("Iltimos, avval boshqarish uchun shifokorni tanlang!", "error");
+      showToast("Iltimos, avval shifokorni tanlang!", "error");
       return;
     }
     
@@ -1434,34 +1440,14 @@
       return;
     }
 
-    if (userRole === 'ADMIN') {
-      // Admin clicks normal slot: toggle availability in pendingChanges
-      const key = `${iso}_${time}`;
-      const action = pendingChanges[key];
-      const existing = allSlots.find(s => {
-        const sStart = new Date(s.startTime).getTime();
-        const slotDateTime = parseTashkentDateTime(iso, time).getTime();
-        return slotDateTime === sStart;
-      });
-
-      if (existing) {
-        if (action === 'remove') delete pendingChanges[key];
-        else pendingChanges[key] = 'remove';
-      } else {
-        if (action === 'add') delete pendingChanges[key];
-        else pendingChanges[key] = 'add';
-      }
-      renderGrid();
+    if (userRole === 'DOCTOR' || userRole === 'ADMIN') {
+      showToast("Qabullarni faqat admin yoki retseptsiya yozishi mumkin", "info");
     } else {
-      // Doctor clicks active/free slot: visual read-only toast
-      if (userRole === 'DOCTOR') {
-        showToast("Qabullarni faqat admin yoki retseptsiya yozishi mumkin", "info");
+      // RECEPTION or other roles can book
+      if (existingId) {
+        openBookingModal(iso, time, existingId);
       } else {
-        if (existingId) {
-          openBookingModal(iso, time, existingId);
-        } else {
-          showToast("Ushbu vaqt shifokor ish grafigiga kiritilmagan", "error");
-        }
+        showToast("Ushbu vaqt shifokor ish grafigiga kiritilmagan", "error");
       }
     }
   }
