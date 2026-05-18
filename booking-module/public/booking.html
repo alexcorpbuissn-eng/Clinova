@@ -340,6 +340,40 @@ async function loadDoctors() {
       g.appendChild(card);
     });
     c.innerHTML=''; c.appendChild(g);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryDoctorId = urlParams.get('doctorId');
+    const queryProcedureId = urlParams.get('procedureId');
+    const queryPromo = urlParams.get('promo');
+
+    if (queryPromo) {
+      const descInput = document.getElementById('fDesc');
+      if (descInput && !descInput.value) {
+        let promoText = '';
+        if (queryPromo === 'oqartirish') promoText = 'Aksiya: Tishlarni oqartirish (-30%)';
+        else if (queryPromo === 'yangi') promoText = 'Aksiya: Birinchi tashrif (-20%)';
+        else if (queryPromo === 'oila') promoText = 'Aksiya: Oilaviy paket (-25%)';
+        else if (queryPromo === 'implant') promoText = 'Aksiya: Implant o\'rnatishda toj sovg\'a';
+        else promoText = `Aksiya: ${queryPromo}`;
+        descInput.value = promoText;
+      }
+    }
+
+    if (queryDoctorId) {
+      const targetDoc = doctors.find(d => d.id === queryDoctorId);
+      if (targetDoc) {
+        selDoctor = targetDoc;
+        const cards = g.querySelectorAll('.doc-card');
+        const cardIndex = doctors.findIndex(d => d.id === queryDoctorId);
+        if (cards[cardIndex]) {
+          document.querySelectorAll('.doc-card').forEach(x=>x.classList.remove('sel'));
+          cards[cardIndex].classList.add('sel');
+        }
+        await loadProcedures(queryDoctorId, queryProcedureId);
+        setStep(2);
+      }
+    }
+
   } catch(e) { c.innerHTML='<div class="state-msg">❌ Server xatosi. Sahifani yangilang.</div>'; }
 }
 
@@ -379,7 +413,7 @@ function initDays() {
   }
 }
 
-async function loadProcedures(doctorId) {
+async function loadProcedures(doctorId, autoSelectProcedureId = null) {
   initDays();
   const c = document.getElementById('proc-container');
   c.innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
@@ -396,8 +430,9 @@ async function loadProcedures(doctorId) {
       btn.innerHTML=`<strong>${p.name}</strong><span>⏱ ${p.durationMinutes} daqiqa</span>`;
       btn.onclick = () => {
         if (!selDateKey) {
-          showToast('Iltimos, yuqoridan qabul kunini tanlang.');
-          return;
+          // If auto-selecting, we might not have a selDateKey yet, default to today
+          const todayBtn = document.querySelector('.day-btn');
+          if (todayBtn) { todayBtn.click(); }
         }
         document.querySelectorAll('.proc-btn').forEach(x=>x.classList.remove('sel'));
         btn.classList.add('sel');
@@ -410,6 +445,18 @@ async function loadProcedures(doctorId) {
       list.appendChild(btn);
     });
     c.innerHTML=''; c.appendChild(list);
+
+    if (autoSelectProcedureId) {
+      const targetProc = procedures.find(p => p.id === autoSelectProcedureId);
+      if (targetProc) {
+        const btns = list.querySelectorAll('.proc-btn');
+        const procIndex = procedures.findIndex(p => p.id === autoSelectProcedureId);
+        if (btns[procIndex]) {
+          btns[procIndex].click(); // simulate click to load slots
+        }
+      }
+    }
+
   } catch(e) { c.innerHTML='<div class="state-msg">❌ Xatolik.</div>'; }
 }
 

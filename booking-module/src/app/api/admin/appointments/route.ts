@@ -16,7 +16,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
+  const { searchParams } = new URL(request.url);
+  const since = searchParams.get('since');
+
+  const whereClause: any = {};
+  if (since) {
+    whereClause.createdAt = { gt: new Date(since) };
+  }
+
   const appointments = await prisma.appointment.findMany({
+    where: whereClause,
     include: { 
       doctor: true, 
       slot: true,

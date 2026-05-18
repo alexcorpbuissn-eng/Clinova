@@ -530,6 +530,7 @@
     initDatePicker();
     updateClock();
     setInterval(updateClock, 30000);
+    setInterval(pollAppointments, 30000); // Smart polling
     await loadDoctors();
     await loadAppointments();
     await loadActiveVisits();
@@ -561,6 +562,20 @@
         }
       });
     }
+  }
+
+  let lastApptFetchTime = new Date().toISOString();
+
+  async function pollAppointments() {
+    try {
+      const res = await fetch(`/api/admin/appointments?since=${lastApptFetchTime}`, { headers: { 'Authorization': `Bearer ${adminToken}` } });
+      const data = await res.json();
+      if (data.success && data.appointments && data.appointments.length > 0) {
+        showToast(`Yangi ${data.appointments.length} ta qabul yozildi!`, 'info');
+        loadAppointments(); // Full reload to update UI
+      }
+      lastApptFetchTime = new Date().toISOString();
+    } catch (e) { console.error('Polling error', e); }
   }
 
   // ── Tabs ──────────────────────────────────────────────────────
@@ -832,6 +847,8 @@
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
         body: JSON.stringify({
           doctorId: a.doctorId,
+          patientId: a.patientId || null,
+          appointmentId: a.id,
           patientName: pName,
           serviceName: a.procedure?.name || 'Ko\'rik',
           price: a.procedure?.price || 0,
@@ -986,10 +1003,24 @@
 
     btn.disabled = true; const oldTxt = btn.textContent; btn.textContent = '...';
     try {
+      let finalPatientId = null;
+      if (visitSource === 'WALKIN' && patientPhone) {
+        const parts = patientName.split(' ');
+        const pRes = await fetch('/api/reception/patients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ firstName: parts[0] || 'Bemor', lastName: parts.slice(1).join(' ') || '', phone: patientPhone })
+        });
+        if (pRes.ok) {
+          const pData = await pRes.json();
+          finalPatientId = pData.patient?.id;
+        }
+      }
+
       const res = await fetch('/api/admin/visits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
-        body: JSON.stringify({ doctorId, patientName, serviceName, price, source: visitSource, startTime, endTime, status, note, patientPhone })
+        body: JSON.stringify({ doctorId, patientId: finalPatientId, patientName, serviceName, price, source: visitSource, startTime, endTime, status, note })
       });
       const data = await res.json();
       if (res.ok && data.success) {

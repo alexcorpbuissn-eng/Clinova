@@ -10,19 +10,19 @@ datasource db {
 // DOCTORS
 // ─────────────────────────────────────────────
 model Doctor {
-  id           String      @id @default(uuid())
+  id           String        @id @default(uuid())
   firstName    String
   lastName     String
   specialty    String
-  bio          String?     @db.Text
+  bio          String?       @db.Text
   photoUrl     String?
-  isActive     Boolean     @default(true)
+  isActive     Boolean       @default(true)
   slots        Slot[]
   appointments Appointment[]
   procedures   Procedure[]
   visits       Visit[]
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 // ─────────────────────────────────────────────
@@ -33,9 +33,9 @@ model Procedure {
   id              String        @id @default(uuid())
   doctorId        String
   doctor          Doctor        @relation(fields: [doctorId], references: [id])
-  name            String        // e.g. "Tish tozalash"
-  durationMinutes Int           // e.g. 30, 45, 60
-  price           Int           @default(0)   // Expected price in UZS
+  name            String // e.g. "Tish tozalash"
+  durationMinutes Int // e.g. 30, 45, 60
+  price           Int           @default(0) // Expected price in UZS
   isActive        Boolean       @default(true)
   appointments    Appointment[]
   createdAt       DateTime      @default(now())
@@ -52,8 +52,8 @@ model Slot {
   id          String       @id @default(uuid())
   doctorId    String
   doctor      Doctor       @relation(fields: [doctorId], references: [id])
-  startTime   DateTime     // UTC
-  duration    Int          // total window length in minutes
+  startTime   DateTime // UTC
+  duration    Int // total window length in minutes
   isAvailable Boolean      @default(true)
   appointment Appointment?
   createdAt   DateTime     @default(now())
@@ -68,20 +68,23 @@ model Slot {
 // reused on all future bookings.
 // ─────────────────────────────────────────────
 model Patient {
-  id             String        @id @default(uuid())
-  telegramPhone  String        @unique  // e.g. "+998901234567"
-  telegramChatId String?       @unique  // filled after OTP verified
-  telegramUsername String?              // e.g. "alex"
-  firstName      String
-  lastName       String
-  phone          String
-  isVerified         Boolean       @default(false)
-  cancellationsToday Int           @default(0)
+  id                   String        @id @default(uuid())
+  telegramPhone        String?       @unique // e.g. "+998901234567"
+  telegramChatId       String?       @unique // filled after OTP verified
+  telegramUsername     String? // e.g. "alex"
+  firstName            String
+  lastName             String
+  phone                String
+  source               PatientSource @default(ONLINE)
+  isVerified           Boolean       @default(false)
+  cancellationsToday   Int           @default(0)
   lastCancellationDate DateTime?
-  appointments       Appointment[]
-  createdAt          DateTime      @default(now())
+  appointments         Appointment[]
+  visits               Visit[]
+  createdAt            DateTime      @default(now())
 
   @@index([telegramPhone])
+  @@index([phone])
 }
 
 // ─────────────────────────────────────────────
@@ -92,7 +95,7 @@ model Patient {
 model Otp {
   id            String   @id @default(uuid())
   telegramPhone String
-  code          String   // 6-digit string
+  code          String // 6-digit string
   expiresAt     DateTime
   used          Boolean  @default(false)
   createdAt     DateTime @default(now())
@@ -107,36 +110,38 @@ model Otp {
 // cancelToken retained for direct cancel links.
 // ─────────────────────────────────────────────
 model Appointment {
-  id              String     @id @default(uuid())
-  slotId          String     @unique
-  slot            Slot       @relation(fields: [slotId], references: [id])
-  doctorId        String
-  doctor          Doctor     @relation(fields: [doctorId], references: [id])
-  procedureId     String
-  procedure       Procedure  @relation(fields: [procedureId], references: [id])
+  id          String    @id @default(uuid())
+  slotId      String    @unique
+  slot        Slot      @relation(fields: [slotId], references: [id])
+  doctorId    String
+  doctor      Doctor    @relation(fields: [doctorId], references: [id])
+  procedureId String
+  procedure   Procedure @relation(fields: [procedureId], references: [id])
 
   // Patient (new relation — replaces raw fields)
-  patientId       String
-  patient         Patient    @relation(fields: [patientId], references: [id])
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id])
 
   // Legacy raw fields kept for backward compat during migration
-  patientEmail    String?
-  patientFirst    String?
-  patientLast     String?
-  patientPhone    String?
+  patientEmail String?
+  patientFirst String?
+  patientLast  String?
+  patientPhone String?
 
-  description     String?    @db.VarChar(500)
-  status          ApptStatus @default(SCHEDULED)
-  cancelToken     String?    @unique
-  cancelledBy     String?    // 'PATIENT' | 'ADMIN' — set on cancellation
-  callAttempts    Int        @default(0)
+  description  String?    @db.VarChar(500)
+  status       ApptStatus @default(SCHEDULED)
+  cancelToken  String?    @unique
+  cancelledBy  String? // 'PATIENT' | 'ADMIN' — set on cancellation
+  callAttempts Int        @default(0)
 
   // Reminder flags — checked by hourly Vercel cron job
-  reminderSent24h Boolean    @default(false)
-  reminderSent2h  Boolean    @default(false)
+  reminderSent24h Boolean @default(false)
+  reminderSent2h  Boolean @default(false)
 
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  visit Visit?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([patientId])
   @@index([status, reminderSent24h, reminderSent2h])
@@ -171,21 +176,26 @@ enum Role {
 // Used for doctor stats and revenue tracking.
 // ─────────────────────────────────────────────
 model Visit {
-  id          String      @id @default(uuid())
-  doctorId    String
-  doctor      Doctor      @relation(fields: [doctorId], references: [id])
-  patientName String
-  serviceName String
-  price       Int         // expected/total amount in UZS
-  paidAmount  Int         @default(0) // actual amount paid so far
-  status      VisitStatus @default(COMPLETED)
-  source      VisitSource @default(WALKIN)
-  startTime   DateTime    @default(now())
-  endTime     DateTime?
-  note        String?
-  createdAt   DateTime    @default(now())
+  id            String       @id @default(uuid())
+  doctorId      String
+  doctor        Doctor       @relation(fields: [doctorId], references: [id])
+  patientId     String?
+  patient       Patient?     @relation(fields: [patientId], references: [id])
+  appointmentId String?      @unique
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+  patientName   String
+  serviceName   String
+  price         Int // expected/total amount in UZS
+  paidAmount    Int          @default(0) // actual amount paid so far
+  status        VisitStatus  @default(COMPLETED)
+  source        VisitSource  @default(WALKIN)
+  startTime     DateTime     @default(now())
+  endTime       DateTime?
+  note          String?
+  createdAt     DateTime     @default(now())
 
   @@index([doctorId])
+  @@index([patientId])
   @@index([startTime])
   @@index([status])
 }
@@ -196,6 +206,11 @@ enum VisitStatus {
 }
 
 enum VisitSource {
-  BOOKED   // came from online booking
-  WALKIN   // walk-in patient
+  BOOKED // came from online booking
+  WALKIN // walk-in patient
+}
+
+enum PatientSource {
+  ONLINE
+  WALKIN
 }

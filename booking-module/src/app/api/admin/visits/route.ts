@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { doctorId, patientName, serviceName, price, source, startTime, endTime, status, note, patientPhone } = body;
+  const { doctorId, patientId, appointmentId, patientName, serviceName, price, source, startTime, endTime, status, note } = body;
 
   if (!doctorId || !patientName || !serviceName || price === undefined) {
     return NextResponse.json(
@@ -46,43 +46,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Auto-register patient if phone number is provided
-  if (patientPhone) {
-    try {
-      const cleanPhone = String(patientPhone).replace(/\s+/g, '');
-      if (cleanPhone && cleanPhone.startsWith('+998')) {
-        const parts = String(patientName).trim().split(/\s+/);
-        const first = parts[0] || 'Bemor';
-        const last = parts.slice(1).join(' ') || '';
-
-        await prisma.patient.upsert({
-          where: { telegramPhone: cleanPhone },
-          update: {
-            firstName: first,
-            lastName: last,
-            phone: cleanPhone,
-          },
-          create: {
-            telegramPhone: cleanPhone,
-            phone: cleanPhone,
-            firstName: first,
-            lastName: last,
-            isVerified: true
-          }
-        });
-      }
-    } catch (err) {
-      console.error('Error auto-registering patient on visit creation:', err);
-    }
-  }
-
   const visit = await prisma.visit.create({
     data: {
       doctorId,
+      patientId: patientId || null,
+      appointmentId: appointmentId || null,
       patientName: String(patientName).trim(),
       serviceName: String(serviceName).trim(),
       price: parseInt(price),
-      source: source === 'BOOKED' ? 'BOOKED' : 'WALKIN',
+      source: patientId ? 'BOOKED' : 'WALKIN',
       startTime: startTime ? new Date(startTime) : new Date(),
       endTime: endTime ? new Date(endTime) : null,
       status: status === 'IN_PROGRESS' ? 'IN_PROGRESS' : 'COMPLETED',

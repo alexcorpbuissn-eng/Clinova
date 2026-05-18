@@ -33,7 +33,9 @@ export async function GET(request: NextRequest) {
 
   const patientMap: Record<string, string> = {};
   for (const p of patients) {
-    patientMap[p.telegramPhone] = `${p.firstName} ${p.lastName}`;
+    if (p.telegramPhone) {
+      patientMap[p.telegramPhone] = `${p.firstName} ${p.lastName}`;
+    }
   }
 
   const usersWithName = users.map(u => ({
