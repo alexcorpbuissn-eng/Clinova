@@ -118,6 +118,35 @@
     .tab-btn.active { background: var(--surface); color: var(--navy); border: 1px solid var(--border); border-bottom: none; position: relative; z-index: 1; }
     .tab-pane { display: none; }
     .tab-pane.active { display: block; }
+
+    .filter-btn {
+      background: #f1f5f9;
+      border: 1.5px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .filter-btn:hover {
+      background: #e2e8f0;
+      color: var(--navy);
+    }
+    .filter-btn.active {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff;
+    }
+    
+    .patient-row {
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .patient-row:hover {
+      background: #f8fafc;
+    }
     
     .btn-action { padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.2s; }
     .btn-action:hover { opacity: 0.8; }
@@ -351,6 +380,7 @@
         <button class="tab-btn active" onclick="switchMainTab('tab-qabullar')">📅 Qabullar</button>
         <button class="tab-btn" onclick="switchMainTab('tab-active')">⚡ Hozirgi muolajalar</button>
         <button class="tab-btn" onclick="switchMainTab('tab-history')">🕐 Tarix</button>
+        <button class="tab-btn" onclick="switchMainTab('tab-patients')">👤 Bemorlar</button>
       </div>
 
       <!-- Tab 1: Scheduled Appointments -->
@@ -385,6 +415,35 @@
             <button class="btn-refresh" onclick="loadVisits()">Yangilash</button>
           </div>
           <div id="visits-container">
+            <div class="empty-state">Yuklanmoqda...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Patients Directory -->
+      <div id="tab-patients" class="tab-pane">
+        <div class="visits-card">
+          <div class="visits-header" style="display:flex; flex-direction:column; align-items:stretch; gap:15px; padding-bottom:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h2 style="font-size: 1.15rem; font-weight:700;">👤 Bemorlar ro'yxati (Statistika va Aloqa)</h2>
+              <button class="btn-refresh" onclick="loadPatientsTab()">Yangilash</button>
+            </div>
+            <!-- Search & Filters -->
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <input type="text" id="reception-patient-search" placeholder="Bemor ismi yoki telefon raqami..." style="width:100%; padding:10px 14px; border:2px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.92rem; outline:none;" oninput="filterPatientsTab()" />
+              
+              <!-- Filter segments -->
+              <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                <button class="filter-btn active" id="f-pat-all" onclick="setPatientFilter('all')">Barchasi</button>
+                <button class="filter-btn" id="f-pat-upcoming" onclick="setPatientFilter('upcoming')">Kelishi kutilmoqda</button>
+                <button class="filter-btn" id="f-pat-completed" onclick="setPatientFilter('completed')">Tashrif buyurgan</button>
+                <button class="filter-btn" id="f-pat-noshow" onclick="setPatientFilter('noshow')">Kelmaganlar (No-Show)</button>
+                <button class="filter-btn" id="f-pat-unreachable" onclick="setPatientFilter('unreachable')">Aloqaga chiqmaganlar</button>
+              </div>
+            </div>
+          </div>
+          <div id="patients-tab-container" style="padding: 0 24px 24px; overflow-x:auto;">
+            <!-- Patients table gets rendered here -->
             <div class="empty-state">Yuklanmoqda...</div>
           </div>
         </div>
@@ -469,6 +528,44 @@
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
       <button class="btn-cancel" onclick="closeCancelReasonModal()" style="padding: 12px; border-radius: 8px;">❌ Orqaga</button>
       <button class="btn-submit-premium" onclick="submitCancelWithReason()" style="padding: 12px; border-radius: 8px; background: linear-gradient(135deg, #ef4444, #b91c1c);">🗑️ Bekor qilish</button>
+    </div>
+  </div>
+</div>
+
+<!-- PATIENT HISTORY MODAL -->
+<div class="modal-overlay" id="patient-history-modal">
+  <div class="modal" style="max-width: 600px; padding: 30px 28px; background: #fff; color: #1e293b;">
+    <button onclick="closePatientHistoryModal()" style="position:absolute; top:20px; right:20px; background:none; border:none; font-size:1.8rem; cursor:pointer; color:#64748b">&times;</button>
+    <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
+      <div style="font-size: 2.5rem; line-height: 1;">👤</div>
+      <div>
+        <h3 id="ph-name" style="font-size: 1.4rem; color: #0f172a; margin-bottom: 4px; font-weight: 700;">Bemor Profili</h3>
+        <p id="ph-joined" style="color: #64748b; font-size: 0.85rem;">Klinikada ro'yxatdan o'tgan sana: ...</p>
+      </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+      <div>
+        <div style="font-size:0.75rem; color:#64748b; margin-bottom:4px; font-weight: 600;">Telefon raqami</div>
+        <div id="ph-phone" style="font-weight:600; color:#0f172a;">-</div>
+      </div>
+      <div>
+        <div style="font-size:0.75rem; color:#64748b; margin-bottom:4px; font-weight: 600;">Telegram raqami</div>
+        <div id="ph-tg-phone" style="font-weight:600; color:#0f172a;">-</div>
+      </div>
+      <div>
+        <div style="font-size:0.75rem; color:#64748b; margin-bottom:4px; font-weight: 600;">Telegram Username</div>
+        <div id="ph-tg-user" style="font-weight:600; color:#0f172a;">-</div>
+      </div>
+      <div>
+        <div style="font-size:0.75rem; color:#64748b; margin-bottom:4px; font-weight: 600;">Ro'yxatdan o'tgan turi</div>
+        <div id="ph-source" style="font-weight:600; color:#0f172a;">-</div>
+      </div>
+    </div>
+
+    <h4 style="margin-bottom: 12px; color: #0f172a; font-size: 1rem; font-weight: 700;">🕐 Tashriflar tarixi</h4>
+    <div id="ph-history-list" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+      <!-- History elements render here -->
     </div>
   </div>
 </div>
@@ -710,6 +807,7 @@
     if (tabId === 'tab-qabullar') loadAppointments();
     if (tabId === 'tab-active') loadActiveVisits();
     if (tabId === 'tab-history') loadVisits();
+    if (tabId === 'tab-patients') loadPatientsTab();
   }
 
   // ── Load Appointments ─────────────────────────────────────────
@@ -1750,6 +1848,311 @@
     }
 
     showToast("Vaqt muvaffaqiyatli tanlandi: " + startVal.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent' }), "success");
+  }
+
+  // --- Patients Directory Tab ---
+  let allPatients = [];
+  let currentPatientFilter = 'all';
+
+  async function loadPatientsTab() {
+    const container = document.getElementById('patients-tab-container');
+    container.innerHTML = '<div class="empty-state">Yuklanmoqda...</div>';
+
+    try {
+      const res = await fetch('/api/admin/patients', {
+        headers: { 'Authorization': `Bearer ${adminToken}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        allPatients = data.patients;
+        renderPatientsTab();
+      } else {
+        container.innerHTML = '<div class="empty-state" style="color:var(--red);">Bemorlar ro\'yxatini yuklashda xatolik yuz berdi.</div>';
+      }
+    } catch (err) {
+      console.error(err);
+      container.innerHTML = '<div class="empty-state" style="color:var(--red);">Tarmoq xatoligi yuz berdi.</div>';
+    }
+  }
+
+  function setPatientFilter(filterName) {
+    currentPatientFilter = filterName;
+    document.querySelectorAll('#tab-patients .filter-btn').forEach(b => b.classList.remove('active'));
+    
+    let btnId = 'f-pat-all';
+    if (filterName === 'upcoming') btnId = 'f-pat-upcoming';
+    else if (filterName === 'completed') btnId = 'f-pat-completed';
+    else if (filterName === 'noshow') btnId = 'f-pat-noshow';
+    else if (filterName === 'unreachable') btnId = 'f-pat-unreachable';
+    
+    const btn = document.getElementById(btnId);
+    if (btn) btn.classList.add('active');
+    
+    renderPatientsTab();
+  }
+
+  function filterPatientsTab() {
+    renderPatientsTab();
+  }
+
+  function renderPatientsTab() {
+    const container = document.getElementById('patients-tab-container');
+    const searchInput = document.getElementById('reception-patient-search');
+    const query = searchInput ? searchInput.value.toLowerCase().replace(/\s+/g, '') : '';
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    let filtered = allPatients;
+
+    if (query) {
+      filtered = filtered.filter(p => {
+        const nameMatch = `${p.firstName} ${p.lastName}`.toLowerCase().replace(/\s+/g, '').includes(query);
+        const phoneMatch = p.phone.replace(/\D/g, '').includes(query) || (p.telegramPhone && p.telegramPhone.replace(/\D/g, '').includes(query));
+        return nameMatch || phoneMatch;
+      });
+    }
+
+    if (currentPatientFilter === 'upcoming') {
+      filtered = filtered.filter(p => {
+        return p.appointments && p.appointments.some(a => a.status === 'SCHEDULED' && new Date(a.slot.startTime) >= today);
+      });
+    } else if (currentPatientFilter === 'completed') {
+      filtered = filtered.filter(p => {
+        const hasCompletedAppt = p.appointments && p.appointments.some(a => a.status === 'COMPLETED');
+        const hasCompletedVisit = p.visits && p.visits.some(v => v.status === 'COMPLETED');
+        return hasCompletedAppt || hasCompletedVisit;
+      });
+    } else if (currentPatientFilter === 'noshow') {
+      filtered = filtered.filter(p => {
+        return p.appointments && p.appointments.some(a => a.status === 'CANCELLED' && (a.cancelledBy === 'NOSHOW' || a.cancelledBy === 'NOSHOW_UNREACHABLE'));
+      });
+    } else if (currentPatientFilter === 'unreachable') {
+      filtered = filtered.filter(p => {
+        return p.appointments && p.appointments.some(a => a.status === 'CANCELLED' && a.cancelledBy === 'NOSHOW_UNREACHABLE');
+      });
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="empty-state">Bemorlar topilmadi.</div>';
+      return;
+    }
+
+    container.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Bemor ismi</th>
+            <th>Telefon raqami</th>
+            <th>Telegram raqami</th>
+            <th>Turi</th>
+            <th>Tashriflar / Bronlar</th>
+            <th>Oxirgi status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filtered.map(p => {
+            const apptsCount = p.appointments ? p.appointments.length : 0;
+            const completedCount = p.appointments ? p.appointments.filter(a => a.status === 'COMPLETED').length : 0;
+            const activeVisitsCount = p.visits ? p.visits.filter(v => v.status === 'IN_PROGRESS').length : 0;
+            
+            let lastEvent = 'Tashrif yozilmagan';
+            let lastEventDate = null;
+            
+            if (p.appointments) {
+              p.appointments.forEach(a => {
+                const d = new Date(a.slot.startTime);
+                if (!lastEventDate || d > lastEventDate) {
+                  lastEventDate = d;
+                  if (a.status === 'SCHEDULED') lastEvent = `Bron: ${d.toLocaleDateString()}`;
+                  else if (a.status === 'COMPLETED') lastEvent = `Kelgan: ${d.toLocaleDateString()}`;
+                  else lastEvent = `Bekor qilingan: ${d.toLocaleDateString()}`;
+                }
+              });
+            }
+            if (p.visits) {
+              p.visits.forEach(v => {
+                const d = new Date(v.startTime);
+                if (!lastEventDate || d > lastEventDate) {
+                  lastEventDate = d;
+                  if (v.status === 'IN_PROGRESS') lastEvent = `Muolajada: ${d.toLocaleDateString()}`;
+                  else lastEvent = `Tugatilgan: ${d.toLocaleDateString()}`;
+                }
+              });
+            }
+
+            const sourceBadge = p.source === 'ONLINE' 
+              ? '<span class="source-badge booked">📱 Bot</span>' 
+              : '<span class="source-badge walkin">🚶 Kelgan</span>';
+
+            const tgPhone = p.telegramPhone || '-';
+
+            return `
+              <tr class="patient-row" onclick="openPatientHistoryModal('${p.id}')">
+                <td style="font-weight: 700; color: var(--navy);">👤 ${p.firstName} ${p.lastName}</td>
+                <td>${p.phone}</td>
+                <td>${tgPhone}</td>
+                <td>${sourceBadge}</td>
+                <td>
+                  <span style="color:var(--teal-dark); font-weight:600;">${completedCount} kelgan</span> / 
+                  <span style="color:var(--text-muted); font-size:0.8rem;">${apptsCount} bron</span>
+                  ${activeVisitsCount > 0 ? ` <span style="background:rgba(168,85,247,0.1); color:#a855f7; font-size:0.7rem; font-weight:600; padding:2px 6px; border-radius:4px; margin-left:4px;">Muolajada</span>` : ''}
+                </td>
+                <td style="font-weight: 600; font-size: 0.8rem; color: var(--text-muted);">${lastEvent}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  async function openPatientHistoryModal(patientId) {
+    const modal = document.getElementById('patient-history-modal');
+    modal.style.display = 'flex';
+    
+    document.getElementById('ph-name').textContent = "Yuklanmoqda...";
+    document.getElementById('ph-joined').textContent = "...";
+    document.getElementById('ph-phone').textContent = "...";
+    document.getElementById('ph-tg-phone').textContent = "...";
+    document.getElementById('ph-tg-user').textContent = "...";
+    document.getElementById('ph-source').textContent = "...";
+    document.getElementById('ph-history-list').innerHTML = '<div class="empty-state">Tarix yuklanmoqda...</div>';
+
+    try {
+      const res = await fetch(`/api/admin/patients/${patientId}`, {
+        headers: { 'Authorization': `Bearer ${adminToken}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const p = data.patient;
+        document.getElementById('ph-name').textContent = `${p.firstName} ${p.lastName}`;
+        
+        const joinDate = new Date(p.createdAt);
+        const uzMonths = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun', 'Iyul', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
+        document.getElementById('ph-joined').textContent = `Klinikada ro'yxatdan o'tgan sana: ${joinDate.getDate()} ${uzMonths[joinDate.getMonth()]} ${joinDate.getFullYear()}`;
+        
+        document.getElementById('ph-phone').textContent = p.phone || '-';
+        document.getElementById('ph-tg-phone').textContent = p.telegramPhone || '-';
+        document.getElementById('ph-tg-user').textContent = p.telegramUsername ? `@${p.telegramUsername}` : '-';
+        document.getElementById('ph-source').textContent = p.source === 'ONLINE' ? '📱 Telegram Bot' : '🚶 Kelgan bemor';
+
+        const list = document.getElementById('ph-history-list');
+        const items = [];
+        
+        if (p.appointments) {
+          p.appointments.forEach(a => {
+            const time = new Date(a.slot.startTime);
+            items.push({
+              type: 'APPOINTMENT',
+              time,
+              status: a.status,
+              cancelledBy: a.cancelledBy,
+              cancelNote: a.cancelNote,
+              doctor: a.doctor,
+              procedure: a.procedure
+            });
+          });
+        }
+
+        if (p.visits) {
+          p.visits.forEach(v => {
+            const time = new Date(v.startTime);
+            items.push({
+              type: 'VISIT',
+              time,
+              status: v.status,
+              serviceName: v.serviceName,
+              price: v.price,
+              paidAmount: v.paidAmount,
+              paymentMethod: v.paymentMethod,
+              doctor: v.doctor,
+              note: v.note
+            });
+          });
+        }
+
+        items.sort((a, b) => b.time - a.time);
+
+        if (items.length === 0) {
+          list.innerHTML = '<div class="empty-state">Tashriflar topilmadi.</div>';
+          return;
+        }
+
+        list.innerHTML = items.map(item => {
+          const t = item.time;
+          const timeStr = `${t.getDate()} ${uzMonths[t.getMonth()]} ${t.toLocaleTimeString('uz-UZ', { hour:'2-digit', minute:'2-digit', timeZone: 'Asia/Tashkent' })}`;
+          
+          if (item.type === 'APPOINTMENT') {
+            let badge = '';
+            if (item.status === 'SCHEDULED') {
+              badge = '<span style="color:#0284c7; font-size:0.75rem; font-weight:600; padding:2px 6px; background:rgba(2,132,199,0.1); border-radius:4px;">Kutilmoqda</span>';
+            } else if (item.status === 'COMPLETED') {
+              badge = '<span style="color:#16a34a; font-size:0.75rem; font-weight:600; padding:2px 6px; background:rgba(22,163,74,0.1); border-radius:4px;">Keldi</span>';
+            } else if (item.status === 'CANCELLED') {
+              let cancelLabel = 'Bekor qilindi';
+              if (item.cancelledBy === 'NOSHOW') cancelLabel = 'Kelmadi';
+              else if (item.cancelledBy === 'NOSHOW_UNREACHABLE') cancelLabel = 'Telefonga javob bermadi';
+              badge = `<span style="color:#dc2626; font-size:0.75rem; font-weight:600; padding:2px 6px; background:rgba(220,38,38,0.1); border-radius:4px;">${cancelLabel}</span>`;
+            }
+
+            const docName = item.doctor ? `Dr. ${item.doctor.lastName}` : 'Noma\'lum shifokor';
+            const procName = item.procedure ? item.procedure.name : 'Konsultatsiya';
+            const noteText = item.cancelNote ? `<div style="font-size:0.75rem; color:#dc2626; margin-top:4px; font-weight:500;">Sabab: ${item.cancelNote}</div>` : '';
+
+            return `
+              <div style="padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; font-size:0.85rem; color:#334155;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-weight:600; color:#0f172a;">📅 Bron: ${procName}</span>
+                  ${badge}
+                </div>
+                <div style="color:#64748b; margin-top:4px; font-size:0.8rem;">
+                  <span>${timeStr}</span> &bull; <span>${docName}</span>
+                </div>
+                ${noteText}
+              </div>
+            `;
+          } else {
+            let badge = '';
+            if (item.status === 'IN_PROGRESS') {
+              badge = '<span style="color:#a855f7; font-size:0.75rem; font-weight:600; padding:2px 6px; background:rgba(168,85,247,0.1); border-radius:4px;">Muolajada</span>';
+            } else {
+              badge = '<span style="color:#0d9488; font-size:0.75rem; font-weight:600; padding:2px 6px; background:rgba(13,148,136,0.1); border-radius:4px;">Tugatildi</span>';
+            }
+
+            const docName = item.doctor ? `Dr. ${item.doctor.lastName}` : 'Noma\'lum shifokor';
+            const noteText = item.note ? `<div style="font-size:0.75rem; color:#64748b; margin-top:4px;">Izoh: ${item.note}</div>` : '';
+            const paymentText = item.paidAmount >= item.price
+              ? `<span style="color:#16a34a; font-weight:600;">To'liq to'landi (${item.price.toLocaleString()} so'm)</span>`
+              : `<span style="color:#dc2626; font-weight:600;">Qisman to'landi (${item.paidAmount.toLocaleString()} / ${item.price.toLocaleString()} so'm)</span>`;
+
+            return `
+              <div style="padding:10px 12px; background:#f0fdfa; border:1px solid #ccfbf1; border-radius:10px; font-size:0.85rem; color:#334155;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-weight:600; color:#0f172a;">⚡ Tashrif: ${item.serviceName}</span>
+                  ${badge}
+                </div>
+                <div style="color:#64748b; margin-top:4px; font-size:0.8rem;">
+                  <span>${timeStr}</span> &bull; <span>${docName}</span>
+                </div>
+                <div style="margin-top:4px; font-size:0.8rem;">
+                  ${paymentText}
+                </div>
+                ${noteText}
+              </div>
+            `;
+          }
+        }).join('');
+      } else {
+        document.getElementById('ph-history-list').innerHTML = '<div class="empty-state" style="color:red;">Bemor ma\'lumotlarini yuklab bo\'lmadi.</div>';
+      }
+    } catch (err) {
+      console.error(err);
+      document.getElementById('ph-history-list').innerHTML = '<div class="empty-state" style="color:red;">Tarmoq xatoligi.</div>';
+    }
+  }
+
+  function closePatientHistoryModal() {
+    document.getElementById('patient-history-modal').style.display = 'none';
   }
 </script>
 <div id="toast-container"></div>
