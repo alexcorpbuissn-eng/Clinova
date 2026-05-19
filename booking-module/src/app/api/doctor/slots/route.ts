@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
           patientLast: true,
           patientPhone: true,
           description: true,
-          procedure: { select: { name: true } },
+          procedure: { select: { name: true, durationMinutes: true } },
           patient: { select: { firstName: true, lastName: true, phone: true } }
         }
       }

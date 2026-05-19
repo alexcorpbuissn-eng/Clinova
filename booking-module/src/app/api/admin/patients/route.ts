@@ -19,6 +19,9 @@ export async function GET(request: NextRequest) {
   const patients = await prisma.patient.findMany({
     where: { isVerified: true },
     include: {
+      _count: {
+        select: { appointments: true }
+      },
       appointments: {
         select: {
           id: true,

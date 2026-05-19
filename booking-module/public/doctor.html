@@ -1496,28 +1496,78 @@
             let isBooked = false;
             let bookedSubclass = '';
             let apptObj = null;
+            let styleAttr = '';
+
+            let activeAppt = null;
+            let activeApptSlot = null;
+
+            allSlots.forEach(s => {
+              if (s.appointment && s.appointment.status !== 'CANCELLED') {
+                const apptStart = new Date(s.startTime).getTime();
+                const apptDuration = (s.appointment.procedure && s.appointment.procedure.durationMinutes) || s.duration || 30;
+                const apptEnd = apptStart + apptDuration * 60000;
+                if (slotDateTime.getTime() >= apptStart && slotDateTime.getTime() < apptEnd) {
+                  activeAppt = s.appointment;
+                  activeApptSlot = s;
+                }
+              }
+            });
 
             if (existing) {
               statusClass = 'active';
-              isBooked = existing.appointment && existing.appointment.status !== 'CANCELLED';
-              if (isBooked) {
+              
+              if (activeAppt) {
+                isBooked = true;
                 statusClass = 'booked';
-                apptObj = existing.appointment;
-                
+                apptObj = activeAppt;
+
+                const isStart = slotDateTime.getTime() === new Date(activeApptSlot.startTime).getTime();
+                const apptDuration = (activeAppt.procedure && activeAppt.procedure.durationMinutes) || 30;
+                const apptEnd = new Date(activeApptSlot.startTime).getTime() + apptDuration * 60000;
+                const isEnd = (slotDateTime.getTime() + 30 * 60000) >= apptEnd;
+
+                if (apptDuration > 30) {
+                  if (isStart) {
+                    styleAttr = 'style="border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: none;"';
+                  } else if (isEnd) {
+                    styleAttr = 'style="border-top-left-radius: 0; border-top-right-radius: 0; border-top: none;"';
+                  } else {
+                    styleAttr = 'style="border-radius: 0; border-top: none; border-bottom: none;"';
+                  }
+                }
+
                 // Color codes
                 const isBreak = apptObj.patientPhone === '+998000000000' || apptObj.patientFirst === 'Tanaffus';
                 if (isBreak) {
                   bookedSubclass = 'status-break';
-                  label = `<span class="patient-lbl">☕ Tanaffus</span>`;
-                } else if (apptObj.procedure && apptObj.procedure.name.toLowerCase().includes('konsul')) {
-                  bookedSubclass = 'status-open';
-                  label = `<span class="patient-lbl">${apptObj.patientFirst} ${apptObj.patientLast[0]}.</span><span class="procedure-lbl">Konsultatsiya</span>`;
-                } else if (apptObj.description && apptObj.description.toLowerCase().includes('takroriy')) {
-                  bookedSubclass = 'status-followup';
-                  label = `<span class="patient-lbl">${apptObj.patientFirst} ${apptObj.patientLast[0]}.</span><span class="procedure-lbl">Takroriy qabul</span>`;
+                  if (isStart) {
+                    label = `<span class="patient-lbl">☕ Tanaffus</span>`;
+                  } else {
+                    label = `<span class="patient-lbl" style="font-size:0.65rem; opacity:0.6; font-weight:600;">☕ Tanaffus (davomi)</span>`;
+                  }
                 } else {
-                  bookedSubclass = 'status-busy';
-                  label = `<span class="patient-lbl">${apptObj.patientFirst} ${apptObj.patientLast[0]}.</span><span class="procedure-lbl">${apptObj.procedure ? apptObj.procedure.name : 'Birlamchi'}</span>`;
+                  if (apptObj.procedure && apptObj.procedure.name.toLowerCase().includes('konsul')) {
+                    bookedSubclass = 'status-open';
+                    if (isStart) {
+                      label = `<span class="patient-lbl">${apptObj.patientFirst} ${apptObj.patientLast[0]}.</span><span class="procedure-lbl">Konsultatsiya</span>`;
+                    } else {
+                      label = `<span class="patient-lbl" style="font-size:0.65rem; opacity:0.6; font-weight:600;">↳ ${apptObj.patientFirst} ${apptObj.patientLast[0]}. (davomi)</span>`;
+                    }
+                  } else if (apptObj.description && apptObj.description.toLowerCase().includes('takroriy')) {
+                    bookedSubclass = 'status-followup';
+                    if (isStart) {
+                      label = `<span class="patient-lbl">${apptObj.patientFirst} ${apptObj.patientLast[0]}.</span><span class="procedure-lbl">Takroriy qabul</span>`;
+                    } else {
+                      label = `<span class="patient-lbl" style="font-size:0.65rem; opacity:0.6; font-weight:600;">↳ ${apptObj.patientFirst} ${apptObj.patientLast[0]}. (davomi)</span>`;
+                    }
+                  } else {
+                    bookedSubclass = 'status-busy';
+                    if (isStart) {
+                      label = `<span class="patient-lbl">${apptObj.patientFirst} ${apptObj.patientLast[0]}.</span><span class="procedure-lbl">${apptObj.procedure ? apptObj.procedure.name : 'Birlamchi'}</span>`;
+                    } else {
+                      label = `<span class="patient-lbl" style="font-size:0.65rem; opacity:0.6; font-weight:600;">↳ ${apptObj.patientFirst} ${apptObj.patientLast[0]}. (davomi)</span>`;
+                    }
+                  }
                 }
               }
             }
@@ -1533,7 +1583,7 @@
 
             return `
               <div class="grid-cell">
-                <button class="slot-btn ${statusClass} ${bookedSubclass}" ${onClickAttr}>
+                <button class="slot-btn ${statusClass} ${bookedSubclass}" ${onClickAttr} ${styleAttr}>
                   ${label}
                 </button>
               </div>
