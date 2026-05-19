@@ -406,12 +406,45 @@
   </div>
 </div>
 
+<!-- CUSTOM CONFIRM MODAL -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal" style="max-width: 420px; text-align: center; padding: 30px 24px;">
+    <div id="confirm-icon" style="font-size: 3.5rem; margin-bottom: 16px; line-height: 1;">⚠️</div>
+    <h3 id="confirm-title" style="margin-bottom: 12px; font-size: 1.35rem; color: #fff;">Tasdiqlang</h3>
+    <p id="confirm-message" style="color: var(--text-muted); margin-bottom: 28px; font-size: 0.95rem; line-height: 1.6;">Haqiqatan ham bu amalni bajarasizmi?</p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+      <button class="btn-cancel" onclick="closeConfirmModal()" style="padding: 12px; border-radius: 8px;">Bekor qilish</button>
+      <button class="btn-submit-premium" id="btn-confirm-yes" style="padding: 12px; border-radius: 8px;">Tasdiqlash</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
   const API = '';
   let adminToken = null;
   let visitSource = 'WALKIN';
   let doctorsList = [];
+
+  // --- Custom Confirm Logic ---
+  let confirmCallback = null;
+  function showConfirm(title, message, icon, confirmText, callback) {
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-message').textContent = message;
+    document.getElementById('confirm-icon').textContent = icon || '⚠️';
+    document.getElementById('btn-confirm-yes').textContent = confirmText || 'Tasdiqlash';
+    
+    confirmCallback = callback;
+    document.getElementById('confirm-modal').style.display = 'flex';
+  }
+  function closeConfirmModal() {
+    document.getElementById('confirm-modal').style.display = 'none';
+    confirmCallback = null;
+  }
+  document.getElementById('btn-confirm-yes').addEventListener('click', () => {
+    if (confirmCallback) confirmCallback();
+    closeConfirmModal();
+  });
 
   // ── Date/Time setup ─────────────────────────────────────────────
   let startPicker, endPicker;
@@ -682,6 +715,36 @@
     </table>`;
   }
 
+  function renderResolvedMissedTable(list) {
+    const tbody = list.map(a => {
+      const date = formatShortDate(a.slot.startTime);
+      const time = new Date(a.slot.startTime).toLocaleTimeString('uz-UZ', { hour:'2-digit', minute:'2-digit' });
+      const pName = a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : (a.patientFirst ? `${a.patientFirst} ${a.patientLast}` : 'Noma\'lum');
+      const pPhone = a.patient ? a.patient.phone : (a.patientPhone || 'Yo\'q');
+
+      return `<tr style="background:#f0fdf4; border-left: 4px solid var(--teal);">
+        <td>
+          <strong style="color:var(--teal); text-decoration: line-through;">${pName}</strong><br>
+          <span style="color: var(--teal); font-size: 0.85rem; font-weight: 500;">📞 ${pPhone}</span>
+        </td>
+        <td><div style="font-size:0.8rem">Dr. ${a.doctor.lastName}<br><span style="color:var(--text-muted)">${a.procedure?.name || 'Ko\'rik'}</span></div></td>
+        <td><div style="font-size:0.8rem; color:var(--teal)"><strong>${date}</strong><br>${time}</div></td>
+        <td>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="background: #10b981; color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+              ✅ Bog'lanildi
+            </span>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+
+    return `<table>
+      <thead><tr><th>Bemor</th><th>Shifokor / Xizmat</th><th>Sana / Vaqt</th><th>Holati</th></tr></thead>
+      <tbody>${tbody}</tbody>
+    </table>`;
+  }
+
   async function loadAppointments() {
     const container = document.getElementById('appointments-container');
     try {
@@ -705,6 +768,7 @@
       });
       
       const missed = data.appointments.filter(a => a.status === 'CANCELLED' && a.cancelledBy === 'NOSHOW');
+      const missedResolved = data.appointments.filter(a => a.status === 'CANCELLED' && a.cancelledBy === 'NOSHOW_RESOLVED');
 
       let html = '';
       
@@ -732,6 +796,14 @@
         html += renderMissedTable(missed);
       }
       
+      // 4. Resolved No Shows (Bog'lanilganlar)
+      html += `<h3 style="font-size: 1rem; color: var(--teal); margin: 30px 0 10px 0; display: flex; align-items: center; gap: 8px;">✅ Kelmadi - Bog'lanilganlar</h3>`;
+      if (missedResolved.length === 0) {
+        html += `<div class="empty-state" style="padding: 20px; color: var(--text-muted);">Ro'yxat bo'sh.</div>`;
+      } else {
+        html += renderResolvedMissedTable(missedResolved);
+      }
+      
       container.innerHTML = html;
     } catch (err) {
       console.error(err);
@@ -739,27 +811,35 @@
     }
   }
 
-  async function deleteAppt(id, callAttempts = 3) {
+  function deleteAppt(id, callAttempts = 3) {
     if (callAttempts < 3) {
       showToast("Bemorga kamida 3 marta qo'ng'iroq qilinishi shart! (Joriy: " + callAttempts + "/3)", "error");
       return;
     }
-    if (!confirm("Haqiqatan ham bu qabulni bekor qilmoqchimisiz?")) return;
-    try {
-      const res = await fetch(`/api/admin/appointments/${id}`, { 
-        method: 'DELETE', 
-        headers: { 'Authorization': `Bearer ${adminToken}` } 
-      });
-      if (res.ok) {
-        showToast("Qabul muvaffaqiyatli o'chirildi!", "success");
-        loadAppointments();
-      } else {
-        const data = await res.json();
-        showToast(data.error || "O'chirishda xatolik yuz berdi", "error");
+    
+    showConfirm(
+      "Qabulni bekor qilish",
+      "Haqiqatan ham bu qabulni bekor qilmoqchimisiz?",
+      "🗑️",
+      "Bekor qilish",
+      async () => {
+        try {
+          const res = await fetch(`/api/admin/appointments/${id}`, { 
+            method: 'DELETE', 
+            headers: { 'Authorization': `Bearer ${adminToken}` } 
+          });
+          if (res.ok) {
+            showToast("Qabul muvaffaqiyatli o'chirildi!", "success");
+            loadAppointments();
+          } else {
+            const data = await res.json();
+            showToast(data.error || "O'chirishda xatolik yuz berdi", "error");
+          }
+        } catch {
+          showToast("Tarmoq xatosi", "error");
+        }
       }
-    } catch {
-      showToast("Tarmoq xatosi", "error");
-    }
+    );
   }
 
   async function updateCallStatus(id, action) {
@@ -788,26 +868,33 @@
     }
   }
 
-  async function resolvePastAppointment(id, answer) {
+  function resolvePastAppointment(id, answer) {
     if (answer === 'NO') {
-      if (!confirm("Haqiqatan ham bemor kelmadi deb belgilamoqchimisiz? Kelmadi ro'yxatiga tushadi va telefon raqami ko'rsatiladi.")) return;
-      try {
-        const res = await fetch(`/api/admin/appointments/${id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
-          body: JSON.stringify({ action: 'NOSHOW' })
-        });
-        if (res.ok) {
-          loadAppointments();
-        } else {
-          const data = await res.json();
-          alert(data.error || "Xatolik yuz berdi");
+      showConfirm(
+        "Bemor kelmadi",
+        "Haqiqatan ham bemor kelmadi deb belgilamoqchimisiz? Kelmadi ro'yxatiga tushadi va telefon raqami ko'rsatiladi.",
+        "🛑",
+        "Tasdiqlash",
+        async () => {
+          try {
+            const res = await fetch(`/api/admin/appointments/${id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+              body: JSON.stringify({ action: 'NOSHOW' })
+            });
+            if (res.ok) {
+              loadAppointments();
+            } else {
+              const data = await res.json();
+              showToast(data.error || "Xatolik yuz berdi", "error");
+            }
+          } catch {
+            showToast("Tarmoq xatosi", "error");
+          }
         }
-      } catch {
-        alert("Tarmoq xatosi");
-      }
+      );
     } else if (answer === 'YES') {
-      await startAppointment(id, null, true);
+      startAppointment(id, null, true);
     }
   }
 

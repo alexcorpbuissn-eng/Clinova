@@ -1071,6 +1071,18 @@
   </div>
 </div>
 
+<!-- CUSTOM CONFIRM MODAL -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal" style="max-width: 420px; text-align: center; padding: 30px 24px;">
+    <div id="confirm-icon" style="font-size: 3.5rem; margin-bottom: 16px; line-height: 1;">⚠️</div>
+    <h3 id="confirm-title" style="margin-bottom: 12px; font-size: 1.35rem; color: #fff;">Tasdiqlang</h3>
+    <p id="confirm-message" style="color: var(--text-muted); margin-bottom: 28px; font-size: 0.95rem; line-height: 1.6;">Haqiqatan ham bu amalni bajarasizmi?</p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+      <button class="btn-cancel" onclick="closeConfirmModal()" style="padding: 12px; border-radius: 8px;">Bekor qilish</button>
+      <button class="btn-submit-premium" id="btn-confirm-yes" style="padding: 12px; border-radius: 8px;">Tasdiqlash</button>
+    </div>
+  </div>
+</div>
 <script>
   let doctorToken = null;
   let doctorInfo = null;
@@ -1084,9 +1096,29 @@
   let allVerifiedPatients = [];
   let selectedSlotData = null; // Stores currently clicked slot metadata {iso, time, id}
   
-  const START_HOUR = 8;
+  const START_HOUR = 9;
   const END_HOUR = 19;
   const INTERVAL = 30; // minutes
+
+  // --- Custom Confirm Logic ---
+  let confirmCallback = null;
+  function showConfirm(title, message, icon, confirmText, callback) {
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-message').textContent = message;
+    document.getElementById('confirm-icon').textContent = icon || '⚠️';
+    document.getElementById('btn-confirm-yes').textContent = confirmText || 'Tasdiqlash';
+    
+    confirmCallback = callback;
+    document.getElementById('confirm-modal').style.display = 'flex';
+  }
+  function closeConfirmModal() {
+    document.getElementById('confirm-modal').style.display = 'none';
+    confirmCallback = null;
+  }
+  document.getElementById('btn-confirm-yes').addEventListener('click', () => {
+    if (confirmCallback) confirmCallback();
+    closeConfirmModal();
+  });
 
   // ---- Tashkent Timezone Date Helpers ----
   function getTashkentISO(date) {
@@ -1828,26 +1860,33 @@
 
 
 
-  async function cancelDetailAppointment() {
+  function cancelDetailAppointment() {
     const apptId = selectedSlotData.apptId;
     if (!apptId) return;
-    if (!confirm("Haqiqatan ham ushbu qabulni bekor qilmoqchimisiz?")) return;
 
-    try {
-      const res = await fetch(`/api/admin/appointments/${apptId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${doctorToken}` }
-      });
-      if (res.ok) {
-        showToast("Qabul bekor qilindi!", "success");
-        closeDetailsModal();
-        loadData();
-      } else {
-        showToast("Bekor qilishda xatolik yuz berdi", "error");
+    showConfirm(
+      "Kelmadi",
+      "Haqiqatan ham ushbu qabulni bekor qilmoqchimisiz?",
+      "🛑",
+      "Tasdiqlash",
+      async () => {
+        try {
+          const res = await fetch(`/api/admin/appointments/${apptId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${doctorToken}` }
+          });
+          if (res.ok) {
+            showToast("Qabul bekor qilindi!", "success");
+            closeDetailsModal();
+            loadData();
+          } else {
+            showToast("Bekor qilishda xatolik yuz berdi", "error");
+          }
+        } catch {
+          showToast("Server bilan bog'lanib bo'lmadi", "error");
+        }
       }
-    } catch {
-      showToast("Server bilan bog'lanib bo'lmadi", "error");
-    }
+    );
   }
 
   async function completeDetailAppointment() {
@@ -1935,18 +1974,25 @@
   // Sidebar fast actions
 
 
-  async function sidebarCancel(apptId) {
-    if (!confirm("Haqiqatan ham ushbu qabulni bekor qilmoqchimisiz?")) return;
-    try {
-      const res = await fetch(`/api/admin/appointments/${apptId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${doctorToken}` }
-      });
-      if (res.ok) {
-        showToast("Qabul bekor qilindi!", "success");
-        loadData();
-      } else { showToast("Xatolik yuz berdi", "error"); }
-    } catch { showToast("Ulanish xatosi", "error"); }
+  function sidebarCancel(apptId) {
+    showConfirm(
+      "Kelmadi",
+      "Haqiqatan ham ushbu qabulni bekor qilmoqchimisiz?",
+      "🛑",
+      "Tasdiqlash",
+      async () => {
+        try {
+          const res = await fetch(`/api/admin/appointments/${apptId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${doctorToken}` }
+          });
+          if (res.ok) {
+            showToast("Qabul bekor qilindi!", "success");
+            loadData();
+          } else { showToast("Xatolik yuz berdi", "error"); }
+        } catch { showToast("Ulanish xatosi", "error"); }
+      }
+    );
   }
 
   async function sidebarComplete(apptId) {
