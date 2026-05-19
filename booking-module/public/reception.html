@@ -6,7 +6,15 @@
   <title>Qabul Daftari | Habibullo-Hilola</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
   <style>
+    /* Tom Select Tech-Luxe */
+    .ts-control { border: 1.5px solid var(--border); border-radius: 10px; padding: 12px; font-family: inherit; font-size: 0.93rem; box-shadow: none; outline: none; background: #fff; }
+    .ts-control.focus { border-color: var(--teal); box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1); }
+    .ts-dropdown { border-radius: 10px; border: 1px solid var(--border); box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-top: 4px; overflow: hidden; }
+    .ts-dropdown .option { padding: 10px 14px; font-size: 0.93rem; color: var(--navy); }
+    .ts-dropdown .option.active { background: var(--teal-light); color: var(--teal-dark); }
     :root {
       --navy: #0f172a; --teal: #0d9488; --teal-dark: #0f766e; --teal-light: #f0fdfa;
       --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --text: #334155; --text-muted: #64748b;
@@ -419,6 +427,34 @@
   </div>
 </div>
 
+<!-- CANCEL REASON MODAL -->
+<div class="modal-overlay" id="cancel-reason-modal">
+  <div class="modal" style="max-width: 480px; padding: 30px 28px;">
+    <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 20px;">
+      <div style="font-size: 2.5rem; line-height: 1;">🗑️</div>
+      <div>
+        <h3 style="font-size: 1.2rem; color: #fff; margin-bottom: 4px;">Qabulni bekor qilish</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Sababni tizimga kiritishingiz shart</p>
+      </div>
+    </div>
+    <div style="margin-bottom: 20px;">
+      <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #fff; margin-bottom: 8px;">Bekor qilish sababi *</label>
+      <textarea
+        id="cancel-reason-input"
+        rows="4"
+        placeholder="Masalan: Bemor vaqtida kela olmaydi, qayta belgilash kerak..."
+        maxlength="1000"
+        style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.93rem; resize: vertical; outline: none; background: rgba(255,255,255,0.05); color: #fff; line-height: 1.5;"
+      ></textarea>
+      <p id="cancel-reason-err" style="color: #f87171; font-size: 0.82rem; margin-top: 6px; display: none;">Iltimos, sababni kiriting!</p>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+      <button class="btn-cancel" onclick="closeCancelReasonModal()" style="padding: 12px; border-radius: 8px;">❌ Orqaga</button>
+      <button class="btn-submit-premium" onclick="submitCancelWithReason()" style="padding: 12px; border-radius: 8px; background: linear-gradient(135deg, #ef4444, #b91c1c);">🗑️ Bekor qilish</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
   const API = '';
@@ -446,7 +482,39 @@
     closeConfirmModal();
   });
 
+  // --- Cancel Reason Modal Logic ---
+  let cancelReasonCallback = null;
+  function showCancelReason(callback) {
+    document.getElementById('cancel-reason-input').value = '';
+    document.getElementById('cancel-reason-err').style.display = 'none';
+    cancelReasonCallback = callback;
+    document.getElementById('cancel-reason-modal').style.display = 'flex';
+  }
+  function closeCancelReasonModal() {
+    document.getElementById('cancel-reason-modal').style.display = 'none';
+    cancelReasonCallback = null;
+  }
+  function submitCancelWithReason() {
+    const reason = document.getElementById('cancel-reason-input').value.trim();
+    if (!reason) {
+      document.getElementById('cancel-reason-err').style.display = 'block';
+      return;
+    }
+    if (cancelReasonCallback) cancelReasonCallback(reason);
+    closeCancelReasonModal();
+  }
+
   // ── Date/Time setup ─────────────────────────────────────────────
+  let serviceSelectInstance = null;
+  function initServiceSelect() {
+    if (serviceSelectInstance) serviceSelectInstance.destroy();
+    serviceSelectInstance = new TomSelect('#f-service', {
+      create: false,
+      sortField: { field: "text", direction: "asc" },
+      placeholder: "Xizmatni qidiring..."
+    });
+  }
+
   let startPicker, endPicker;
   function initDatePicker() {
     startPicker = flatpickr("#f-start-date", {
@@ -561,6 +629,7 @@
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     initDatePicker();
+    initServiceSelect();
     updateClock();
     setInterval(updateClock, 30000);
     setInterval(pollAppointments, 30000); // Smart polling
@@ -856,29 +925,27 @@
       return;
     }
     
-    showConfirm(
-      "Qabulni bekor qilish",
-      "Haqiqatan ham bu qabulni bekor qilmoqchimisiz?",
-      "🗑️",
-      "Bekor qilish",
-      async () => {
-        try {
-          const res = await fetch(`/api/admin/appointments/${id}`, { 
-            method: 'DELETE', 
-            headers: { 'Authorization': `Bearer ${adminToken}` } 
-          });
-          if (res.ok) {
-            showToast("Qabul muvaffaqiyatli o'chirildi!", "success");
-            loadAppointments();
-          } else {
-            const data = await res.json();
-            showToast(data.error || "O'chirishda xatolik yuz berdi", "error");
-          }
-        } catch {
-          showToast("Tarmoq xatosi", "error");
+    showCancelReason(async (reason) => {
+      try {
+        const res = await fetch(`/api/admin/appointments/${id}`, { 
+          method: 'DELETE', 
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminToken}` 
+          },
+          body: JSON.stringify({ cancelNote: reason })
+        });
+        if (res.ok) {
+          showToast("Qabul muvaffaqiyatli o'chirildi!", "success");
+          loadAppointments();
+        } else {
+          const data = await res.json();
+          showToast(data.error || "O'chirishda xatolik yuz berdi", "error");
         }
+      } catch {
+        showToast("Tarmoq xatosi", "error");
       }
-    );
+    });
   }
 
   async function updateCallStatus(id, action) {
@@ -1043,8 +1110,13 @@
 
   async function loadProceduresForDoctor(doctorId) {
     const sel = document.getElementById('f-service');
+    if (serviceSelectInstance) { serviceSelectInstance.destroy(); serviceSelectInstance = null; }
     sel.innerHTML = '<option value="">Yuklanmoqda...</option>';
-    if (!doctorId) { sel.innerHTML = '<option value="" disabled selected hidden>Xizmatni tanlang...</option><option value="__custom__">Boshqa (qo\'lda kiriting)</option>'; return; }
+    if (!doctorId) { 
+      sel.innerHTML = '<option value="" disabled selected hidden>Xizmatni tanlang...</option><option value="__custom__">Boshqa (qo\'lda kiriting)</option>'; 
+      initServiceSelect();
+      return; 
+    }
     try {
       const res = await fetch(`/api/public/doctors/${doctorId}/procedures`);
       const data = await res.json();
@@ -1067,6 +1139,7 @@
     } catch {
       sel.innerHTML = '<option value="" disabled selected hidden>Xizmatni tanlang...</option><option value="__custom__">Boshqa (qo\'lda kiriting)</option>';
     }
+    initServiceSelect();
   }
 
   document.getElementById('f-service').addEventListener('change', function() {
@@ -1158,7 +1231,8 @@
         document.getElementById('f-price').value = '';
         document.getElementById('f-note').value = '';
         document.querySelector('input[name="f-visit-type"][value="new"]').checked = true;
-        document.getElementById('f-service').selectedIndex = 0;
+        if (serviceSelectInstance) serviceSelectInstance.clear();
+        else document.getElementById('f-service').selectedIndex = 0;
         document.getElementById('f-service-custom').style.display = 'none';
         setDefaultDate();
         loadActiveVisits();

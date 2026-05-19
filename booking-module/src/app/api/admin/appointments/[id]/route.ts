@@ -20,6 +20,15 @@ export async function DELETE(
 
   const { id } = await params;
 
+  // Read optional cancelNote from request body (JSON)
+  let cancelNote: string | undefined;
+  try {
+    const body = await request.json();
+    cancelNote = body?.cancelNote?.trim()?.slice(0, 1000) || undefined;
+  } catch {
+    // No body or not JSON — that's fine, cancelNote stays undefined
+  }
+
   try {
     const appointment = await prisma.appointment.findUnique({
       where: { id },
@@ -47,7 +56,11 @@ export async function DELETE(
     await prisma.$transaction([
       prisma.appointment.update({ 
         where: { id },
-        data: { status: 'CANCELLED', cancelledBy: newCancelledBy } 
+        data: { 
+          status: 'CANCELLED', 
+          cancelledBy: newCancelledBy,
+          ...(cancelNote ? { cancelNote } : {})
+        } 
       }),
       prisma.slot.updateMany({
         where: {

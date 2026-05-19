@@ -131,7 +131,8 @@ model Appointment {
   description  String?    @db.VarChar(500)
   status       ApptStatus @default(SCHEDULED)
   cancelToken  String?    @unique
-  cancelledBy  String? // 'PATIENT' | 'ADMIN' — set on cancellation
+  cancelledBy  String? // 'PATIENT' | 'ADMIN' | 'NOSHOW' | 'NOSHOW_RESOLVED' | 'NOSHOW_UNREACHABLE'
+  cancelNote   String? @db.VarChar(1000) // reason entered by reception when cancelling
   callAttempts Int        @default(0)
 
   // Reminder flags — checked by hourly Vercel cron job
