@@ -1,18 +1,22 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { v4 as uuidv4 } from 'uuid';
+
+async function requireStaff(request: NextRequest) {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+  const token = authHeader.split(' ')[1];
+  const payload = await verifyToken(token);
+  if (payload && (payload.role === 'ADMIN' || payload.role === 'RECEPTION')) {
+    return payload;
+  }
+  return null;
+}
 
 // GET /api/admin/appointments — All appointments across all doctors
 export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const token = authHeader.split(' ')[1];
-  const payload = await verifyToken(token);
-
-  if (!payload || (payload.role !== 'ADMIN' && payload.role !== 'RECEPTION')) {
+  if (!await requireStaff(request)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -36,4 +40,145 @@ export async function GET(request: NextRequest) {
   });
 
   return NextResponse.json({ success: true, appointments });
+}
+
+// POST /api/admin/appointments — Book/Schedule a new appointment
+export async function POST(request: NextRequest) {
+  if (!await requireStaff(request)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  let body: any;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+
+  const { slotId, procedureId, patientName, patientPhone, note } = body;
+
+  if (!slotId || !procedureId || !patientName || !patientPhone) {
+    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+  }
+
+  // 1. Create or Find Patient
+  const cleanPhone = String(patientPhone).trim();
+  const parts = String(patientName).trim().split(' ');
+  const firstName = parts[0] || 'Bemor';
+  const lastName = parts.slice(1).join(' ') || '';
+
+  let patient = await prisma.patient.findFirst({
+    where: { phone: cleanPhone },
+  });
+
+  if (!patient) {
+    patient = await prisma.patient.create({
+      data: {
+        phone: cleanPhone,
+        firstName,
+        lastName,
+        isVerified: true, // staff verified them
+        source: 'ONLINE',
+      },
+    });
+  } else {
+    // Keep name in sync
+    patient = await prisma.patient.update({
+      where: { id: patient.id },
+      data: { firstName, lastName },
+    });
+  }
+
+  try {
+    const result = await prisma.$transaction(async (tx: any) => {
+      // Lock slot
+      const slots = await tx.$queryRaw<any[]>`
+        SELECT s.* FROM "Slot" s
+        WHERE s.id = ${slotId} AND s."isAvailable" = true
+        FOR UPDATE
+      `;
+
+      if (!slots?.length) {
+        throw new Error('SLOT_UNAVAILABLE');
+      }
+
+      const slot = slots[0];
+
+      // Fetch procedure to check duration
+      const procedure = await tx.procedure.findUnique({
+        where: { id: procedureId },
+      });
+
+      if (!procedure) throw new Error('PROCEDURE_NOT_FOUND');
+
+      const N = Math.ceil(procedure.durationMinutes / 30);
+      const baseTime = new Date(slot.startTime);
+      const consecutiveSlots = [slot];
+
+      for (let i = 1; i < N; i++) {
+        const chunkStartTime = new Date(baseTime.getTime() + i * 30 * 60 * 1000);
+        const nextSlot = await tx.slot.findFirst({
+          where: {
+            doctorId: slot.doctorId,
+            startTime: chunkStartTime,
+            isAvailable: true
+          }
+        });
+
+        if (!nextSlot) {
+          throw new Error('SLOT_UNAVAILABLE');
+        }
+        consecutiveSlots.push(nextSlot);
+      }
+
+      // Check if patient already has a scheduled appointment on this day
+      const slotDate = new Date(slot.startTime);
+      const dayStart = new Date(slotDate);
+      dayStart.setUTCHours(0, 0, 0, 0);
+      const dayEnd = new Date(slotDate);
+      dayEnd.setUTCHours(23, 59, 59, 999);
+
+      const existing = await tx.appointment.findFirst({
+        where: {
+          patientId: patient.id,
+          status: 'SCHEDULED',
+          slot: { startTime: { gte: dayStart, lte: dayEnd } },
+        },
+      });
+
+      if (existing) throw new Error('DUPLICATE_BOOKING');
+
+      // Make slots unavailable
+      for (const cs of consecutiveSlots) {
+        await tx.slot.update({ where: { id: cs.id }, data: { isAvailable: false } });
+      }
+
+      // Create appointment
+      const appointment = await tx.appointment.create({
+        data: {
+          slotId,
+          doctorId: slot.doctorId,
+          procedureId,
+          patientId: patient.id,
+          patientFirst: firstName,
+          patientLast: lastName,
+          patientPhone: cleanPhone,
+          description: note?.trim() || null,
+          cancelToken: uuidv4(),
+        },
+        include: { slot: true, procedure: true, doctor: true, patient: true },
+      });
+
+      return appointment;
+    });
+
+    return NextResponse.json({ success: true, appointment: result });
+  } catch (err: any) {
+    const msg: Record<string, string> = {
+      SLOT_UNAVAILABLE: 'Bu vaqt allaqachon band qilingan.',
+      DUPLICATE_BOOKING: 'Bemor ushbu kunda boshqa qabulga yozilgan.',
+      PROCEDURE_NOT_FOUND: 'Tanlangan xizmat topilmadi.',
+    };
+    return NextResponse.json({ error: msg[err.message] || err.message || 'Xatolik yuz berdi' }, { status: 400 });
+  }
 }

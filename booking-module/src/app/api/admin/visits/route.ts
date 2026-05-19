@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { doctorId, patientId, appointmentId, patientName, serviceName, price, source, startTime, endTime, status, note } = body;
+  const { doctorId, patientId, appointmentId, patientName, serviceName, price, source, startTime, endTime, status, note, paymentMethod } = body;
 
   if (!doctorId || !patientName || !serviceName || price === undefined) {
     return NextResponse.json(
@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
       endTime: endTime ? new Date(endTime) : null,
       status: status === 'IN_PROGRESS' ? 'IN_PROGRESS' : 'COMPLETED',
       paidAmount: status === 'IN_PROGRESS' ? 0 : parseInt(price),
+      paymentMethod: status === 'IN_PROGRESS' ? null : (paymentMethod || 'CASH'),
       note: note ? String(note).trim() : null,
     },
     include: { doctor: { select: { firstName: true, lastName: true } } },

@@ -21,7 +21,7 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await request.json();
-  const { status, paidAmount, price, note, endTime } = body;
+  const { status, paidAmount, price, note, endTime, paymentMethod } = body;
 
   try {
     const visit = await prisma.visit.update({
@@ -29,6 +29,7 @@ export async function PATCH(
       data: {
         status: status || undefined,
         paidAmount: paidAmount !== undefined ? parseInt(paidAmount) : undefined,
+        paymentMethod: paymentMethod !== undefined ? paymentMethod : undefined,
         price: price !== undefined ? parseInt(price) : undefined,
         note: note || undefined,
         endTime: endTime ? new Date(endTime) : undefined,

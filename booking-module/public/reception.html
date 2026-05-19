@@ -287,6 +287,14 @@
           <span class="price-suffix">so'm</span>
         </div>
       </div>
+      <div class="form-group" id="f-payment-method-group">
+        <label>To'lov turi *</label>
+        <select id="f-payment-method" style="width:100%; padding:12px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.93rem; outline:none; background:#fff; cursor:pointer;">
+          <option value="CASH" selected>Naqd pul</option>
+          <option value="CARD">Plastik karta</option>
+          <option value="TRANSFER">O'tkazma</option>
+        </select>
+      </div>
 
       <!-- Available Slots Container -->
       <div class="form-group" id="free-slots-group" style="display:none; margin-bottom: 18px;">
@@ -327,9 +335,10 @@
         <input type="text" id="f-note" placeholder="Qo'shimcha ma'lumot..." />
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px;">
-        <button class="btn-submit" id="btn-start" onclick="submitVisit('IN_PROGRESS')" style="background: var(--teal);">⚡ Boshlash</button>
-        <button class="btn-submit" id="btn-submit" onclick="submitVisit('COMPLETED')" style="background: var(--navy); font-size: 0.85rem; font-weight: 500;">Qayd etish</button>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 15px;">
+        <button class="btn-submit" id="btn-book" onclick="submitVisit('SCHEDULED')" style="background: var(--teal); font-size: 0.82rem; padding: 12px 6px; margin-top: 0; display: flex; align-items: center; justify-content: center; gap: 4px;">📅 Bron qilish</button>
+        <button class="btn-submit" id="btn-start" onclick="submitVisit('IN_PROGRESS')" style="background: #a855f7; font-size: 0.82rem; padding: 12px 6px; margin-top: 0; display: flex; align-items: center; justify-content: center; gap: 4px;">⚡ Boshlash</button>
+        <button class="btn-submit" id="btn-submit" onclick="submitVisit('COMPLETED')" style="background: var(--navy); font-size: 0.82rem; padding: 12px 6px; margin-top: 0; display: flex; align-items: center; justify-content: center; gap: 4px;">Qayd etish</button>
       </div>
       <div class="success-toast" id="success-toast">✅ Tashrif muvaffaqiyatli qayd etildi!</div>
       <div class="err-form" id="err-form"></div>
@@ -410,6 +419,15 @@
       <span style="font-size: 0.9rem; font-weight: 500;">To'liq to'landi</span>
     </div>
 
+    <div class="paid-input-group" style="margin-top: 15px;">
+      <label>To'lov turi</label>
+      <select id="m-payment-method" style="width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; font-family: inherit; outline: none; background: #fff; cursor: pointer;">
+        <option value="CASH" selected>Naqd pul</option>
+        <option value="CARD">Plastik karta</option>
+        <option value="TRANSFER">O'tkazma</option>
+      </select>
+    </div>
+
     <button class="btn-save-payment" id="btn-save-payment" onclick="savePayment()">Tugatish va Saqlash</button>
   </div>
 </div>
@@ -461,6 +479,7 @@
   let adminToken = null;
   let visitSource = 'WALKIN';
   let doctorsList = [];
+  let selectedSlotId = null;
 
   // --- Custom Confirm Logic ---
   let confirmCallback = null;
@@ -844,6 +863,37 @@
     </table>`;
   }
 
+  function renderCancelledTable(list) {
+    const tbody = list.map(a => {
+      const date = formatShortDate(a.slot.startTime);
+      const time = new Date(a.slot.startTime).toLocaleTimeString('uz-UZ', { hour:'2-digit', minute:'2-digit', timeZone: 'Asia/Tashkent' });
+      const pName = a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : (a.patientFirst ? `${a.patientFirst} ${a.patientLast}` : 'Noma\'lum');
+      const pPhone = a.patient ? a.patient.phone : (a.patientPhone || 'Yo\'q');
+      const canceller = a.cancelledBy === 'PATIENT' ? 'Bemor' : 'Admin';
+      const note = a.cancelNote || 'Sabab ko\'rsatilmagan';
+
+      return `<tr style="background:#fff7ed; border-left: 4px solid #f97316;">
+        <td>
+          <strong style="color:#c2410c; text-decoration: line-through;">${pName}</strong><br>
+          <span style="color:#ea580c; font-size:0.85rem; font-weight:500;">📞 ${pPhone}</span>
+        </td>
+        <td><div style="font-size:0.8rem; color:#c2410c;">Dr. ${a.doctor.lastName}<br><span style="color:#f97316;">${a.procedure?.name || 'Ko\'rik'}</span></div></td>
+        <td><div style="font-size:0.8rem; color:#c2410c;"><strong>${date}</strong><br>${time}</div></td>
+        <td>
+          <div style="font-size:0.8rem; color:#7c2d12;">
+            <strong>Kim bekor qildi:</strong> ${canceller}<br>
+            <strong>Sabab:</strong> <span style="font-style:italic;">"${note}"</span>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+
+    return `<table>
+      <thead><tr><th>Bemor</th><th>Shifokor / Xizmat</th><th>Sana / Vaqt</th><th>Bekor qilinish tafsilotlari</th></tr></thead>
+      <tbody>${tbody}</tbody>
+    </table>`;
+  }
+
   async function loadAppointments() {
     const container = document.getElementById('appointments-container');
     try {
@@ -910,6 +960,15 @@
         html += `<div class="empty-state" style="padding: 20px; color: var(--text-muted);">Ro'yxat bo'sh.</div>`;
       } else {
         html += renderUnreachableMissedTable(missedUnreachable);
+      }
+
+      // 6. Cancelled Appointments (Bekor qilinganlar)
+      const cancelledGeneral = data.appointments.filter(a => a.status === 'CANCELLED' && (a.cancelledBy === 'ADMIN' || a.cancelledBy === 'PATIENT'));
+      html += `<h3 style="font-size: 1rem; color: #ea580c; margin: 30px 0 10px 0; display: flex; align-items: center; gap: 8px;">❌ Bekor qilingan qabullar</h3>`;
+      if (cancelledGeneral.length === 0) {
+        html += `<div class="empty-state" style="padding: 20px; color: var(--text-muted);">Ro'yxat bo'sh.</div>`;
+      } else {
+        html += renderCancelledTable(cancelledGeneral);
       }
       
       container.innerHTML = html;
@@ -1101,6 +1160,7 @@
           sel.appendChild(opt);
         });
         sel.addEventListener('change', () => {
+          selectedSlotId = null;
           loadProceduresForDoctor(sel.value);
           loadAvailableSlots();
         });
@@ -1143,6 +1203,7 @@
   }
 
   document.getElementById('f-service').addEventListener('change', function() {
+    selectedSlotId = null;
     document.getElementById('f-service-custom').style.display = this.value === '__custom__' ? '' : 'none';
     
     // Auto-calculate end time
@@ -1165,7 +1226,14 @@
 
   // ── Submit visit ─────────────────────────────────────────────
   async function submitVisit(status = 'COMPLETED') {
-    const btn = status === 'IN_PROGRESS' ? document.getElementById('btn-start') : document.getElementById('btn-submit');
+    let btn;
+    if (status === 'IN_PROGRESS') {
+      btn = document.getElementById('btn-start');
+    } else if (status === 'SCHEDULED') {
+      btn = document.getElementById('btn-book');
+    } else {
+      btn = document.getElementById('btn-submit');
+    }
     const toast = document.getElementById('success-toast');
     const errEl = document.getElementById('err-form');
     toast.style.display = 'none'; errEl.style.display = 'none';
@@ -1181,6 +1249,7 @@
     const price = parseInt(priceStr, 10);
     const startTime = document.getElementById('f-start-date').value;
     const endTime = document.getElementById('f-end-date').value;
+    const paymentMethod = document.getElementById('f-payment-method').value;
     
     const visitType = document.querySelector('input[name="f-visit-type"]:checked').value;
     let note = document.getElementById('f-note').value.trim();
@@ -1194,53 +1263,105 @@
       return;
     }
 
-    if (visitSource === 'WALKIN' && (!patientPhone || !/^\+998 \d{2} \d{3} \d{2} \d{2}$/.test(patientPhone))) {
+    if (!patientPhone || !/^\+998 \d{2} \d{3} \d{2} \d{2}$/.test(patientPhone)) {
       errEl.textContent = 'Iltimos, to\'g\'ri telefon raqamini kiriting (+998 XX XXX XX XX).';
       errEl.style.display = 'block';
       return;
     }
 
+    if (status === 'SCHEDULED') {
+      if (serviceVal === '__custom__') {
+        errEl.textContent = 'Qabulni bron qilish uchun ro\'yxatdan xizmatni tanlang. Qo\'lda kiritish xizmati bilan bron qilish mumkin emas.';
+        errEl.style.display = 'block';
+        return;
+      }
+      if (!selectedSlotId) {
+        errEl.textContent = 'Iltimos, shifokorning bo\'sh vaqtlaridan birini tanlang.';
+        errEl.style.display = 'block';
+        return;
+      }
+    }
+
     btn.disabled = true; const oldTxt = btn.textContent; btn.textContent = '...';
     try {
-      let finalPatientId = null;
-      if (visitSource === 'WALKIN' && patientPhone) {
-        const parts = patientName.split(' ');
-        const pRes = await fetch('/api/reception/patients', {
+      if (status === 'SCHEDULED') {
+        const serviceSel = document.getElementById('f-service');
+        const selectedOpt = serviceSel.options[serviceSel.selectedIndex];
+        const procedureId = selectedOpt ? selectedOpt.dataset.id : null;
+
+        const res = await fetch('/api/admin/appointments', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
-          body: JSON.stringify({ firstName: parts[0] || 'Bemor', lastName: parts.slice(1).join(' ') || '', phone: patientPhone })
+          body: JSON.stringify({ slotId: selectedSlotId, procedureId, patientName, patientPhone, note })
         });
-        if (pRes.ok) {
-          const pData = await pRes.json();
-          finalPatientId = pData.patient?.id;
+        const data = await res.json();
+        if (res.ok && data.success) {
+          toast.textContent = "✅ Qabul muvaffaqiyatli bron qilindi!";
+          toast.style.display = 'block';
+          setTimeout(() => toast.style.display = 'none', 4000);
+          // Reset form
+          document.getElementById('f-patient').value = '';
+          document.getElementById('f-phone').value = '';
+          document.getElementById('f-price').value = '';
+          document.getElementById('f-note').value = '';
+          document.querySelector('input[name="f-visit-type"][value="new"]').checked = true;
+          if (serviceSelectInstance) serviceSelectInstance.clear();
+          else document.getElementById('f-service').selectedIndex = 0;
+          document.getElementById('f-service-custom').style.display = 'none';
+          selectedSlotId = null;
+          setDefaultDate();
+          loadAppointments();
+          loadActiveVisits();
+          loadVisits();
+          loadAvailableSlots();
+        } else {
+          errEl.textContent = data.error || 'Bron qilishda xatolik yuz berdi';
+          errEl.style.display = 'block';
         }
-      }
-
-      const res = await fetch('/api/admin/visits', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
-        body: JSON.stringify({ doctorId, patientId: finalPatientId, patientName, serviceName, price, source: visitSource, startTime, endTime, status, note })
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        toast.style.display = 'block';
-        setTimeout(() => toast.style.display = 'none', 4000);
-        // Reset form
-        document.getElementById('f-patient').value = '';
-        document.getElementById('f-phone').value = '';
-        document.getElementById('f-price').value = '';
-        document.getElementById('f-note').value = '';
-        document.querySelector('input[name="f-visit-type"][value="new"]').checked = true;
-        if (serviceSelectInstance) serviceSelectInstance.clear();
-        else document.getElementById('f-service').selectedIndex = 0;
-        document.getElementById('f-service-custom').style.display = 'none';
-        setDefaultDate();
-        loadActiveVisits();
-        loadVisits();
-        loadAvailableSlots();
       } else {
-        errEl.textContent = data.error || 'Xatolik yuz berdi';
-        errEl.style.display = 'block';
+        let finalPatientId = null;
+        if (patientPhone) {
+          const parts = patientName.split(' ');
+          const pRes = await fetch('/api/reception/patients', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+            body: JSON.stringify({ firstName: parts[0] || 'Bemor', lastName: parts.slice(1).join(' ') || '', phone: patientPhone })
+          });
+          if (pRes.ok) {
+            const pData = await pRes.json();
+            finalPatientId = pData.patient?.id;
+          }
+        }
+
+        const res = await fetch('/api/admin/visits', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ doctorId, patientId: finalPatientId, patientName, serviceName, price, source: visitSource, startTime, endTime, status, note, paymentMethod })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          toast.textContent = "✅ Tashrif muvaffaqiyatli qayd etildi!";
+          toast.style.display = 'block';
+          setTimeout(() => toast.style.display = 'none', 4000);
+          // Reset form
+          document.getElementById('f-patient').value = '';
+          document.getElementById('f-phone').value = '';
+          document.getElementById('f-price').value = '';
+          document.getElementById('f-note').value = '';
+          document.querySelector('input[name="f-visit-type"][value="new"]').checked = true;
+          if (serviceSelectInstance) serviceSelectInstance.clear();
+          else document.getElementById('f-service').selectedIndex = 0;
+          document.getElementById('f-service-custom').style.display = 'none';
+          selectedSlotId = null;
+          setDefaultDate();
+          loadAppointments();
+          loadActiveVisits();
+          loadVisits();
+          loadAvailableSlots();
+        } else {
+          errEl.textContent = data.error || 'Xatolik yuz berdi';
+          errEl.style.display = 'block';
+        }
       }
     } catch {
       errEl.textContent = 'Tarmoq xatosi';
@@ -1354,6 +1475,7 @@
     const btn = document.getElementById('btn-save-payment');
     const paidStr = document.getElementById('m-paid-amount').value.replace(/\D/g, '');
     const paidAmount = parseInt(paidStr);
+    const paymentMethod = document.getElementById('m-payment-method').value;
 
     btn.disabled = true; btn.textContent = 'Saqlanmoqda...';
     try {
@@ -1363,6 +1485,7 @@
         body: JSON.stringify({ 
           status: 'COMPLETED', 
           paidAmount,
+          paymentMethod,
           endTime: new Date().toISOString()
         })
       });
@@ -1395,9 +1518,14 @@
         const timeStr = _d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', timeZone: 'Asia/Tashkent' });
         const start = `${_d.getDate()} ${uzMonths[_d.getMonth()]} ${timeStr}`;
         const isFullPaid = v.paidAmount >= v.price;
+        let payMethodText = '';
+        if (v.paymentMethod) {
+          const methodMap = { CASH: "Naqd", CARD: "Karta", TRANSFER: "O'tkazma" };
+          payMethodText = `<span style="font-size:0.75rem; color:var(--text-muted); display:block;">(${methodMap[v.paymentMethod] || v.paymentMethod})</span>`;
+        }
         const paymentStatus = isFullPaid 
-          ? `<span style="color:var(--green)">✅ ${v.price.toLocaleString()}</span>`
-          : `<span style="color:var(--red)">⚠️ ${v.paidAmount.toLocaleString()} / ${v.price.toLocaleString()}</span>`;
+          ? `<span style="color:var(--green)">✅ ${v.price.toLocaleString()}</span>${payMethodText}`
+          : `<span style="color:var(--red)">⚠️ ${v.paidAmount.toLocaleString()} / ${v.price.toLocaleString()}</span>${payMethodText}`;
 
         const sourceBadge = v.source === 'BOOKED'
           ? '<span class="source-badge booked">📱 Online</span>'
@@ -1570,7 +1698,7 @@
           const tTimeStr = sDate.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent' });
           
           return `
-            <button type="button" class="slot-pill" data-start="${s.startTime}" data-duration="${s.duration}" onclick="selectFreeSlot('${s.startTime}', ${s.duration}, this)">
+            <button type="button" class="slot-pill" data-start="${s.startTime}" data-duration="${s.duration}" onclick="selectFreeSlot('${s.startTime}', ${s.duration}, '${s.id}', this)">
               ${tTimeStr}
             </button>
           `;
@@ -1602,7 +1730,8 @@
     }
   }
 
-  function selectFreeSlot(startTimeISO, durationMinutes, btnEl) {
+  function selectFreeSlot(startTimeISO, durationMinutes, slotId, btnEl) {
+    selectedSlotId = slotId;
     const startVal = new Date(startTimeISO);
     const endVal = new Date(startVal.getTime() + durationMinutes * 60000);
 

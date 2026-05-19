@@ -132,7 +132,7 @@ model Appointment {
   status       ApptStatus @default(SCHEDULED)
   cancelToken  String?    @unique
   cancelledBy  String? // 'PATIENT' | 'ADMIN' | 'NOSHOW' | 'NOSHOW_RESOLVED' | 'NOSHOW_UNREACHABLE'
-  cancelNote   String? @db.VarChar(1000) // reason entered by reception when cancelling
+  cancelNote   String?    @db.VarChar(1000) // reason entered by reception when cancelling
   callAttempts Int        @default(0)
 
   // Reminder flags — checked by hourly Vercel cron job
@@ -188,6 +188,7 @@ model Visit {
   serviceName   String
   price         Int // expected/total amount in UZS
   paidAmount    Int          @default(0) // actual amount paid so far
+  paymentMethod String? // CASH | CARD | TRANSFER
   status        VisitStatus  @default(COMPLETED)
   source        VisitSource  @default(WALKIN)
   startTime     DateTime     @default(now())
