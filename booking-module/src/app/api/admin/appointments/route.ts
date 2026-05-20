@@ -55,17 +55,28 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { slotId, procedureId, patientName, patientPhone, note } = body;
+  const { slotId, procedureId, patientName, patientPhone, note, firstName: reqFirstName, lastName: reqLastName, telegramPhone } = body;
 
-  if (!slotId || !procedureId || !patientName || !patientPhone) {
+  if (!slotId || !procedureId || !patientPhone || (!patientName && !reqFirstName)) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
   // 1. Create or Find Patient
   const cleanPhone = String(patientPhone).trim();
-  const parts = String(patientName).trim().split(' ');
-  const firstName = parts[0] || 'Bemor';
-  const lastName = parts.slice(1).join(' ') || '';
+  const cleanTgPhone = telegramPhone ? String(telegramPhone).trim() : null;
+
+  let firstName = reqFirstName ? String(reqFirstName).trim() : '';
+  let lastName = reqLastName ? String(reqLastName).trim() : '';
+
+  if (!firstName && patientName) {
+    const parts = String(patientName).trim().split(' ');
+    firstName = parts[0] || 'Bemor';
+    lastName = parts.slice(1).join(' ') || '';
+  }
+
+  if (!firstName) {
+    firstName = 'Bemor';
+  }
 
   let patient = await prisma.patient.findFirst({
     where: { phone: cleanPhone },
@@ -77,15 +88,20 @@ export async function POST(request: NextRequest) {
         phone: cleanPhone,
         firstName,
         lastName,
+        telegramPhone: cleanTgPhone,
         isVerified: true, // staff verified them
         source: 'ONLINE',
       },
     });
   } else {
-    // Keep name in sync
+    // Keep name and telegram phone in sync
     patient = await prisma.patient.update({
       where: { id: patient.id },
-      data: { firstName, lastName },
+      data: { 
+        firstName, 
+        lastName,
+        ...(cleanTgPhone ? { telegramPhone: cleanTgPhone } : {})
+      },
     });
   }
 

@@ -44,15 +44,34 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Deduplicate patients
+    // Deduplicate patients and count appointments
     const patientMap = new Map();
     for (const appt of appointments) {
       if (appt.patient) {
-        patientMap.set(appt.patient.id, appt.patient);
+        const pId = appt.patient.id;
+        if (!patientMap.has(pId)) {
+          patientMap.set(pId, {
+            id: appt.patient.id,
+            firstName: appt.patient.firstName,
+            lastName: appt.patient.lastName,
+            phone: appt.patient.phone,
+            telegramPhone: appt.patient.telegramPhone,
+            visitCount: 0
+          });
+        }
+        patientMap.get(pId).visitCount += 1;
       }
     }
 
     const patients = Array.from(patientMap.values());
+    // Sort by visitCount desc, then by firstName asc
+    patients.sort((a, b) => {
+      if (b.visitCount !== a.visitCount) {
+        return b.visitCount - a.visitCount;
+      }
+      return a.firstName.localeCompare(b.firstName);
+    });
+
     return NextResponse.json({ success: true, patients });
   } catch (error) {
     console.error('Error fetching doctor patients:', error);

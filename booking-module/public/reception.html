@@ -75,7 +75,7 @@
     th { background: #f1f5f9; padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
     td { padding: 13px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
-    .source-badge { padding: 3px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; }
+    .source-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
     .source-badge.booked { background: #e0f2fe; color: #0284c7; }
     .source-badge.walkin { background: #f3f4f6; color: #4b5563; }
     .price-cell { font-weight: 700; color: var(--teal-dark); white-space: nowrap; }
@@ -295,11 +295,19 @@
       </div>
       <div class="form-group">
         <label>Bemor ismi *</label>
-        <input type="text" id="f-patient" required placeholder="To'liq ism" />
+        <input type="text" id="f-patient" required placeholder="Ismi (Masalan: Alisher)" />
+      </div>
+      <div class="form-group">
+        <label>Bemor familiyasi *</label>
+        <input type="text" id="f-patient-surname" required placeholder="Familiyasi (Masalan: Toshmatov)" />
       </div>
       <div class="form-group" id="f-phone-group">
         <label>Telefon raqami *</label>
         <input type="tel" id="f-phone" placeholder="+998 90 000 00 00" />
+      </div>
+      <div class="form-group" id="f-tg-phone-group">
+        <label>Telegram raqami (ixtiyoriy)</label>
+        <input type="tel" id="f-tg-phone" placeholder="+998 90 000 00 00" />
       </div>
       <div class="form-group">
         <label>Xizmat turi *</label>
@@ -775,6 +783,34 @@
       });
 
       fPhone.addEventListener('focus', function(e) {
+        if (!e.target.value) {
+          e.target.value = '+998 ';
+        }
+      });
+    }
+
+    const fTgPhone = document.getElementById('f-tg-phone');
+    if (fTgPhone) {
+      fTgPhone.addEventListener('input', function(e) {
+        let valStr = e.target.value;
+        if (!valStr) return;
+        let x = valStr.replace(/\D/g, '').match(/(\d{0,3})(\d{0,2})(\d{0,3})(\d{0,2})(\d{0,2})/);
+        if (!x[1]) {
+          e.target.value = '';
+          return;
+        }
+        if (x[1] !== '998') {
+          x[1] = '998';
+        }
+        let val = '+998';
+        if (x[2]) val += ' ' + x[2];
+        if (x[3]) val += ' ' + x[3];
+        if (x[4]) val += ' ' + x[4];
+        if (x[5]) val += ' ' + x[5];
+        e.target.value = val;
+      });
+
+      fTgPhone.addEventListener('focus', function(e) {
         if (!e.target.value) {
           e.target.value = '+998 ';
         }
@@ -1337,8 +1373,13 @@
     toast.style.display = 'none'; errEl.style.display = 'none';
 
     const doctorId = document.getElementById('f-doctor').value;
-    const patientName = document.getElementById('f-patient').value.trim();
+    const firstName = document.getElementById('f-patient').value.trim();
+    const lastName = document.getElementById('f-patient-surname').value.trim();
+    const patientName = `${firstName} ${lastName}`;
     const patientPhone = document.getElementById('f-phone').value.trim();
+    const rawTgPhone = document.getElementById('f-tg-phone').value.trim();
+    const telegramPhone = (rawTgPhone === '+998' || rawTgPhone === '+998 ') ? '' : rawTgPhone;
+
     const serviceVal = document.getElementById('f-service').value;
     const serviceName = serviceVal === '__custom__'
       ? document.getElementById('f-service-custom').value.trim()
@@ -1355,7 +1396,7 @@
       note = `Takroriy qabul. ${note}`.trim();
     }
 
-    if (!doctorId || !patientName || !serviceName || !price) {
+    if (!doctorId || !firstName || !lastName || !serviceName || !price) {
       errEl.textContent = 'Iltimos, barcha majburiy maydonlarni to\'ldiring.';
       errEl.style.display = 'block';
       return;
@@ -1363,6 +1404,12 @@
 
     if (!patientPhone || !/^\+998 \d{2} \d{3} \d{2} \d{2}$/.test(patientPhone)) {
       errEl.textContent = 'Iltimos, to\'g\'ri telefon raqamini kiriting (+998 XX XXX XX XX).';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    if (telegramPhone && !/^\+998 \d{2} \d{3} \d{2} \d{2}$/.test(telegramPhone)) {
+      errEl.textContent = 'Iltimos, to\'g\'ri Telegram raqamini kiriting (+998 XX XXX XX XX).';
       errEl.style.display = 'block';
       return;
     }
@@ -1390,7 +1437,16 @@
         const res = await fetch('/api/admin/appointments', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
-          body: JSON.stringify({ slotId: selectedSlotId, procedureId, patientName, patientPhone, note })
+          body: JSON.stringify({ 
+            slotId: selectedSlotId, 
+            procedureId, 
+            patientName, 
+            firstName, 
+            lastName, 
+            patientPhone, 
+            telegramPhone, 
+            note 
+          })
         });
         const data = await res.json();
         if (res.ok && data.success) {
@@ -1399,7 +1455,9 @@
           setTimeout(() => toast.style.display = 'none', 4000);
           // Reset form
           document.getElementById('f-patient').value = '';
+          document.getElementById('f-patient-surname').value = '';
           document.getElementById('f-phone').value = '';
+          document.getElementById('f-tg-phone').value = '';
           document.getElementById('f-price').value = '';
           document.getElementById('f-note').value = '';
           document.querySelector('input[name="f-visit-type"][value="new"]').checked = true;
@@ -1419,11 +1477,10 @@
       } else {
         let finalPatientId = null;
         if (patientPhone) {
-          const parts = patientName.split(' ');
           const pRes = await fetch('/api/reception/patients', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
-            body: JSON.stringify({ firstName: parts[0] || 'Bemor', lastName: parts.slice(1).join(' ') || '', phone: patientPhone })
+            body: JSON.stringify({ firstName, lastName, phone: patientPhone, telegramPhone })
           });
           if (pRes.ok) {
             const pData = await pRes.json();
@@ -1443,7 +1500,9 @@
           setTimeout(() => toast.style.display = 'none', 4000);
           // Reset form
           document.getElementById('f-patient').value = '';
+          document.getElementById('f-patient-surname').value = '';
           document.getElementById('f-phone').value = '';
+          document.getElementById('f-tg-phone').value = '';
           document.getElementById('f-price').value = '';
           document.getElementById('f-note').value = '';
           document.querySelector('input[name="f-visit-type"][value="new"]').checked = true;
@@ -1981,7 +2040,7 @@
             }
 
             const sourceBadge = p.source === 'ONLINE' 
-              ? '<span class="source-badge booked">📱 Bot</span>' 
+              ? '<span class="source-badge booked">📱 Telegram Bot</span>' 
               : '<span class="source-badge walkin">🚶 Kelgan</span>';
 
             const tgPhone = p.telegramPhone || '-';
