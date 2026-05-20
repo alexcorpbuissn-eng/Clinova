@@ -311,7 +311,7 @@
       </div>
       <div class="form-group">
         <label>Xizmat turi *</label>
-        <select id="f-service" required>
+        <select id="f-service" multiple required>
           <option value="" disabled selected hidden>Xizmatni tanlang...</option>
           <option value="__custom__">Boshqa (qo'lda kiriting)</option>
         </select>
@@ -634,8 +634,9 @@
     if (serviceSelectInstance) serviceSelectInstance.destroy();
     serviceSelectInstance = new TomSelect('#f-service', {
       create: false,
+      plugins: ['remove_button'],
       sortField: { field: "text", direction: "asc" },
-      placeholder: "Xizmatni qidiring..."
+      placeholder: "Xizmatlarni tanlang..."
     });
   }
 
@@ -1338,21 +1339,34 @@
 
   document.getElementById('f-service').addEventListener('change', function() {
     selectedSlotId = null;
-    document.getElementById('f-service-custom').style.display = this.value === '__custom__' ? '' : 'none';
+    const selectedOpts = Array.from(this.selectedOptions);
+    const values = selectedOpts.map(opt => opt.value);
     
-    // Auto-calculate end time
-    const selected = this.options[this.selectedIndex];
-    const duration = parseInt(selected.dataset.duration || '30');
+    document.getElementById('f-service-custom').style.display = values.includes('__custom__') ? '' : 'none';
+    
+    // Auto-calculate end time and total price
+    let totalDuration = 0;
+    let totalPrice = 0;
+    
+    selectedOpts.forEach(opt => {
+      if (opt.value !== '__custom__') {
+        totalDuration += parseInt(opt.dataset.duration || '0');
+        totalPrice += parseInt(opt.dataset.price || '0');
+      }
+    });
+
+    if (totalDuration === 0) totalDuration = 30; // Default if nothing or only custom is selected
+
     if (startPicker && endPicker) {
       const start = startPicker.selectedDates[0] || new Date();
-      const end = new Date(start.getTime() + duration * 60000);
+      const end = new Date(start.getTime() + totalDuration * 60000);
       endPicker.setDate(end);
     }
 
-    // Auto-fill price
-    const price = selected.dataset.price;
-    if (price) {
-      document.getElementById('f-price').value = parseInt(price).toLocaleString('uz-UZ').replace(/,/g, '.');
+    if (totalPrice > 0) {
+      document.getElementById('f-price').value = totalPrice.toLocaleString('uz-UZ').replace(/,/g, '.');
+    } else {
+      document.getElementById('f-price').value = '';
     }
 
     loadAvailableSlots();
@@ -1380,10 +1394,12 @@
     const rawTgPhone = document.getElementById('f-tg-phone').value.trim();
     const telegramPhone = (rawTgPhone === '+998' || rawTgPhone === '+998 ') ? '' : rawTgPhone;
 
-    const serviceVal = document.getElementById('f-service').value;
-    const serviceName = serviceVal === '__custom__'
-      ? document.getElementById('f-service-custom').value.trim()
-      : serviceVal;
+    const selectedServiceOpts = Array.from(document.getElementById('f-service').selectedOptions);
+    const serviceValues = selectedServiceOpts.map(opt => opt.value);
+    
+    let serviceName = serviceValues.map(val => {
+      return val === '__custom__' ? document.getElementById('f-service-custom').value.trim() : val;
+    }).filter(Boolean).join(' + ');
     const priceStr = document.getElementById('f-price').value.replace(/\D/g, ''); 
     const price = parseInt(priceStr, 10);
     const startTime = document.getElementById('f-start-date').value;
@@ -1431,8 +1447,9 @@
     try {
       if (status === 'SCHEDULED') {
         const serviceSel = document.getElementById('f-service');
-        const selectedOpt = serviceSel.options[serviceSel.selectedIndex];
-        const procedureId = selectedOpt ? selectedOpt.dataset.id : null;
+        const selectedOpts = Array.from(serviceSel.selectedOptions);
+        const validOpt = selectedOpts.find(opt => opt.value !== '__custom__');
+        const procedureId = validOpt ? validOpt.dataset.id : null;
 
         const res = await fetch('/api/admin/appointments', {
           method: 'POST',
