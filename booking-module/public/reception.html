@@ -293,6 +293,12 @@
           <option value="" disabled selected hidden>Shifokor tanlang...</option>
         </select>
       </div>
+      <!-- Patient Autocomplete Search -->
+      <div class="form-group" style="position: relative;">
+        <label>Bemor qidirish (Avto-to'ldirish)</label>
+        <input type="text" id="f-auto-patient" placeholder="Ism yoki telefon..." autocomplete="off" oninput="onAutoPatientInput(this.value)" style="width:100%; padding:10px 14px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.92rem; outline:none;" />
+        <div id="f-auto-patient-results" style="display:none; position:absolute; top:calc(100% + 5px); left:0; right:0; background:#fff; border:1px solid var(--border); border-radius:10px; z-index:100; max-height:200px; overflow-y:auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></div>
+      </div>
       <div class="form-group">
         <label>Bemor ismi *</label>
         <input type="text" id="f-patient" required placeholder="Ismi (Masalan: Alisher)" />
@@ -331,6 +337,16 @@
           <option value="CARD">Plastik karta</option>
           <option value="TRANSFER">O'tkazma</option>
         </select>
+      </div>
+
+      <!-- Manual Duration Selector -->
+      <div class="form-group" id="f-duration-group" style="display:none; margin-bottom: 15px;">
+        <label>Qabul davomiyligi (shifokor vaqti)</label>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <input type="number" id="f-manual-duration" value="30" step="15" min="15" style="width:80px; padding:10px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.93rem; outline:none; text-align:center;" onchange="updateDurationAndSlots()" />
+          <span style="font-size:0.85rem; color:var(--text-muted);">daqiqa</span>
+        </div>
+        <p style="font-size:0.75rem; color:var(--text-muted); margin-top:5px;">Vaqtni qo'lda o'zgartirish orqali bo'sh vaqtlarni qayta hisoblash (masalan, 15, 30, 45, 60).</p>
       </div>
 
       <!-- Available Slots Container -->
@@ -762,6 +778,7 @@
     await loadAppointments();
     await loadActiveVisits();
     await loadVisits();
+    await loadAllPatientsForAutocomplete();
 
     // Initialize auto-formatting mask for patient phone
     const fPhone = document.getElementById('f-phone');
@@ -1357,6 +1374,9 @@
 
     if (totalDuration === 0) totalDuration = 30; // Default if nothing or only custom is selected
 
+    const durInput = document.getElementById('f-manual-duration');
+    if (durInput) durInput.value = totalDuration;
+
     if (startPicker && endPicker) {
       const start = startPicker.selectedDates[0] || new Date();
       const end = new Date(start.getTime() + totalDuration * 60000);
@@ -1787,6 +1807,58 @@
     }, 4000);
   }
 
+  function updateDurationAndSlots() {
+    const durInput = document.getElementById('f-manual-duration');
+    if (!durInput) return;
+    const dur = parseInt(durInput.value) || 30;
+    
+    if (startPicker && endPicker) {
+      const start = startPicker.selectedDates[0] || new Date();
+      const end = new Date(start.getTime() + dur * 60000);
+      endPicker.setDate(end);
+    }
+    
+    loadAvailableSlots();
+  }
+
+  function onAutoPatientInput(val) {
+    const resDiv = document.getElementById('f-auto-patient-results');
+    if (!val || val.length < 2) {
+      resDiv.style.display = 'none';
+      return;
+    }
+    const term = val.toLowerCase();
+    const filtered = allPatients.filter(p => 
+      p.firstName.toLowerCase().includes(term) || 
+      (p.lastName && p.lastName.toLowerCase().includes(term)) || 
+      (p.phone && p.phone.includes(term))
+    ).slice(0, 5);
+
+    if (filtered.length === 0) {
+      resDiv.innerHTML = '<div style="padding:10px; color:var(--text-muted); font-size:0.9rem;">Bemor topilmadi...</div>';
+    } else {
+      resDiv.innerHTML = filtered.map(p => `
+        <div style="padding:10px; border-bottom:1px solid #eee; cursor:pointer;" onmousedown="selectAutoPatient('${p.id}')">
+          <div style="font-weight:600; color:var(--navy);">${p.firstName} ${p.lastName || ''}</div>
+          <div style="font-size:0.8rem; color:var(--text-muted);">${p.phone || ''}</div>
+        </div>
+      `).join('');
+    }
+    resDiv.style.display = 'block';
+  }
+
+  function selectAutoPatient(id) {
+    const p = allPatients.find(x => x.id === id);
+    if (p) {
+      document.getElementById('f-patient').value = p.firstName || '';
+      document.getElementById('f-patient-surname').value = p.lastName || '';
+      document.getElementById('f-phone').value = p.phone || '';
+      document.getElementById('f-tg-phone').value = p.telegramPhone || '';
+      document.getElementById('f-auto-patient').value = '';
+    }
+    document.getElementById('f-auto-patient-results').style.display = 'none';
+  }
+
   async function loadAvailableSlots() {
     const docId = document.getElementById('f-doctor').value;
     const serviceSel = document.getElementById('f-service');
@@ -1796,20 +1868,28 @@
 
     if (!docId) {
       groupEl.style.display = 'none';
+      if (document.getElementById('f-duration-group')) document.getElementById('f-duration-group').style.display = 'none';
       return;
     }
 
     groupEl.style.display = 'block';
+    if (document.getElementById('f-duration-group')) document.getElementById('f-duration-group').style.display = 'block';
     listEl.innerHTML = '<div style="font-size:0.85rem; color:var(--text-muted); text-align:center; padding:10px;">Yuklanmoqda...</div>';
     loadingEl.style.display = 'inline';
 
     try {
-      const selectedOpt = serviceSel.options[serviceSel.selectedIndex];
-      const procId = (selectedOpt && selectedOpt.value !== '__custom__') ? (selectedOpt.dataset.id || '') : '';
+      const manualDurInput = document.getElementById('f-manual-duration');
+      const customDur = manualDurInput ? manualDurInput.value : '';
       
       let url = `/api/public/doctors/${docId}/slots`;
-      if (procId) {
-        url += `?procedureId=${procId}`;
+      if (customDur) {
+        url += `?duration=${customDur}`;
+      } else {
+        const selectedOpt = serviceSel.options[serviceSel.selectedIndex];
+        const procId = (selectedOpt && selectedOpt.value !== '__custom__') ? (selectedOpt.dataset.id || '') : '';
+        if (procId) {
+          url += `?procedureId=${procId}`;
+        }
       }
 
       const res = await fetch(url);
@@ -1929,6 +2009,20 @@
   // --- Patients Directory Tab ---
   let allPatients = [];
   let currentPatientFilter = 'all';
+
+  async function loadAllPatientsForAutocomplete() {
+    try {
+      const res = await fetch('/api/admin/patients', {
+        headers: { 'Authorization': `Bearer ${adminToken}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        allPatients = data.patients;
+      }
+    } catch (err) {
+      console.error('Failed to load patients for autocomplete', err);
+    }
+  }
 
   async function loadPatientsTab() {
     const container = document.getElementById('patients-tab-container');

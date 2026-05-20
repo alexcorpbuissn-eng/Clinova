@@ -25,7 +25,15 @@ export async function GET(request: Request) {
       return NextResponse.json({ success: false, error: 'Patient not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, patient });
+    const visits = await prisma.visit.findMany({
+      where: { patientId: patientId, status: 'COMPLETED' },
+      select: { price: true },
+    });
+
+    const totalVisits = visits.length;
+    const totalPaid = visits.reduce((sum, v) => sum + (v.price || 0), 0);
+
+    return NextResponse.json({ success: true, patient, stats: { totalVisits, totalPaid } });
   } catch (error) {
     console.error('Error fetching profile:', error);
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });

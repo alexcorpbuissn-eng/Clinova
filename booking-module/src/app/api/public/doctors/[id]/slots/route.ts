@@ -17,10 +17,13 @@ export async function GET(
 ) {
   const { id } = await params;
   const procedureId = req.nextUrl.searchParams.get('procedureId');
+  const customDuration = req.nextUrl.searchParams.get('duration');
 
   let procedureDuration: number | null = null;
 
-  if (procedureId) {
+  if (customDuration && !isNaN(Number(customDuration))) {
+    procedureDuration = Number(customDuration);
+  } else if (procedureId) {
     const procedure = await prisma.procedure.findUnique({
       where: { id: procedureId },
       select: { durationMinutes: true },

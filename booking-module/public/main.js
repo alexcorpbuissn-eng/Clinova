@@ -318,18 +318,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const fFirst = localStorage.getItem('fFirst');
     const fLast = localStorage.getItem('fLast');
     
-    // 1. Dynamic "Mening qabullarim" Link
-    if (patientId && navLinksList) {
-      const existingLink = navLinksList.querySelector('a[href="my-appointments.html"]');
-      if (!existingLink) {
-        const myApptsLink = document.createElement('a');
-        myApptsLink.href = 'my-appointments.html';
-        myApptsLink.className = 'nav-link';
-        myApptsLink.textContent = 'Mening qabullarim';
-        navLinksList.appendChild(myApptsLink);
-      }
-    }
-
     // 2. Profile Widget
     const profileWrap = document.createElement('div');
     profileWrap.className = 'nav-profile-widget';

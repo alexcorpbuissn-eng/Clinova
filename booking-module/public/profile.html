@@ -84,6 +84,14 @@
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Shaxsiy ma'lumotlar
       </button>
+      <button class="sidebar-link" onclick="switchProfileTab('appointments', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Mening qabullarim
+      </button>
+      <button class="sidebar-link" onclick="switchProfileTab('history', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Tarix (Tashriflar)
+      </button>
       <button class="sidebar-link" onclick="switchProfileTab('notifications', this)">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         Xabarnomalar
@@ -134,6 +142,34 @@
         </form>
       </div>
 
+      <!-- Appointments Tab -->
+      <div id="tab-appointments" class="profile-tab-content">
+        <div class="tab-header">
+          <h2>Mening qabullarim</h2>
+          <p>Sizning faol va bo'lajak qabullaringiz ro'yxati.</p>
+        </div>
+        <div id="cancel-info" style="margin-bottom: 20px; font-size: 0.95rem; color: var(--navy); display: none; background: #e0f2fe; padding: 12px; border-radius: 8px; border: 1px solid #bae6fd;"></div>
+        <div id="appt-container" class="appt-list" style="display: flex; flex-direction: column; gap: 16px;"></div>
+      </div>
+
+      <!-- History Tab -->
+      <div id="tab-history" class="profile-tab-content">
+        <div class="tab-header">
+          <h2>Tarix (Tashriflar)</h2>
+          <p>Klinikamizga qilgan tashriflaringiz tarixi va statistikasi.</p>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+          <div style="background: #f8fafc; border: 1px solid var(--border); padding: 20px; border-radius: 12px; text-align: center;">
+            <div style="font-size: 2.5rem; font-weight: 700; color: var(--navy);" id="hist-total-visits">0</div>
+            <div style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">Jami tashriflar</div>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid var(--border); padding: 20px; border-radius: 12px; text-align: center;">
+            <div style="font-size: 1.5rem; font-weight: 700; color: var(--teal-dark); margin-top: 10px;" id="hist-total-paid">0 so'm</div>
+            <div style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">To'langan summa</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Notifications Tab -->
       <div id="tab-notifications" class="profile-tab-content">
         <div class="tab-header">
@@ -141,7 +177,7 @@
           <p>Tizimdan kelgan so'nggi bildirishnomalar.</p>
         </div>
         <div class="empty-state">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 48px; height: 48px; stroke-width: 1; margin-bottom: 16px; opacity: 0.5;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           <div>Hozircha xabarnomalar yo'q.</div>
         </div>
       </div>
@@ -206,6 +242,12 @@
         document.getElementById('sidebar-name').textContent = `${data.patient.firstName || ''} ${data.patient.lastName || ''}`;
         document.getElementById('sidebar-avatar').textContent = (data.patient.firstName || 'B')[0].toUpperCase();
         
+        // Populate stats
+        if (data.stats) {
+          document.getElementById('hist-total-visits').textContent = data.stats.totalVisits;
+          document.getElementById('hist-total-paid').textContent = new Intl.NumberFormat('uz-UZ').format(data.stats.totalPaid) + " so'm";
+        }
+
         // Format phone nicely
         let phone = data.patient.telegramPhone || '';
         if (phone.startsWith('+')) {
@@ -226,6 +268,152 @@
       document.getElementById('loader').style.display = 'none';
       document.getElementById('profile-content').style.display = 'block';
       err("Server bilan bog'lanishda xatolik");
+    }
+  }
+
+  // --- Appointments Logic ---
+  let activeIntervals = [];
+
+  function fmtTime(utcStr) {
+    return new Date(utcStr).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Tashkent'});
+  }
+  function fmtDate(utcStr) {
+    const _d = new Date(utcStr);
+    const _uzMonths = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'];
+    return `${_d.getDate()}-${_uzMonths[_d.getMonth()]} ${_d.getFullYear()}`;
+  }
+
+  async function fetchAppts() {
+    try {
+      const res = await fetch(`${API}/api/public/appointments?patientId=${patientId}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      renderAppts(data.appointments, data.remainingCancellations);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function renderAppts(appts, remainingCancellations) {
+    activeIntervals.forEach(clearInterval);
+    activeIntervals = [];
+
+    const c = document.getElementById('appt-container');
+    const info = document.getElementById('cancel-info');
+    
+    if (remainingCancellations !== undefined) {
+      if (remainingCancellations === 0) {
+        info.innerHTML = `Siz bugungi bekor qilish limitidan (2 ta) to'liq foydalandingiz.<br><strong style="color:#be123c; display:inline-block; margin-top:6px;">Muammoni hal qilish uchun markaz bilan bog'laning: +998 90 123 45 67</strong>`;
+        info.style.background = '#fff1f2';
+        info.style.border = '1px solid #fecdd3';
+        info.style.color = '#be123c';
+      } else {
+        info.innerHTML = `Sizda bugun bekor qilish uchun <strong>${remainingCancellations} ta</strong> urinish qoldi (Maksimum 2 ta).`;
+        info.style.background = '#e0f2fe';
+        info.style.border = '1px solid #bae6fd';
+        info.style.color = 'var(--navy)';
+      }
+      info.style.display = 'block';
+    } else {
+      info.style.display = 'none';
+    }
+
+    if (!appts || appts.length === 0) {
+      c.innerHTML = `
+        <div class="empty-state">
+          <h3>Sizda faol qabullar yo'q</h3>
+          <p>Yangi qabulga yozilish uchun shifokor tanlang.</p>
+          <a href="booking.html" class="btn-submit-booking" style="display:inline-block;padding:10px 24px;border-radius:8px; text-decoration: none; width: auto;">Yangi qabul</a>
+        </div>
+      `;
+      return;
+    }
+
+    c.innerHTML = '';
+    appts.forEach(a => {
+      const card = document.createElement('div');
+      card.style = 'background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center;';
+      
+      const timerId = `timer-${a.id}`;
+      const btnId = `btn-${a.id}`;
+
+      card.innerHTML = `
+        <div class="appt-info">
+          <span style="display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; background: #dcfce7; color: #166534; margin-bottom: 10px;">Faol</span>
+          <h3 style="margin: 0 0 6px; font-size: 1.1rem; color: var(--navy);">Dr. ${a.doctor.firstName} ${a.doctor.lastName}</h3>
+          <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Protsedura: <strong style="color: var(--teal-dark);">${a.procedure.name}</strong></p>
+          <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Sana: <strong style="color: var(--teal-dark);">${fmtDate(a.slot.startTime)}, ${fmtTime(a.slot.startTime)}</strong></p>
+        </div>
+        <div style="text-align:right">
+          <div id="${timerId}" style="font-size:0.85rem; color:#ef4444; margin-bottom: 8px; font-weight: 500;"></div>
+          <button id="${btnId}" onclick="cancelAppt('${a.id}', this)" style="display:none; background: #fee2e2; color: #991b1b; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;">Bekor qilish</button>
+        </div>
+      `;
+      c.appendChild(card);
+
+      const bookedAt = new Date(a.createdAt).getTime();
+      const slotTime = new Date(a.slot.startTime).getTime();
+
+      function updateTimer() {
+        const now = Date.now();
+        const minsSince = (now - bookedAt) / 60000;
+        
+        let canCancel = false;
+        let timeText = '';
+        
+        if (remainingCancellations === 0) {
+          timeText = "Markaz bilan bog'laning: +998 90 123 45 67";
+        } else if (minsSince <= 15) {
+          canCancel = true;
+          const timeLeftMs = (bookedAt + 15 * 60000) - now;
+          const m = Math.floor(timeLeftMs / 60000);
+          const s = Math.floor((timeLeftMs % 60000) / 1000);
+          timeText = `Bekor qilish: ${m} daq ${s} soniya`;
+        } else {
+          timeText = "Bekor qilish vaqti o'tib ketgan.";
+        }
+
+        const timerEl = document.getElementById(timerId);
+        const btnEl = document.getElementById(btnId);
+        
+        if (timerEl) timerEl.textContent = timeText;
+        if (btnEl) {
+          if (canCancel) {
+            btnEl.style.display = 'inline-block';
+          } else {
+            btnEl.style.display = 'none';
+          }
+        }
+      }
+      
+      updateTimer();
+      activeIntervals.push(setInterval(updateTimer, 1000));
+    });
+  }
+
+  async function cancelAppt(id, btn) {
+    if (!confirm('Haqiqatan ham qabulni bekor qilmoqchimisiz?')) return;
+    btn.disabled = true;
+    btn.textContent = 'Kuting...';
+    try {
+      const res = await fetch(`${API}/api/public/appointments/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appointmentId: id, patientId })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert('Qabul bekor qilindi.');
+        fetchAppts();
+      } else {
+        alert(data.error || 'Bekor qilishda xatolik yuz berdi');
+        btn.disabled = false;
+        btn.textContent = 'Bekor qilish';
+      }
+    } catch (e) {
+      alert('Server xatosi');
+      btn.disabled = false;
+      btn.textContent = 'Bekor qilish';
     }
   }
 
@@ -287,6 +475,7 @@
   });
 
   fetchProfile();
+  fetchAppts();
 </script>
 </body>
 </html>
