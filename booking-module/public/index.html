@@ -509,6 +509,71 @@
     </script>
   </section>
 
+  <!-- ========= DOCTORS SECTION ========= -->
+  <section class="doctors-section" id="doctors" style="background:#fff; padding:80px 0;">
+    <div class="container">
+      <div class="section-header" style="text-align:center; margin-bottom: 50px;">
+        <span style="background-color: #e0f2fe; color: #0369a1; padding: 6px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Bizning Jamoa</span>
+        <h2 class="section-title center" style="margin-top: 16px;">O'z ishining ustalari</h2>
+        <div style="width: 40px; height: 2px; background-color: var(--teal); margin: 24px auto;"></div>
+        <p class="section-sub">Sog'ligingizni tajribali va ishonchli mutaxassislarga topshiring</p>
+      </div>
+      
+      <style>
+        .home-docs-scroll { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 24px; scroll-snap-type: x mandatory; scrollbar-width: thin; scrollbar-color: var(--teal) #f1f5f9; }
+        .home-docs-scroll::-webkit-scrollbar { height: 8px; }
+        .home-docs-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .home-docs-scroll::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 10px; }
+        .home-doc-card { min-width: 280px; max-width: 300px; background: #fff; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; scroll-snap-align: start; flex: 0 0 auto; transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        .home-doc-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0,0,0,0.06); border-color: #bae6fd; }
+        .home-doc-img { height: 320px; background: #f8fafc; position: relative; overflow: hidden; border-bottom: 1px solid var(--border); }
+        .home-doc-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+        .home-doc-card:hover .home-doc-img img { transform: scale(1.05); }
+      </style>
+
+      <div id="home-doctors-container" class="home-docs-scroll">
+        <div style="width: 100%; text-align: center; color: var(--text-muted); padding: 40px;">Shifokorlar yuklanmoqda...</div>
+      </div>
+      
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="about.html#team" style="display: inline-flex; align-items: center; gap: 8px; color: var(--teal-dark); font-weight: 600; text-decoration: none;">
+          Barcha shifokorlarni ko'rish
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <script>
+      async function loadHomeDoctors() {
+        try {
+          const res = await fetch('/api/public/doctors');
+          const data = await res.json();
+          if (data.success && data.doctors && data.doctors.length > 0) {
+            const container = document.getElementById('home-doctors-container');
+            container.innerHTML = data.doctors.map(d => `
+              <div class="home-doc-card">
+                <div class="home-doc-img">
+                  ${d.photoUrl 
+                    ? `<img src="${d.photoUrl}" alt="${d.firstName}" loading="lazy" />` 
+                    : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 5rem; color: #cbd5e1; background: #f1f5f9;">👨‍⚕️</div>`
+                  }
+                </div>
+                <div style="padding: 24px; text-align: center;">
+                  <h3 style="margin: 0 0 6px; font-size: 1.25rem; color: var(--navy); font-weight: 700;">Dr. ${d.firstName} ${d.lastName}</h3>
+                  <div style="color: var(--teal-dark); font-weight: 600; font-size: 0.9rem; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.05em;">${d.specialty}</div>
+                  <a href="booking.html?doctor=${d.id}" class="btn-outline" style="display: block; width: 100%; text-align: center; border: 2px solid var(--border); color: var(--navy); padding: 10px; border-radius: 10px; text-decoration: none; font-size: 0.95rem; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='var(--teal)'; this.style.color='#fff'; this.style.borderColor='var(--teal)';" onmouseout="this.style.background='transparent'; this.style.color='var(--navy)'; this.style.borderColor='var(--border)';">Qabulga yozilish</a>
+                </div>
+              </div>
+            `).join('');
+          }
+        } catch(e) {
+          console.error('Error loading doctors', e);
+        }
+      }
+      document.addEventListener('DOMContentLoaded', loadHomeDoctors);
+    </script>
+  </section>
+
   <!-- ========= TESTIMONIALS ========= -->
   <section class="testimonials" id="testimonials">
     <div class="container">

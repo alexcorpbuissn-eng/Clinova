@@ -27,11 +27,11 @@ export async function GET(request: Request) {
 
     const visits = await prisma.visit.findMany({
       where: { patientId: patientId, status: 'COMPLETED' },
-      select: { price: true },
+      select: { paidAmount: true },
     });
 
     const totalVisits = visits.length;
-    const totalPaid = visits.reduce((sum, v) => sum + (v.price || 0), 0);
+    const totalPaid = visits.reduce((sum, v) => sum + (v.paidAmount || 0), 0);
 
     return NextResponse.json({ success: true, patient, stats: { totalVisits, totalPaid } });
   } catch (error) {
