@@ -119,7 +119,7 @@
         <!-- STEP 2: Day + Procedure + Slot -->
         <div id="s2" style="display:none">
           <button class="nav-back" id="back12">← Orqaga</button>
-          <p class="section-label">2-qadam — Kun, protsedura va vaqt tanlang</p>
+          <p class="section-label">2-qadam — Kun va vaqt tanlang</p>
           
           <div class="step2-panel" style="margin-bottom: 20px; width: 100%; border: none; padding: 0;">
             <div class="step2-panel-title" style="margin-bottom: 15px;">
@@ -130,19 +130,19 @@
           </div>
 
           <div class="step2-split">
-            <!-- Left: procedures -->
-            <div class="step2-panel">
+            <!-- Left: procedures (HIDDEN for public) -->
+            <div class="step2-panel" style="display:none;">
               <div class="step2-panel-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6M9 16h6M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l5 5v11a2 2 0 0 1-2 2z"/></svg>
-                2. Protsedura
+                Protsedura
               </div>
               <div id="proc-container"><div class="state-msg"><div class="spinner"></div></div></div>
             </div>
             <!-- Right: time slots -->
-            <div class="step2-panel">
+            <div class="step2-panel" style="width: 100%;">
               <div class="step2-panel-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                3. Bo'sh vaqtlar
+                2. Bo'sh vaqtlar
               </div>
               <div class="step2-slots-wrap" id="slot-section">
                 <div class="slot-placeholder" id="slot-placeholder">
@@ -430,7 +430,6 @@ async function loadProcedures(doctorId, autoSelectProcedureId = null) {
       btn.innerHTML=`<strong>${p.name}</strong><span>⏱ ${p.durationMinutes} daqiqa</span>`;
       btn.onclick = () => {
         if (!selDateKey) {
-          // If auto-selecting, we might not have a selDateKey yet, default to today
           const todayBtn = document.querySelector('.day-btn');
           if (todayBtn) { todayBtn.click(); }
         }
@@ -445,6 +444,16 @@ async function loadProcedures(doctorId, autoSelectProcedureId = null) {
       list.appendChild(btn);
     });
     c.innerHTML=''; c.appendChild(list);
+
+    // Auto-select "Konsultatsiya" or first procedure for the public UI
+    let targetIndex = procedures.findIndex(p => p.name.toLowerCase().includes('konsult'));
+    if (targetIndex === -1) targetIndex = procedures.findIndex(p => p.name.toLowerCase().includes('ko\'rik'));
+    if (targetIndex === -1) targetIndex = 0;
+
+    const btns = list.querySelectorAll('.proc-btn');
+    if (btns[targetIndex]) {
+      btns[targetIndex].click();
+    }
 
     if (autoSelectProcedureId) {
       const targetProc = procedures.find(p => p.id === autoSelectProcedureId);
