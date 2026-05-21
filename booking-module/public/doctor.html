@@ -2106,13 +2106,8 @@
           const procName = isBreak ? "Tanaffus" : (a.procedure ? a.procedure.name : "Birlamchi qabul");
           const attempts = a.callAttempts || 0;
 
-          // Main actions section
-          const actionsSection = isBreak ? '' : `
-            <div class="card-actions-wrap">
-              <button class="btn-action-card btn-cancel-card" onclick="sidebarCancel('${a.id}')">Kelmadi</button>
-              <button class="btn-action-card btn-complete" onclick="sidebarComplete('${a.id}')">Keldi</button>
-            </div>
-          `;
+          // Main actions section removed for upcoming appointments as they are confusing
+          const actionsSection = '';
 
           return `
             <div class="appt-card" style="${isBreak ? 'border-left: 3px solid var(--color-break);' : 'border-left: 3px solid var(--color-busy);'}">
