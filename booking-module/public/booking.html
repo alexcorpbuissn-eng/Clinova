@@ -476,7 +476,7 @@ async function loadSlots(doctorId, procedureId) {
   if (ph) ph.style.display='none';
   sc.innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
   try {
-    const {slots} = await fetch(`${API}/api/public/doctors/${doctorId}/slots?procedureId=${procedureId}`).then(r=>r.json());
+    const {slots} = await fetch(`${API}/api/public/doctors/${doctorId}/slots?procedureId=${procedureId}&duration=${selProc.durationMinutes}`).then(r=>r.json());
     currentSlots = slots || [];
     renderSlotsForSelectedDay();
   } catch(e) { sc.innerHTML='<div class="state-msg">❌ Xatolik.</div>'; }
@@ -556,6 +556,7 @@ document.getElementById('patient-form').addEventListener('submit', async e => {
         lastName: fLast,
         phone: fPhone,
         description: document.getElementById('fDesc').value.trim(),
+        draftId: draftId || undefined
       })
     });
     const data = await res.json();
@@ -608,8 +609,53 @@ async function loadPatientProfile() {
         phoneInput.value = originalVerifiedPhone;
       }
     }
-  } catch (err) {
-    console.error("Error loading patient profile:", err);
+  } catch(e) {}
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+const draftId = urlParams.get('draftId');
+
+async function handleDraft() {
+  if (!draftId || !patientId) return;
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API}/api/public/drafts?patientId=${patientId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      const draft = data.drafts.find(d => d.id === draftId);
+      if (draft) {
+        // Pre-select Doctor
+        selDoc = {
+          id: draft.doctor.id,
+          firstName: draft.doctor.firstName,
+          lastName: draft.doctor.lastName,
+          specialty: draft.doctor.specialty
+        };
+        
+        // Pre-select Procedure
+        selProc = {
+          id: draft.procedure.id,
+          name: draft.procedure.name,
+          price: draft.procedure.price,
+          durationMinutes: draft.procedure.durationMinutes
+        };
+
+        // UI Updates to lock steps
+        document.getElementById('step1').style.display = 'none';
+        document.getElementById('step2').style.display = 'none';
+        document.getElementById('step3').style.display = 'block';
+        document.getElementById('prog1').classList.remove('active');
+        document.getElementById('prog2').classList.remove('active');
+        document.getElementById('prog3').classList.add('active');
+
+        // Fetch slots
+        fetchSlots();
+      }
+    }
+  } catch (e) {
+    console.error(e);
   }
 }
 
@@ -619,6 +665,9 @@ document.getElementById('back23').onclick = () => { selSlot=null; setStep(2); };
 
 // ── Init ─────────────────────────────────────────────────────────────────
 loadDoctors();
+loadPatientProfile().then(() => {
+  handleDraft();
+});
 </script>
 <script src="main.js"></script>
 </body>

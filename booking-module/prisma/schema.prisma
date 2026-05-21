@@ -21,6 +21,7 @@ model Doctor {
   appointments Appointment[]
   procedures   Procedure[]
   visits       Visit[]
+  savedDrafts  SavedDraft[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
@@ -38,6 +39,7 @@ model Procedure {
   price           Int           @default(0) // Expected price in UZS
   isActive        Boolean       @default(true)
   appointments    Appointment[]
+  savedDrafts     SavedDraft[]
   createdAt       DateTime      @default(now())
 
   @@index([doctorId])
@@ -81,6 +83,7 @@ model Patient {
   lastCancellationDate DateTime?
   appointments         Appointment[]
   visits               Visit[]
+  savedDrafts          SavedDraft[]
   createdAt            DateTime      @default(now())
 
   @@index([telegramPhone])
@@ -147,6 +150,33 @@ model Appointment {
   @@index([patientId])
   @@index([status, reminderSent24h, reminderSent2h])
 }
+
+// ─────────────────────────────────────────────
+// SAVED DRAFTS (new)
+// For saved or "delayed" appointments where the 
+// doctor and procedure are known but the time is not.
+// ─────────────────────────────────────────────
+model SavedDraft {
+  id              String      @id @default(uuid())
+  patientId       String
+  patient         Patient     @relation(fields: [patientId], references: [id])
+  doctorId        String
+  doctor          Doctor      @relation(fields: [doctorId], references: [id])
+  procedureId     String
+  procedure       Procedure   @relation(fields: [procedureId], references: [id])
+  customDuration  Int?        // Optional custom duration
+  status          DraftStatus @default(PENDING)
+  createdAt       DateTime    @default(now())
+
+  @@index([patientId])
+}
+
+enum DraftStatus {
+  PENDING
+  CONVERTED
+  CANCELLED
+}
+
 
 enum ApptStatus {
   SCHEDULED

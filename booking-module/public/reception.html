@@ -388,10 +388,11 @@
         <input type="text" id="f-note" placeholder="Qo'shimcha ma'lumot..." />
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 15px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px;">
         <button class="btn-submit" id="btn-book" onclick="submitVisit('SCHEDULED')" style="background: var(--teal); font-size: 0.82rem; padding: 12px 6px; margin-top: 0; display: flex; align-items: center; justify-content: center; gap: 4px;">📅 Bron qilish</button>
+        <button class="btn-submit" id="btn-draft" onclick="submitDraft()" style="background: #eab308; color: #fff; font-size: 0.82rem; padding: 12px 6px; margin-top: 0; display: flex; align-items: center; justify-content: center; gap: 4px;">⏳ Saqlab qo'yish</button>
         <button class="btn-submit" id="btn-start" onclick="submitVisit('IN_PROGRESS')" style="background: #a855f7; font-size: 0.82rem; padding: 12px 6px; margin-top: 0; display: flex; align-items: center; justify-content: center; gap: 4px;">⚡ Boshlash</button>
-        <button class="btn-submit" id="btn-submit" onclick="submitVisit('COMPLETED')" style="background: var(--navy); font-size: 0.82rem; padding: 12px 6px; margin-top: 0; display: flex; align-items: center; justify-content: center; gap: 4px;">Qayd etish</button>
+        <button class="btn-submit" id="btn-submit" onclick="submitVisit('COMPLETED')" style="background: var(--navy); font-size: 0.82rem; padding: 12px 6px; margin-top: 0; display: flex; align-items: center; justify-content: center; gap: 4px;">✅ Qayd etish</button>
       </div>
       <div class="success-toast" id="success-toast">✅ Tashrif muvaffaqiyatli qayd etildi!</div>
       <div class="err-form" id="err-form"></div>
@@ -1556,6 +1557,86 @@
           errEl.textContent = data.error || 'Xatolik yuz berdi';
           errEl.style.display = 'block';
         }
+      }
+    } catch {
+      errEl.textContent = 'Tarmoq xatosi';
+      errEl.style.display = 'block';
+    }
+    btn.disabled = false; btn.textContent = oldTxt;
+  }
+
+  // ── Save Draft ───────────────────────────────────────────────
+  async function submitDraft() {
+    const btn = document.getElementById('btn-draft');
+    const toast = document.getElementById('success-toast');
+    const errEl = document.getElementById('err-form');
+    toast.style.display = 'none'; errEl.style.display = 'none';
+
+    const doctorId = document.getElementById('f-doctor').value;
+    // We must find the patient in the DB to save a draft (so they can see it in their profile).
+    // The patientId is populated if they were selected from the dropdown, but we also search by phone.
+    const phone = document.getElementById('f-phone').value.trim();
+    if (!doctorId) {
+      errEl.textContent = "Iltimos, shifokorni tanlang.";
+      errEl.style.display = 'block'; return;
+    }
+    if (!phone) {
+      errEl.textContent = "Iltimos, bemor telefon raqamini kiriting (yoki bemorni qidiruvdan tanlang).";
+      errEl.style.display = 'block'; return;
+    }
+
+    const serviceSel = document.getElementById('f-service');
+    const selectedOpts = Array.from(serviceSel.selectedOptions);
+    const validOpt = selectedOpts.find(opt => opt.value !== '__custom__');
+    const procedureId = validOpt ? validOpt.dataset.id : null;
+
+    if (!procedureId) {
+      errEl.textContent = "Saqlab qo'yish uchun aniq xizmat (protsedura) tanlanishi shart (qo'lda kiritish mumkin emas).";
+      errEl.style.display = 'block'; return;
+    }
+
+    btn.disabled = true; const oldTxt = btn.textContent; btn.textContent = '...';
+    try {
+      // First, try to ensure patient exists
+      let finalPatientId = null;
+      // We will just use the backend's POST /api/reception/patients if we need to ensure patient
+      // Actually, since this is for returning patients, reception SHOULD use the search bar.
+      // If patientId isn't stored anywhere easily accessible, we might need to fetch by phone.
+      const pRes = await fetch('/api/reception/patients?search=' + encodeURIComponent(phone), { headers: { 'Authorization': `Bearer ${adminToken}` } });
+      const pData = await pRes.json();
+      if (pData.success && pData.patients && pData.patients.length > 0) {
+        finalPatientId = pData.patients[0].id;
+      } else {
+        errEl.textContent = "Bemor bazada topilmadi. Avval bemorni qidiruvdan tanlang yoki qo'shing.";
+        errEl.style.display = 'block'; btn.disabled = false; btn.textContent = oldTxt; return;
+      }
+
+      const customDuration = document.getElementById('f-manual-duration').value;
+
+      const res = await fetch('/api/reception/drafts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+        body: JSON.stringify({ doctorId, patientId: finalPatientId, procedureId, customDuration })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.textContent = "⏳ Saqlandi! Bemor o'z profilidan davom ettirishi mumkin.";
+        toast.style.display = 'block';
+        setTimeout(() => toast.style.display = 'none', 4000);
+        // Reset form
+        document.getElementById('f-patient').value = '';
+        document.getElementById('f-patient-surname').value = '';
+        document.getElementById('f-phone').value = '';
+        document.getElementById('f-tg-phone').value = '';
+        document.getElementById('f-price').value = '';
+        document.getElementById('f-note').value = '';
+        if (serviceSelectInstance) serviceSelectInstance.clear();
+        else document.getElementById('f-service').selectedIndex = 0;
+        selectedSlotId = null;
+        setDefaultDate();
+      } else {
+        errEl.textContent = data.error || 'Xatolik yuz berdi';
+        errEl.style.display = 'block';
       }
     } catch {
       errEl.textContent = 'Tarmoq xatosi';

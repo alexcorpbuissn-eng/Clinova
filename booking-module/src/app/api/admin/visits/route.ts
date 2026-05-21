@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       patientName: String(patientName).trim(),
       serviceName: String(serviceName).trim(),
       price: parseInt(price),
-      source: patientId ? 'BOOKED' : 'WALKIN',
+      source: (source === 'BOOKED' || source === 'WALKIN') ? source : (patientId ? 'BOOKED' : 'WALKIN'),
       startTime: startTime ? new Date(startTime) : new Date(),
       endTime: endTime ? new Date(endTime) : null,
       status: status === 'IN_PROGRESS' ? 'IN_PROGRESS' : 'COMPLETED',

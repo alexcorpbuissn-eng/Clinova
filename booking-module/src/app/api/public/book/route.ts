@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { slotId, procedureId, patientId, firstName, lastName, phone, description } = body;
+  const { slotId, procedureId, patientId, firstName, lastName, phone, description, draftId } = body;
 
   if (!slotId || !procedureId || !patientId || !firstName || !lastName || !phone) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -93,8 +93,19 @@ export async function POST(req: NextRequest) {
 
       if (!procedure) throw new Error('PROCEDURE_NOT_FOUND');
 
+      let actualDuration = procedure.durationMinutes;
+
+      if (draftId) {
+        const draft = await tx.savedDraft.findUnique({
+          where: { id: draftId }
+        });
+        if (draft && draft.customDuration) {
+          actualDuration = draft.customDuration;
+        }
+      }
+
       // Find and lock all consecutive slots required
-      const N = Math.ceil(procedure.durationMinutes / 30);
+      const N = Math.ceil(actualDuration / 30);
       const baseTime = new Date(slot.startTime);
       const consecutiveSlots = [slot];
 
@@ -153,6 +164,13 @@ export async function POST(req: NextRequest) {
         },
         include: { slot: true, procedure: true, doctor: true, patient: true },
       });
+
+      if (draftId) {
+        await tx.savedDraft.update({
+          where: { id: draftId },
+          data: { status: 'CONVERTED' }
+        });
+      }
 
       return appointment;
     });

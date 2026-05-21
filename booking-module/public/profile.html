@@ -88,6 +88,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         Mening qabullarim
       </button>
+      <button class="sidebar-link" onclick="switchProfileTab('drafts', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Rejalashtirilgan muolajalar
+      </button>
       <button class="sidebar-link" onclick="switchProfileTab('history', this)">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         Tarix (Tashriflar)
@@ -150,6 +154,15 @@
         </div>
         <div id="cancel-info" style="margin-bottom: 20px; font-size: 0.95rem; color: var(--navy); display: none; background: #e0f2fe; padding: 12px; border-radius: 8px; border: 1px solid #bae6fd;"></div>
         <div id="appt-container" class="appt-list" style="display: flex; flex-direction: column; gap: 16px;"></div>
+      </div>
+
+      <!-- Drafts Tab -->
+      <div id="tab-drafts" class="profile-tab-content">
+        <div class="tab-header">
+          <h2>Rejalashtirilgan muolajalar</h2>
+          <p>Shifokor tomonidan siz uchun rejalashtirilgan, lekin hali aniq vaqti belgilanmagan muolajalar ro'yxati. O'zingizga qulay vaqtni tanlab, qabulga yozilishingiz mumkin.</p>
+        </div>
+        <div id="drafts-container" class="appt-list" style="display: flex; flex-direction: column; gap: 16px;"></div>
       </div>
 
       <!-- History Tab -->
@@ -281,6 +294,45 @@
     const _d = new Date(utcStr);
     const _uzMonths = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'];
     return `${_d.getDate()}-${_uzMonths[_d.getMonth()]} ${_d.getFullYear()}`;
+  }
+
+  // --- Drafts Logic ---
+  async function fetchDrafts() {
+    const c = document.getElementById('drafts-container');
+    try {
+      const res = await fetch(`/api/public/drafts?patientId=${patientId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (data.drafts.length === 0) {
+          c.innerHTML = '<div style="color:var(--text-muted); padding:20px; text-align:center; background:#f8fafc; border-radius:12px; border:1px dashed #cbd5e1;">Hozircha rejalashtirilgan muolajalar yo\\'q.</div>';
+          return;
+        }
+        c.innerHTML = data.drafts.map(d => `
+          <div class="appt-card">
+            <div class="appt-header">
+              <span class="appt-status status-active" style="background:#fef3c7; color:#d97706; border:1px solid #fde68a;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Saqlangan
+              </span>
+            </div>
+            <div class="appt-details">
+              <div class="appt-doc">🩺 Dr. ${d.doctor.firstName} ${d.doctor.lastName} <span style="font-size:0.8rem;color:#64748b;">(${d.doctor.specialty})</span></div>
+              <div class="appt-proc">💉 ${d.procedure.name}</div>
+            </div>
+            <div class="appt-actions" style="border-top:1px solid var(--border); padding-top:12px; margin-top:12px;">
+              <button class="btn-action-appt" onclick="window.location.href='/booking.html?draftId=${d.id}'" style="background:var(--teal); color:#fff; border:none; padding:10px 16px; border-radius:8px; font-weight:600; cursor:pointer;">
+                Davom etish (Sana tanlash)
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+    } catch (e) {
+      console.error(e);
+      c.innerHTML = '<div style="color:red; padding:20px;">Xatolik yuz berdi.</div>';
+    }
   }
 
   async function fetchAppts() {
@@ -475,6 +527,7 @@
   });
 
   fetchProfile();
+  fetchDrafts();
   fetchAppts();
 </script>
 </body>
