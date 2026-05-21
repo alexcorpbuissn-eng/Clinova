@@ -31,11 +31,17 @@ export async function GET(
     if (procedure) procedureDuration = procedure.durationMinutes;
   }
 
+  // Limit patient horizon to exactly 7 days from now
+  const horizonDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
   const slots = await prisma.slot.findMany({
     where: {
       doctorId: id,
       isAvailable: true,
-      startTime: { gt: new Date() },
+      startTime: { 
+        gt: new Date(),
+        lte: horizonDate 
+      },
     },
     orderBy: { startTime: 'asc' },
   });

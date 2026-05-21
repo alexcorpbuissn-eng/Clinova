@@ -10,6 +10,49 @@
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
+    @keyframes adminPulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+    @keyframes adminShimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes adminBounce {
+      0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    .admin-loader {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 48px 20px; gap: 16px;
+    }
+    .admin-loader-dots {
+      display: flex; gap: 8px; align-items: center;
+    }
+    .admin-loader-dots span {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--teal); display: inline-block;
+      animation: adminBounce 1.4s infinite ease-in-out both;
+    }
+    .admin-loader-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .admin-loader-dots span:nth-child(2) { animation-delay: -0.16s; }
+    .admin-loader-dots span:nth-child(3) { animation-delay: 0s; }
+    .admin-loader-text {
+      font-size: 0.85rem; color: var(--text-muted); font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+    .admin-skeleton {
+      display: flex; flex-direction: column; gap: 12px; padding: 20px; width: 100%;
+    }
+    .admin-skeleton-row {
+      display: flex; gap: 16px; align-items: center;
+    }
+    .admin-skeleton-bar {
+      height: 14px; border-radius: 8px;
+      background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+      background-size: 200% 100%;
+      animation: adminShimmer 1.5s infinite;
+    }
     :root {
       --navy: #0f172a; --navy-light: #1e293b; --navy-mid: #162032;
       --teal: #0d9488; --teal-dark: #0f766e; --teal-light: #f0fdfa;
@@ -348,6 +391,7 @@
       <div class="nav-item" onclick="switchTab('doctors')">Shifokorlar</div>
       <div class="nav-item" onclick="switchTab('users')">Ruxsatlar</div>
       <div class="nav-item" onclick="switchTab('procedures')">Xizmatlar (Narxlar)</div>
+      <div class="nav-item" onclick="switchTab('leaves')">Dam Olish (Otpuska)</div>
       <div class="nav-item" onclick="switchTab('schedule')">Jadval boshqaruvi</div>
       <div style="flex:1"></div>
       <div class="nav-item" onclick="window.open('reception.html','_blank')" style="color:#86efac">Qabul Daftari</div>
@@ -375,7 +419,7 @@
               </tr>
             </thead>
             <tbody id="appt-tbody">
-              <tr><td colspan="6" style="text-align:center">Yuklanmoqda...</td></tr>
+              <tr><td colspan="6"><div class="admin-loader"><div class="admin-loader-dots"><span></span><span></span><span></span></div><div class="admin-loader-text">Qabullar yuklanmoqda...</div><div class="admin-skeleton"><div class="admin-skeleton-row"><div class="admin-skeleton-bar" style="width:30%;"></div><div class="admin-skeleton-bar" style="width:20%;"></div><div class="admin-skeleton-bar" style="width:40%;"></div></div><div class="admin-skeleton-row"><div class="admin-skeleton-bar" style="width:25%;"></div><div class="admin-skeleton-bar" style="width:35%;"></div><div class="admin-skeleton-bar" style="width:15%;"></div></div></div></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -400,7 +444,7 @@
               </tr>
             </thead>
             <tbody id="pat-tbody">
-              <tr><td colspan="6" style="text-align:center">Yuklanmoqda...</td></tr>
+              <tr><td colspan="6"><div class="admin-loader"><div class="admin-loader-dots"><span></span><span></span><span></span></div><div class="admin-loader-text">Bemorlar yuklanmoqda...</div></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -429,7 +473,7 @@
               </tr>
             </thead>
             <tbody id="doc-stomatolog-tbody">
-              <tr><td colspan="8" style="text-align:center">Yuklanmoqda...</td></tr>
+              <tr><td colspan="8"><div class="admin-loader"><div class="admin-loader-dots"><span></span><span></span><span></span></div><div class="admin-loader-text">Stomatologlar yuklanmoqda...</div></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -450,7 +494,7 @@
               </tr>
             </thead>
             <tbody id="doc-lor-tbody">
-              <tr><td colspan="8" style="text-align:center">Yuklanmoqda...</td></tr>
+              <tr><td colspan="8"><div class="admin-loader"><div class="admin-loader-dots"><span></span><span></span><span></span></div><div class="admin-loader-text">LORlar yuklanmoqda...</div></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -501,7 +545,7 @@
               </tr>
             </thead>
             <tbody id="users-tbody">
-              <tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>
+              <tr><td colspan="5"><div class="admin-loader"><div class="admin-loader-dots"><span></span><span></span><span></span></div><div class="admin-loader-text">Foydalanuvchilar yuklanmoqda...</div></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -525,7 +569,30 @@
               </tr>
             </thead>
             <tbody id="proc-tbody">
-              <tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>
+              <tr><td colspan="5"><div class="admin-loader"><div class="admin-loader-dots"><span></span><span></span><span></span></div><div class="admin-loader-text">Xizmatlar yuklanmoqda...</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      <!-- LEAVES TAB -->
+      <div id="tab-leaves" class="tab-content" style="display:none;">
+        <div class="header" style="flex-wrap: wrap;">
+          <h1>Dam Olish (Otpuska) Boshqaruvi</h1>
+          <button class="btn" style="width:auto" onclick="openLeaveModal()">+ Dam Olish Qo'shish</button>
+        </div>
+        <div class="table-card" style="max-height: calc(100vh - 200px); overflow-y: auto;">
+          <table>
+            <thead style="position: sticky; top: 0; background: white;">
+              <tr>
+                <th>Shifokor</th>
+                <th>Boshlanish vaqti</th>
+                <th>Tugash vaqti</th>
+                <th>Sabab / Izoh</th>
+                <th>Qo'shilgan vaqti</th>
+                <th>Amal</th>
+              </tr>
+            </thead>
+            <tbody id="leave-tbody">
+              <tr><td colspan="6"><div class="admin-loader"><div class="admin-loader-dots"><span></span><span></span><span></span></div><div class="admin-loader-text">Yuklanmoqda...</div></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -623,6 +690,38 @@
     </div>
   </div>
 
+  <!-- Modal for Leaves -->
+  <div id="leave-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:white; padding:32px; border-radius:24px; max-width:450px; width:90%; position:relative;">
+      <button onclick="closeLeaveModal()" style="position:absolute; top:16px; right:16px; font-size:1.5rem; background:none; border:none; cursor:pointer;">&times;</button>
+      <h3 style="margin-bottom:20px; color:var(--navy)">Dam Olish / Otpuska Qo'shish</h3>
+      
+      <div class="form-group" style="margin-bottom: 20px;">
+        <label>Shifokorni tanlang</label>
+        <select id="leave-doc-select" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem; background: white;">
+          <option value="">Shifokor...</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 20px;">
+        <label>Boshlanish vaqti</label>
+        <input type="datetime-local" id="leave-start" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 20px;">
+        <label>Tugash vaqti</label>
+        <input type="datetime-local" id="leave-end" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 20px;">
+        <label>Sababi (Ixtiyoriy)</label>
+        <input type="text" id="leave-reason" placeholder="Masalan: Otpuska, Betob..." style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
+      </div>
+
+      <button class="btn" onclick="submitLeave()" style="width:100%;">Saqlash</button>
+    </div>
+  </div>
+
   <!-- Modal for Monthly History -->
   <div id="history-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
     <div style="background:white; padding:32px; border-radius:24px; max-width:500px; width:90%; max-height:80vh; overflow-y:auto; position:relative;">
@@ -674,6 +773,27 @@
 
   <script>
     function closeModal() { document.getElementById('history-modal').style.display = 'none'; }
+    
+    // Loading animation helper
+    function adminLoaderHTML(cols, text = 'Yuklanmoqda...') {
+      return `<tr><td colspan="${cols}">
+        <div class="admin-loader">
+          <div class="admin-loader-dots"><span></span><span></span><span></span></div>
+          <div class="admin-loader-text">${text}</div>
+          <div class="admin-skeleton">
+            <div class="admin-skeleton-row"><div class="admin-skeleton-bar" style="width:30%; height:12px;"></div><div class="admin-skeleton-bar" style="width:20%;"></div><div class="admin-skeleton-bar" style="width:40%;"></div></div>
+            <div class="admin-skeleton-row"><div class="admin-skeleton-bar" style="width:25%;"></div><div class="admin-skeleton-bar" style="width:35%; height:12px;"></div><div class="admin-skeleton-bar" style="width:15%;"></div></div>
+            <div class="admin-skeleton-row"><div class="admin-skeleton-bar" style="width:40%; height:12px;"></div><div class="admin-skeleton-bar" style="width:20%;"></div><div class="admin-skeleton-bar" style="width:30%;"></div></div>
+          </div>
+        </div>
+      </td></tr>`;
+    }
+    function adminLoaderDiv(text = 'Yuklanmoqda...') {
+      return `<div class="admin-loader">
+        <div class="admin-loader-dots"><span></span><span></span><span></span></div>
+        <div class="admin-loader-text">${text}</div>
+      </div>`;
+    }
     function showHistory(name, historyJson) {
       const history = JSON.parse(decodeURIComponent(historyJson));
       document.getElementById('modal-title').textContent = `${name} - Daromad Tarixi`;
@@ -755,7 +875,7 @@
     // ---- PROCEDURES (XIZMATLAR) ----
     async function loadProcedures() {
       const tbody = document.getElementById('proc-tbody');
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Yuklanmoqda...</td></tr>';
+      tbody.innerHTML = adminLoaderHTML(5, 'Xizmatlar yuklanmoqda...');
       try {
         const data = await apiGet('/api/admin/procedures');
         if (data.success) {
@@ -970,6 +1090,90 @@
       if (tab === 'users') loadUsers();
       if (tab === 'procedures') loadProcedures();
       if (tab === 'schedule') loadScheduleTab();
+      if (tab === 'leaves') loadLeaves();
+    }
+
+    // ---- LEAVES / TIME OFF ----
+    async function loadLeaves() {
+      const tbody = document.getElementById('leave-tbody');
+      tbody.innerHTML = adminLoaderHTML(6, 'Dam olish ro\'yxati yuklanmoqda...');
+      try {
+        const data = await apiGet('/api/admin/leaves');
+        if (data.success) {
+          if (data.leaves.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Hech qanday dam olish kiritilmagan</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data.leaves.map(l => `
+            <tr>
+              <td><div style="font-weight:600; color:var(--navy);">${l.doctor.firstName} ${l.doctor.lastName}</div></td>
+              <td>${new Date(l.startTime).toLocaleString('ru-RU')}</td>
+              <td>${new Date(l.endTime).toLocaleString('ru-RU')}</td>
+              <td>${l.reason || '-'}</td>
+              <td><span style="font-size:0.8rem; color:var(--text-muted);">${new Date(l.createdAt).toLocaleDateString('ru-RU')}</span></td>
+              <td>
+                <button class="btn" style="background:var(--red-bg); color:var(--red); padding:6px 12px; font-size:0.8rem; width:auto;" onclick="deleteLeave('${l.id}')">Bekor qilish</button>
+              </td>
+            </tr>
+          `).join('');
+        }
+      } catch(e) {}
+    }
+
+    async function openLeaveModal() {
+      document.getElementById('leave-start').value = '';
+      document.getElementById('leave-end').value = '';
+      document.getElementById('leave-reason').value = '';
+      
+      const select = document.getElementById('leave-doc-select');
+      select.innerHTML = '<option value="">Yuklanmoqda...</option>';
+      document.getElementById('leave-modal').style.display = 'flex';
+      
+      try {
+        const data = await apiGet('/api/admin/doctors');
+        if (data.success) {
+          select.innerHTML = '<option value="">Shifokor...</option>' + 
+            data.doctors.map(d => `<option value="${d.id}">${d.firstName} ${d.lastName} (${d.specialty})</option>`).join('');
+        }
+      } catch(e) {}
+    }
+
+    function closeLeaveModal() {
+      document.getElementById('leave-modal').style.display = 'none';
+    }
+
+    async function submitLeave() {
+      const doctorId = document.getElementById('leave-doc-select').value;
+      const startTime = document.getElementById('leave-start').value;
+      const endTime = document.getElementById('leave-end').value;
+      const reason = document.getElementById('leave-reason').value;
+
+      if(!doctorId || !startTime || !endTime) {
+        alert("Shifokor, boshlanish va tugash vaqtini tanlang!");
+        return;
+      }
+
+      try {
+        const res = await apiPost('/api/admin/leaves', { doctorId, startTime, endTime, reason });
+        if(res.success) {
+          showAdminToast(`Dam olish saqlandi. ${res.deletedSlots} ta bo'sh slotlar o'chirildi!`);
+          closeLeaveModal();
+          loadLeaves();
+        } else {
+          alert("Xatolik: " + res.error);
+        }
+      } catch(e) { alert("Tarmoq xatosi"); }
+    }
+
+    async function deleteLeave(id) {
+      if(!confirm("Haqiqatan ham ushbu dam olishni bekor qilmoqchimisiz?")) return;
+      try {
+        const res = await apiDelete(`/api/admin/leaves?id=${id}`);
+        if(res.success) {
+          showAdminToast("Bekor qilindi");
+          loadLeaves();
+        }
+      } catch(e) { alert("Xatolik"); }
     }
 
     async function apiGet(endpoint) {
@@ -1011,7 +1215,7 @@
     // Fetch Appointments
     async function loadAppointments() {
       const tbody = document.getElementById('appt-tbody');
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Yuklanmoqda...</td></tr>';
+      tbody.innerHTML = adminLoaderHTML(6, 'Qabullar yuklanmoqda...');
       try {
         const data = await apiGet('/api/admin/appointments');
         if (data.success) {
@@ -1111,7 +1315,7 @@
     // Fetch Patients
     async function loadPatients() {
       const tbody = document.getElementById('pat-tbody');
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Yuklanmoqda...</td></tr>';
+      tbody.innerHTML = adminLoaderHTML(6, 'Bemorlar yuklanmoqda...');
       try {
         const data = await apiGet('/api/admin/patients');
         if (data.success) {
@@ -1146,7 +1350,7 @@
     async function loadDoctors() {
       const tbodyStom = document.getElementById('doc-stomatolog-tbody');
       const tbodyLor = document.getElementById('doc-lor-tbody');
-      const loadingCol = '<tr><td colspan="8" style="text-align:center">Yuklanmoqda...</td></tr>';
+      const loadingCol = adminLoaderHTML(8, 'Shifokorlar yuklanmoqda...');
       tbodyStom.innerHTML = loadingCol;
       tbodyLor.innerHTML = loadingCol;
       try {
@@ -1456,10 +1660,11 @@
       if (!dashboard) return;
       
       dashboard.innerHTML = `
-        <div style="display:flex; justify-content:center; align-items:center; padding:60px; color:var(--text-muted); background:#fff; border-radius:20px; border:1.5px solid var(--border);">
-          <div style="text-align:center;">
-            <div style="font-size:2rem; margin-bottom:12px; display:inline-block; animation: spin 1s linear infinite;">🔄</div>
-            <div style="font-weight:600;">Umumiy jadval statistikasi yuklanmoqda...</div>
+        <div style="background:#fff; border-radius:20px; border:1.5px solid var(--border); overflow:hidden;">
+          ${adminLoaderDiv('Umumiy jadval statistikasi yuklanmoqda...')}
+          <div class="admin-skeleton" style="padding: 12px 24px 24px;">
+            <div class="admin-skeleton-row"><div class="admin-skeleton-bar" style="width:100%; height:60px; border-radius:12px;"></div></div>
+            <div class="admin-skeleton-row" style="gap:12px;"><div class="admin-skeleton-bar" style="width:33%; height:50px; border-radius:10px;"></div><div class="admin-skeleton-bar" style="width:33%; height:50px; border-radius:10px;"></div><div class="admin-skeleton-bar" style="width:33%; height:50px; border-radius:10px;"></div></div>
           </div>
         </div>
       `;
@@ -1604,7 +1809,7 @@
       if (!adminCurrentDoctorId) return;
       
       const container = document.getElementById('admin-grid-columns');
-      container.innerHTML = '<div style="grid-column: 1 / span 8; text-align: center; padding: 40px; color: var(--text-muted);">Yuklanmoqda...</div>';
+      container.innerHTML = `<div style="grid-column: 1 / span 8;">${adminLoaderDiv('Jadval yuklanmoqda...')}</div>`;
       
       try {
         const year = adminCalendarCurrentDate.getFullYear();
