@@ -1,13 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { verifyToken } from '@/lib/auth';
+
+async function requireAdmin(request: NextRequest) {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  const payload = await verifyToken(authHeader.split(' ')[1]);
+  return payload?.role === 'ADMIN' ? payload : null;
+}
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const role = request.headers.get('x-user-role');
-  if (role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!await requireAdmin(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const data = await request.json();
   const allowedFields = ['firstName', 'lastName', 'specialty', 'bio', 'photoUrl', 'isActive'];
@@ -25,8 +32,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const role = request.headers.get('x-user-role');
-  if (role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!await requireAdmin(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   await prisma.doctor.delete({ where: { id } });
   return NextResponse.json({ success: true });

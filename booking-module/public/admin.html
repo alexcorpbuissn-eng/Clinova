@@ -454,7 +454,10 @@
       <div id="tab-doctors" class="tab-content">
         <div class="header">
           <h1>Shifokorlar &amp; Statistika</h1>
-          <button class="btn" style="width:auto" onclick="loadDoctors()">Yangilash</button>
+          <div>
+            <button class="btn" style="width:auto; margin-right: 10px;" onclick="openDoctorModal()">+ Yangi shifokor</button>
+            <button class="btn" style="width:auto; background:var(--teal);" onclick="loadDoctors()">Yangilash</button>
+          </div>
         </div>
         
         <h2 style="margin-bottom: 15px; color: var(--navy); font-size: 1.1rem;">🦷 Stomatologlar</h2>
@@ -720,6 +723,46 @@
       </div>
 
       <button class="btn" onclick="submitLeave()" style="width:100%;">Saqlash</button>
+    </div>
+  </div>
+
+  <!-- Modal for Add/Edit Doctor -->
+  <div id="doctor-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:white; padding:32px; border-radius:24px; max-width:450px; width:90%; position:relative;">
+      <button onclick="closeDoctorModal()" style="position:absolute; top:16px; right:16px; font-size:1.5rem; background:none; border:none; cursor:pointer;">&times;</button>
+      <h3 id="doctor-modal-title" style="margin-bottom:20px; color:var(--navy)">Shifokor qo'shish</h3>
+      
+      <input type="hidden" id="edit-doc-id" value="">
+      
+      <div class="form-group" style="margin-bottom: 15px;">
+        <label>Ism</label>
+        <input type="text" id="edit-doc-first" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
+      </div>
+      
+      <div class="form-group" style="margin-bottom: 15px;">
+        <label>Familiya</label>
+        <input type="text" id="edit-doc-last" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 15px;">
+        <label>Mutaxassislik</label>
+        <select id="edit-doc-specialty" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem; background:white;">
+          <option value="Stomatolog">Stomatolog</option>
+          <option value="LOR">LOR</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 15px;">
+        <label>Bio (qisqacha)</label>
+        <input type="text" id="edit-doc-bio" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
+      </div>
+      
+      <div class="form-group" style="margin-bottom: 20px;">
+        <label>Rasm URL (ixtiyoriy)</label>
+        <input type="text" id="edit-doc-photo" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
+      </div>
+
+      <button class="btn" onclick="submitDoctorModal()" style="width:100%;">Saqlash</button>
     </div>
   </div>
 
@@ -1361,6 +1404,93 @@
       const loadingCol = adminLoaderHTML(8, 'Shifokorlar yuklanmoqda...');
       tbodyStom.innerHTML = loadingCol;
       tbodyLor.innerHTML = loadingCol;
+    // ---- DOCTOR ADD/EDIT ----
+    function openDoctorModal(docStr) {
+      document.getElementById('role-error').style.display = 'none'; // reset just in case
+      const modal = document.getElementById('doctor-modal');
+      const doc = docStr ? JSON.parse(decodeURIComponent(docStr)) : null;
+      
+      if (doc) {
+        document.getElementById('doctor-modal-title').textContent = "Shifokorni tahrirlash";
+        document.getElementById('edit-doc-id').value = doc.id;
+        document.getElementById('edit-doc-first').value = doc.firstName || '';
+        document.getElementById('edit-doc-last').value = doc.lastName || '';
+        document.getElementById('edit-doc-specialty').value = doc.specialty || 'Stomatolog';
+        document.getElementById('edit-doc-bio').value = doc.bio || '';
+        document.getElementById('edit-doc-photo').value = doc.photoUrl || '';
+      } else {
+        document.getElementById('doctor-modal-title').textContent = "Yangi shifokor qo'shish";
+        document.getElementById('edit-doc-id').value = '';
+        document.getElementById('edit-doc-first').value = '';
+        document.getElementById('edit-doc-last').value = '';
+        document.getElementById('edit-doc-specialty').value = 'Stomatolog';
+        document.getElementById('edit-doc-bio').value = '';
+        document.getElementById('edit-doc-photo').value = '';
+      }
+      modal.style.display = 'flex';
+    }
+
+    function closeDoctorModal() {
+      document.getElementById('doctor-modal').style.display = 'none';
+    }
+
+    async function submitDoctorModal() {
+      const id = document.getElementById('edit-doc-id').value;
+      const firstName = document.getElementById('edit-doc-first').value;
+      const lastName = document.getElementById('edit-doc-last').value;
+      const specialty = document.getElementById('edit-doc-specialty').value;
+      const bio = document.getElementById('edit-doc-bio').value;
+      const photoUrl = document.getElementById('edit-doc-photo').value;
+      
+      if(!firstName || !lastName || !specialty) {
+        alert("Ism, familiya va mutaxassislikni kiriting!");
+        return;
+      }
+
+      try {
+        let res;
+        if (id) {
+          res = await fetch(`/api/admin/doctors/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
+            body: JSON.stringify({ firstName, lastName, specialty, bio, photoUrl })
+          }).then(r => r.json());
+        } else {
+          res = await apiPost('/api/admin/doctors', { firstName, lastName, specialty, bio, photoUrl });
+        }
+
+        if(res.success) {
+          showAdminToast("Muvaffaqiyatli saqlandi!");
+          closeDoctorModal();
+          loadDoctors();
+        } else {
+          alert("Xatolik: " + res.error);
+        }
+      } catch(e) { alert("Tarmoq xatosi"); }
+    }
+
+    async function toggleDoctorStatus(id, isActive) {
+      if(!confirm(`Shifokorni ${isActive ? 'faollashtirishni' : 'o\'chirishni'} xohlaysizmi?`)) return;
+      try {
+        const res = await fetch(`/api/admin/doctors/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
+          body: JSON.stringify({ isActive })
+        }).then(r => r.json());
+        if(res.success) {
+          showAdminToast("Holat o'zgartirildi!");
+          loadDoctors();
+        }
+      } catch(e) { alert("Xatolik"); }
+    }
+
+    async function loadDoctors() {
+      if (!localStorage.getItem('admin_token')) return;
+      const tbodyStom = document.getElementById('doc-stomatolog-tbody');
+      const tbodyLor = document.getElementById('doc-lor-tbody');
+      const loadingCol = adminLoaderHTML(8, 'Shifokorlar yuklanmoqda...');
+      tbodyStom.innerHTML = loadingCol;
+      tbodyLor.innerHTML = loadingCol;
       try {
         const data = await apiGet('/api/admin/stats');
         if (data.success) {
@@ -1370,7 +1500,10 @@
 
           const renderRow = d => `
             <tr>
-              <td><strong>${d.firstName} ${d.lastName}</strong></td>
+              <td>
+                <strong>${d.firstName} ${d.lastName}</strong>
+                ${!d.isActive ? '<span style="color:red;font-size:0.8em;display:block;">(Nofaol)</span>' : ''}
+              </td>
               <td style="text-align:center">${d.daily}</td>
               <td style="text-align:center">${d.weekly}</td>
               <td style="text-align:center">${d.monthly}</td>
@@ -1378,8 +1511,11 @@
               <td style="color:var(--teal-dark);font-weight:600">${fmt(d.monthlyRevenue)}</td>
               <td style="color:var(--navy);font-weight:600">${fmt(d.yearlyRevenue)}</td>
               <td style="text-align:center">
-                <button onclick="showHistory('${d.firstName} ${d.lastName}', '${encodeURIComponent(JSON.stringify(d.monthlyHistory))}')" 
-                        style="color:var(--teal); font-size:1.2rem;" title="Tarix">📅</button>
+                <button onclick="openDoctorModal('${encodeURIComponent(JSON.stringify(d))}')" style="color:var(--blue); font-size:1.2rem; margin-right:8px; background:none; border:none; cursor:pointer;" title="Tahrirlash">✏️</button>
+                <button onclick="showHistory('${d.firstName} ${d.lastName}', '${encodeURIComponent(JSON.stringify(d.monthlyHistory))}')" style="color:var(--teal); font-size:1.2rem; margin-right:8px; background:none; border:none; cursor:pointer;" title="Tarix">📅</button>
+                <button onclick="toggleDoctorStatus('${d.id}', ${!d.isActive})" style="color:${d.isActive ? 'var(--red)' : 'var(--teal)'}; font-size:1.2rem; background:none; border:none; cursor:pointer;" title="${d.isActive ? 'O\\'chirish' : 'Faollashtirish'}">
+                  ${d.isActive ? '❌' : '✅'}
+                </button>
               </td>
             </tr>
           `;

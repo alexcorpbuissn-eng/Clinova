@@ -33,8 +33,7 @@ export async function GET(request: NextRequest) {
   const yearStart = new Date(now.getFullYear(), 0, 1);
 
   const doctors = await prisma.doctor.findMany({
-    where: { isActive: true },
-    select: { id: true, firstName: true, lastName: true, specialty: true },
+    select: { id: true, firstName: true, lastName: true, specialty: true, isActive: true, bio: true, photoUrl: true },
     orderBy: { specialty: 'asc' },
   });
 
