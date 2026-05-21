@@ -86,6 +86,8 @@ export async function GET(request: NextRequest) {
         });
         totalCreated += result.count;
       }
+    }
+
     for (const doctor of doctors) {
       // existing slot logic...
       
