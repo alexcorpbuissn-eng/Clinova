@@ -78,6 +78,23 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    let telegramChatIdToUse = null;
+
+    // If assigning doctor, update the Doctor model with telegramChatId
+    if (role === 'DOCTOR' && doctorId) {
+      const patient = await prisma.patient.findUnique({ where: { telegramPhone } });
+      if (patient && patient.telegramChatId) {
+        telegramChatIdToUse = patient.telegramChatId;
+        await prisma.doctor.update({
+          where: { id: doctorId },
+          data: { 
+            telegramChatId: patient.telegramChatId,
+            telegramUsername: patient.telegramUsername
+          }
+        });
+      }
+    }
+
     // Notify user via Telegram DM if they have verified/registered
     try {
       const patient = await prisma.patient.findUnique({

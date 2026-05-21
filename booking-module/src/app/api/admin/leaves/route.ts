@@ -73,6 +73,24 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // 3. Send Telegram notification to the doctor
+    try {
+      const doctor = await prisma.doctor.findUnique({ where: { id: doctorId } });
+      if (doctor && doctor.telegramChatId) {
+        // dynamic import of bot to avoid top-level issues if any
+        const { getBot, toTashkentDate } = await import('@/lib/telegram');
+        const bot = getBot();
+        
+        const startDateStr = toTashkentDate(start);
+        const endDateStr = toTashkentDate(end);
+
+        const text = `🎉 *Tabriklaymiz!*\n\nSizga *${startDateStr}* dan *${endDateStr}* gacha dam olish (otpuska) berildi.\n\nYaxshi dam oling! 🌴`;
+        await bot.sendMessage(doctor.telegramChatId, text, { parse_mode: 'Markdown' });
+      }
+    } catch (tgErr) {
+      console.error('[POST leaves Telegram error]', tgErr);
+    }
+
     return NextResponse.json({ success: true, leave, deletedSlots: deletedSlots.count });
   } catch (err) {
     console.error('[POST leaves error]', err);

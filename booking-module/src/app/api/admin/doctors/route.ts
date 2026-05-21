@@ -24,14 +24,40 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const { firstName, lastName, specialty, bio, photoUrl } = await request.json();
+  const { firstName, lastName, specialty, bio, photoUrl, telegramUsername } = await request.json();
   if (!firstName || !lastName || !specialty) {
     return NextResponse.json({ error: 'firstName, lastName, specialty are required' }, { status: 400 });
   }
 
+  let telegramChatId = null;
+  let cleanUsername = null;
+
+  if (telegramUsername) {
+    cleanUsername = telegramUsername.replace('@', '').trim();
+    const patient = await prisma.patient.findFirst({
+      where: {
+        telegramUsername: {
+          equals: cleanUsername,
+          mode: 'insensitive'
+        }
+      }
+    });
+    if (patient && patient.telegramChatId) {
+      telegramChatId = patient.telegramChatId;
+    }
+  }
+
   const doctor = await prisma.doctor.create({
-    data: { firstName, lastName, specialty, bio, photoUrl },
+    data: { 
+      firstName, 
+      lastName, 
+      specialty, 
+      bio, 
+      photoUrl,
+      telegramUsername: cleanUsername,
+      telegramChatId
+    },
   });
 
-  return NextResponse.json({ success: true, doctor }, { status: 201 });
+  return NextResponse.json({ success: true, doctor, chatFound: !!telegramChatId }, { status: 201 });
 }

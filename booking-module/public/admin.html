@@ -705,13 +705,13 @@
       </div>
 
       <div class="form-group" style="margin-bottom: 20px;">
-        <label>Boshlanish vaqti</label>
-        <input type="datetime-local" id="leave-start" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
+        <label>Boshlanish sanasi</label>
+        <input type="date" id="leave-start" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
       </div>
 
       <div class="form-group" style="margin-bottom: 20px;">
-        <label>Tugash vaqti</label>
-        <input type="datetime-local" id="leave-end" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
+        <label>Tugash sanasi</label>
+        <input type="date" id="leave-end" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
       </div>
 
       <div class="form-group" style="margin-bottom: 20px;">
@@ -1145,14 +1145,21 @@
 
     async function submitLeave() {
       const doctorId = document.getElementById('leave-doc-select').value;
-      const startTime = document.getElementById('leave-start').value;
-      const endTime = document.getElementById('leave-end').value;
+      const startStr = document.getElementById('leave-start').value;
+      const endStr = document.getElementById('leave-end').value;
       const reason = document.getElementById('leave-reason').value;
 
-      if(!doctorId || !startTime || !endTime) {
-        alert("Shifokor, boshlanish va tugash vaqtini tanlang!");
+      if(!doctorId || !startStr || !endStr) {
+        alert("Shifokor, boshlanish va tugash sanasini tanlang!");
         return;
       }
+
+      // Convert to Date objects spanning from 00:00 to 23:59
+      const startDate = new Date(startStr + "T00:00:00");
+      const endDate = new Date(endStr + "T23:59:59");
+      
+      const startTime = startDate.toISOString();
+      const endTime = endDate.toISOString();
 
       try {
         const res = await apiPost('/api/admin/leaves', { doctorId, startTime, endTime, reason });

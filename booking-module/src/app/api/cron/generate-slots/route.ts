@@ -86,6 +86,29 @@ export async function GET(request: NextRequest) {
         });
         totalCreated += result.count;
       }
+    for (const doctor of doctors) {
+      // existing slot logic...
+      
+      if (doctor.telegramChatId) {
+        const tashkentNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tashkent' }));
+        for (const leave of doctor.leaves) {
+          const tashkentEnd = new Date(leave.endTime.toLocaleString('en-US', { timeZone: 'Asia/Tashkent' }));
+          
+          if (tashkentNow.getFullYear() === tashkentEnd.getFullYear() &&
+              tashkentNow.getMonth() === tashkentEnd.getMonth() &&
+              tashkentNow.getDate() === tashkentEnd.getDate()) {
+              
+              try {
+                const { getBot } = await import('@/lib/telegram');
+                const bot = getBot();
+                const text = `⏰ *Eslatma:*\n\nDam olish kuningiz tugamoqda. Ertaga ishga chiqishingiz kerak!\n\n🏥 Klinika: *Habibullo-Hilola*`;
+                await bot.sendMessage(doctor.telegramChatId, text, { parse_mode: 'Markdown' });
+              } catch(e) {
+                console.error('[Cron Leave Reminder Error]', e);
+              }
+          }
+        }
+      }
     }
 
     return NextResponse.json({ success: true, created: totalCreated, message: `Generated ${totalCreated} slots for ${doctors.length} doctors.` });
