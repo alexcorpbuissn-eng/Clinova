@@ -103,11 +103,48 @@ export async function POST(req: NextRequest) {
   const sent24 = results24h.filter((r: any) => r.status === 'fulfilled').length;
   const sent2  = results2h.filter((r: any) => r.status === 'fulfilled').length;
 
-  console.log(`[cron] Reminders sent — 24h: ${sent24}/${due24h.length}, 2h: ${sent2}/${due2h.length}`);
+  // ── Leave Ending Reminders ──────────────────────────────────────────────
+  // If we run hourly, check for leaves where endTime is between 24h and 25h from now.
+  // Wait, if endTime is 23:59:59, then 24h before that is 23:59:59 the day before.
+  // We'll just check if there is any leave whose endTime is between 24h and 25h from now.
+  let sentLeaveReminders = 0;
+  try {
+    const endingLeaves = await prisma.leave.findMany({
+      where: {
+        endTime: { gt: in24h, lte: in25h }
+      },
+      include: {
+        doctor: true
+      }
+    });
+
+    const { getBot } = await import('@/lib/telegram');
+    const bot = getBot();
+
+    for (const leave of endingLeaves) {
+      if (leave.doctor?.telegramChatId) {
+        try {
+          await bot.sendMessage(
+            leave.doctor.telegramChatId, 
+            `Eslatma: Dam olish (otpuska) vaqtingiz tugashiga 1 kun qoldi! Ertadan ishga chiqishingiz kerak bo'ladi.`,
+            { parse_mode: 'Markdown' }
+          );
+          sentLeaveReminders++;
+        } catch (e) {
+          console.error('Leave reminder tg error:', e);
+        }
+      }
+    }
+  } catch(e) {
+    console.error('Leave reminder error:', e);
+  }
+
+  console.log(`[cron] Reminders sent — 24h: ${sent24}/${due24h.length}, 2h: ${sent2}/${due2h.length}, leaves: ${sentLeaveReminders}`);
 
   return NextResponse.json({
     ok: true,
     sent24h: sent24,
     sent2h: sent2,
+    sentLeave: sentLeaveReminders
   });
 }
