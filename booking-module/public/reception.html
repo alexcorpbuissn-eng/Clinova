@@ -406,6 +406,7 @@
         <button class="tab-btn" onclick="switchMainTab('tab-active')">⚡ Hozirgi muolajalar</button>
         <button class="tab-btn" onclick="switchMainTab('tab-history')">🕐 Tarix</button>
         <button class="tab-btn" onclick="switchMainTab('tab-patients')">👤 Bemorlar</button>
+        <button class="tab-btn" onclick="switchMainTab('tab-issues')">⚠️ Muammoli qabullar</button>
       </div>
 
       <!-- Tab 1: Scheduled Appointments -->
@@ -473,6 +474,20 @@
           </div>
         </div>
       </div>
+      
+      <!-- Tab 5: Problematic Appointments (No Shows, Cancelled) -->
+      <div id="tab-issues" class="tab-pane">
+        <div class="visits-card">
+          <div class="visits-header">
+            <h2>⚠️ Muammoli qabullar (Kelmadi, Bekor qilindi)</h2>
+            <button class="btn-refresh" onclick="loadIssues()">Yangilash</button>
+          </div>
+          <div id="issues-container">
+            <div class="empty-state">Yuklanmoqda...</div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -777,6 +792,7 @@
     setInterval(pollAppointments, 30000); // Smart polling
     await loadDoctors();
     await loadAppointments();
+    await loadIssues();
     await loadActiveVisits();
     await loadVisits();
     await loadAllPatientsForAutocomplete();
@@ -846,6 +862,7 @@
       if (data.success && data.appointments && data.appointments.length > 0) {
         showToast(`Yangi ${data.appointments.length} ta qabul yozildi!`, 'info');
         loadAppointments(); // Full reload to update UI
+        loadIssues();
       }
       lastApptFetchTime = new Date().toISOString();
     } catch (e) { console.error('Polling error', e); }
@@ -863,6 +880,7 @@
     if (tabId === 'tab-active') loadActiveVisits();
     if (tabId === 'tab-history') loadVisits();
     if (tabId === 'tab-patients') loadPatientsTab();
+    if (tabId === 'tab-issues') loadIssues();
   }
 
   // ── Load Appointments ─────────────────────────────────────────
@@ -1099,7 +1117,28 @@
         html += renderMissedTable(missed);
       }
       
-      // 4. Resolved No Shows (Bog'lanilganlar)
+      container.innerHTML = html;
+    } catch (err) {
+      console.error(err);
+      container.innerHTML = '<div class="empty-state" style="color:red;">Xatolik yuz berdi.</div>';
+    }
+  }
+
+  async function loadIssues() {
+    const container = document.getElementById('issues-container');
+    container.innerHTML = '<div class="empty-state">Yuklanmoqda...</div>';
+    try {
+      const res = await fetch('/api/admin/appointments', { headers: { 'Authorization': `Bearer ${adminToken}` } });
+      const data = await res.json();
+      if (!data.success) return;
+
+      const missedResolved = data.appointments.filter(a => a.status === 'CANCELLED' && a.cancelledBy === 'NOSHOW_RESOLVED');
+      const missedUnreachable = data.appointments.filter(a => a.status === 'CANCELLED' && a.cancelledBy === 'NOSHOW_UNREACHABLE');
+      const cancelledGeneral = data.appointments.filter(a => a.status === 'CANCELLED' && (a.cancelledBy === 'ADMIN' || a.cancelledBy === 'PATIENT'));
+
+      let html = '';
+      
+      // Resolved No Shows (Bog'lanilganlar)
       html += `<h3 style="font-size: 1rem; color: var(--teal); margin: 30px 0 10px 0; display: flex; align-items: center; gap: 8px;">✅ Kelmadi - Bog'lanilganlar</h3>`;
       if (missedResolved.length === 0) {
         html += `<div class="empty-state" style="padding: 20px; color: var(--text-muted);">Ro'yxat bo'sh.</div>`;
@@ -1107,7 +1146,7 @@
         html += renderResolvedMissedTable(missedResolved);
       }
       
-      // 5. Unreachable No Shows (Bog'lanib bo'lmadi)
+      // Unreachable No Shows (Bog'lanib bo'lmadi)
       html += `<h3 style="font-size: 1rem; color: #475569; margin: 30px 0 10px 0; display: flex; align-items: center; gap: 8px;">🔇 Kelmadi - Bog'lanib bo'lmadi</h3>`;
       if (missedUnreachable.length === 0) {
         html += `<div class="empty-state" style="padding: 20px; color: var(--text-muted);">Ro'yxat bo'sh.</div>`;
@@ -1115,8 +1154,7 @@
         html += renderUnreachableMissedTable(missedUnreachable);
       }
 
-      // 6. Cancelled Appointments (Bekor qilinganlar)
-      const cancelledGeneral = data.appointments.filter(a => a.status === 'CANCELLED' && (a.cancelledBy === 'ADMIN' || a.cancelledBy === 'PATIENT'));
+      // Cancelled Appointments (Bekor qilinganlar)
       html += `<h3 style="font-size: 1rem; color: #ea580c; margin: 30px 0 10px 0; display: flex; align-items: center; gap: 8px;">❌ Bekor qilingan qabullar</h3>`;
       if (cancelledGeneral.length === 0) {
         html += `<div class="empty-state" style="padding: 20px; color: var(--text-muted);">Ro'yxat bo'sh.</div>`;
@@ -1150,6 +1188,7 @@
         if (res.ok) {
           showToast("Qabul muvaffaqiyatli o'chirildi!", "success");
           loadAppointments();
+          loadIssues();
         } else {
           const data = await res.json();
           showToast(data.error || "O'chirishda xatolik yuz berdi", "error");
@@ -1178,6 +1217,7 @@
           showToast("Javob bermadi deb belgilandi! (Joriy: " + data.appointment.callAttempts + "/3)", "info");
         }
         loadAppointments();
+        loadIssues();
       } else {
         showToast(data.error || "Xatolik yuz berdi", "error");
       }
@@ -1202,6 +1242,7 @@
             });
             if (res.ok) {
               loadAppointments();
+              loadIssues();
             } else {
               const data = await res.json();
               showToast(data.error || "Xatolik yuz berdi", "error");
@@ -1505,6 +1546,7 @@
           selectedSlotId = null;
           setDefaultDate();
           loadAppointments();
+          loadIssues();
           loadActiveVisits();
           loadVisits();
           loadAvailableSlots();
@@ -1550,6 +1592,7 @@
           selectedSlotId = null;
           setDefaultDate();
           loadAppointments();
+          loadIssues();
           loadActiveVisits();
           loadVisits();
           loadAvailableSlots();

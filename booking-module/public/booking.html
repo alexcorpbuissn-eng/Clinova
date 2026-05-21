@@ -335,6 +335,7 @@ async function loadDoctors() {
         <div class="doc-card-body">
           <div class="doc-card-name">Dr. ${d.firstName} ${d.lastName}</div>
           <div class="doc-card-spec">${d.specialty}</div>
+          ${d.isOnLeave ? `<div style="margin-top: 8px; font-size: 0.75rem; font-weight: 700; color: #ef4444; background: #fee2e2; display: inline-block; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.05em;">🌴 Dam olishda</div>` : ''}
         </div>`;
       card.onclick = () => { document.querySelectorAll('.doc-card').forEach(x=>x.classList.remove('sel')); card.classList.add('sel'); selDoctor=d; loadProcedures(d.id); setStep(2); };
       g.appendChild(card);

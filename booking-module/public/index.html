@@ -831,7 +831,8 @@
                 </div>
                 <div class="home-doc-info">
                   <h3 style="margin: 0 0 6px; font-size: 1.25rem; color: var(--navy); font-weight: 700;">Dr. ${d.firstName} ${d.lastName}</h3>
-                  <div style="color: var(--teal-dark); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em;">${d.specialty}</div>
+                  <div style="color: var(--teal-dark); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">${d.specialty}</div>
+                  ${d.isOnLeave ? `<div style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem; font-weight: 700; color: #ef4444; background: #fee2e2; padding: 4px 10px; border-radius: 12px;"><span style="font-size: 0.9rem;">🌴</span> Dam olishda</div>` : ''}
                 </div>
               </div>
             `).join('');
