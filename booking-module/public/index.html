@@ -138,8 +138,8 @@
       .ms2-section{width:100%;background:var(--ms-white);display:grid;grid-template-columns:1fr 1fr;min-height:520px;}
       /* ── LEFT ── */
       .ms2-left{padding:60px clamp(32px,8vw,100px);display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;}
-      .ms2-left::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 40%, rgba(255,255,255,0.4) 80%, rgba(255,255,255,0.1) 100%), url('milestone_bg.png') center right/cover no-repeat;z-index:0;transition:all 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);}
-      .ms2-left:hover::before{transform:scale(1.05); background:linear-gradient(to right, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.75) 40%, rgba(255,255,255,0.2) 80%, transparent 100%), url('milestone_bg.png') center right/cover no-repeat;}
+      .ms2-left::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:var(--ms-white);z-index:0;transition:all 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);}
+      .ms2-left:hover::before{transform:scale(1.02); background:var(--ms-white);}
       .ms2-left > *{position:relative;z-index:1;}
       .ms2-left::after{content:'';position:absolute;right:0;top:60px;bottom:60px;width:1px;background:var(--ms-border);z-index:1;}
       .ms2-hero-row{display:flex;align-items:center;line-height:1;opacity:0;animation:ms2up .7s .2s ease forwards;margin-bottom:8px;}

@@ -34,7 +34,8 @@ export async function GET(request: NextRequest) {
       doctor: true, 
       slot: true,
       patient: true,
-      procedure: true
+      procedure: true,
+      visit: true
     },
     orderBy: { createdAt: 'desc' },
   });

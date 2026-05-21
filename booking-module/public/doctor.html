@@ -7,30 +7,30 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #08111D;
-      --navy-dark: #0A1929;
-      --surface: #0F2137;
-      --border: rgba(255, 255, 255, 0.08);
-      --border-focus: rgba(29, 158, 117, 0.4);
-      --text: #cdd4dc;
-      --text-bright: #F1EFE8;
-      --text-muted: #666f7a;
+      --bg: #f8fafc;
+      --navy-dark: #ffffff;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --border-focus: rgba(13, 148, 136, 0.4);
+      --text: #334155;
+      --text-bright: #0f172a;
+      --text-muted: #64748b;
       
       /* Services Colors */
-      --color-open: #1D9E75;
-      --color-open-bg: rgba(29, 158, 117, 0.15);
+      --color-open: #0d9488;
+      --color-open-bg: #f0fdfa;
       
-      --color-busy: #185FA5;
-      --color-busy-bg: rgba(24, 95, 165, 0.15);
+      --color-busy: #0284c7;
+      --color-busy-bg: #f0f9ff;
       
-      --color-followup: #BA7517;
-      --color-followup-bg: rgba(186, 117, 23, 0.15);
+      --color-followup: #d97706;
+      --color-followup-bg: #fffbeb;
       
-      --color-break: #64748B;
-      --color-break-bg: rgba(100, 116, 139, 0.15);
+      --color-break: #475569;
+      --color-break-bg: #f1f5f9;
       
       --red: #ef4444;
-      --red-bg: rgba(239, 68, 68, 0.15);
+      --red-bg: #fef2f2;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -66,13 +66,13 @@
       justify-content: center; 
       width: 100%; 
       min-height: 100vh; 
-      background: radial-gradient(circle at center, #0F2137 0%, #08111D 100%); 
+      background: var(--bg); 
     }
     .login-card { 
       background: var(--surface); 
       padding: 40px; 
       border-radius: 24px; 
-      box-shadow: 0 30px 70px rgba(0,0,0,0.5); 
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
       border: 1px solid var(--border);
       width: 100%; 
       max-width: 420px; 
@@ -90,7 +90,7 @@
       border-radius: 12px; 
       font-family: inherit; 
       font-size: 0.95rem; 
-      color: #fff;
+      color: var(--text-bright);
       outline: none; 
       transition: all 0.25s; 
     }
@@ -149,7 +149,7 @@
     .doctor-selector { 
       background: var(--navy-dark); 
       border: 1px solid var(--border); 
-      color: #fff; 
+      color: var(--text-bright); 
       padding: 8px 16px; 
       border-radius: 10px; 
       font-family: inherit; 
@@ -231,15 +231,16 @@
       background: var(--surface); 
       border-radius: 24px; 
       border: 1px solid var(--border); 
-      overflow: hidden; 
-      box-shadow: 0 15px 40px rgba(0,0,0,0.2); 
+      overflow-x: auto; 
+      box-shadow: 0 15px 40px rgba(0,0,0,0.05); 
       margin-bottom: 30px; 
     }
     .weekly-header { 
+      min-width: 800px;
       display: grid; 
       grid-template-columns: 70px repeat(7, 1fr); 
       background: var(--navy-dark); 
-      color: #fff; 
+      color: var(--text-bright); 
       text-align: center; 
       border-bottom: 1px solid var(--border); 
     }
@@ -272,6 +273,7 @@
     }
 
     .weekly-grid { 
+      min-width: 800px;
       display: grid; 
       grid-template-columns: 70px repeat(7, 1fr); 
       max-height: 680px; 
@@ -421,7 +423,7 @@
       border-radius: 20px; 
       border: 1px solid var(--border); 
       overflow: hidden; 
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
     }
     .visits-header { 
       padding: 24px 24px 16px; 
@@ -444,7 +446,7 @@
     }
     .btn-refresh:hover { 
       border-color: var(--color-open); 
-      color: #fff; 
+      color: var(--text-bright); 
     }
     
     .appt-grid { 
@@ -619,7 +621,7 @@
       border-radius: 24px;
       width: 100%;
       max-width: 520px;
-      box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
       overflow: hidden;
       transform: translateY(30px);
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -649,7 +651,7 @@
       line-height: 1;
       transition: color 0.2s;
     }
-    .modal-close:hover { color: #fff; }
+    .modal-close:hover { color: var(--text-bright); }
     .modal-body {
       padding: 28px;
       max-height: 80vh;
@@ -682,7 +684,7 @@
     .suggestion-item:last-child { border-bottom: none; }
     .suggestion-item:hover {
       background: var(--navy-dark);
-      color: #fff;
+      color: var(--text-bright);
     }
 
     /* Toggle switches */
@@ -799,16 +801,16 @@
       pointer-events: auto;
       min-width: 320px;
       max-width: 450px;
-      background: rgba(15, 33, 55, 0.95);
+      background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.05);
       border-radius: 16px;
       padding: 16px 20px;
-      color: #fff;
+      color: var(--text-bright);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
       font-weight: 500;
       font-size: 0.9rem;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
       display: flex;
       align-items: center;
       gap: 14px;
@@ -833,7 +835,7 @@
       font-size: 1.3rem;
       padding: 4px;
     }
-    .toast-close:hover { color: #fff; }
+    .toast-close:hover { color: var(--text-bright); }
   </style>
 </head>
 <body>
@@ -1085,13 +1087,6 @@
         <div class="details-val" id="det-description">-</div>
       </div>
       
-      <!-- Action buttons -->
-      <div id="det-actions-container" style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border); display:flex; flex-direction:column; gap:10px;">
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-          <button class="btn-cancel" id="det-btn-cancel-appt" onclick="cancelDetailAppointment()">Kelmadi</button>
-          <button class="btn-submit-premium" id="det-btn-complete-appt" onclick="completeDetailAppointment()">Keldi</button>
-        </div>
-      </div>
     </div>
   </div>
 </div>
@@ -1100,7 +1095,7 @@
 <div class="modal-overlay" id="confirm-modal">
   <div class="modal" style="max-width: 420px; text-align: center; padding: 30px 24px;">
     <div id="confirm-icon" style="font-size: 3.5rem; margin-bottom: 16px; line-height: 1;">⚠️</div>
-    <h3 id="confirm-title" style="margin-bottom: 12px; font-size: 1.35rem; color: #fff;">Tasdiqlang</h3>
+    <h3 id="confirm-title" style="margin-bottom: 12px; font-size: 1.35rem; color: var(--text-bright);">Tasdiqlang</h3>
     <p id="confirm-message" style="color: var(--text-muted); margin-bottom: 28px; font-size: 0.95rem; line-height: 1.6;">Haqiqatan ham bu amalni bajarasizmi?</p>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
       <button class="btn-cancel" onclick="closeConfirmModal()" style="padding: 12px; border-radius: 8px;">Bekor qilish</button>
@@ -1116,7 +1111,7 @@
     <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 16px;">
       <div style="font-size: 2.5rem; line-height: 1;">👤</div>
       <div>
-        <h3 id="ph-name" style="font-size: 1.4rem; color: #fff; margin-bottom: 4px;">Bemor Profili</h3>
+        <h3 id="ph-name" style="font-size: 1.4rem; color: var(--text-bright); margin-bottom: 4px;">Bemor Profili</h3>
         <p id="ph-joined" style="color: var(--text-muted); font-size: 0.85rem;">Klinikada ro'yxatdan o'tgan sana: ...</p>
       </div>
     </div>
@@ -1124,23 +1119,23 @@
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; background: var(--navy-dark); padding: 15px; border-radius: 12px; border: 1px solid var(--border);">
       <div>
         <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">Telefon raqami</div>
-        <div id="ph-phone" style="font-weight:600; color:#fff;">-</div>
+        <div id="ph-phone" style="font-weight:600; color: var(--text-bright);">-</div>
       </div>
       <div>
         <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">Telegram raqami</div>
-        <div id="ph-tg-phone" style="font-weight:600; color:#fff;">-</div>
+        <div id="ph-tg-phone" style="font-weight:600; color: var(--text-bright);">-</div>
       </div>
       <div>
         <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">Telegram Username</div>
-        <div id="ph-tg-user" style="font-weight:600; color:#fff;">-</div>
+        <div id="ph-tg-user" style="font-weight:600; color: var(--text-bright);">-</div>
       </div>
       <div>
         <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">Ro'yxatdan o'tgan turi</div>
-        <div id="ph-source" style="font-weight:600; color:#fff;">-</div>
+        <div id="ph-source" style="font-weight:600; color: var(--text-bright);">-</div>
       </div>
     </div>
 
-    <h4 style="margin-bottom: 12px; color: #fff; font-size: 1rem; font-weight: 600;">🕐 Tashriflar tarixi</h4>
+    <h4 style="margin-bottom: 12px; color: var(--text-bright); font-size: 1rem; font-weight: 600;">🕐 Tashriflar tarixi</h4>
     <div id="ph-history-list" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
       <!-- History elements render here -->
     </div>
@@ -1409,7 +1404,7 @@
         listEl.innerHTML = patients.map(p => `
           <div class="patient-result-item" onclick="openDoctorPatientCard('${p.id}')" style="flex-direction: row; align-items: center; justify-content: space-between; gap: 8px;">
             <div style="display:flex; flex-direction:column; gap:2px;">
-              <span style="font-weight:600; font-size:0.88rem; color:#fff;">👤 ${p.firstName} ${p.lastName}</span>
+              <span style="font-weight:600; font-size:0.88rem; color: var(--text-bright);">👤 ${p.firstName} ${p.lastName}</span>
               <span style="font-size:0.75rem; color:var(--text-muted);">📞 ${p.phone}</span>
             </div>
             <span style="font-size:0.75rem; background:rgba(30, 41, 59, 0.7); border:1px solid var(--border); padding:3px 8px; border-radius:12px; color:var(--text-muted); font-weight:600; white-space:nowrap;">
@@ -1493,7 +1488,7 @@
         const isToday = d.iso === getTashkentISO(new Date());
         const showPaste = (copiedSchedule !== null) && d.iso !== (copySelect ? copySelect.value : '') && userRole === 'ADMIN';
         const pasteBtn = showPaste ? `
-          <button onclick="pasteToDay('${d.iso}', event)" title="Joylash" style="background:rgba(29, 158, 117, 0.25); color:#fff; border:1px solid var(--color-open); padding:2px 6px; border-radius:6px; font-size:0.6rem; margin-top:5px; cursor:pointer;">📥 Joylash</button>
+          <button onclick="pasteToDay('${d.iso}', event)" title="Joylash" style="background:rgba(29, 158, 117, 0.25); color:var(--color-open); border:1px solid var(--color-open); padding:2px 6px; border-radius:6px; font-size:0.6rem; margin-top:5px; cursor:pointer;">📥 Joylash</button>
         ` : '';
 
         return `
@@ -2363,7 +2358,7 @@
 
     list.innerHTML = filtered.map(p => `
       <div class="patient-result-item" onclick="openDoctorPatientCard('${p.id}')">
-        <span style="font-weight:600; font-size:0.88rem; color:#fff;">👤 ${p.firstName} ${p.lastName}</span>
+        <span style="font-weight:600; font-size:0.88rem; color: var(--text-bright);">👤 ${p.firstName} ${p.lastName}</span>
         <span style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">📞 ${p.phone}</span>
       </div>
     `).join('');
@@ -2467,7 +2462,7 @@
             return `
               <div style="padding:10px 12px; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:10px; font-size:0.85rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <span style="font-weight:600; color:#fff;">📅 Bron: ${procName}</span>
+                  <span style="font-weight:600; color: var(--text-bright);">📅 Bron: ${procName}</span>
                   ${badge}
                 </div>
                 <div style="color:var(--text-muted); margin-top:4px; font-size:0.8rem;">
@@ -2493,7 +2488,7 @@
             return `
               <div style="padding:10px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(29, 158, 117, 0.2); border-radius:10px; font-size:0.85rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <span style="font-weight:600; color:#fff;">⚡ Tashrif: ${item.serviceName}</span>
+                  <span style="font-weight:600; color: var(--text-bright);">⚡ Tashrif: ${item.serviceName}</span>
                   ${badge}
                 </div>
                 <div style="color:var(--text-muted); margin-top:4px; font-size:0.8rem;">

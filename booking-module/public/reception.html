@@ -66,7 +66,7 @@
     .err-form { background: var(--red-bg); border: 1px solid #fecaca; border-radius: 10px; padding: 12px 16px; color: var(--red); font-size: 0.88rem; margin-top: 10px; display: none; }
 
     /* Visits list */
-    .visits-card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+    .visits-card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); overflow-x: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
     .visits-header { padding: 20px 24px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
     .visits-header h2 { font-size: 1.05rem; color: var(--navy); }
     .btn-refresh { background: none; border: 1.5px solid var(--border); color: var(--text-muted); padding: 7px 14px; border-radius: 8px; font-family: inherit; font-size: 0.82rem; cursor: pointer; }
@@ -330,14 +330,7 @@
           <span class="price-suffix">so'm</span>
         </div>
       </div>
-      <div class="form-group" id="f-payment-method-group">
-        <label>To'lov turi *</label>
-        <select id="f-payment-method" style="width:100%; padding:12px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.93rem; outline:none; background:#fff; cursor:pointer;">
-          <option value="CASH" selected>Naqd pul</option>
-          <option value="CARD">Plastik karta</option>
-          <option value="TRANSFER">O'tkazma</option>
-        </select>
-      </div>
+
 
       <!-- Manual Duration Selector -->
       <div class="form-group" id="f-duration-group" style="display:none; margin-bottom: 15px;">
@@ -606,6 +599,21 @@
     <h4 style="margin-bottom: 12px; color: #0f172a; font-size: 1rem; font-weight: 700;">🕐 Tashriflar tarixi</h4>
     <div id="ph-history-list" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
       <!-- History elements render here -->
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Bog'lanildi Options -->
+<div id="contacted-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:var(--surface); padding:32px 24px; border-radius:24px; max-width:400px; width:90%; text-align:center; position:relative; box-shadow: 0 20px 40px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.8);">
+    <div style="font-size: 3.5rem; margin-bottom: 16px; line-height: 1;">📞</div>
+    <h3 style="margin-bottom: 12px; color: var(--navy); font-size: 1.25rem; font-weight: 700;">Bemor bilan bog'lanildi</h3>
+    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; line-height: 1.5;">Bemor nima deganini belgilang:</p>
+    
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <button class="btn" style="background: #10b981; color: white; width: 100%; border: none;" onclick="handleContactedChoice('RESCHEDULE')">🗓️ Vaqtni ko'chirishni so'radi</button>
+      <button class="btn btn-cancel" style="background: #ef4444; color: white; width: 100%; border: none;" onclick="handleContactedChoice('KElMADI')">❌ Kelmasligini aytdi (Kelmadi)</button>
+      <button class="btn" style="background: #e2e8f0; color: #475569; width: 100%; border: none; margin-top: 8px;" onclick="closeContactedModal()">Yopish</button>
     </div>
   </div>
 </div>
@@ -953,15 +961,11 @@
         <td><div style="font-size:0.8rem; color:var(--red)"><strong>${date}</strong><br>${time}</div></td>
         <td>
           <div style="display:flex; gap:6px; flex-wrap:wrap;">
-            <button class="btn-action btn-start" style="background:#10b981;" onclick="updateCallStatus('${a.id}', 'RESOLVE')">
+            <button class="btn-action btn-start" style="background:#10b981;" onclick="openContactedModal('${a.id}', '${encodeURIComponent(JSON.stringify(a))}')">
               📞 Bog'lanildi
             </button>
             <button class="btn-action" style="background:#f59e0b; color:white;" onclick="updateCallStatus('${a.id}', 'NO_ANSWER')">
               Javob bermadi (${attempts}/3)
-            </button>
-            <button class="btn-action btn-cancel" style="background:${isDeleteDisabled ? '#cbd5e1' : '#ef4444'}; color:${isDeleteDisabled ? '#64748b' : '#fff'};" 
-                    onclick="deleteAppt('${a.id}', ${attempts})" title="${deleteTooltip}">
-              O'chirish
             </button>
           </div>
         </td>
@@ -1226,6 +1230,65 @@
     }
   }
 
+  let currentContactedApptId = null;
+  let currentContactedApptData = null;
+
+  function openContactedModal(id, encodedData) {
+    currentContactedApptId = id;
+    currentContactedApptData = JSON.parse(decodeURIComponent(encodedData));
+    document.getElementById('contacted-modal').style.display = 'flex';
+  }
+
+  function closeContactedModal() {
+    document.getElementById('contacted-modal').style.display = 'none';
+    currentContactedApptId = null;
+    currentContactedApptData = null;
+  }
+
+  function handleContactedChoice(choice) {
+    if (!currentContactedApptId) return;
+    
+    if (choice === 'KELMADI') {
+      updateCallStatus(currentContactedApptId, 'RESOLVE');
+      closeContactedModal();
+    } else if (choice === 'RESCHEDULE') {
+      const a = currentContactedApptData;
+      
+      // Cancel the old appointment silently as NOSHOW_RESOLVED
+      updateCallStatus(currentContactedApptId, 'RESOLVE'); 
+      closeContactedModal();
+      
+      // Prefill booking form
+      if (a.doctorId) document.getElementById('f-doctor').value = a.doctorId;
+      
+      const pName = a.patient ? a.patient.firstName : (a.patientFirst || '');
+      const pLast = a.patient ? a.patient.lastName : (a.patientLast || '');
+      const phone = a.patient ? a.patient.phone : (a.patientPhone || '');
+      
+      document.getElementById('f-patient').value = pName;
+      document.getElementById('f-patient-surname').value = pLast;
+      document.getElementById('f-phone').value = phone;
+      
+      if (a.doctorId) {
+        loadProceduresForDoctor(a.doctorId).then(() => {
+          if (a.procedureId) {
+            const sel = document.getElementById('f-service');
+            for (let i=0; i<sel.options.length; i++) {
+              if (sel.options[i].dataset.id === a.procedureId) {
+                sel.selectedIndex = i;
+                sel.dispatchEvent(new Event('change'));
+                break;
+              }
+            }
+          }
+        });
+      }
+      
+      switchMainTab('tab-qabullar');
+      showToast("Yangi vaqtni tanlang va qabulni bron qiling", "info");
+    }
+  }
+
   function resolvePastAppointment(id, answer) {
     if (answer === 'NO') {
       showConfirm(
@@ -1466,7 +1529,7 @@
     const price = parseInt(priceStr, 10);
     const startTime = document.getElementById('f-start-date').value;
     const endTime = document.getElementById('f-end-date').value;
-    const paymentMethod = document.getElementById('f-payment-method').value;
+    const paymentMethod = 'CASH';
     
     const visitType = document.querySelector('input[name="f-visit-type"]:checked').value;
     let note = document.getElementById('f-note').value.trim();
@@ -1640,17 +1703,22 @@
 
     btn.disabled = true; const oldTxt = btn.textContent; btn.textContent = '...';
     try {
-      // First, try to ensure patient exists
+      // Find or create patient by phone
       let finalPatientId = null;
-      // We will just use the backend's POST /api/reception/patients if we need to ensure patient
-      // Actually, since this is for returning patients, reception SHOULD use the search bar.
-      // If patientId isn't stored anywhere easily accessible, we might need to fetch by phone.
-      const pRes = await fetch('/api/reception/patients?search=' + encodeURIComponent(phone), { headers: { 'Authorization': `Bearer ${adminToken}` } });
+      const pFirstName = document.getElementById('f-patient').value.trim();
+      const pLastName = document.getElementById('f-patient-surname').value.trim();
+      
+      const pRes = await fetch('/api/reception/patients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+        body: JSON.stringify({ firstName: pFirstName || 'Noma\\'lum', lastName: pLastName || 'Noma\\'lum', phone: phone })
+      });
       const pData = await pRes.json();
-      if (pData.success && pData.patients && pData.patients.length > 0) {
-        finalPatientId = pData.patients[0].id;
+      
+      if (pRes.ok && pData.patient) {
+        finalPatientId = pData.patient.id;
       } else {
-        errEl.textContent = "Bemor bazada topilmadi. Avval bemorni qidiruvdan tanlang yoki qo'shing.";
+        errEl.textContent = "Bemor yaratishda xatolik: " + (pData.error || '');
         errEl.style.display = 'block'; btn.disabled = false; btn.textContent = oldTxt; return;
       }
 

@@ -237,15 +237,15 @@
     }
 
     /* Weekly Grid Scheduling for Admin */
-    .weekly-container { background: var(--surface); border-radius: 20px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.04); margin-bottom: 28px; }
-    .weekly-header { display: grid; grid-template-columns: 80px repeat(7, 1fr); background: var(--navy); color: #fff; text-align: center; border-bottom: 1px solid #1e293b; }
+    .weekly-container { background: var(--surface); border-radius: 20px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.04); margin-bottom: 28px; overflow-x: auto; }
+    .weekly-header { min-width: 800px; display: grid; grid-template-columns: 80px repeat(7, 1fr); background: var(--navy); color: #fff; text-align: center; border-bottom: 1px solid #1e293b; }
     .weekly-header-cell { padding: 15px 5px; border-right: 1px solid #1e293b; }
     .weekly-header-cell:last-child { border-right: none; }
     .weekly-header-cell .day-name { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7; font-weight: 700; }
     .weekly-header-cell .day-date { font-size: 1.1rem; font-weight: 700; display: block; margin-top: 2px; }
     .weekly-header-cell.today { background: var(--teal); color: #fff; }
 
-    .weekly-grid { display: grid; grid-template-columns: 80px repeat(7, 1fr); max-height: 600px; overflow-y: auto; }
+    .weekly-grid { min-width: 800px; display: grid; grid-template-columns: 80px repeat(7, 1fr); max-height: 600px; overflow-y: auto; }
     .time-col { background: #f1f5f9; border-right: 1px solid var(--border); }
     .time-cell { height: 50px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border); }
     
@@ -460,7 +460,7 @@
           </div>
         </div>
         
-        <h2 style="margin-bottom: 15px; color: var(--navy); font-size: 1.1rem;">🦷 Stomatologlar</h2>
+        <h2 style="margin-bottom: 15px; color: var(--navy); font-size: 1.1rem;">Stomatologlar</h2>
         <div class="table-card" style="margin-bottom: 30px;">
           <table>
             <thead>
@@ -481,7 +481,7 @@
           </table>
         </div>
 
-        <h2 style="margin-bottom: 15px; color: var(--navy); font-size: 1.1rem;">👂 LORlar</h2>
+        <h2 style="margin-bottom: 15px; color: var(--navy); font-size: 1.1rem;">LORlar</h2>
         <div class="table-card">
           <table>
             <thead>
@@ -758,8 +758,17 @@
       </div>
       
       <div class="form-group" style="margin-bottom: 20px;">
-        <label>Rasm URL (ixtiyoriy)</label>
-        <input type="text" id="edit-doc-photo" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
+        <label>Shifokor rasmi (ixtiyoriy)</label>
+        <div id="photo-drop-zone" style="border: 2px dashed var(--border); border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s;">
+          <input type="file" id="edit-doc-photo-file" accept="image/*" style="display: none;">
+          <div id="photo-preview-container" style="display: none; margin-bottom: 12px;">
+            <img id="photo-preview-img" src="" style="max-width: 100px; max-height: 100px; border-radius: 50%; object-fit: cover;">
+          </div>
+          <div id="photo-drop-text" style="color: var(--text-muted); font-size: 0.95rem;">
+            📷 <span>Rasmni shu yerga tashlang yoki tanlash uchun bosing</span>
+          </div>
+        </div>
+        <input type="hidden" id="edit-doc-photo" value="">
       </div>
 
       <div class="form-group" style="margin-bottom: 20px;">
@@ -774,7 +783,7 @@
   <!-- Modal for Monthly History -->
   <div id="history-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
     <div style="background:white; padding:32px; border-radius:24px; max-width:500px; width:90%; max-height:80vh; overflow-y:auto; position:relative;">
-      <button onclick="closeModal()" style="position:absolute; top:16px; right:16px; font-size:1.5rem; background:none; border:none; cursor:pointer;">&times;</button>
+      <button onclick="closeHistoryModal()" style="position:absolute; top:16px; right:16px; font-size:1.5rem; background:none; border:none; cursor:pointer;">&times;</button>
       <h3 id="modal-title" style="margin-bottom:20px; color:var(--navy)">Oylik Daromad Tarixi</h3>
       <table style="width:100%; border-collapse:collapse;">
         <thead>
@@ -821,7 +830,7 @@
   </div>
 
   <script>
-    function closeModal() { document.getElementById('history-modal').style.display = 'none'; }
+    function closeHistoryModal() { document.getElementById('history-modal').style.display = 'none'; }
     
     // Loading animation helper
     function adminLoaderHTML(cols, text = 'Yuklanmoqda...') {
@@ -1298,6 +1307,13 @@
                              (isNoShow || isNoShowResolved || isNoShowUnreachable ? 'row-noshow' : ''));
             
             let statusCell = `<span class="badge badge-${a.status.toLowerCase()}">${a.status}</span>`;
+            if (a.status === 'COMPLETED' && a.visit) {
+              const pm = a.visit.paymentMethod;
+              const pmText = pm === 'CASH' ? 'Naqd' : (pm === 'CARD' ? 'Karta' : (pm === 'TRANSFER' ? 'O\\'tkazma' : pm || 'Aniqlanmagan'));
+              const amount = a.visit.paidAmount || a.visit.price || 0;
+              const amountText = amount > 0 ? ` - ${amount.toLocaleString('uz-UZ').replace(/,/g, ' ')} so'm` : '';
+              statusCell += ` <span class="badge" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; margin-left:4px;" title="To'lov turi va summa">💳 ${pmText}${amountText}</span>`;
+            }
             if (isCancelledAdmin) {
               statusCell += ` <span class="badge badge-cancelled-admin" title="Admin tomonidan bekor qilindi">🛡 Admin</span>`;
             } else if (isCancelledPatient) {
@@ -1418,6 +1434,16 @@
         document.getElementById('edit-doc-bio').value = doc.bio || '';
         document.getElementById('edit-doc-photo').value = doc.photoUrl || '';
         document.getElementById('edit-doc-tg').value = doc.telegramUsername || '';
+        
+        if (doc.photoUrl) {
+          document.getElementById('photo-preview-img').src = doc.photoUrl;
+          document.getElementById('photo-preview-container').style.display = 'block';
+          document.getElementById('photo-drop-text').style.display = 'none';
+        } else {
+          document.getElementById('photo-preview-img').src = '';
+          document.getElementById('photo-preview-container').style.display = 'none';
+          document.getElementById('photo-drop-text').style.display = 'block';
+        }
       } else {
         document.getElementById('doctor-modal-title').textContent = "Yangi shifokor qo'shish";
         document.getElementById('edit-doc-id').value = '';
@@ -1427,12 +1453,87 @@
         document.getElementById('edit-doc-bio').value = '';
         document.getElementById('edit-doc-photo').value = '';
         document.getElementById('edit-doc-tg').value = '';
+        
+        document.getElementById('photo-preview-img').src = '';
+        document.getElementById('photo-preview-container').style.display = 'none';
+        document.getElementById('photo-drop-text').style.display = 'block';
       }
       modal.style.display = 'flex';
     }
 
     function closeDoctorModal() {
       document.getElementById('doctor-modal').style.display = 'none';
+    }
+
+    // Photo Upload Logic
+    const dropZone = document.getElementById('photo-drop-zone');
+    const fileInput = document.getElementById('edit-doc-photo-file');
+    const photoUrlInput = document.getElementById('edit-doc-photo');
+    const photoPreview = document.getElementById('photo-preview-img');
+    const photoPreviewContainer = document.getElementById('photo-preview-container');
+    const photoDropText = document.getElementById('photo-drop-text');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = 'var(--teal)';
+      dropZone.style.backgroundColor = '#f0fdf4';
+    });
+
+    dropZone.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = 'var(--border)';
+      dropZone.style.backgroundColor = 'transparent';
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = 'var(--border)';
+      dropZone.style.backgroundColor = 'transparent';
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handlePhotoUpload(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        handlePhotoUpload(e.target.files[0]);
+      }
+    });
+
+    async function handlePhotoUpload(file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Faqat rasm yuklash mumkin!');
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      photoDropText.innerHTML = 'Yuklanmoqda... ⏳';
+      
+      try {
+        const res = await fetch('/api/admin/upload', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
+          body: formData
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          photoUrlInput.value = data.url;
+          photoPreview.src = data.url;
+          photoPreviewContainer.style.display = 'block';
+          photoDropText.style.display = 'none';
+        } else {
+          alert('Xatolik: ' + (data.error || 'Noma\\'lum xatolik'));
+          photoDropText.innerHTML = '📷 <span>Rasmni shu yerga tashlang yoki tanlash uchun bosing</span>';
+        }
+      } catch (err) {
+        alert('Tarmoq xatosi');
+        photoDropText.innerHTML = '📷 <span>Rasmni shu yerga tashlang yoki tanlash uchun bosing</span>';
+      }
     }
 
     async function submitDoctorModal() {
