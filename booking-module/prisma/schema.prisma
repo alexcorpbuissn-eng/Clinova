@@ -84,10 +84,26 @@ model Patient {
   appointments         Appointment[]
   visits               Visit[]
   savedDrafts          SavedDraft[]
+  complaints           Complaint[]
   createdAt            DateTime      @default(now())
 
   @@index([telegramPhone])
   @@index([phone])
+}
+
+// ─────────────────────────────────────────────
+// COMPLAINTS (new)
+// Patient feedback and complaints
+// ─────────────────────────────────────────────
+model Complaint {
+  id        String   @id @default(uuid())
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id])
+  message   String   @db.Text
+  status    String   @default("PENDING") // PENDING, REVIEWED
+  createdAt DateTime @default(now())
+
+  @@index([patientId])
 }
 
 // ─────────────────────────────────────────────
