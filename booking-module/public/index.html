@@ -138,8 +138,8 @@
       .ms2-section{width:100%;background:var(--ms-white);display:grid;grid-template-columns:1fr 1fr;min-height:520px;}
       /* ── LEFT ── */
       .ms2-left{padding:60px clamp(32px,8vw,100px);display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;}
-      .ms2-left::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:url('milestone_bg.png') center/cover no-repeat;background-attachment:fixed;opacity:0.15;z-index:0;transition:all 0.8s cubic-bezier(0.165, 0.84, 0.44, 1); filter: grayscale(50%);}
-      .ms2-left:hover::before{opacity:0.3;transform:scale(1.05); filter: grayscale(0%);}
+      .ms2-left::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 40%, rgba(255,255,255,0.4) 80%, rgba(255,255,255,0.1) 100%), url('milestone_bg.png') center right/cover no-repeat;z-index:0;transition:all 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);}
+      .ms2-left:hover::before{transform:scale(1.05); background:linear-gradient(to right, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.75) 40%, rgba(255,255,255,0.2) 80%, transparent 100%), url('milestone_bg.png') center right/cover no-repeat;}
       .ms2-left > *{position:relative;z-index:1;}
       .ms2-left::after{content:'';position:absolute;right:0;top:60px;bottom:60px;width:1px;background:var(--ms-border);z-index:1;}
       .ms2-hero-row{display:flex;align-items:center;line-height:1;opacity:0;animation:ms2up .7s .2s ease forwards;margin-bottom:8px;}
@@ -819,7 +819,7 @@
           if (data.success && data.doctors && data.doctors.length > 0) {
             const container = document.getElementById('home-doctors-container');
             container.innerHTML = data.doctors.map(d => `
-              <div class="home-doc-card" onclick="window.location.href='booking.html?doctor=${d.id}'">
+              <div class="home-doc-card" onclick="window.location.href='booking.html?doctorId=${d.id}'">
                 <div class="home-doc-img">
                   ${d.photoUrl 
                     ? `<img src="${d.photoUrl}" alt="${d.firstName}" loading="lazy" />` 
@@ -841,6 +841,88 @@
         }
       }
       document.addEventListener('DOMContentLoaded', loadHomeDoctors);
+    </script>
+  </section>
+
+  <!-- ========= FAQ SECTION ========= -->
+  <section class="faq-section" style="background:#f8fafc; padding:80px 0;">
+    <div class="container">
+      <div class="section-header" style="text-align:center; margin-bottom: 50px;">
+        <span style="color: #0369a1; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">FAQ</span>
+        <h2 class="section-title center" style="margin-top: 16px;">Ko'p beriladigan savollar</h2>
+        <div style="width: 40px; height: 2px; background-color: var(--teal); margin: 24px auto;"></div>
+      </div>
+      
+      <div class="faq-accordion" style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px;">
+        
+        <div class="faq-item" style="background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; transition: all 0.3s; border: 1px solid #e2e8f0;">
+          <button class="faq-question" style="width: 100%; text-align: left; padding: 20px 24px; background: transparent; border: none; font-size: 1.1rem; font-weight: 700; color: #0C447C; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+            Qabulga qanday yozilsam bo'ladi?
+            <span class="faq-icon" style="transition: transform 0.3s; color: var(--teal);">▼</span>
+          </button>
+          <div class="faq-answer" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: #fff;">
+            <p style="padding: 0 24px 20px; color: var(--gray); margin: 0; line-height: 1.6;">Saytimiz orqali onlayn band qilishingiz, telegram botimizdan foydalanishingiz yoki to'g'ridan-to'g'ri telefon raqamlarimizga qo'ng'iroq qilib yozilishingiz mumkin.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" style="background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; transition: all 0.3s; border: 1px solid #e2e8f0;">
+          <button class="faq-question" style="width: 100%; text-align: left; padding: 20px 24px; background: transparent; border: none; font-size: 1.1rem; font-weight: 700; color: #0C447C; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+            Birinchi tashrifda nimalar qilinadi?
+            <span class="faq-icon" style="transition: transform 0.3s; color: var(--teal);">▼</span>
+          </button>
+          <div class="faq-answer" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: #fff;">
+            <p style="padding: 0 24px 20px; color: var(--gray); margin: 0; line-height: 1.6;">Birinchi tashrifda shifokor og'iz bo'shlig'ingizni to'liq ko'rikdan o'tkazadi, kerak bo'lsa rentgen qilinadi, aniq tashxis qo'yiladi va davolash rejasi tuziladi.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" style="background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; transition: all 0.3s; border: 1px solid #e2e8f0;">
+          <button class="faq-question" style="width: 100%; text-align: left; padding: 20px 24px; background: transparent; border: none; font-size: 1.1rem; font-weight: 700; color: #0C447C; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+            Tish davolash og'riqlimi?
+            <span class="faq-icon" style="transition: transform 0.3s; color: var(--teal);">▼</span>
+          </button>
+          <div class="faq-answer" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: #fff;">
+            <p style="padding: 0 24px 20px; color: var(--gray); margin: 0; line-height: 1.6;">Yo'q, biz zamonaviy va xavfsiz og'riqsizlantirish (anesteziya) usullaridan foydalanamiz, shuning uchun davolash jarayoni mutlaqo og'riqsiz o'tadi.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item" style="background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; transition: all 0.3s; border: 1px solid #e2e8f0;">
+          <button class="faq-question" style="width: 100%; text-align: left; padding: 20px 24px; background: transparent; border: none; font-size: 1.1rem; font-weight: 700; color: #0C447C; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+            Klinikada qanday to'lov usullari mavjud?
+            <span class="faq-icon" style="transition: transform 0.3s; color: var(--teal);">▼</span>
+          </button>
+          <div class="faq-answer" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: #fff;">
+            <p style="padding: 0 24px 20px; color: var(--gray); margin: 0; line-height: 1.6;">Bizda naqd pul, plastik kartalar (Uzcard, Humo) hamda Click, Payme kabi elektron to'lov tizimlari orqali to'lovlarni amalga oshirishingiz mumkin.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    
+    <script>
+      document.querySelectorAll('.faq-question').forEach(button => {
+        button.addEventListener('click', () => {
+          const faqItem = button.parentElement;
+          const answer = button.nextElementSibling;
+          const icon = button.querySelector('.faq-icon');
+          
+          const isOpen = faqItem.classList.contains('active');
+          
+          // Close all other faqs
+          document.querySelectorAll('.faq-item').forEach(item => {
+            item.classList.remove('active');
+            item.querySelector('.faq-answer').style.maxHeight = '0';
+            item.querySelector('.faq-icon').style.transform = 'rotate(0deg)';
+            item.style.borderColor = '#e2e8f0';
+          });
+          
+          if (!isOpen) {
+            faqItem.classList.add('active');
+            answer.style.maxHeight = answer.scrollHeight + "px";
+            icon.style.transform = 'rotate(180deg)';
+            faqItem.style.borderColor = 'var(--teal)';
+          }
+        });
+      });
     </script>
   </section>
 
@@ -1119,6 +1201,144 @@
   </footer>
 
   <script src="main.js"></script>
+  <!-- ========= FEEDBACK WIDGET ========= -->
+  <div id="feedback-widget" style="position: fixed; bottom: 24px; right: 24px; z-index: 9999; font-family: 'Inter', sans-serif;">
+    <!-- Chat Button -->
+    <button id="fw-btn" style="width: 60px; height: 60px; border-radius: 50%; background: var(--primary); color: white; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; transition: all 0.3s ease; position: relative;">
+      💬
+      <!-- Notification dot -->
+      <span style="position: absolute; top: 12px; right: 12px; width: 10px; height: 10px; background: #ef4444; border-radius: 50%; border: 2px solid var(--primary); animation: fw-pulse 2s infinite;"></span>
+    </button>
+
+    <!-- Chat Window -->
+    <div id="fw-window" style="position: absolute; bottom: 80px; right: 0; width: 320px; background: white; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); overflow: hidden; display: none; flex-direction: column; opacity: 0; transform: translateY(20px); transition: all 0.3s ease;">
+      <!-- Header -->
+      <div style="background: var(--primary); color: white; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px;">🎧</div>
+          <div>
+            <h4 style="margin: 0; font-size: 1rem; font-weight: 600;">Qo'llab-quvvatlash</h4>
+            <p style="margin: 0; font-size: 0.75rem; opacity: 0.8;">Sayt bo'yicha taklif va shikoyatlar</p>
+          </div>
+        </div>
+        <button id="fw-close" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; opacity: 0.8; transition: opacity 0.2s;">×</button>
+      </div>
+
+      <!-- Messages -->
+      <div id="fw-messages" style="height: 250px; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #f8fafc;">
+        <!-- Initial Message -->
+        <div style="display: flex; gap: 8px; max-width: 85%;">
+          <div style="width: 28px; height: 28px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0;">🎧</div>
+          <div style="background: white; padding: 10px 14px; border-radius: 0 12px 12px 12px; font-size: 0.9rem; color: #334155; box-shadow: 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; line-height: 1.4;">
+            Assalomu alaykum! Sayt ishlashida qandaydir muammo yoki shikoyatingiz bormi? Yozib qoldiring!
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Area -->
+      <div style="padding: 12px 16px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 8px;">
+        <input type="text" id="fw-input" placeholder="Xabaringizni yozing..." style="flex: 1; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 20px; font-size: 0.9rem; outline: none; transition: border-color 0.2s;">
+        <button id="fw-send" style="background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;">➤</button>
+      </div>
+    </div>
+
+    <style>
+      @keyframes fw-pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+      #fw-btn:hover { transform: scale(1.05); }
+      #fw-send:hover { transform: scale(1.05); background: var(--primary-dark); }
+      #fw-close:hover { opacity: 1; }
+      #fw-input:focus { border-color: var(--primary); }
+      .fw-user-msg { background: var(--primary); color: white; padding: 10px 14px; border-radius: 12px 0 12px 12px; font-size: 0.9rem; align-self: flex-end; max-width: 85%; box-shadow: 0 2px 4px rgba(0,0,0,0.05); word-wrap: break-word; }
+      .fw-bot-msg { background: white; color: #334155; padding: 10px 14px; border-radius: 0 12px 12px 12px; font-size: 0.9rem; align-self: flex-start; max-width: 85%; box-shadow: 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; line-height: 1.4; word-wrap: break-word; }
+      .fw-bot-container { display: flex; gap: 8px; max-width: 85%; }
+      .fw-bot-icon { width: 28px; height: 28px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+      /* Custom Scrollbar for messages */
+      #fw-messages::-webkit-scrollbar { width: 6px; }
+      #fw-messages::-webkit-scrollbar-track { background: transparent; }
+      #fw-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+      #fw-messages::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+
+    <script>
+      const fwBtn = document.getElementById('fw-btn');
+      const fwWindow = document.getElementById('fw-window');
+      const fwClose = document.getElementById('fw-close');
+      const fwSend = document.getElementById('fw-send');
+      const fwInput = document.getElementById('fw-input');
+      const fwMessages = document.getElementById('fw-messages');
+
+      let isFwOpen = false;
+
+      function toggleFwChat() {
+        isFwOpen = !isFwOpen;
+        if (isFwOpen) {
+          fwWindow.style.display = 'flex';
+          setTimeout(() => {
+            fwWindow.style.opacity = '1';
+            fwWindow.style.transform = 'translateY(0)';
+          }, 10);
+          fwInput.focus();
+          // Remove notification dot
+          const dot = fwBtn.querySelector('span');
+          if (dot) dot.style.display = 'none';
+        } else {
+          fwWindow.style.opacity = '0';
+          fwWindow.style.transform = 'translateY(20px)';
+          setTimeout(() => {
+            fwWindow.style.display = 'none';
+          }, 300);
+        }
+      }
+
+      fwBtn.addEventListener('click', toggleFwChat);
+      fwClose.addEventListener('click', toggleFwChat);
+
+      function appendFwUserMessage(text) {
+        const msg = document.createElement('div');
+        msg.className = 'fw-user-msg';
+        msg.textContent = text;
+        fwMessages.appendChild(msg);
+        fwMessages.scrollTop = fwMessages.scrollHeight;
+      }
+
+      function appendFwBotMessage(text) {
+        const container = document.createElement('div');
+        container.className = 'fw-bot-container';
+        
+        const icon = document.createElement('div');
+        icon.className = 'fw-bot-icon';
+        icon.textContent = '🎧';
+        
+        const msg = document.createElement('div');
+        msg.className = 'fw-bot-msg';
+        msg.textContent = text;
+        
+        container.appendChild(icon);
+        container.appendChild(msg);
+        fwMessages.appendChild(container);
+        fwMessages.scrollTop = fwMessages.scrollHeight;
+      }
+
+      function handleFwSend() {
+        const text = fwInput.value.trim();
+        if (!text) return;
+
+        // User message
+        appendFwUserMessage(text);
+        fwInput.value = '';
+
+        // Simulate thinking & auto-reply
+        setTimeout(() => {
+          appendFwBotMessage('Fikringiz uchun rahmat! Sizning xabaringiz qabul qilindi va darhol ma\'muriyatga yuborildi. Biz albatta buni inobatga olamiz.');
+        }, 1000);
+      }
+
+      fwSend.addEventListener('click', handleFwSend);
+      fwInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleFwSend();
+      });
+    </script>
+  </div>
 </body>
 
 </html>
