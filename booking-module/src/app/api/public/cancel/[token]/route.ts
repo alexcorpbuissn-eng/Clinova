@@ -100,7 +100,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
         `❌ *Qabul bekor qilindi*\n\n` +
         `Dr. *${doctorName}* bilan *${date}, ${time}* dagi qabulingiz bekor qilindi.\n\n` +
         `Qayta yozilish uchun: ${process.env.NEXT_PUBLIC_APP_URL}/booking`;
-      bot.sendMessage(chatId, text, { parse_mode: 'Markdown' }).catch(console.error);
+      try {
+        await bot.sendMessage(chatId, text, { parse_mode: 'Markdown' });
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     // Notify clinic group
@@ -113,7 +117,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
         `👨‍⚕️ Shifokor: *Dr. ${doctorName}*\n` +
         `📅 Sana: *${date}*\n` +
         `🕐 Vaqt: *${time}*`;
-      bot.sendMessage(groupChatId, groupText, { parse_mode: 'Markdown' }).catch(console.error);
+      try {
+        await bot.sendMessage(groupChatId, groupText, { parse_mode: 'Markdown' });
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     return NextResponse.json({ success: true, message: 'Qabul muvaffaqiyatli bekor qilindi.' });

@@ -61,19 +61,27 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         `Hurmatli *${appointment.patientFirst}*,\n` +
         `Dr. *${doctorName}* siz bilan *${date}, ${time}* dagi qabulni bekor qildi.\n\n` +
         `Yangi vaqtga yozilish uchun: ${process.env.NEXT_PUBLIC_APP_URL}/booking`;
-      bot.sendMessage(chatId, text, { parse_mode: 'Markdown' }).catch(console.error);
+      try {
+        await bot.sendMessage(chatId, text, { parse_mode: 'Markdown' });
+      } catch(e) {
+        console.error(e);
+      }
     }
 
     // Also notify the clinic group
-    sendGroupNotification({
-      patientFirst: appointment.patientFirst ?? '',
-      patientLast: appointment.patientLast ?? '',
-      phone: appointment.patientPhone ?? '',
-      doctorName,
-      procedureName: 'Bekor qilindi',
-      appointmentTime: appointment.slot.startTime,
-      description: `❌ Shifokor tomonidan bekor qilindi`,
-    }).catch(console.error);
+    try {
+      await sendGroupNotification({
+        patientFirst: appointment.patientFirst ?? '',
+        patientLast: appointment.patientLast ?? '',
+        phone: appointment.patientPhone ?? '',
+        doctorName,
+        procedureName: 'Bekor qilindi',
+        appointmentTime: appointment.slot.startTime,
+        description: `❌ Shifokor tomonidan bekor qilindi`,
+      });
+    } catch(e) {
+      console.error(e);
+    }
   }
 
   return NextResponse.json({ success: true });
