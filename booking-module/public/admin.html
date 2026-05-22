@@ -1310,7 +1310,7 @@
             let statusCell = `<span class="badge badge-${a.status.toLowerCase()}">${a.status}</span>`;
             if (a.status === 'COMPLETED' && a.visit) {
               const pm = a.visit.paymentMethod;
-              const pmText = pm === 'CASH' ? 'Naqd' : (pm === 'CARD' ? 'Karta' : (pm === 'TRANSFER' ? 'O\\'tkazma' : pm || 'Aniqlanmagan'));
+              const pmText = pm === 'CASH' ? 'Naqd' : (pm === 'CARD' ? 'Karta' : (pm === 'TRANSFER' ? "O'tkazma" : pm || 'Aniqlanmagan'));
               const amount = a.visit.paidAmount || a.visit.price || 0;
               const amountText = amount > 0 ? ` - ${amount.toLocaleString('uz-UZ').replace(/,/g, ' ')} so'm` : '';
               statusCell += ` <span class="badge" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; margin-left:4px;" title="To'lov turi va summa">💳 ${pmText}${amountText}</span>`;
@@ -1528,7 +1528,7 @@
           photoPreviewContainer.style.display = 'block';
           photoDropText.style.display = 'none';
         } else {
-          alert('Xatolik: ' + (data.error || 'Noma\\'lum xatolik'));
+          alert('Xatolik: ' + (data.error || "Noma'lum xatolik"));
           photoDropText.innerHTML = '📷 <span>Rasmni shu yerga tashlang yoki tanlash uchun bosing</span>';
         }
       } catch (err) {
