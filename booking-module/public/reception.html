@@ -1713,7 +1713,7 @@
       const pRes = await fetch('/api/reception/patients', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
-        body: JSON.stringify({ firstName: pFirstName || 'Noma\\'lum', lastName: pLastName || 'Noma\\'lum', phone: phone })
+        body: JSON.stringify({ firstName: pFirstName || "Noma'lum", lastName: pLastName || "Noma'lum", phone: phone })
       });
       const pData = await pRes.json();
       
