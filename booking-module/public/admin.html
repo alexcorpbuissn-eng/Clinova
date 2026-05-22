@@ -1032,7 +1032,7 @@
     // Phone Submit
     document.getElementById('phone-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const phone = document.getElementById('telegram-phone').value;
+      let phone = document.getElementById('telegram-phone').value;
       const errEl = document.getElementById('login-err');
       const btn = document.getElementById('btn-phone');
 
