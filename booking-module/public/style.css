@@ -1060,11 +1060,37 @@ em {
 .footer-bottom {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding: 20px 24px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
   font-size: 0.78rem;
   color: rgba(255, 255, 255, 0.4);
   max-width: 1180px;
   margin: 0 auto;
+}
+.footer-bottom .made-by {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.75rem;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-bottom .made-by:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+.footer-bottom .made-by span {
+  font-weight: 600;
+  color: var(--teal);
+}
+@media (max-width: 600px) {
+  .footer-bottom {
+    justify-content: center;
+    text-align: center;
+  }
 }
 
 /* =========================================
