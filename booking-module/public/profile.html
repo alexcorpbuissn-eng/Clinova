@@ -306,7 +306,7 @@
       const data = await res.json();
       if (res.ok && data.success) {
         if (data.drafts.length === 0) {
-          c.innerHTML = '<div style="color:var(--text-muted); padding:20px; text-align:center; background:#f8fafc; border-radius:12px; border:1px dashed #cbd5e1;">Hozircha rejalashtirilgan muolajalar yo\\'q.</div>';
+          c.innerHTML = `<div style="color:var(--text-muted); padding:20px; text-align:center; background:#f8fafc; border-radius:12px; border:1px dashed #cbd5e1;">Hozircha rejalashtirilgan muolajalar yo'q.</div>`;
           return;
         }
         c.innerHTML = data.drafts.map(d => `
