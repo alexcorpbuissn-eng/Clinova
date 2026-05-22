@@ -342,7 +342,7 @@
       <div id="login-err" class="err-msg"></div>
       
       <!-- STEP 1: Phone -->
-      <form id="phone-form">
+      <form id="phone-form" onsubmit="event.preventDefault();">
         <div class="form-group">
           <label>Telegram raqamingiz</label>
           <input type="tel" id="telegram-phone" required placeholder="+998 90 000 00 00" />
@@ -351,7 +351,7 @@
       </form>
 
       <!-- STEP 2: OTP -->
-      <form id="otp-form" style="display:none;">
+      <form id="otp-form" style="display:none;" onsubmit="event.preventDefault();">
         <div class="form-group">
           <label>Tasdiqlash kodi</label>
           <input type="text" id="otp-code" required placeholder="123456" maxlength="6" />
@@ -1011,20 +1011,19 @@
     
     // Auth Check on load — verify token with server, don't just trust localStorage
     async function verifyAuthOnLoad() {
-      const token = localStorage.getItem('admin_token');
-      if (!token) return; // no token, stay on login screen
       try {
+        const token = localStorage.getItem('admin_token');
+        if (!token) return; // no token, stay on login screen
         const res = await fetch('/api/admin/appointments', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
           showDashboard();
         } else {
-          // Token invalid or expired — clear it and force re-login
           localStorage.removeItem('admin_token');
         }
-      } catch {
-        // Network error — stay on login, don't clear token
+      } catch (err) {
+        console.error('Auth verification failed', err);
       }
     }
     verifyAuthOnLoad();

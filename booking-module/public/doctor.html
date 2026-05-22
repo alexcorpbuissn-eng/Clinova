@@ -849,15 +849,15 @@
     </div>
     <div id="login-err" class="err-msg"></div>
 
-    <form id="phone-form">
+    <form id="phone-form" onsubmit="event.preventDefault();">
       <div class="form-group">
         <label>Telegram raqamingiz</label>
         <input type="tel" id="telegram-phone" required placeholder="+998 90 000 00 00" />
       </div>
-      <button type="submit" class="btn-full" id="btn-phone">Kodni Olish</button>
+      <button type="submit" class="btn" id="btn-phone">Kodni Olish</button>
     </form>
 
-    <form id="otp-form" style="display:none;">
+    <form id="otp-form" style="display:none;" onsubmit="event.preventDefault();">
       <div class="form-group">
         <label>Tasdiqlash kodi (Telegramdan)</label>
         <input type="text" id="otp-code" required placeholder="123456" maxlength="6" style="font-size:1.5rem; letter-spacing: 0.3em; text-align:center;" />
