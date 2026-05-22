@@ -300,9 +300,7 @@
   async function fetchDrafts() {
     const c = document.getElementById('drafts-container');
     try {
-      const res = await fetch(`/api/public/drafts?patientId=${patientId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await fetch(`/api/public/drafts?patientId=${patientId}`);
       const data = await res.json();
       if (res.ok && data.success) {
         if (data.drafts.length === 0) {

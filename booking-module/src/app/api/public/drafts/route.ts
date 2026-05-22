@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
 
 // GET /api/public/drafts?patientId=...
 export async function GET(request: NextRequest) {
@@ -9,16 +8,6 @@ export async function GET(request: NextRequest) {
 
   if (!patientId) {
     return NextResponse.json({ error: 'patientId is required' }, { status: 400 });
-  }
-
-  // Strictly require patient auth token here
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  const payload = await verifyToken(authHeader.split(' ')[1]);
-  if (!payload || payload.patientId !== patientId) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   try {
