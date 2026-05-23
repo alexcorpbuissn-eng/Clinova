@@ -363,7 +363,59 @@
         <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="#ffffff"></path>
       </svg>
     </div>
-    <canvas id="maxsusShaderCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;"></canvas>
+    <!-- Lightweight CSS background instead of heavy WebGL shader -->
+    <div id="mxt-bg" aria-hidden="true"></div>
+    <style>
+      #mxt-bg {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 0; pointer-events: none; overflow: hidden;
+        background: linear-gradient(135deg, #021a10 0%, #031f13 40%, #042516 100%);
+      }
+      #mxt-bg::before {
+        content: '';
+        position: absolute; inset: 0;
+        background:
+          repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(34,197,94,0.06) 40px),
+          repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(34,197,94,0.06) 40px);
+        animation: mxt-grid-drift 20s linear infinite;
+      }
+      #mxt-bg::after {
+        content: '';
+        position: absolute; inset: -20%;
+        background: radial-gradient(ellipse 60% 40% at 30% 50%, rgba(34,197,94,0.12) 0%, transparent 70%),
+                    radial-gradient(ellipse 40% 60% at 80% 30%, rgba(56,189,248,0.07) 0%, transparent 70%);
+        animation: mxt-glow-pulse 8s ease-in-out infinite alternate;
+      }
+      @keyframes mxt-grid-drift {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(40px, 40px); }
+      }
+      @keyframes mxt-glow-pulse {
+        0% { opacity: 0.6; transform: scale(1); }
+        100% { opacity: 1; transform: scale(1.05); }
+      }
+      /* Floating ECG line — pure CSS, 1 element, very light */
+      .mxt-ecg-line {
+        position: absolute; bottom: 30%; left: 0; width: 200%; height: 60px;
+        z-index: 0; pointer-events: none; opacity: 0.25;
+        animation: mxt-scroll 12s linear infinite;
+      }
+      .mxt-ecg-line2 {
+        bottom: 45%; opacity: 0.15;
+        animation: mxt-scroll 18s linear infinite reverse;
+      }
+      @keyframes mxt-scroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+      }
+    </style>
+    <!-- Two simple repeating SVG ECG lines — zero JS, negligible CPU -->
+    <svg class="mxt-ecg-line" viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <polyline points="0,30 120,30 140,30 150,10 160,50 170,15 185,45 200,30 320,30 340,30 350,10 360,50 370,15 385,45 400,30 520,30 540,30 550,10 560,50 570,15 585,45 600,30 720,30 740,30 750,10 760,50 770,15 785,45 800,30 920,30 940,30 950,10 960,50 970,15 985,45 1000,30 1120,30 1140,30 1150,10 1160,50 1170,15 1185,45 1200,30 1320,30 1340,30 1350,10 1360,50 1370,15 1385,45 1400,30 1440,30" fill="none" stroke="#22c55e" stroke-width="1.5"/>
+    </svg>
+    <svg class="mxt-ecg-line mxt-ecg-line2" viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <polyline points="0,30 80,30 100,30 110,8 120,52 130,12 145,48 160,30 240,30 260,30 270,8 280,52 290,12 305,48 320,30 400,30 420,30 430,8 440,52 450,12 465,48 480,30 560,30 580,30 590,8 600,52 610,12 625,48 640,30 720,30 740,30 750,8 760,52 770,12 785,48 800,30 880,30 900,30 910,8 920,52 930,12 945,48 960,30 1040,30 1060,30 1070,8 1080,52 1090,12 1105,48 1120,30 1200,30 1220,30 1230,8 1240,52 1250,12 1265,48 1280,30 1360,30 1380,30 1390,8 1400,52 1410,12 1425,48 1440,30" fill="none" stroke="#38bdf8" stroke-width="1"/>
+    </svg>
     
     <style>
       .mxt-container{position:relative;z-index:1;max-width:1140px;margin:0 auto;padding:0 24px}
@@ -514,186 +566,6 @@
         }
         tick();
         setInterval(tick,1000);
-      })();
-
-      // WebGL ECG Shader Background - Green Theme
-      (function(){
-        const canvas = document.getElementById('maxsusShaderCanvas');
-        if(!canvas) return;
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        if(!gl) return;
-
-        const VS_SOURCE = `
-          attribute vec4 aVertexPosition;
-          void main() { gl_Position = aVertexPosition; }
-        `;
-        const FS_SOURCE = `
-          precision highp float;
-          uniform vec2  iResolution;
-          uniform float iTime;
-          const float overallSpeed = 0.18;
-          const float gridSmoothWidth = 0.015;
-          const float axisWidth = 0.04;
-          const float majorLineWidth = 0.020;
-          const float minorLineWidth = 0.010;
-          const float majorLineFrequency= 5.0;
-          const float minorLineFrequency= 1.0;
-          const float scale = 5.0;
-          const float lineSpeed = 1.0 * overallSpeed;
-          const float lineAmplitude = 1.0;
-          const float lineFrequency = 0.2;
-          const float warpSpeed = 0.15 * overallSpeed;
-          const float warpFrequency = 0.4;
-          const float warpAmplitude = 0.7;
-          const float offsetFrequency = 0.5;
-          const float offsetSpeed = 1.2 * overallSpeed;
-          const float minOffsetSpread = 0.5;
-          const float maxOffsetSpread = 2.0;
-          const float minLineWidth = 0.008;
-          const float maxLineWidth = 0.14;
-          const int   linesPerGroup = 10;
-          
-          /* GREEN LINE COLOR */
-          const vec4 lineColor = vec4(0.13, 0.77, 0.36, 1.0); /* #22c55e approx */
-          const vec4 gridColor = vec4(0.3);
-
-          #define drawCrispLine(pos, halfWidth, t) smoothstep(halfWidth + gridSmoothWidth, halfWidth, abs(pos - (t)))
-          #define drawSmoothLine(pos, halfWidth, t) smoothstep(halfWidth, 0.0, abs(pos - (t)))
-          #define drawPeriodicLine(freq, width, t) drawCrispLine(freq / 2.0, width, abs(mod(t, freq) - (freq) / 2.0))
-          #define drawCircle(pos, radius, coord) smoothstep(radius + gridSmoothWidth, radius, length(coord - (pos)))
-
-          float drawGridLines(float axis) {
-            return drawCrispLine(0.0, axisWidth, axis) + drawPeriodicLine(majorLineFrequency, majorLineWidth, axis) + drawPeriodicLine(minorLineFrequency, minorLineWidth, axis);
-          }
-          float drawGrid(vec2 space) { return min(1.0, drawGridLines(space.x) + drawGridLines(space.y)); }
-
-          float ecgWave(float x) {
-            float period = 1.0 / lineFrequency;
-            float t = mod(x, period) / period;
-            float p = smoothstep(0.05, 0.10, t) * smoothstep(0.18, 0.13, t) * 0.25;
-            float q = -smoothstep(0.22, 0.25, t) * smoothstep(0.27, 0.25, t) * 0.15;
-            float r =  smoothstep(0.25, 0.28, t) * smoothstep(0.34, 0.30, t) * 1.0;
-            float s = -smoothstep(0.30, 0.33, t) * smoothstep(0.36, 0.33, t) * 0.20;
-            float tw = smoothstep(0.42, 0.50, t) * smoothstep(0.62, 0.55, t) * 0.30;
-            return p + q + r + s + tw;
-          }
-
-          float getPlasmaY(float x, float horizontalFade, float offset) {
-            float rand = (cos(x * lineFrequency + iTime * lineSpeed) + cos(x * lineFrequency * 1.3 + iTime * lineSpeed * 1.1 + 1.3) + cos(x * lineFrequency * 1.4 + iTime * lineSpeed * 0.9 + 2.6)) / 3.0;
-            float ecg = ecgWave(x * lineFrequency * 0.5 + iTime * lineSpeed * 0.7);
-            return mix(rand, ecg, 0.55) * horizontalFade * lineAmplitude + offset;
-          }
-
-          void main() {
-            vec2 fragCoord = gl_FragCoord.xy;
-            vec2 uv = fragCoord / iResolution.xy;
-            vec2 space = (fragCoord - iResolution.xy * 0.5) / iResolution.x * 2.0 * scale;
-
-            float horizontalFade = 1.0 - (cos(uv.x * 6.2832) * 0.5 + 0.5);
-            float verticalFade   = 1.0 - (cos(uv.y * 6.2832) * 0.5 + 0.5);
-
-            float wx = (cos(space.x * warpFrequency + iTime * warpSpeed) + cos(space.x * warpFrequency * 1.3 + iTime * warpSpeed * 1.2 + 1.3) + cos(space.x * warpFrequency * 1.4 + iTime * warpSpeed * 0.8 + 2.6)) / 3.0;
-            float wy = (cos(space.y * warpFrequency + iTime * warpSpeed + 2.0) + cos(space.y * warpFrequency * 1.2 + iTime * warpSpeed * 1.1 + 0.5) + cos(space.y * warpFrequency * 1.5 + iTime * warpSpeed * 0.9 + 3.8)) / 3.0;
-            space.y += wx * warpAmplitude * (0.5 + horizontalFade);
-            space.x += wy * warpAmplitude * horizontalFade;
-
-            float grid = drawGrid(space) * 0.06;
-            vec4 lines = vec4(0.0);
-
-            for (int l = 0; l < linesPerGroup; l++) {
-              float nli = float(l) / float(linesPerGroup);
-              float offsetTime = iTime * offsetSpeed;
-              float offsetPos = float(l) + space.x * offsetFrequency;
-              float r3 = (cos(offsetPos + offsetTime) + cos(offsetPos * 1.3 + offsetTime * 1.3 + 1.3) + cos(offsetPos * 1.4 + offsetTime * 1.4 + 2.6)) / 3.0;
-              float rand = r3 * 0.5 + 0.5;
-
-              float halfWidth = mix(minLineWidth, maxLineWidth, rand * horizontalFade) * 0.5;
-              float r3b = (cos(offsetPos + offsetTime * (1.0 + nli)) + cos(offsetPos * 1.3 + offsetTime * (1.0 + nli) * 1.3 + 1.3) + cos(offsetPos * 1.4 + offsetTime * (1.0 + nli) * 1.4 + 2.6)) / 3.0;
-              float offset = r3b * mix(minOffsetSpread, maxOffsetSpread, horizontalFade);
-
-              float linePos = getPlasmaY(space.x, horizontalFade, offset);
-              float line = drawSmoothLine(linePos, halfWidth, space.y) * 0.5 + drawCrispLine(linePos, halfWidth * 0.15, space.y);
-
-              float dotX = mod(float(l) * 1.7 + iTime * lineSpeed * 2.0, 26.0) - 13.0;
-              vec2 dotPos = vec2(dotX, getPlasmaY(dotX, horizontalFade, offset));
-              float dot = drawCircle(dotPos, 0.012, space) * 5.0;
-
-              lines += (line + dot) * lineColor * rand;
-            }
-
-            /* DARK GREEN BACKGROUND */
-            vec4 bgColor1 = vec4(0.01, 0.08, 0.04, 1.0);
-            vec4 bgColor2 = vec4(0.03, 0.12, 0.07, 1.0);
-            vec4 fragColor = mix(bgColor1, bgColor2, uv.x + sin(iTime * 0.05) * 0.1);
-
-            fragColor.rgb += grid;
-            fragColor *= verticalFade * 0.6 + 0.4;
-            fragColor.a = 1.0;
-            fragColor += lines;
-            gl_FragColor = fragColor;
-          }
-        `;
-
-        function loadShader(gl, type, src) {
-          const shader = gl.createShader(type);
-          gl.shaderSource(shader, src);
-          gl.compileShader(shader);
-          return shader;
-        }
-        
-        const prog = gl.createProgram();
-        gl.attachShader(prog, loadShader(gl, gl.VERTEX_SHADER, VS_SOURCE));
-        gl.attachShader(prog, loadShader(gl, gl.FRAGMENT_SHADER, FS_SOURCE));
-        gl.linkProgram(prog);
-        if(!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
-
-        const posBuf = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
-
-        const attrib = { vertexPosition: gl.getAttribLocation(prog, 'aVertexPosition') };
-        const uniform = { resolution: gl.getUniformLocation(prog, 'iResolution'), time: gl.getUniformLocation(prog, 'iTime') };
-
-        function resize() {
-          const dpr = Math.min(1.5, window.devicePixelRatio || 1);
-          const w = canvas.clientWidth * dpr | 0;
-          const h = canvas.clientHeight * dpr | 0;
-          if (canvas.width !== w || canvas.height !== h) {
-            canvas.width = w; canvas.height = h;
-          }
-          gl.viewport(0, 0, w, h);
-        }
-        window.addEventListener('resize', resize, { passive: true });
-        resize();
-
-        const startTime = performance.now();
-        let rafId;
-        function render() {
-          const t = (performance.now() - startTime) * 0.001;
-          gl.clearColor(0, 0, 0, 1);
-          gl.clear(gl.COLOR_BUFFER_BIT);
-          gl.useProgram(prog);
-          gl.uniform2f(uniform.resolution, canvas.width, canvas.height);
-          gl.uniform1f(uniform.time, t);
-          gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
-          gl.vertexAttribPointer(attrib.vertexPosition, 2, gl.FLOAT, false, 0, 0);
-          gl.enableVertexAttribArray(attrib.vertexPosition);
-          gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-          rafId = requestAnimationFrame(render);
-        }
-        
-        const section = document.getElementById('maxsus-takliflar');
-        if (section && 'IntersectionObserver' in window) {
-          const obs = new IntersectionObserver((entries) => {
-            entries.forEach(e => {
-              if(e.isIntersecting) { if(!rafId) rafId = requestAnimationFrame(render); }
-              else { if(rafId){ cancelAnimationFrame(rafId); rafId = null; } }
-            });
-          }, { threshold: 0.01 });
-          obs.observe(section);
-        } else {
-          rafId = requestAnimationFrame(render);
-        }
       })();
     </script>
     <div class="custom-shape-divider-bottom" style="position: absolute; bottom: -1px; left: 0; width: 100%; overflow: hidden; line-height: 0; z-index: 2; transform: rotate(180deg);">
