@@ -643,16 +643,9 @@ async function handleDraft() {
           durationMinutes: draft.procedure.durationMinutes
         };
 
-        // UI Updates to lock steps
-        document.getElementById('step1').style.display = 'none';
-        document.getElementById('step2').style.display = 'none';
-        document.getElementById('step3').style.display = 'block';
-        document.getElementById('prog1').classList.remove('active');
-        document.getElementById('prog2').classList.remove('active');
-        document.getElementById('prog3').classList.add('active');
-
-        // Fetch slots
-        fetchSlots();
+        // Move to Step 2 (Time Selection) and load procedures/slots
+        setStep(2);
+        loadProcedures(draft.doctor.id, draft.procedure.id);
       }
     }
   } catch (e) {

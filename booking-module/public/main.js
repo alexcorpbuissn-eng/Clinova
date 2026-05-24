@@ -362,3 +362,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
+
+window.toggleServiceCard = function(btn) {
+  const content = btn.closest('.sd-content');
+  const isExpanded = content.classList.contains('expanded');
+  
+  if (isExpanded) {
+    content.classList.remove('expanded');
+    btn.innerHTML = `Batafsil <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>`;
+  } else {
+    content.classList.add('expanded');
+    btn.innerHTML = `Yopish <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>`;
+  }
+};

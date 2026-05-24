@@ -1427,12 +1427,24 @@ body.bg-light {
   line-height: 1.3;
 }
 
+.sd-desc-wrapper {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.4s ease, margin-bottom 0.4s ease;
+  margin-bottom: 0;
+}
+
+.sd-content.expanded .sd-desc-wrapper {
+  max-height: 300px;
+  opacity: 1;
+  margin-bottom: 32px;
+}
+
 .sd-desc {
   font-size: 0.85rem;
   color: var(--text-muted);
   line-height: 1.6;
-  margin-bottom: 32px;
-  flex-grow: 1;
 }
 
 .sd-link {
@@ -1443,6 +1455,11 @@ body.bg-light {
   letter-spacing: 0.05em;
   display: inline-flex;
   align-items: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
   gap: 6px;
   transition: gap var(--transition);
   margin-top: auto;

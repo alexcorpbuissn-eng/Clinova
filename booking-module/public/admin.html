@@ -393,6 +393,7 @@
       <div class="nav-item" onclick="switchTab('procedures')">Xizmatlar (Narxlar)</div>
       <div class="nav-item" onclick="switchTab('leaves')">Dam Olish (Otpuska)</div>
       <div class="nav-item" onclick="switchTab('schedule')">Jadval boshqaruvi</div>
+      <div class="nav-item" onclick="switchTab('purchases')">Xarajatlar (Sklad)</div>
       <div style="flex:1"></div>
       <div class="nav-item" onclick="window.open('reception.html','_blank')" style="color:#86efac">Qabul Daftari</div>
       <div class="nav-item" onclick="logout()" style="color:#fca5a5">Chiqish</div>
@@ -425,8 +426,33 @@
         </div>
       </div>
 
+      <!-- PURCHASES TAB -->
+      <div id="tab-purchases" class="tab-content" style="display: none;">
+        <div class="header">
+          <h1>Xarajatlar tarixi (Sklad)</h1>
+          <button class="btn" onclick="loadPurchases()"><i class="fas fa-sync"></i> Yangilash</button>
+        </div>
+        <div class="card" style="overflow-x:auto;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Sana</th>
+                <th>Xarid narsasi</th>
+                <th>Sotuvchi</th>
+                <th>Summa (so'm)</th>
+                <th>Kiritdi</th>
+                <th>Amal</th>
+              </tr>
+            </thead>
+            <tbody id="purchases-tbody">
+              <tr><td colspan="6" class="text-center" style="padding:20px; color:#94a3b8">Yuklanmoqda...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- PATIENTS TAB -->
-      <div id="tab-patients" class="tab-content">
+      <div id="tab-patients" class="tab-content" style="display: none;">
         <div class="header">
           <h1>Bemorlar Bazasi</h1>
           <button class="btn" style="width:auto" onclick="loadPatients()">Yangilash</button>
@@ -522,6 +548,7 @@
               <select id="new-user-role" onchange="toggleDoctorSelect()" style="width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem;">
                 <option value="RECEPTION">Qabulxona (Reception)</option>
                 <option value="DOCTOR">Shifokor (Doctor)</option>
+                <option value="INVENTORY">Ta'minotchi (Sklad)</option>
                 <option value="ADMIN">Admin</option>
               </select>
             </div>
@@ -1150,6 +1177,50 @@
       if (tab === 'procedures') loadProcedures();
       if (tab === 'schedule') loadScheduleTab();
       if (tab === 'leaves') loadLeaves();
+      if (tab === 'purchases') loadPurchases();
+    }
+
+    // ---- PURCHASES (SKLAD) ----
+    async function loadPurchases() {
+      const tbody = document.getElementById('purchases-tbody');
+      if(!tbody) return;
+      tbody.innerHTML = adminLoaderHTML(6, 'Xarajatlar yuklanmoqda...');
+      try {
+        const data = await apiGet('/api/inventory/purchases');
+        if (data.success) {
+          if (data.purchases.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Hech qanday xarajat kiritilmagan</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data.purchases.map(p => `
+            <tr>
+              <td>${new Date(p.createdAt).toLocaleString('ru-RU')}</td>
+              <td><div style="font-weight:600; color:var(--navy);">${p.itemName}</div></td>
+              <td>${p.sellerName}</td>
+              <td><span style="font-weight:700; color:var(--teal);">${p.price.toLocaleString('ru-RU')} so'm</span></td>
+              <td><span style="font-size:0.8rem; color:var(--text-muted);">${p.recordedBy || 'Noma\'lum'}</span></td>
+              <td>
+                <button class="btn" style="background:var(--red-bg); color:var(--red); padding:6px 12px; font-size:0.8rem; width:auto;" onclick="deletePurchase('${p.id}')">
+                  <i class="fas fa-trash"></i> O'chirish
+                </button>
+              </td>
+            </tr>
+          `).join('');
+        }
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="6" style="color:var(--red); text-align:center;">Xato yuz berdi</td></tr>';
+      }
+    }
+
+    async function deletePurchase(id) {
+      if (!confirm("Haqiqatan ham bu xarajatni o'chirmoqchimisiz?")) return;
+      const res = await apiFetch(`/api/admin/purchases/${id}`, { method: 'DELETE' });
+      if (res.success) {
+        showToast("Xarajat o'chirildi");
+        loadPurchases();
+      } else {
+        showToast(res.error || 'Xato', true);
+      }
     }
 
     // ---- LEAVES / TIME OFF ----
@@ -1843,7 +1914,7 @@
     let adminSelectedStartDate = null;
 
     const ADMIN_START_HOUR = 9;
-    const ADMIN_END_HOUR = 19;
+    const ADMIN_END_HOUR = 17;
     const ADMIN_INTERVAL = 30;
 
     function getLocalISO(date) {

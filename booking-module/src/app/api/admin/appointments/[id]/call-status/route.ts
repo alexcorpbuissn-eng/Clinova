@@ -43,10 +43,21 @@ export async function PATCH(
         data: { cancelledBy: 'NOSHOW_RESOLVED' },
       });
     } else {
-      updatedAppointment = await prisma.appointment.update({
-        where: { id },
-        data: { callAttempts: { increment: 1 } },
-      });
+      const newAttempts = appointment.callAttempts + 1;
+      if (newAttempts >= 3) {
+        updatedAppointment = await prisma.appointment.update({
+          where: { id },
+          data: { 
+            callAttempts: newAttempts,
+            cancelledBy: 'NOSHOW_UNREACHABLE'
+          },
+        });
+      } else {
+        updatedAppointment = await prisma.appointment.update({
+          where: { id },
+          data: { callAttempts: newAttempts },
+        });
+      }
     }
 
     return NextResponse.json({ success: true, appointment: updatedAppointment });

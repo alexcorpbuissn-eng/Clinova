@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sklad va Xarajatlar | Habibullo-Hilola</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #0f172a; --teal: #0d9488; --teal-dark: #0f766e; --teal-light: #f0fdfa;
+      --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --text: #334155; --text-muted: #64748b;
+      --red: #ef4444; --red-bg: #fef2f2; --green: #16a34a; --green-bg: #dcfce7;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* Login */
+    #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 100vh; background: var(--navy); }
+    .login-card { background: var(--surface); padding: 40px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 400px; }
+    .login-logo { text-align: center; margin-bottom: 28px; }
+    .login-logo h1 { color: var(--navy); font-size: 1.4rem; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--navy); margin-bottom: 7px; }
+    .form-group input { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
+    .form-group input:focus { border-color: var(--teal); }
+    .btn-full { display: block; width: 100%; background: var(--teal); color: #fff; padding: 13px 20px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn-full:hover { background: var(--teal-dark); }
+    .err-msg { color: var(--red); font-size: 0.83rem; margin-bottom: 14px; text-align: center; min-height: 20px; }
+
+    /* App layout */
+    #app { display: none; }
+    .top-bar { background: var(--navy); color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .top-bar-title { font-size: 1.1rem; font-weight: 700; }
+    .btn-logout { background: none; border: 1px solid #334155; color: #94a3b8; padding: 6px 14px; border-radius: 8px; cursor: pointer; }
+    .btn-logout:hover { border-color: #64748b; color: #fff; }
+
+    .page-body { max-width: 1200px; margin: 0 auto; padding: 30px 20px; display: grid; grid-template-columns: 400px 1fr; gap: 28px; align-items: start; }
+    @media(max-width: 860px) { .page-body { grid-template-columns: 1fr; } }
+
+    /* Cards */
+    .card { background: var(--surface); border-radius: 16px; padding: 28px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+    .card h2 { font-size: 1.05rem; color: var(--navy); margin-bottom: 22px; }
+    
+    .price-input-wrap { position: relative; }
+    .price-input-wrap input { padding-right: 60px; }
+    .price-suffix { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 0.82rem; color: var(--text-muted); font-weight: 600; }
+    
+    .btn-submit { display: block; width: 100%; background: var(--teal); color: #fff; padding: 14px 20px; border: none; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 20px; }
+    
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th { background: #f1f5f9; padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border); }
+    td { padding: 13px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    
+    /* Toast */
+    #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+    .toast { pointer-events: auto; background: rgba(15, 23, 42, 0.9); padding: 16px 20px; color: #fff; border-radius: 12px; transform: translateX(120%); opacity: 0; transition: all 0.4s; display:flex; align-items:center; gap:12px;}
+    .toast.show { transform: translateX(0); opacity: 1; }
+    .toast.success { border-left: 4px solid var(--teal); }
+    .toast.error { border-left: 4px solid var(--red); }
+  </style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <h1>📦 Sklad va Xarajatlar</h1>
+      <p style="color:var(--text-muted); font-size:0.85rem; margin-top:4px;">Ta'minotchi Paneli</p>
+    </div>
+    <div id="login-err" class="err-msg"></div>
+
+    <form id="phone-form" onsubmit="event.preventDefault();">
+      <div class="form-group">
+        <label>Telegram raqamingiz</label>
+        <input type="tel" id="telegram-phone" required placeholder="+998 90 000 00 00" />
+      </div>
+      <button type="submit" class="btn-full" id="btn-phone">Kodni Olish</button>
+    </form>
+
+    <form id="otp-form" style="display:none;" onsubmit="event.preventDefault();">
+      <div class="form-group">
+        <label>Tasdiqlash kodi</label>
+        <input type="text" id="otp-code" required placeholder="123456" maxlength="6" style="text-align:center; letter-spacing:4px; font-size:1.2rem;"/>
+      </div>
+      <button type="submit" class="btn-full" id="btn-otp">Kirish</button>
+    </form>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="top-bar">
+    <div class="top-bar-title">📦 Xarajatlar va Sklad Paneli</div>
+    <button class="btn-logout" onclick="logout()">🚪 Chiqish</button>
+  </div>
+
+  <div class="page-body">
+    <!-- Left: Add Form -->
+    <div class="card">
+      <h2>➕ Yangi xarajat qo'shish</h2>
+      <form id="add-form" onsubmit="event.preventDefault(); submitPurchase();">
+        <div class="form-group">
+          <label>Nima xarid qilindi? (Nomi) *</label>
+          <input type="text" id="p-item" required placeholder="Masalan: Zirconium implanti 5 dona" />
+        </div>
+        <div class="form-group">
+          <label>Sotuvchi / Yetkazib beruvchi *</label>
+          <input type="text" id="p-seller" required placeholder="Masalan: Ahmad Aka / DentMed LLC" />
+        </div>
+        <div class="form-group">
+          <label>Umumiy narxi (so'm) *</label>
+          <div class="price-input-wrap">
+            <input type="text" id="p-price" required placeholder="500.000" oninput="this.value = this.value.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" />
+            <span class="price-suffix">so'm</span>
+          </div>
+        </div>
+        <button type="submit" class="btn-submit" id="btn-submit">✅ Saqlash</button>
+      </form>
+    </div>
+
+    <!-- Right: List -->
+    <div class="card" style="padding:0; overflow:hidden;">
+      <div style="padding:24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="margin:0;">🕐 Xarajatlar tarixi</h2>
+        <button onclick="loadPurchases()" style="background:none; border:1.5px solid var(--border); padding:6px 12px; border-radius:8px; cursor:pointer;">Yangilash</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Sana</th>
+              <th>Xarid narsasi</th>
+              <th>Sotuvchi</th>
+              <th>Summa</th>
+            </tr>
+          </thead>
+          <tbody id="purchases-tbody">
+            <tr><td colspan="4" style="text-align:center; padding:20px;">Yuklanmoqda...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let token = null;
+
+  function showToast(msg, isError = false) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${isError ? 'error' : 'success'}`;
+    toast.innerHTML = `<div class="toast-content">${msg}</div>`;
+    container.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 400);
+    }, 3000);
+  }
+
+  // --- Auth Flow ---
+  async function verifyAuth() {
+    const t = localStorage.getItem('inventory_token');
+    if (!t) return;
+    try {
+      const res = await fetch('/api/inventory/purchases', { headers: { 'Authorization': `Bearer ${t}` } });
+      if (res.ok) { token = t; showApp(); }
+      else localStorage.removeItem('inventory_token');
+    } catch {}
+  }
+  
+  document.getElementById('phone-form').addEventListener('submit', async () => {
+    let phone = document.getElementById('telegram-phone').value;
+    const errEl = document.getElementById('login-err');
+    let digits = phone.replace(/\D/g, '');
+    if (digits.startsWith('998') && digits.length === 12) phone = '+' + digits;
+    else return errEl.textContent = "To'g'ri raqam kiriting.";
+
+    errEl.textContent = '';
+    const btn = document.getElementById('btn-phone');
+    btn.disabled = true; btn.textContent = '...';
+    try {
+      const res = await fetch('/api/public/send-otp', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegramPhone: phone })
+      });
+      const data = await res.json();
+      if (res.ok && (data.success || data.action)) {
+        if(data.action === 'deep_link') errEl.innerHTML = `<a href="${data.deepLink}" target="_blank">Botdan ro'yxatdan o'ting</a>`;
+        else {
+          document.getElementById('phone-form').style.display = 'none';
+          document.getElementById('otp-form').style.display = 'block';
+        }
+      } else errEl.textContent = data.error || 'Xatolik';
+    } catch { errEl.textContent = 'Tarmoq xatosi'; }
+    btn.disabled = false; btn.textContent = 'Kodni Olish';
+  });
+
+  document.getElementById('otp-form').addEventListener('submit', async () => {
+    const phone = document.getElementById('telegram-phone').value;
+    const code = document.getElementById('otp-code').value;
+    const errEl = document.getElementById('login-err');
+    errEl.textContent = '';
+    const btn = document.getElementById('btn-otp');
+    btn.disabled = true; btn.textContent = '...';
+    try {
+      const res = await fetch('/api/public/verify-otp', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegramPhone: phone, code })
+      });
+      const data = await res.json();
+      if (res.ok && data.success && data.token) {
+        localStorage.setItem('inventory_token', data.token);
+        token = data.token;
+        showApp();
+      } else errEl.textContent = data.error || "Ruxsat yo'q!";
+    } catch { errEl.textContent = 'Tarmoq xatosi'; }
+    btn.disabled = false; btn.textContent = 'Kirish';
+  });
+
+  function logout() {
+    localStorage.removeItem('inventory_token');
+    token = null;
+    location.reload();
+  }
+
+  function showApp() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadPurchases();
+  }
+
+  // --- API ---
+  async function submitPurchase() {
+    const item = document.getElementById('p-item').value;
+    const seller = document.getElementById('p-seller').value;
+    const priceStr = document.getElementById('p-price').value.replace(/\D/g, '');
+    
+    if(!item || !seller || !priceStr) return showToast("Barcha maydonlarni to'ldiring", true);
+
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = true; btn.textContent = 'Saqlanmoqda...';
+
+    try {
+      const res = await fetch('/api/inventory/purchases', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ itemName: item, sellerName: seller, price: priceStr })
+      });
+      const data = await res.json();
+      if(data.success) {
+        showToast("Xarajat muvaffaqiyatli saqlandi!");
+        document.getElementById('add-form').reset();
+        loadPurchases();
+      } else {
+        showToast(data.error || 'Xatolik', true);
+      }
+    } catch { showToast('Tarmoq xatosi', true); }
+    
+    btn.disabled = false; btn.textContent = '✅ Saqlash';
+  }
+
+  async function loadPurchases() {
+    const tbody = document.getElementById('purchases-tbody');
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Yuklanmoqda...</td></tr>';
+    try {
+      const res = await fetch('/api/inventory/purchases', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if(data.success) {
+        if(data.purchases.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--text-muted);">Hech qanday xarajat yo\'q</td></tr>';
+          return;
+        }
+        tbody.innerHTML = data.purchases.map(p => `
+          <tr>
+            <td>${new Date(p.createdAt).toLocaleString('ru-RU')}</td>
+            <td><strong>${p.itemName}</strong></td>
+            <td>${p.sellerName}</td>
+            <td style="color:var(--teal); font-weight:700;">${p.price.toLocaleString('ru-RU')} so'm</td>
+          </tr>
+        `).join('');
+      } else {
+        if(res.status === 401 || res.status === 403) logout();
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:red;">${data.error}</td></tr>`;
+      }
+    } catch {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:red;">Tarmoq xatosi</td></tr>';
+    }
+  }
+
+  window.onload = verifyAuth;
+</script>
+</body>
+</html>

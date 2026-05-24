@@ -105,7 +105,8 @@ export async function POST(request: NextRequest) {
         const roleNames: Record<string, string> = {
           ADMIN: 'Administrator 🛡️',
           RECEPTION: 'Qabulxona xodimi (Receptionist) 📋',
-          DOCTOR: 'Shifokor (Doctor) 👨‍⚕️'
+          DOCTOR: 'Shifokor (Doctor) 👨‍⚕️',
+          INVENTORY: 'Ta\'minotchi (Inventory) 📦'
         };
         const text = `🎉 *Tabriklaymiz!*\n\nSizga tizimda yangi lavozim berildi:\n\n👤 Rol: *${roleNames[role] || role}*\n\nEndi siz o'z telefon raqamingiz bilan xodimlar sahifasiga kirishingiz mumkin!`;
         await bot.sendMessage(patient.telegramChatId, text, { parse_mode: 'Markdown' });

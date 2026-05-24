@@ -610,10 +610,53 @@
     <h3 style="margin-bottom: 12px; color: var(--navy); font-size: 1.25rem; font-weight: 700;">Bemor bilan bog'lanildi</h3>
     <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; line-height: 1.5;">Bemor nima deganini belgilang:</p>
     
+    <style>
+      .contact-btn {
+        padding: 14px 20px;
+        border-radius: 14px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+      }
+      .contact-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+      }
+      .contact-btn:active {
+        transform: translateY(0);
+      }
+    </style>
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <button class="contact-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: white; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);" onclick="handleContactedChoice('RESCHEDULE')">🗓️ Vaqtni ko'chirishni so'radi</button>
+      <button class="contact-btn" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);" onclick="handleContactedChoice('KElMADI')">❌ Kelmasligini aytdi</button>
+      <button class="contact-btn" style="background: #f1f5f9; color: #475569; margin-top: 8px;" onclick="closeContactedModal()">Orqaga</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESCHEDULE MODAL -->
+<div class="modal-overlay" id="reschedule-modal">
+  <div class="modal" style="max-width: 480px; padding: 30px 24px;">
+    <button onclick="closeRescheduleModal()" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-muted)">&times;</button>
+    <div style="font-size: 2.5rem; margin-bottom: 12px; text-align: center; line-height: 1;">🗓️</div>
+    <h3 style="text-align: center; font-size: 1.3rem; margin-bottom: 8px; color: var(--navy);">Vaqtni ko'chirish</h3>
+    <p style="text-align: center; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">Shifokorning bo'sh vaqtlaridan birini tanlang</p>
+    
+    <div id="reschedule-slots-loading" style="font-size:0.85rem; color:var(--teal); margin-bottom:10px; display:none; text-align:center;">Yuklanmoqda...</div>
+    <div id="reschedule-slots-list" style="max-height: 250px; overflow-y: auto; padding: 12px; border: 1.5px solid var(--border); border-radius: 12px; background: #f8fafc; display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+      <!-- Slots will be injected here -->
+    </div>
+    
     <div style="display: flex; flex-direction: column; gap: 12px;">
-      <button class="btn" style="background: #10b981; color: white; width: 100%; border: none;" onclick="handleContactedChoice('RESCHEDULE')">🗓️ Vaqtni ko'chirishni so'radi</button>
-      <button class="btn btn-cancel" style="background: #ef4444; color: white; width: 100%; border: none;" onclick="handleContactedChoice('KElMADI')">❌ Kelmasligini aytdi (Kelmadi)</button>
-      <button class="btn" style="background: #e2e8f0; color: #475569; width: 100%; border: none; margin-top: 8px;" onclick="closeContactedModal()">Yopish</button>
+      <button class="btn-submit-premium" id="btn-save-reschedule" style="width: 100%; padding: 14px; border-radius: 12px; background: var(--teal); border: none; color: white; font-weight: 600; font-size: 1rem; cursor: pointer; opacity: 0.5; pointer-events: none;">💾 Saqlash va Ko'chirish</button>
+      <button class="btn" style="background: #e2e8f0; color: #475569; width: 100%; border: none;" onclick="closeRescheduleModal()">Bekor qilish</button>
     </div>
   </div>
 </div>
@@ -680,7 +723,7 @@
     });
   }
 
-  let startPicker, endPicker;
+  let startPicker, endPicker, reschedulePicker;
   function initDatePicker() {
     startPicker = flatpickr("#f-start-date", {
       enableTime: true,
@@ -693,6 +736,12 @@
       dateFormat: "Y-m-d H:i",
       time_24hr: true,
       defaultDate: new Date(Date.now() + 30 * 60000) // +30 min default
+    });
+    reschedulePicker = flatpickr("#reschedule-date", {
+      enableTime: true,
+      dateFormat: "Y-m-d H:i",
+      time_24hr: true,
+      defaultDate: new Date(Date.now() + 24 * 60 * 60000) // Tomorrow default
     });
   }
 
@@ -1220,7 +1269,11 @@
         if (action === 'RESOLVE') {
           showToast("Bemor bilan bog'lanildi va ro'yxatdan olindi!", "success");
         } else {
-          showToast("Javob bermadi deb belgilandi! (Joriy: " + data.appointment.callAttempts + "/3)", "info");
+          if (data.appointment.callAttempts >= 3) {
+            showToast("Bemor 3 marta javob bermadi va Muammoli qabullarga o'tkazildi!", "error");
+          } else {
+            showToast("Javob bermadi deb belgilandi! (Joriy: " + data.appointment.callAttempts + "/3)", "info");
+          }
         }
         loadAppointments();
         loadIssues();
@@ -1255,40 +1308,195 @@
       closeContactedModal();
     } else if (choice === 'RESCHEDULE') {
       const a = currentContactedApptData;
+      document.getElementById('contacted-modal').style.display = 'none';
+      openRescheduleModal(a);
+    }
+  }
+
+  let selectedRescheduleSlotId = null;
+  let rescheduleApptData = null;
+
+  function openRescheduleModal(apptData) {
+    rescheduleApptData = apptData;
+    selectedRescheduleSlotId = null;
+    document.getElementById('reschedule-modal').style.display = 'flex';
+    document.getElementById('reschedule-slots-list').innerHTML = '';
+    
+    const btnSave = document.getElementById('btn-save-reschedule');
+    btnSave.style.opacity = '0.5';
+    btnSave.style.pointerEvents = 'none';
+
+    if (apptData.doctorId) {
+      loadRescheduleSlots(apptData.doctorId, apptData.procedureId);
+    } else {
+      document.getElementById('reschedule-slots-list').innerHTML = '<div style="color:var(--red); text-align:center;">Shifokor topilmadi.</div>';
+    }
+  }
+
+  function closeRescheduleModal() {
+    document.getElementById('reschedule-modal').style.display = 'none';
+    rescheduleApptData = null;
+    selectedRescheduleSlotId = null;
+    // We should clear currentContactedApptId if they cancel, so they can re-open it
+    currentContactedApptId = null; 
+    currentContactedApptData = null;
+  }
+
+  async function loadRescheduleSlots(docId, procId) {
+    const listEl = document.getElementById('reschedule-slots-list');
+    const loadingEl = document.getElementById('reschedule-slots-loading');
+    
+    listEl.innerHTML = '';
+    loadingEl.style.display = 'block';
+
+    try {
+      let url = `/api/public/doctors/${docId}/slots`;
+      if (procId) {
+        url += `?procedureId=${procId}`;
+      }
+      const res = await fetch(url);
+      const data = await res.json();
+      loadingEl.style.display = 'none';
+
+      if (!data.success || !data.slots || data.slots.length === 0) {
+        listEl.innerHTML = '<div style="font-size:0.85rem; color:var(--red); text-align:center; padding:10px;">Bo\'sh vaqtlar topilmadi. Avval shifokor uchun yangi ish soatlari yarating.</div>';
+        return;
+      }
+
+      // Group slots by Tashkent day
+      const grouped = {};
+      const tzOffset = 5 * 60 * 60 * 1000;
+
+      data.slots.forEach(s => {
+        const utcMs = new Date(s.startTime).getTime();
+        const tNow = new Date(utcMs + tzOffset);
+        const dayIso = tNow.toISOString().slice(0, 10);
+        if (!grouped[dayIso]) grouped[dayIso] = [];
+        grouped[dayIso].push(s);
+      });
+
+      const sortedDays = Object.keys(grouped).sort();
       
-      // Cancel the old appointment silently as NOSHOW_RESOLVED
-      updateCallStatus(currentContactedApptId, 'RESOLVE'); 
-      closeContactedModal();
+      const now = new Date();
+      const tashkentShift = new Date(now.getTime() + tzOffset);
+      const ty = tashkentShift.getUTCFullYear();
+      const tm = String(tashkentShift.getUTCMonth() + 1).padStart(2, '0');
+      const td = String(tashkentShift.getUTCDate()).padStart(2, '0');
+      const tashkentToday = `${ty}-${tm}-${td}`;
       
-      // Prefill booking form
-      if (a.doctorId) document.getElementById('f-doctor').value = a.doctorId;
-      
+      const tomorrowShift = new Date(tashkentShift.getTime() + 24 * 60 * 60 * 1000);
+      const ty2 = tomorrowShift.getUTCFullYear();
+      const tm2 = String(tomorrowShift.getUTCMonth() + 1).padStart(2, '0');
+      const td2 = String(tomorrowShift.getUTCDate()).padStart(2, '0');
+      const tashkentTomorrow = `${ty2}-${tm2}-${td2}`;
+
+      const weekDays = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
+
+      sortedDays.forEach(dayIso => {
+        const slotsForDay = grouped[dayIso].sort((a,b) => new Date(a.startTime) - new Date(b.startTime));
+        const dayDate = new Date(dayIso);
+        const wDay = weekDays[dayDate.getDay()];
+        let headerText = `${dayIso} (${wDay})`;
+        
+        if (dayIso === tashkentToday) headerText = `Bugun (${wDay})`;
+        else if (dayIso === tashkentTomorrow) headerText = `Ertaga (${wDay})`;
+
+        const section = document.createElement('div');
+        section.innerHTML = `<div style="font-size:0.85rem; font-weight:600; color:var(--text-muted); margin-bottom:8px; margin-top:8px;">${headerText}</div>`;
+        const pillsWrap = document.createElement('div');
+        pillsWrap.style.display = 'flex';
+        pillsWrap.style.flexWrap = 'wrap';
+        pillsWrap.style.gap = '8px';
+
+        slotsForDay.forEach(s => {
+          const sUtc = new Date(s.startTime).getTime();
+          const sLocal = new Date(sUtc + tzOffset);
+          const hh = String(sLocal.getUTCHours()).padStart(2, '0');
+          const mm = String(sLocal.getUTCMinutes()).padStart(2, '0');
+          const timeStr = `${hh}:${mm}`;
+
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'slot-pill';
+          btn.textContent = timeStr;
+          btn.onclick = () => selectRescheduleSlot(s.id, btn);
+          pillsWrap.appendChild(btn);
+        });
+
+        section.appendChild(pillsWrap);
+        listEl.appendChild(section);
+      });
+    } catch (err) {
+      loadingEl.style.display = 'none';
+      listEl.innerHTML = '<div style="font-size:0.85rem; color:var(--red); text-align:center; padding:10px;">Xatolik yuz berdi</div>';
+    }
+  }
+
+  function selectRescheduleSlot(slotId, btnEl) {
+    selectedRescheduleSlotId = slotId;
+    const parent = document.getElementById('reschedule-slots-list');
+    const all = parent.querySelectorAll('.slot-pill');
+    all.forEach(el => el.classList.remove('selected'));
+    btnEl.classList.add('selected');
+    
+    const btnSave = document.getElementById('btn-save-reschedule');
+    btnSave.style.opacity = '1';
+    btnSave.style.pointerEvents = 'auto';
+  }
+
+  async function submitReschedule() {
+    if (!selectedRescheduleSlotId || !rescheduleApptData || !currentContactedApptId) return;
+
+    const btn = document.getElementById('btn-save-reschedule');
+    const oldTxt = btn.textContent;
+    btn.textContent = '...';
+    btn.disabled = true;
+
+    try {
+      const a = rescheduleApptData;
       const pName = a.patient ? a.patient.firstName : (a.patientFirst || '');
       const pLast = a.patient ? a.patient.lastName : (a.patientLast || '');
       const phone = a.patient ? a.patient.phone : (a.patientPhone || '');
       
-      document.getElementById('f-patient').value = pName;
-      document.getElementById('f-patient-surname').value = pLast;
-      document.getElementById('f-phone').value = phone;
+      const payload = {
+        slotId: selectedRescheduleSlotId,
+        procedureId: a.procedureId,
+        patientName: `${pName} ${pLast}`.trim(),
+        firstName: pName,
+        lastName: pLast,
+        patientPhone: phone,
+        telegramPhone: a.patient ? (a.patient.telegramPhone || '') : '',
+        note: `Ko'chirilgan qabul. ${a.description || ''}`.trim()
+      };
+
+      const res = await fetch('/api/admin/appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
       
-      if (a.doctorId) {
-        loadProceduresForDoctor(a.doctorId).then(() => {
-          if (a.procedureId) {
-            const sel = document.getElementById('f-service');
-            for (let i=0; i<sel.options.length; i++) {
-              if (sel.options[i].dataset.id === a.procedureId) {
-                sel.selectedIndex = i;
-                sel.dispatchEvent(new Event('change'));
-                break;
-              }
-            }
-          }
+      if (res.ok && data.success) {
+        // Booked successfully, now resolve the old one silently
+        await fetch(`/api/admin/appointments/${currentContactedApptId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ action: 'RESOLVE' })
         });
+
+        showToast("Qabul muvaffaqiyatli ko'chirildi!", "success");
+        closeRescheduleModal();
+        loadAppointments();
+        loadIssues();
+      } else {
+        showToast(data.error || "Xatolik yuz berdi", "error");
       }
-      
-      switchMainTab('tab-qabullar');
-      showToast("Yangi vaqtni tanlang va qabulni bron qiling", "info");
+    } catch (err) {
+      showToast("Tarmoq xatosi", "error");
     }
+    
+    btn.textContent = oldTxt;
+    btn.disabled = false;
   }
 
   function resolvePastAppointment(id, answer) {
@@ -2046,8 +2254,14 @@
     if (p) {
       document.getElementById('f-patient').value = p.firstName || '';
       document.getElementById('f-patient-surname').value = p.lastName || '';
-      document.getElementById('f-phone').value = p.phone || '';
-      document.getElementById('f-tg-phone').value = p.telegramPhone || '';
+      const fPhone = document.getElementById('f-phone');
+      fPhone.value = p.phone || '';
+      fPhone.dispatchEvent(new Event('input'));
+
+      const fTgPhone = document.getElementById('f-tg-phone');
+      fTgPhone.value = p.telegramPhone || '';
+      fTgPhone.dispatchEvent(new Event('input'));
+      
       document.getElementById('f-auto-patient').value = '';
     }
     document.getElementById('f-auto-patient-results').style.display = 'none';

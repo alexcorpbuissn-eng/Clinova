@@ -235,6 +235,7 @@ enum Role {
   ADMIN
   DOCTOR
   RECEPTION
+  INVENTORY
 }
 
 // ─────────────────────────────────────────────
@@ -281,4 +282,19 @@ enum VisitSource {
 enum PatientSource {
   ONLINE
   WALKIN
+}
+
+// ─────────────────────────────────────────────
+// PURCHASES (new)
+// Clinic expenses and inventory tracking
+// ─────────────────────────────────────────────
+model Purchase {
+  id          String   @id @default(uuid())
+  itemName    String   // What was bought
+  price       Int      // Price in UZS
+  sellerName  String   // Vendor/Seller name
+  recordedBy  String?  // Telegram phone of the user who recorded it
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
 }

@@ -24,40 +24,45 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const { firstName, lastName, specialty, bio, photoUrl, telegramUsername } = await request.json();
-  if (!firstName || !lastName || !specialty) {
-    return NextResponse.json({ error: 'firstName, lastName, specialty are required' }, { status: 400 });
-  }
-
-  let telegramChatId = null;
-  let cleanUsername = null;
-
-  if (telegramUsername) {
-    cleanUsername = telegramUsername.replace('@', '').trim();
-    const patient = await prisma.patient.findFirst({
-      where: {
-        telegramUsername: {
-          equals: cleanUsername,
-          mode: 'insensitive'
-        }
-      }
-    });
-    if (patient && patient.telegramChatId) {
-      telegramChatId = patient.telegramChatId;
+  try {
+    const { firstName, lastName, specialty, bio, photoUrl, telegramUsername } = await request.json();
+    if (!firstName || !lastName || !specialty) {
+      return NextResponse.json({ error: 'firstName, lastName, specialty are required' }, { status: 400 });
     }
+
+    let telegramChatId = null;
+    let cleanUsername = null;
+
+    if (telegramUsername) {
+      cleanUsername = telegramUsername.replace('@', '').trim();
+      const patient = await prisma.patient.findFirst({
+        where: {
+          telegramUsername: {
+            equals: cleanUsername,
+            mode: 'insensitive'
+          }
+        }
+      });
+      if (patient && patient.telegramChatId) {
+        telegramChatId = patient.telegramChatId;
+      }
+    }
+
+    const doctor = await prisma.doctor.create({
+      data: { 
+        firstName, 
+        lastName, 
+        specialty, 
+        bio, 
+        photoUrl,
+        telegramUsername: cleanUsername,
+        telegramChatId
+      },
+    });
+
+    return NextResponse.json({ success: true, doctor, chatFound: !!telegramChatId }, { status: 201 });
+  } catch (error: any) {
+    console.error('Doctor POST Error:', error);
+    return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 });
   }
-
-  const doctor = await prisma.doctor.create({
-    data: { 
-      firstName, 
-      lastName, 
-      specialty, 
-      bio, 
-      photoUrl,
-      telegramUsername: cleanUsername,
-      telegramChatId
-    },
-  });
-
-  return NextResponse.json({ success: true, doctor, chatFound: !!telegramChatId }, { status: 201 });
 }
