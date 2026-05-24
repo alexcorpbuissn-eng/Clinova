@@ -12,14 +12,14 @@ async function requireAdmin(request: NextRequest) {
 // DELETE /api/admin/purchases/[id]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!await requireAdmin(request)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   try {
-    const id = params.id;
+    const { id } = await params;
     if (!id) {
       return NextResponse.json({ error: 'ID topilmadi' }, { status: 400 });
     }
