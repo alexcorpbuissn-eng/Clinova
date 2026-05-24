@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
         status: 'PENDING'
       },
       include: {
-        doctor: { select: { firstName: true, lastName: true, specialty: true } },
+        doctor: { select: { id: true, firstName: true, lastName: true, specialty: true } },
         procedure: { select: { id: true, name: true, price: true, durationMinutes: true } }
       },
       orderBy: { createdAt: 'desc' }

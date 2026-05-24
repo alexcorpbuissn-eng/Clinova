@@ -1580,32 +1580,53 @@
         return;
       }
       
-      const formData = new FormData();
-      formData.append('file', file);
-      
       photoDropText.innerHTML = 'Yuklanmoqda... ⏳';
       
-      try {
-        const res = await fetch('/api/admin/upload', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
-          body: formData
-        });
-        const data = await res.json();
-        
-        if (data.success) {
-          photoUrlInput.value = data.url;
-          photoPreview.src = data.url;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          const MAX_SIZE = 600;
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height *= MAX_SIZE / width;
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width *= MAX_SIZE / height;
+              height = MAX_SIZE;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Get base64 string
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          
+          photoUrlInput.value = dataUrl;
+          photoPreview.src = dataUrl;
           photoPreviewContainer.style.display = 'block';
           photoDropText.style.display = 'none';
-        } else {
-          alert('Xatolik: ' + (data.error || "Noma'lum xatolik"));
+        };
+        img.onerror = function() {
+          alert('Rasmni yuklashda xatolik yuz berdi');
           photoDropText.innerHTML = '📷 <span>Rasmni shu yerga tashlang yoki tanlash uchun bosing</span>';
-        }
-      } catch (err) {
-        alert('Tarmoq xatosi');
+        };
+        img.src = e.target.result;
+      };
+      reader.onerror = function() {
+        alert('Faylni o`qishda xatolik yuz berdi');
         photoDropText.innerHTML = '📷 <span>Rasmni shu yerga tashlang yoki tanlash uchun bosing</span>';
-      }
+      };
+      reader.readAsDataURL(file);
     }
 
     async function submitDoctorModal() {
