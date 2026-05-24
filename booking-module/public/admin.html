@@ -1293,21 +1293,21 @@
       try {
         const res = await apiPost('/api/admin/leaves', { doctorId, startTime, endTime, reason });
         if(res.success) {
-          showAdminToast(`Dam olish saqlandi. ${res.deletedSlots} ta bo'sh slotlar o'chirildi!`);
+          showToast(`Dam olish saqlandi. ${res.deletedSlots} ta bo'sh slotlar o'chirildi!`);
           closeLeaveModal();
           loadLeaves();
         } else {
-          alert("Xatolik: " + res.error);
+          showToast(res.error || "Xatolik yuz berdi", "error");
         }
-      } catch(e) { alert("Tarmoq xatosi"); }
+      } catch(e) { showToast("Tarmoq xatosi", "error"); }
     }
 
     async function deleteLeave(id) {
-      if(!confirm("Haqiqatan ham ushbu dam olishni bekor qilmoqchimisiz?")) return;
+      if(!confirm("Bu dam olishni bekor qilasizmi? (O'chirilgan slotlar qayta tiklanmaydi!)")) return;
       try {
         const res = await apiDelete(`/api/admin/leaves?id=${id}`);
         if(res.success) {
-          showAdminToast("Bekor qilindi");
+          showToast("Bekor qilindi");
           loadLeaves();
         }
       } catch(e) { alert("Xatolik"); }
@@ -1656,7 +1656,7 @@
         }
 
         if(res.success) {
-          showAdminToast("Muvaffaqiyatli saqlandi!");
+          showToast("Muvaffaqiyatli saqlandi!");
           closeDoctorModal();
           loadDoctors();
         } else {
@@ -1674,7 +1674,7 @@
           body: JSON.stringify({ isActive })
         }).then(r => r.json());
         if(res.success) {
-          showAdminToast("Holat o'zgartirildi!");
+          showToast("Holat o'zgartirildi!");
           loadDoctors();
         }
       } catch(e) { alert("Xatolik"); }
