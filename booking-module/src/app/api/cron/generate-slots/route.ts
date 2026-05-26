@@ -4,6 +4,12 @@ import { prisma } from '@/lib/prisma';
 // This endpoint can be triggered by a Vercel Cron or called manually
 // GET /api/cron/generate-slots
 export async function GET(request: NextRequest) {
+  // Protect against unauthorized triggering
+  const secret = request.headers.get('x-cron-secret') ?? request.headers.get('authorization');
+  if (!process.env.CRON_SECRET || secret !== process.env.CRON_SECRET) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     // 1. Get all active doctors
     const doctors = await prisma.doctor.findMany({

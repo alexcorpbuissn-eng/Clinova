@@ -25,11 +25,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Fayl topilmadi' }, { status: 400 });
     }
 
+    // Validate file size (max 5 MB)
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      return NextResponse.json({ error: 'Fayl hajmi 5 MB dan oshmasligi kerak' }, { status: 400 });
+    }
+
+    // Whitelist allowed image types only
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return NextResponse.json({ error: 'Faqat rasm fayllari qabul qilinadi (JPEG, PNG, WEBP, GIF)' }, { status: 400 });
+    }
+
+    // Derive extension from MIME type — never trust the filename extension from client
+    const MIME_TO_EXT: Record<string, string> = {
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/webp': 'webp',
+      'image/gif': 'gif',
+    };
+    const ext = MIME_TO_EXT[file.type];
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Create unique filename
-    const ext = file.name.split('.').pop() || 'png';
+    // Create unique filename (extension comes from server-side MIME map, not client)
     const filename = `${uuidv4()}.${ext}`;
     
     // Save to public/uploads

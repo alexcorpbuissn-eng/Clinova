@@ -16,6 +16,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Message is required' }, { status: 400 });
     }
 
+    if (message.trim().length > 2000) {
+      return NextResponse.json({ success: false, error: 'Xabar 2000 belgidan oshmasligi kerak' }, { status: 400 });
+    }
+
     // Verify patient exists
     const patient = await prisma.patient.findUnique({
       where: { id: patientId }
@@ -45,9 +49,12 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const devPassword = req.headers.get('X-Dev-Password');
-    
-    // The password approved by the user
-    if (devPassword !== 'yamada554551') {
+
+    if (!process.env.DEV_COMPLAINTS_SECRET) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
+    }
+
+    if (devPassword !== process.env.DEV_COMPLAINTS_SECRET) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
     }
 
