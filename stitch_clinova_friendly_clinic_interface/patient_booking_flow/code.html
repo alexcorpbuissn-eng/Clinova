@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CLINOVA - Book Appointment</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&amp;family=Atkinson+Hyperlegible+Next:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-lowest": "#ffffff",
+                      "primary-container": "#2d6a4f",
+                      "outline": "#707973",
+                      "on-primary-fixed-variant": "#0e5138",
+                      "tertiary-fixed": "#cee9d3",
+                      "surface": "#f9faf6",
+                      "surface-tint": "#2c694e",
+                      "error": "#ba1a1a",
+                      "on-error-container": "#93000a",
+                      "surface-bright": "#f9faf6",
+                      "on-primary-container": "#a8e7c5",
+                      "on-tertiary-fixed": "#092012",
+                      "secondary-fixed": "#a0f4c8",
+                      "on-secondary": "#ffffff",
+                      "surface-container-high": "#e7e9e5",
+                      "outline-variant": "#bfc9c1",
+                      "on-primary-fixed": "#002114",
+                      "tertiary-container": "#4d6553",
+                      "on-surface-variant": "#404943",
+                      "on-surface": "#1a1c1a",
+                      "primary-fixed": "#b1f0ce",
+                      "on-secondary-container": "#19724f",
+                      "secondary-fixed-dim": "#85d7ad",
+                      "on-tertiary-fixed-variant": "#354c3b",
+                      "on-primary": "#ffffff",
+                      "primary": "#0f5238",
+                      "surface-dim": "#d9dad7",
+                      "secondary": "#0e6c4a",
+                      "inverse-on-surface": "#f0f1ed",
+                      "on-tertiary": "#ffffff",
+                      "surface-variant": "#e2e3df",
+                      "background": "#f9faf6",
+                      "error-container": "#ffdad6",
+                      "tertiary": "#364d3c",
+                      "on-secondary-fixed": "#002113",
+                      "surface-container-low": "#f3f4f0",
+                      "inverse-surface": "#2e312f",
+                      "on-tertiary-container": "#c6e1ca",
+                      "on-background": "#1a1c1a",
+                      "surface-container-highest": "#e2e3df",
+                      "on-error": "#ffffff",
+                      "on-secondary-fixed-variant": "#005236",
+                      "tertiary-fixed-dim": "#b3cdb7",
+                      "primary-fixed-dim": "#95d4b3",
+                      "surface-container": "#edeeea",
+                      "inverse-primary": "#95d4b3",
+                      "secondary-container": "#a0f4c8"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-desktop": "32px",
+                      "gutter": "24px",
+                      "margin-mobile": "16px",
+                      "unit": "8px",
+                      "container-max": "1280px",
+                      "sidebar-width": "260px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-sm": [
+                              "Atkinson Hyperlegible Next"
+                      ],
+                      "body-md": [
+                              "Atkinson Hyperlegible Next"
+                      ],
+                      "headline-xl": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-lg": [
+                              "Atkinson Hyperlegible Next"
+                      ],
+                      "label-sm": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-md": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-xl": [
+                              "40px",
+                              {
+                                      "lineHeight": "48px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "14px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-surface-dim shadow-sm sticky top-0 z-50 w-full transition-colors duration-300">
+<div class="flex justify-between items-center px-margin-mobile md:px-margin-desktop w-full max-w-container-max mx-auto h-16">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed tracking-tight">CLINOVA</span>
+</div>
+<nav class="hidden md:flex gap-8 items-center h-full">
+<a class="h-full flex items-center font-body-md text-body-md text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Home</a>
+<a class="h-full flex items-center font-body-md text-body-md text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Services</a>
+<a class="h-full flex items-center font-body-md text-body-md text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Doctors</a>
+</nav>
+<div class="flex items-center">
+<!-- Hide trailing action on booking flow as user is already acting -->
+<button class="hidden md:inline-flex bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-label-md text-label-md px-6 py-2.5 rounded-full transition-all active:scale-95 shadow-sm hover:shadow-md items-center gap-2">
+                    Book Now
+                </button>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col items-center py-margin-desktop px-margin-mobile w-full max-w-3xl mx-auto">
+<!-- Header & Progress -->
+<div class="w-full text-center mb-12">
+<h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary mb-4">Book Appointment</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl mx-auto">We're here to help you feel better. Let's get you scheduled with the right specialist.</p>
+</div>
+<div class="w-full mb-12">
+<div class="flex justify-between items-center relative">
+<!-- Progress Line -->
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-surface-container-highest rounded-full -z-10"></div>
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-[25%] h-1 bg-primary rounded-full -z-10 transition-all duration-500"></div>
+<!-- Steps -->
+<div class="flex flex-col items-center gap-2 bg-background px-2">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-md shadow-sm">1</div>
+<span class="font-label-sm text-label-sm text-primary">Doctor</span>
+</div>
+<div class="flex flex-col items-center gap-2 bg-background px-2 opacity-50">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-label-md">2</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Service</span>
+</div>
+<div class="flex flex-col items-center gap-2 bg-background px-2 opacity-50">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-label-md">3</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Time</span>
+</div>
+<div class="flex flex-col items-center gap-2 bg-background px-2 opacity-50">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-label-md">4</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Verify</span>
+</div>
+<div class="flex flex-col items-center gap-2 bg-background px-2 opacity-50">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-label-md">
+<span class="material-symbols-outlined" style="font-size: 16px;">check</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Done</span>
+</div>
+</div>
+</div>
+<!-- Step 1: Choose Doctor -->
+<div class="w-full bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/30 shadow-[0_4px_24px_rgba(45,106,79,0.04)] mb-8">
+<div class="mb-6">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Choose a Specialist</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Select the doctor you'd like to see. You can also skip this if you just need a general consultation.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Doctor Card 1 (Selected) -->
+<button class="flex items-center gap-4 p-4 rounded-lg border-2 border-primary bg-primary-container/10 text-left transition-all hover:-translate-y-0.5 relative overflow-hidden group">
+<div class="w-16 h-16 rounded-full overflow-hidden border-2 border-surface flex-shrink-0 relative">
+<img alt="Dr. Sarah Jenkins" class="w-full h-full object-cover" data-alt="A professional headshot of a friendly female doctor in her late 30s with warm brown hair tied back, wearing a crisp white coat over a light blue blouse. She is smiling gently at the camera. The background is a brightly lit, modern clinical space slightly out of focus. The overall aesthetic is compassionate, professional, and reassuring, using a soft, airy lighting style typical of high-end medical facilities." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA16Z4EEsp3A1jrjFt7x1wqctyKD1Njv-QuC9VgE8LW2xHvk1Fwd7jsIq-4GBhQlhiUZJdPxm8pJ1qzJ524Gf6FVdhqfeN9cX49L1M1FJcGeWLU-hK2R0pF3Rkgf-OC3FLCnq7jI9J3PFwTfz96R96JXkxFnfc_FfUhGEW23sblFGbx9EdFEAuBzTm7Ox8LxHv3EIZKfgZs9Pz6o3QgE7YKk4IH_reI-CYN9OY-LtK_MF3OnJSLVAD5_UvCQVUM5b6Oc-sVRZDCTjuB"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface mb-1 group-hover:text-primary transition-colors">Dr. Sarah Jenkins</h3>
+<p class="font-label-sm text-label-sm text-secondary mb-1">General Dentistry</p>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px] text-primary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-body-sm text-body-sm text-xs">4.9 (120 reviews)</span>
+</div>
+</div>
+<div class="absolute top-4 right-4 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</button>
+<!-- Doctor Card 2 -->
+<button class="flex items-center gap-4 p-4 rounded-lg border border-outline-variant/50 bg-surface text-left transition-all hover:bg-surface-container-low hover:border-primary/30 hover:-translate-y-0.5 group">
+<div class="w-16 h-16 rounded-full overflow-hidden border-2 border-surface flex-shrink-0">
+<img alt="Dr. Michael Chen" class="w-full h-full object-cover" data-alt="A professional headshot of a welcoming male doctor in his 40s with short dark hair and glasses, wearing dark green scrubs. He has a calm, approachable demeanor. The background is a clean, modern medical office with soft, warm white light filtering in. The image style emphasizes trust, minimalism, and a soft-touch clinical environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBz8DTGQZ7_ALuGxtslPgnLbyUw2s22HjffAifZozyAFhrWTAXgrwaf49RyEUA82WcSTELXoDfzh2GdsLwtKSeoRi5mcJKrxusaVFI_ItCiHz2Tb2bZDxpKXQeRD4GGMUDBOx0V-QHMgJ8sRk_u83F_EzBMjnfP6-buy75zVLOygohuGlDtFd8t0FggWo_xpgjDpzZU9XdL82bManK94TAEOPAqYrzb-igGddzV6euj5U7e1QJLzj5TNp4PapG4A6upXmR6v7nOCLva"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface mb-1 group-hover:text-primary transition-colors">Dr. Michael Chen</h3>
+<p class="font-label-sm text-label-sm text-secondary mb-1">ENT Specialist</p>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px] text-outline" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-body-sm text-body-sm text-xs">4.8 (85 reviews)</span>
+</div>
+</div>
+</button>
+<!-- Doctor Card 3 -->
+<button class="flex items-center gap-4 p-4 rounded-lg border border-outline-variant/50 bg-surface text-left transition-all hover:bg-surface-container-low hover:border-primary/30 hover:-translate-y-0.5 group">
+<div class="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center border-2 border-surface flex-shrink-0 text-on-surface-variant group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-3xl">psychiatry</span>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface mb-1 group-hover:text-primary transition-colors">No Preference</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">First available specialist</p>
+</div>
+</button>
+</div>
+</div>
+<!-- Bottom Actions -->
+<div class="w-full flex justify-between items-center mt-auto">
+<button class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors px-4 py-2">
+                Back
+            </button>
+<button class="bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-label-md text-label-md px-8 py-3 rounded-full transition-all active:scale-95 shadow-sm hover:shadow-md flex items-center gap-2">
+                Continue to Service
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-12 px-margin-mobile md:px-margin-desktop flex flex-col items-center gap-gutter bg-surface-container-highest dark:bg-surface-container mt-auto">
+<span class="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary-fixed">CLINOVA</span>
+<div class="flex gap-6">
+<a class="font-body-sm text-body-sm text-on-surface-variant dark:text-outline hover:text-primary-container transition-colors" href="#">Contact Info</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant dark:text-outline hover:text-primary-container transition-colors" href="#">Social Media</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant dark:text-outline hover:text-primary-container transition-colors" href="#">Clinic Location</a>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-outline">© 2024 CLINOVA Dental &amp; ENT Clinic. All rights reserved.</p>
+</footer>
+</body></html>

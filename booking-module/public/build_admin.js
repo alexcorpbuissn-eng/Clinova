@@ -1,4 +1,126 @@
-<!DOCTYPE html>
+const fs = require('fs');
+
+const jsContent = fs.readFileSync('D:/AI_Workplace/Habbullo-Hilola/booking-module/public/admin_logic_clean.js', 'utf8');
+
+const tailwindConfig = `
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                "colors": {
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#2d6a4f",
+                    "outline": "#707973",
+                    "on-primary-fixed-variant": "#0e5138",
+                    "tertiary-fixed": "#cee9d3",
+                    "surface": "#f9faf6",
+                    "surface-tint": "#2c694e",
+                    "error": "#ba1a1a",
+                    "on-error-container": "#93000a",
+                    "surface-bright": "#f9faf6",
+                    "on-primary-container": "#a8e7c5",
+                    "on-tertiary-fixed": "#092012",
+                    "secondary-fixed": "#a0f4c8",
+                    "on-secondary": "#ffffff",
+                    "surface-container-high": "#e7e9e5",
+                    "outline-variant": "#bfc9c1",
+                    "on-primary-fixed": "#002114",
+                    "tertiary-container": "#4d6553",
+                    "on-surface-variant": "#404943",
+                    "on-surface": "#1a1c1a",
+                    "primary-fixed": "#b1f0ce",
+                    "on-secondary-container": "#19724f",
+                    "secondary-fixed-dim": "#85d7ad",
+                    "on-tertiary-fixed-variant": "#354c3b",
+                    "on-primary": "#ffffff",
+                    "primary": "#0f5238",
+                    "surface-dim": "#d9dad7",
+                    "secondary": "#0e6c4a",
+                    "inverse-on-surface": "#f0f1ed",
+                    "on-tertiary": "#ffffff",
+                    "surface-variant": "#e2e3df",
+                    "background": "#f9faf6",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#364d3c",
+                    "on-secondary-fixed": "#002113",
+                    "surface-container-low": "#f3f4f0",
+                    "inverse-surface": "#2e312f",
+                    "on-tertiary-container": "#c6e1ca",
+                    "on-background": "#1a1c1a",
+                    "surface-container-highest": "#e2e3df",
+                    "on-error": "#ffffff",
+                    "on-secondary-fixed-variant": "#005236",
+                    "tertiary-fixed-dim": "#b3cdb7",
+                    "primary-fixed-dim": "#95d4b3",
+                    "surface-container": "#edeeea",
+                    "inverse-primary": "#95d4b3",
+                    "secondary-container": "#a0f4c8"
+                },
+                "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+                },
+                "spacing": {
+                    "margin-desktop": "32px",
+                    "gutter": "24px",
+                    "margin-mobile": "16px",
+                    "unit": "8px",
+                    "container-max": "1280px",
+                    "sidebar-width": "260px"
+                },
+                "fontFamily": {
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "body-sm": ["Atkinson Hyperlegible Next"],
+                    "body-md": ["Atkinson Hyperlegible Next"],
+                    "headline-xl": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-lg": ["Atkinson Hyperlegible Next"],
+                    "label-sm": ["Plus Jakarta Sans"],
+                    "label-md": ["Plus Jakarta Sans"]
+                },
+                "fontSize": {
+                    "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                    "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                    "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                    "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                    "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                    "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                    "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                    "label-sm": ["12px", { "lineHeight": "14px", "fontWeight": "500" }],
+                    "label-md": ["14px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }]
+                }
+            }
+        }
+    }
+</script>
+`;
+
+const globalStyles = `
+<style>
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .fill-icon {
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Simple reset for table loader from js */
+    .admin-loader { text-align: center; padding: 20px; }
+    .admin-skeleton-bar { background: #e2e3df; margin-bottom: 8px; border-radius: 4px; height: 16px; }
+    .badge { padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 500; }
+    .badge-scheduled { background-color: var(--color-surface-variant); color: var(--color-on-surface-variant); }
+    .badge-completed { background-color: var(--color-tertiary-fixed); color: var(--color-on-tertiary-fixed); }
+    .badge-cancelled-admin { background-color: var(--color-error-container); color: var(--color-on-error-container); }
+    .badge-cancelled-patient { background-color: var(--color-error-container); color: var(--color-on-error-container); }
+    .badge-noshow { background-color: var(--color-error-container); color: var(--color-on-error-container); }
+</style>
+`;
+
+const htmlTemplate = `<!DOCTYPE html>
 <html lang="uz">
 <head>
     <meta charset="utf-8"/>
@@ -7,8 +129,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Atkinson+Hyperlegible+Next:wght@400;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
-    ${tailwindConfig}
-    ${globalStyles}
+    \${tailwindConfig}
+    \${globalStyles}
 </head>
 <body class="bg-background text-on-background font-body-md text-body-md flex antialiased selection:bg-primary-container selection:text-on-primary-container">
 
@@ -449,7 +571,10 @@
     </div>
 
     <script>
-        ${jsContent}
+        \${jsContent}
     </script>
 </body>
-</html>
+</html>`;
+
+fs.writeFileSync('D:/AI_Workplace/Habbullo-Hilola/booking-module/public/admin.html', htmlTemplate);
+console.log('Successfully generated new admin.html');

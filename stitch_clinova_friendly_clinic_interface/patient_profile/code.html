@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Patient Profile | CLINOVA</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&amp;family=Atkinson+Hyperlegible+Next:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-surface-variant": "#404943",
+                      "inverse-on-surface": "#f0f1ed",
+                      "tertiary-container": "#4d6553",
+                      "surface-tint": "#2c694e",
+                      "secondary": "#0e6c4a",
+                      "on-secondary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "on-surface": "#1a1c1a",
+                      "on-tertiary": "#ffffff",
+                      "surface-dim": "#d9dad7",
+                      "tertiary-fixed": "#cee9d3",
+                      "on-tertiary-container": "#c6e1ca",
+                      "surface": "#f9faf6",
+                      "on-primary-fixed-variant": "#0e5138",
+                      "secondary-fixed-dim": "#85d7ad",
+                      "outline-variant": "#bfc9c1",
+                      "inverse-surface": "#2e312f",
+                      "on-primary-container": "#a8e7c5",
+                      "primary-container": "#2d6a4f",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed-variant": "#354c3b",
+                      "background": "#f9faf6",
+                      "primary-fixed-dim": "#95d4b3",
+                      "surface-container-low": "#f3f4f0",
+                      "surface-variant": "#e2e3df",
+                      "on-background": "#1a1c1a",
+                      "tertiary": "#364d3c",
+                      "on-secondary-fixed": "#002113",
+                      "surface-container": "#edeeea",
+                      "on-primary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "surface-container-high": "#e7e9e5",
+                      "on-tertiary-fixed": "#092012",
+                      "primary": "#0f5238",
+                      "primary-fixed": "#b1f0ce",
+                      "surface-container-highest": "#e2e3df",
+                      "surface-bright": "#f9faf6",
+                      "secondary-container": "#a0f4c8",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary-fixed": "#a0f4c8",
+                      "on-primary-fixed": "#002114",
+                      "inverse-primary": "#95d4b3",
+                      "tertiary-fixed-dim": "#b3cdb7",
+                      "on-secondary-container": "#19724f",
+                      "error": "#ba1a1a",
+                      "on-secondary-fixed-variant": "#005236",
+                      "outline": "#707973"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "unit": "8px",
+                      "container-max": "1280px",
+                      "sidebar-width": "260px",
+                      "gutter": "24px",
+                      "margin-desktop": "32px"
+              },
+              "fontFamily": {
+                      "body-md": ["Atkinson Hyperlegible Next"],
+                      "headline-lg-mobile": ["Plus Jakarta Sans"],
+                      "label-md": ["Plus Jakarta Sans"],
+                      "label-sm": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "body-lg": ["Atkinson Hyperlegible Next"],
+                      "body-sm": ["Atkinson Hyperlegible Next"],
+                      "headline-xl": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "label-sm": ["12px", {"lineHeight": "14px", "fontWeight": "500"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+              }
+            }
+          }
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .soft-shadow {
+                box-shadow: 0 8px 24px rgba(45, 106, 79, 0.04), 0 2px 8px rgba(45, 106, 79, 0.02);
+            }
+            .hover-lift {
+                @apply transition-transform duration-300 ease-out hover:-translate-y-0.5;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<nav class="bg-surface dark:bg-surface-dim shadow-sm w-full sticky top-0 z-50">
+<div class="flex justify-between items-center px-margin-desktop w-full max-w-container-max mx-auto h-16">
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">
+                CLINOVA
+            </div>
+<div class="hidden md:flex gap-gutter items-center">
+<a class="text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed transition-colors font-body-md text-body-md py-2" href="#">Home</a>
+<a class="text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed transition-colors font-body-md text-body-md py-2" href="#">Services</a>
+<a class="text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed transition-colors font-body-md text-body-md py-2" href="#">Doctors</a>
+<!-- Active State for Profile (Not in Nav array, but logically this is the active page context if it was in a fuller nav, handled via layout below) -->
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary text-on-primary font-label-md text-label-md px-6 py-2.5 rounded-full hover:bg-secondary transition-colors Active: scale-95 transition-transform">
+                    Book Now
+                </button>
+<div class="md:hidden">
+<span class="material-symbols-outlined text-primary cursor-pointer" data-icon="menu">menu</span>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8 md:py-12">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+<!-- Left Column: Patient Info (Bento/Glassmorphism feel) -->
+<div class="md:col-span-4 flex flex-col gap-6">
+<!-- Profile Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 soft-shadow border border-surface-variant relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-24 bg-tertiary-container/10"></div>
+<div class="relative z-10 flex flex-col items-center mt-6">
+<div class="w-24 h-24 rounded-full bg-surface-container border-4 border-surface-container-lowest overflow-hidden mb-4 shadow-sm">
+<img alt="Patient Avatar" class="w-full h-full object-cover" data-alt="A close-up portrait of a relaxed, smiling woman with clear skin, lit by soft, bright natural window light in a clean, minimalist room. The overarching aesthetic is warm, compassionate, and bright, utilizing a high-key light-mode palette with subtle, organic tones. The mood is calm, safe, and reassuring, reflecting a positive wellness environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJdpu5piquJEl_Ye1O8zbgNo2Pa8HJdVr0Cdt4QqiWTq7DdG9qJSL3ir4a7LmjNQjD4LmNItqJBB8QE65pI0FIDthFsW5Uw5N5ztxzfoyGJX-MrVKSEbgQ0tu3Zkjtfis07-k5ByJIZ0smDYWA_QpQWD12Pr5SIqTepa-oLggaANa9iNe8kPmcJ1N9kxRl6WIv2R7Ds6SHTvMeSCsQLeNO1iowF9tuJ21NtQK9tNOTgkGYGJV0MKDBopWQekI-6L_6ESI9O7W3mQUq"/>
+</div>
+<h1 class="font-headline-md text-headline-md text-on-surface text-center mb-1">Sarah Jenkins</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-center mb-6">Patient ID: #CL-8492</p>
+<div class="w-full space-y-4">
+<div class="flex items-center gap-3 p-3 rounded-lg bg-surface hover:bg-surface-container-low transition-colors">
+<div class="w-8 h-8 rounded-full bg-primary-container/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="mail">mail</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="font-label-sm text-label-sm text-outline mb-0.5">Email</p>
+<p class="font-body-sm text-body-sm text-on-surface truncate">sarah.j@example.com</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-lg bg-surface hover:bg-surface-container-low transition-colors">
+<div class="w-8 h-8 rounded-full bg-primary-container/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="phone">phone</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="font-label-sm text-label-sm text-outline mb-0.5">Phone</p>
+<p class="font-body-sm text-body-sm text-on-surface truncate">+1 (555) 019-2834</p>
+</div>
+</div>
+<a class="flex items-center justify-between p-3 rounded-lg bg-surface border border-outline-variant hover:border-primary-fixed-dim hover:bg-surface-container-low transition-all group/link" href="#">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-[#229ED9]/10 flex items-center justify-center text-[#229ED9]">
+<span class="material-symbols-outlined text-[18px]" data-icon="send">send</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface">Connect Telegram</span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover/link:text-primary transition-colors text-[20px]" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Health Summary Mini-Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 soft-shadow border border-surface-variant flex gap-4">
+<div class="flex-1 flex flex-col items-center justify-center p-3 bg-surface rounded-lg">
+<span class="material-symbols-outlined text-secondary mb-2" data-icon="monitor_weight">monitor_weight</span>
+<p class="font-label-sm text-label-sm text-outline">Weight</p>
+<p class="font-body-md text-body-md text-on-surface font-medium mt-1">64 kg</p>
+</div>
+<div class="flex-1 flex flex-col items-center justify-center p-3 bg-surface rounded-lg">
+<span class="material-symbols-outlined text-secondary mb-2" data-icon="bloodtype">bloodtype</span>
+<p class="font-label-sm text-label-sm text-outline">Blood Type</p>
+<p class="font-body-md text-body-md text-on-surface font-medium mt-1">O+</p>
+</div>
+</div>
+</div>
+<!-- Right Column: Appointments & History -->
+<div class="md:col-span-8 flex flex-col gap-8">
+<!-- Upcoming Appointments -->
+<section>
+<div class="flex justify-between items-end mb-6">
+<div>
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Upcoming Visits</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Your next scheduled check-ups.</p>
+</div>
+</div>
+<div class="space-y-4">
+<!-- Appointment Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-5 soft-shadow border border-tertiary-fixed-dim hover-lift flex flex-col sm:flex-row gap-5 items-start sm:items-center relative overflow-hidden group">
+<!-- Subtle decorative edge -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<!-- Date Block -->
+<div class="bg-surface-container-low rounded-lg p-3 min-w-[80px] text-center border border-outline-variant">
+<p class="font-label-sm text-label-sm text-primary uppercase tracking-wider mb-1">Oct</p>
+<p class="font-headline-md text-headline-md text-on-surface">24</p>
+</div>
+<!-- Details -->
+<div class="flex-1">
+<div class="flex flex-wrap items-center gap-2 mb-2">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-container/40 text-on-secondary-container font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle" data-weight="fill">check_circle</span>
+                                        Confirmed
+                                    </span>
+<span class="font-label-sm text-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span>
+                                        10:30 AM
+                                    </span>
+</div>
+<h3 class="font-body-lg text-body-lg text-on-surface font-medium mb-1">Dental Cleaning &amp; Exam</h3>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<img alt="Doctor Avatar" class="w-6 h-6 rounded-full object-cover border border-surface-variant" data-alt="A small circular portrait of a smiling male doctor in a clean white coat against a soft, blurred bright background. The lighting is high-key and flattering, emphasizing a compassionate, professional, and trustworthy demeanor. The color palette incorporates crisp whites and gentle warm tones, suitable for a modern wellness clinic UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXYHgUvSrR47y9mzVV1DjSjT3d5G8l7suh_V6lpWvALbRnSi4bFZsAmQ9wWB3gX0-s-HLKVVxqkVoc5jZpXLAyU8_IWhVTHZRUrEQGJj076zQeroj59HR7Y9aA8BCFleMKHqfQiWjjBF4TNg6dqzTfv5lM39r1UUDuH33SIe1EC1I3q3_szgu4NIKdJ5Lk7gX4Whtuq9OomF5MlYJ2iPOMSjg5mlC53_sf8W25zksXz363-cgkL1UhM3Vq7hVd-DKk7PLno0l3adhw"/>
+<p class="font-body-sm text-body-sm">Dr. Michael Chen</p>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex sm:flex-col gap-2 w-full sm:w-auto mt-4 sm:mt-0">
+<button class="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-surface-container border border-outline-variant text-on-surface font-label-md text-label-md hover:bg-surface-variant transition-colors text-center">
+                                    Reschedule
+                                </button>
+</div>
+</div>
+<!-- Appointment Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-5 soft-shadow border border-tertiary-fixed-dim hover-lift flex flex-col sm:flex-row gap-5 items-start sm:items-center relative overflow-hidden group">
+<!-- Date Block -->
+<div class="bg-surface-container-low rounded-lg p-3 min-w-[80px] text-center border border-outline-variant">
+<p class="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-1">Nov</p>
+<p class="font-headline-md text-headline-md text-on-surface">12</p>
+</div>
+<!-- Details -->
+<div class="flex-1">
+<div class="flex flex-wrap items-center gap-2 mb-2">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-variant text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]" data-icon="pending" data-weight="fill">pending</span>
+                                        Pending
+                                    </span>
+<span class="font-label-sm text-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span>
+                                        02:00 PM
+                                    </span>
+</div>
+<h3 class="font-body-lg text-body-lg text-on-surface font-medium mb-1">ENT Consultation</h3>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<div class="w-6 h-6 rounded-full bg-primary-container/20 flex items-center justify-center text-primary text-xs font-bold border border-primary-container/30">
+                                        AE
+                                    </div>
+<p class="font-body-sm text-body-sm">Dr. Aisha El-Amin</p>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex sm:flex-col gap-2 w-full sm:w-auto mt-4 sm:mt-0">
+<button class="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-surface-container border border-outline-variant text-on-surface font-label-md text-label-md hover:bg-surface-variant transition-colors text-center">
+                                    Reschedule
+                                </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Past Appointments / History Link -->
+<section class="mt-4">
+<a class="block bg-surface-container-lowest rounded-xl p-6 soft-shadow border border-surface-variant hover:border-primary-fixed-dim hover:bg-surface-container-low transition-all group flex items-center justify-between" href="#">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant group-hover:bg-primary-container/10 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+</div>
+<div>
+<h3 class="font-body-lg text-body-lg text-on-surface font-medium">Appointment History</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Review past visits, notes, and prescriptions.</p>
+</div>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface flex items-center justify-center border border-outline-variant group-hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors" data-icon="chevron_right">chevron_right</span>
+</div>
+</a>
+</section>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-highest dark:bg-surface-container w-full py-12 px-margin-desktop flex flex-col items-center gap-gutter mt-auto">
+<div class="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary-fixed">
+            CLINOVA
+        </div>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="font-body-sm text-body-sm text-on-surface-variant dark:text-outline hover:text-primary-container transition-colors" href="#">Contact Info</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant dark:text-outline hover:text-primary-container transition-colors" href="#">Social Media</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant dark:text-outline hover:text-primary-container transition-colors" href="#">Clinic Location</a>
+</div>
+<div class="font-body-sm text-body-sm text-on-surface dark:text-on-surface-variant text-center mt-4">
+            © 2024 CLINOVA Dental &amp; ENT Clinic. All rights reserved.
+        </div>
+</footer>
+</body></html>

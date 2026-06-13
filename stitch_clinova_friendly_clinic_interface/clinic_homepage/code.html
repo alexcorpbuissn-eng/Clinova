@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CLINOVA - Dental &amp; ENT Clinic</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-surface-variant": "#404943",
+                      "inverse-on-surface": "#f0f1ed",
+                      "tertiary-container": "#4d6553",
+                      "surface-tint": "#2c694e",
+                      "secondary": "#0e6c4a",
+                      "on-secondary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "on-surface": "#1a1c1a",
+                      "on-tertiary": "#ffffff",
+                      "surface-dim": "#d9dad7",
+                      "tertiary-fixed": "#cee9d3",
+                      "on-tertiary-container": "#c6e1ca",
+                      "surface": "#f9faf6",
+                      "on-primary-fixed-variant": "#0e5138",
+                      "secondary-fixed-dim": "#85d7ad",
+                      "outline-variant": "#bfc9c1",
+                      "inverse-surface": "#2e312f",
+                      "on-primary-container": "#a8e7c5",
+                      "primary-container": "#2d6a4f",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed-variant": "#354c3b",
+                      "background": "#f9faf6",
+                      "primary-fixed-dim": "#95d4b3",
+                      "surface-container-low": "#f3f4f0",
+                      "surface-variant": "#e2e3df",
+                      "on-background": "#1a1c1a",
+                      "tertiary": "#364d3c",
+                      "on-secondary-fixed": "#002113",
+                      "surface-container": "#edeeea",
+                      "on-primary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "surface-container-high": "#e7e9e5",
+                      "on-tertiary-fixed": "#092012",
+                      "primary": "#0f5238",
+                      "primary-fixed": "#b1f0ce",
+                      "surface-container-highest": "#e2e3df",
+                      "surface-bright": "#f9faf6",
+                      "secondary-container": "#a0f4c8",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary-fixed": "#a0f4c8",
+                      "on-primary-fixed": "#002114",
+                      "inverse-primary": "#95d4b3",
+                      "tertiary-fixed-dim": "#b3cdb7",
+                      "on-secondary-container": "#19724f",
+                      "error": "#ba1a1a",
+                      "on-secondary-fixed-variant": "#005236",
+                      "outline": "#707973"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "unit": "8px",
+                      "container-max": "1280px",
+                      "sidebar-width": "260px",
+                      "gutter": "24px",
+                      "margin-desktop": "32px"
+              },
+              "fontFamily": {
+                      "body-md": ["Atkinson Hyperlegible Next"],
+                      "headline-lg-mobile": ["Plus Jakarta Sans"],
+                      "label-md": ["Plus Jakarta Sans"],
+                      "label-sm": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "body-lg": ["Atkinson Hyperlegible Next"],
+                      "body-sm": ["Atkinson Hyperlegible Next"],
+                      "headline-xl": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                      "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                      "label-md": ["14px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                      "label-sm": ["12px", { "lineHeight": "14px", "fontWeight": "500" }],
+                      "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                      "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                      "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                      "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                      "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md text-body-md antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<header class="sticky top-0 z-50 bg-surface shadow-sm">
+<div class="flex justify-between items-center px-margin-mobile md:px-margin-desktop w-full max-w-container-max mx-auto h-16">
+<div class="font-headline-md text-headline-md font-bold text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+                CLINOVA
+            </div>
+<nav class="hidden md:flex items-center gap-8 h-full">
+<a class="h-full flex items-center text-primary font-bold border-b-2 border-primary font-label-md text-label-md hover:text-primary transition-colors" href="#">Home</a>
+<a class="h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors" href="#services">Services</a>
+<a class="h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors" href="#doctors">Doctors</a>
+</nav>
+<button class="bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-label-md text-label-md px-6 py-2.5 rounded-full transition-all hover:scale-95 shadow-[0_4px_14px_rgba(45,106,79,0.2)]">
+                Book Now
+            </button>
+</div>
+</header>
+<main>
+<!-- Hero Section -->
+<section class="relative pt-16 pb-24 lg:pt-32 lg:pb-40 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto flex flex-col-reverse lg:flex-row items-center gap-12 lg:gap-gutter">
+<div class="w-full lg:w-1/2 flex flex-col items-start gap-6 z-10">
+<span class="inline-flex items-center gap-2 bg-surface-container-high text-primary px-4 py-1.5 rounded-full font-label-sm text-label-sm border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                    Accepting New Patients
+                </span>
+<h1 class="font-headline-xl text-headline-xl text-on-surface max-w-[15ch]">
+                    Gentle Care for <span class="text-primary relative inline-block">Your Wellbeing
+                        <svg class="absolute w-full h-3 -bottom-1 left-0 text-secondary-container -z-10" preserveaspectratio="none" viewbox="0 0 100 20"><path d="M0 10 Q 50 20 100 10 L 100 20 L 0 20 Z" fill="currentColor"></path></svg>
+</span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
+                    Experience compassionate efficiency. Clinova offers state-of-the-art Dental and ENT services in a calming, restorative environment designed to put you at ease.
+                </p>
+<div class="flex flex-wrap items-center gap-4 mt-4">
+<button class="bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-label-md text-label-md px-8 py-4 rounded-full transition-all hover:scale-95 shadow-[0_8px_24px_rgba(45,106,79,0.25)]">
+                        Book Appointment
+                    </button>
+<button class="bg-surface-container-low hover:bg-surface-container-high text-on-surface font-label-md text-label-md px-8 py-4 rounded-full transition-all flex items-center gap-2">
+<span class="material-symbols-outlined">call</span>
+                        (555) 123-4567
+                    </button>
+</div>
+</div>
+<div class="w-full lg:w-1/2 relative aspect-[4/3] lg:aspect-[3/4] max-h-[600px] rounded-[2rem] overflow-hidden shadow-[0_20px_40px_rgba(45,106,79,0.08)]">
+<img class="w-full h-full object-cover" data-alt="A modern, brightly lit clinic reception area featuring warm wooden textures, soft white walls, and lush green indoor plants. The atmosphere is calming, pristine, and welcoming, reflecting a high-end wellness retreat aesthetic rather than a cold hospital. Sunlight streams through large windows, illuminating a comfortable seating area with plush chairs." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHYaFbDuZ6pGtz5Y5JIbuB3obNduc0HvjyW_4RSVQ63bhnuKBiQ4JIWCKVP7xHkySeyezixo7rB_0Vs2FPOYWemZ8u1DSfTC83GUL-fvsPuf-Nllq3dGBcY18RNr7_IrHYUNQRGRm2TOdnm_o3i7J0-G3i6zELcbwycmUfMV18SzQHio_jyTAgdoqZ0yrxLWWaJtZTe-hMGkc1vGbbngVX0l5IS3lGBOp5yG7tK28Y72WDcQ-yvkr6ojs2XDNYBFyUZPauk22xEdOO"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+</div>
+</section>
+<!-- Services Overview (Bento Grid) -->
+<section class="py-24 bg-surface-container-low px-margin-mobile md:px-margin-desktop" id="services">
+<div class="max-w-container-max mx-auto">
+<div class="text-center mb-16">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-4">Our Specialized Services</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl mx-auto">Comprehensive care tailored to your specific needs, delivered by experts using the latest technology.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<!-- Dental Service Card -->
+<div class="group bg-surface rounded-[2rem] p-8 lg:p-12 hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_24px_rgba(45,106,79,0.04)] hover:shadow-[0_16px_32px_rgba(45,106,79,0.08)] border border-outline-variant/30 flex flex-col h-full">
+<div class="w-16 h-16 rounded-2xl bg-primary-container text-on-primary-container flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">dentistry</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-4">Advanced Dentistry</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8 flex-grow">From routine cleanings and preventive care to complex restorative and cosmetic procedures, our gentle dental team ensures your smile is healthy and bright.</p>
+<ul class="space-y-3 mb-8">
+<li class="flex items-center gap-3 font-body-sm text-body-sm text-on-surface">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span> Preventive Care
+                            </li>
+<li class="flex items-center gap-3 font-body-sm text-body-sm text-on-surface">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span> Cosmetic Dentistry
+                            </li>
+<li class="flex items-center gap-3 font-body-sm text-body-sm text-on-surface">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span> Orthodontics
+                            </li>
+</ul>
+<a class="inline-flex items-center gap-2 font-label-md text-label-md text-primary hover:text-primary-fixed-dim transition-colors mt-auto" href="#">
+                            Learn More <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+</div>
+<!-- ENT Service Card -->
+<div class="group bg-surface rounded-[2rem] p-8 lg:p-12 hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_24px_rgba(45,106,79,0.04)] hover:shadow-[0_16px_32px_rgba(45,106,79,0.08)] border border-outline-variant/30 flex flex-col h-full">
+<div class="w-16 h-16 rounded-2xl bg-tertiary-container text-on-tertiary-container flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">hearing</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-4">Ear, Nose &amp; Throat</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8 flex-grow">Specialized diagnostics and treatment for sinus issues, hearing loss, allergies, and vocal disorders, helping you breathe, hear, and live comfortably.</p>
+<ul class="space-y-3 mb-8">
+<li class="flex items-center gap-3 font-body-sm text-body-sm text-on-surface">
+<span class="material-symbols-outlined text-tertiary-container text-[20px]">check_circle</span> Sinus &amp; Allergy Treatment
+                            </li>
+<li class="flex items-center gap-3 font-body-sm text-body-sm text-on-surface">
+<span class="material-symbols-outlined text-tertiary-container text-[20px]">check_circle</span> Hearing Evaluations
+                            </li>
+<li class="flex items-center gap-3 font-body-sm text-body-sm text-on-surface">
+<span class="material-symbols-outlined text-tertiary-container text-[20px]">check_circle</span> Pediatric ENT Care
+                            </li>
+</ul>
+<a class="inline-flex items-center gap-2 font-label-md text-label-md text-tertiary-container hover:text-tertiary transition-colors mt-auto" href="#">
+                            Learn More <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</section>
+<!-- Featured Doctors -->
+<section class="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto" id="doctors">
+<div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-4">Meet Our Specialists</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">A team of dedicated professionals committed to providing the highest standard of compassionate care.</p>
+</div>
+<button class="bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md px-6 py-2.5 rounded-full transition-colors shrink-0">
+                    View All Doctors
+                </button>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+<!-- Doctor Card 1 -->
+<div class="bg-surface rounded-2xl p-6 shadow-[0_4px_16px_rgba(45,106,79,0.05)] border border-outline-variant/30 text-center hover:-translate-y-1 transition-transform group">
+<div class="w-32 h-32 mx-auto rounded-full p-1 bg-surface border-3 border-surface-container-highest mb-6 overflow-hidden">
+<img class="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform" data-alt="A professional headshot of a friendly female doctor with a warm smile, wearing a pristine white coat over a light blue shirt. She has a stethoscope around her neck. The background is a soft, out-of-focus modern clinic setting with gentle natural light, conveying trust, expertise, and approachability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuKxEysHU0m1nF7ya-plJJuWFTSO3s-3A3LiPACAvMz_xKXXxJ3w1idtUFjYG6u7ZBb35WrTWj0tF2sfaOYt64hA0q3eZGV6Rh8-2eBmBud8N5GlOeNXq-intF2dsaCmac8wCFduxmZ1ExMz8v0SRaTUc3Zb0lKyUbGMFxFlPLoYa-pzWcKKylKn59evCwlXe0PHVGa4KPFaaYua00HZKrd85FWbFGSOt7F3P6pIfwNrZCtXqcpWlAzlwllsh46nU_-Vpoy0SJFZOM"/>
+</div>
+<div class="font-label-sm text-label-sm text-primary mb-1 uppercase tracking-wider">Chief Dentist</div>
+<h4 class="font-headline-md text-headline-md text-on-surface mb-2">Dr. Sarah Jenkins</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">Specializing in restorative dentistry and patient comfort techniques.</p>
+</div>
+<!-- Doctor Card 2 -->
+<div class="bg-surface rounded-2xl p-6 shadow-[0_4px_16px_rgba(45,106,79,0.05)] border border-outline-variant/30 text-center hover:-translate-y-1 transition-transform group">
+<div class="w-32 h-32 mx-auto rounded-full p-1 bg-surface border-3 border-surface-container-highest mb-6 overflow-hidden">
+<img class="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform" data-alt="A professional headshot of a confident male doctor looking directly at the camera with a reassuring expression. He wears a dark stethoscope over a light green scrubs top. The lighting is soft and flattering, typical of a modern, clean medical facility, emphasizing competence and compassionate care." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2D6wNZvvZtl4GSzOUlxR-8r9xwPr__ZjNPnhi2piJAjILcvYYwheDhuU3uYNmnvsqlKU-OG6rpTImNlhJ4c4H5gWEB4Bn_P9JzcgCvsCRkoz6wft6IRpIZGWDDInSHr5tD4oFqah5Fre8UISDIJi1JS4ywuk-HW9ejZTJm_HAkRq3laTnVsU7kL-PJp6LrkAJR1lwRGkTrY4WB-WNGajJkOaxZMYYbCJD4Rk-sK4bsDralQFc1hN04IwIJ7eD5pquCa2s-SCiGajq"/>
+</div>
+<div class="font-label-sm text-label-sm text-tertiary-container mb-1 uppercase tracking-wider">Head of ENT</div>
+<h4 class="font-headline-md text-headline-md text-on-surface mb-2">Dr. Michael Chen</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">Expert in advanced sinus surgery and pediatric otolaryngology.</p>
+</div>
+<!-- Doctor Card 3 -->
+<div class="bg-surface rounded-2xl p-6 shadow-[0_4px_16px_rgba(45,106,79,0.05)] border border-outline-variant/30 text-center hover:-translate-y-1 transition-transform group">
+<div class="w-32 h-32 mx-auto rounded-full p-1 bg-surface border-3 border-surface-container-highest mb-6 overflow-hidden">
+<img class="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform" data-alt="A professional portrait of a welcoming female doctor with short dark hair, wearing a white coat and a light sage green blouse. She is smiling gently. The background is a brightly lit, minimalist clinic corridor, creating an atmosphere of calm efficiency and modern healthcare excellence." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7WuItXk2BjUsHm3vYsTCF6hrQUI6nNPYg0Y-9GXeeTvPp1GTLsgk9f_AGFtQvX5PDHnDKixpFxuf2WAbslrNmrhK_dAdfzs0fkGiNBWEyhrL8xJLDB21z6Gdw9NFRSWvTtflNnhxMbog2R7-67jqsUuErrTmnn1Z9wxRG4gCUJ9jezqp5EbyI5vo5QgxBrInYMvUI9eyGS_bYjWdqDCjTJTVLQEhZP8SlZccx0NKafxK_YxfDhFADI55lNKcaSLQbUIAdrVOCBHUv"/>
+</div>
+<div class="font-label-sm text-label-sm text-primary mb-1 uppercase tracking-wider">Orthodontist</div>
+<h4 class="font-headline-md text-headline-md text-on-surface mb-2">Dr. Emily Patel</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">Creating beautiful smiles with modern, discreet alignment solutions.</p>
+</div>
+<!-- Doctor Card 4 -->
+<div class="bg-surface rounded-2xl p-6 shadow-[0_4px_16px_rgba(45,106,79,0.05)] border border-outline-variant/30 text-center hover:-translate-y-1 transition-transform group">
+<div class="w-32 h-32 mx-auto rounded-full p-1 bg-surface border-3 border-surface-container-highest mb-6 overflow-hidden">
+<img class="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform" data-alt="A headshot of a mature, experienced male doctor with grey hair, wearing glasses and a crisp white coat over a pale blue shirt. He projects wisdom, calm, and authority. The setting features a soft, warm white light typical of a high-end medical practice, ensuring patient trust." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHGfG6jYUEh5CCTNX3gxV3D44XtY7cQwvmFwO2fZjN8y_nAP0gi-iSJ0txUt59AobhLTqO6EfV1lw5RrHXV1Y5kTz6-XTC473eWcmBW9qGggyPqClFnSY4WvU6tJth43LvA9phXw3VmaDLE130PbU2d3vF-wtRAQXRjJj4ng7bIezOUVYkBp3sxOXr6RhdEF3qiKUEgEFHZcx6GLIbiZztNtJQpdbDg_id8LUzsM_fr_N-RZRs4sseEXVu6Ee3QmiyU_RWjcK_7e1V"/>
+</div>
+<div class="font-label-sm text-label-sm text-tertiary-container mb-1 uppercase tracking-wider">Audiologist</div>
+<h4 class="font-headline-md text-headline-md text-on-surface mb-2">Dr. Robert Hayes</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">Dedicated to improving quality of life through advanced hearing care.</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-highest w-full py-12 px-margin-mobile md:px-margin-desktop flex flex-col items-center gap-gutter border-t border-outline-variant/20 mt-16">
+<div class="w-full max-w-container-max mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 mb-8">
+<!-- Brand & Contact -->
+<div class="flex flex-col gap-4">
+<div class="font-headline-sm text-headline-sm font-bold text-primary flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+                    CLINOVA
+                </div>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-xs">Compassionate, efficient care in a calming environment. Your wellness is our priority.</p>
+<div class="flex flex-col gap-2 mt-4">
+<span class="flex items-center gap-2 font-body-sm text-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">call</span> (555) 123-4567
+                    </span>
+<span class="flex items-center gap-2 font-body-sm text-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">mail</span> care@clinova.com
+                    </span>
+</div>
+</div>
+<!-- Links -->
+<div class="flex flex-col gap-4">
+<h4 class="font-label-md text-label-md text-on-surface">Quick Links</h4>
+<nav class="flex flex-col gap-3">
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary-container transition-colors w-fit" href="#">Contact Info</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary-container transition-colors w-fit" href="#">Social Media</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary-container transition-colors w-fit" href="#">Clinic Location</a>
+</nav>
+</div>
+<!-- Map Location Placeholder -->
+<div class="flex flex-col gap-4">
+<h4 class="font-label-md text-label-md text-on-surface">Visit Us</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-2">123 Wellness Way, Suite 100<br/>Healthcare District, City 90210</p>
+<div class="w-full h-32 bg-surface-variant rounded-lg overflow-hidden border border-outline-variant/30">
+<img class="w-full h-full object-cover opacity-80 mix-blend-multiply" data-alt="A stylized, light-themed map UI showing a generic city street grid. The map uses soft green and grey tones, fitting a modern wellness app design. A subtle marker indicates a location in the center, representing the clinic's physical address in a clean, easily readable format." data-location="Map of Clinic Area" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA777CMzDqsOH14tuTTC7DzDVRYdadI7emoiqa_-NQ1ivCwcu2sHD07tqg1dZw36jdyGiZKGWeNcM9iBjDIiUjYOAKKptkAqQDhHtrsVCsJxk5_c-JQCeBHJtYiSEwSHopXHlMll4dyGdcw5yQcr__Ol9sNMGXW5OYUVIDd8TrZPPIADPR4Y_A2P5V_tMJ1bIy6Ue2ZruFbn0SLMH9Mw4Ihw6d45-KptuvhVmRSCxsHbL143k-8YjUL01VL_3cEku_--aVNbyOHjpDr"/>
+</div>
+</div>
+</div>
+<div class="w-full max-w-container-max mx-auto border-t border-outline-variant/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="font-body-sm text-body-sm text-on-surface-variant">© 2024 CLINOVA Dental &amp; ENT Clinic. All rights reserved.</p>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<a class="hover:text-primary-container transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-primary-container transition-colors" href="#">Terms of Service</a>
+</div>
+</div>
+</footer>
+</body></html>

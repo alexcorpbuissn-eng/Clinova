@@ -1,4 +1,103 @@
-<!DOCTYPE html>
+const fs = require('fs');
+
+const jsContent = fs.readFileSync('D:/AI_Workplace/Habbullo-Hilola/booking-module/public/profile_logic_clean.js', 'utf8');
+
+const tailwindConfig = `
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+        "on-surface-variant": "#404943",
+        "inverse-on-surface": "#f0f1ed",
+        "tertiary-container": "#4d6553",
+        "surface-tint": "#2c694e",
+        "secondary": "#0e6c4a",
+        "on-secondary": "#ffffff",
+        "on-error-container": "#93000a",
+        "on-surface": "#1a1c1a",
+        "on-tertiary": "#ffffff",
+        "surface-dim": "#d9dad7",
+        "tertiary-fixed": "#cee9d3",
+        "on-tertiary-container": "#c6e1ca",
+        "surface": "#f9faf6",
+        "on-primary-fixed-variant": "#0e5138",
+        "secondary-fixed-dim": "#85d7ad",
+        "outline-variant": "#bfc9c1",
+        "inverse-surface": "#2e312f",
+        "on-primary-container": "#a8e7c5",
+        "primary-container": "#2d6a4f",
+        "error-container": "#ffdad6",
+        "on-tertiary-fixed-variant": "#354c3b",
+        "background": "#f9faf6",
+        "primary-fixed-dim": "#95d4b3",
+        "surface-container-low": "#f3f4f0",
+        "surface-variant": "#e2e3df",
+        "on-background": "#1a1c1a",
+        "tertiary": "#364d3c",
+        "on-secondary-fixed": "#002113",
+        "surface-container": "#edeeea",
+        "on-primary": "#ffffff",
+        "on-error": "#ffffff",
+        "surface-container-high": "#e7e9e5",
+        "on-tertiary-fixed": "#092012",
+        "primary": "#0f5238",
+        "primary-fixed": "#b1f0ce",
+        "surface-container-highest": "#e2e3df",
+        "surface-bright": "#f9faf6",
+        "secondary-container": "#a0f4c8",
+        "surface-container-lowest": "#ffffff",
+        "secondary-fixed": "#a0f4c8",
+        "on-primary-fixed": "#002114",
+        "inverse-primary": "#95d4b3",
+        "tertiary-fixed-dim": "#b3cdb7",
+        "on-secondary-container": "#19724f",
+        "error": "#ba1a1a",
+        "on-secondary-fixed-variant": "#005236",
+        "outline": "#707973"
+      },
+      "fontFamily": {
+        "body-md": ["Atkinson Hyperlegible Next"],
+        "headline-lg-mobile": ["Plus Jakarta Sans"],
+        "label-md": ["Plus Jakarta Sans"],
+        "label-sm": ["Plus Jakarta Sans"],
+        "headline-lg": ["Plus Jakarta Sans"],
+        "body-lg": ["Atkinson Hyperlegible Next"],
+        "body-sm": ["Atkinson Hyperlegible Next"],
+        "headline-xl": ["Plus Jakarta Sans"],
+        "headline-md": ["Plus Jakarta Sans"]
+      }
+    }
+  }
+}
+</script>
+`;
+
+const globalStyles = `
+<style type="text/tailwindcss">
+  @layer utilities {
+    .soft-shadow {
+      box-shadow: 0 8px 24px rgba(45, 106, 79, 0.04), 0 2px 8px rgba(45, 106, 79, 0.02);
+    }
+    .hover-lift {
+      @apply transition-transform duration-300 ease-out hover:-translate-y-0.5;
+    }
+  }
+
+  .profile-tab-content { display: none; }
+  .profile-tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+  .msg { display: none; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-weight: 600; font-size: 14px; }
+  .msg.on { display: block; }
+  #err { background: var(--color-error-container); color: var(--color-on-error-container); }
+  #success { background: var(--color-secondary-container); color: var(--color-on-secondary-container); }
+</style>
+`;
+
+const htmlTemplate = `<!DOCTYPE html>
 <html class="light" lang="en">
 <head>
   <meta charset="utf-8"/>
@@ -6,8 +105,8 @@
   <title>Patient Profile | CLINOVA</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Atkinson+Hyperlegible+Next:wght@400&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-  ${tailwindConfig}
-  ${globalStyles}
+  \${tailwindConfig}
+  \${globalStyles}
 </head>
 <body class="bg-background text-on-background font-body-md min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
 
@@ -155,7 +254,10 @@
   </footer>
 
   <script>
-    ${jsContent}
+    \${jsContent}
   </script>
 </body>
-</html>
+</html>`;
+
+fs.writeFileSync('D:/AI_Workplace/Habbullo-Hilola/booking-module/public/profile.html', htmlTemplate);
+console.log('Successfully generated new profile.html');

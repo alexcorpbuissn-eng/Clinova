@@ -1,4 +1,152 @@
-<!DOCTYPE html>
+const fs = require('fs');
+
+const jsContent = fs.readFileSync('D:/AI_Workplace/Habbullo-Hilola/booking-module/public/doctor_logic_clean.js', 'utf8');
+
+const tailwindConfig = `
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+        "on-surface-variant": "#404943",
+        "inverse-on-surface": "#f0f1ed",
+        "tertiary-container": "#4d6553",
+        "surface-tint": "#2c694e",
+        "secondary": "#0e6c4a",
+        "on-secondary": "#ffffff",
+        "on-error-container": "#93000a",
+        "on-surface": "#1a1c1a",
+        "on-tertiary": "#ffffff",
+        "surface-dim": "#d9dad7",
+        "tertiary-fixed": "#cee9d3",
+        "on-tertiary-container": "#c6e1ca",
+        "surface": "#f9faf6",
+        "on-primary-fixed-variant": "#0e5138",
+        "secondary-fixed-dim": "#85d7ad",
+        "outline-variant": "#bfc9c1",
+        "inverse-surface": "#2e312f",
+        "on-primary-container": "#a8e7c5",
+        "primary-container": "#2d6a4f",
+        "error-container": "#ffdad6",
+        "on-tertiary-fixed-variant": "#354c3b",
+        "background": "#f9faf6",
+        "primary-fixed-dim": "#95d4b3",
+        "surface-container-low": "#f3f4f0",
+        "surface-variant": "#e2e3df",
+        "on-background": "#1a1c1a",
+        "tertiary": "#364d3c",
+        "on-secondary-fixed": "#002113",
+        "surface-container": "#edeeea",
+        "on-primary": "#ffffff",
+        "on-error": "#ffffff",
+        "surface-container-high": "#e7e9e5",
+        "on-tertiary-fixed": "#092012",
+        "primary": "#0f5238",
+        "primary-fixed": "#b1f0ce",
+        "surface-container-highest": "#e2e3df",
+        "surface-bright": "#f9faf6",
+        "secondary-container": "#a0f4c8",
+        "surface-container-lowest": "#ffffff",
+        "secondary-fixed": "#a0f4c8",
+        "on-primary-fixed": "#002114",
+        "inverse-primary": "#95d4b3",
+        "tertiary-fixed-dim": "#b3cdb7",
+        "on-secondary-container": "#19724f",
+        "error": "#ba1a1a",
+        "on-secondary-fixed-variant": "#005236",
+        "outline": "#707973"
+      },
+      "fontFamily": {
+        "body-md": ["Atkinson Hyperlegible Next"],
+        "headline-lg-mobile": ["Plus Jakarta Sans"],
+        "label-md": ["Plus Jakarta Sans"],
+        "label-sm": ["Plus Jakarta Sans"],
+        "headline-lg": ["Plus Jakarta Sans"],
+        "body-lg": ["Atkinson Hyperlegible Next"],
+        "body-sm": ["Atkinson Hyperlegible Next"],
+        "headline-xl": ["Plus Jakarta Sans"],
+        "headline-md": ["Plus Jakarta Sans"]
+      }
+    }
+  }
+}
+</script>
+`;
+
+const globalStyles = `
+<style>
+:root {
+  --color-open: #0d9488;
+  --color-busy: #0284c7;
+  --color-followup: #d97706;
+  --color-break: #475569;
+}
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+.weekly-header-cell { padding: 12px 4px; border-right: 1px solid var(--color-surface-variant); text-align: center; }
+.weekly-header-cell:last-child { border-right: none; }
+.weekly-header-cell .day-name { display: block; font-size: 14px; font-weight: 600; color: var(--color-on-surface-variant); }
+.weekly-header-cell .day-date { display: block; font-size: 24px; font-weight: 700; color: var(--color-on-surface); }
+.weekly-header-cell.today .day-name { color: var(--color-primary); }
+.weekly-header-cell.today .day-date { color: var(--color-primary); }
+
+.time-cell { height: 60px; display: flex; align-items: start; justify-content: center; padding-top: 8px; font-size: 12px; color: var(--color-outline); border-bottom: 1px solid var(--color-surface-variant); }
+.day-col { border-right: 1px solid var(--color-surface-variant); }
+
+.grid-cell { height: 60px; border-bottom: 1px solid var(--color-surface-variant); padding: 2px; position: relative; }
+.slot-btn { width: 100%; height: 100%; border-radius: 6px; border: 1px dashed var(--color-outline-variant); background: transparent; font-size: 10px; font-weight: 600; color: var(--color-on-surface-variant); display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; padding: 2px; cursor: pointer; transition: all 0.2s; }
+.slot-btn:hover:not(.disabled):not(.booked):not(.active) { border-color: var(--color-primary); background: var(--color-surface-container-high); }
+.slot-btn.active { background: rgba(15, 82, 56, 0.1); border: 1px solid var(--color-primary); color: var(--color-primary); }
+.slot-btn.pending { background: var(--color-secondary-container); border: 1px dashed var(--color-secondary); color: var(--color-on-secondary-container); }
+.slot-btn.disabled { opacity: 0.3; cursor: not-allowed; border: none; background: var(--color-surface-container); }
+
+.slot-btn.booked { border: 1px solid var(--color-outline-variant); text-align: left; align-items: flex-start; padding: 4px; }
+.slot-btn.booked.status-open { background: var(--color-secondary-container); border-left: 3px solid var(--color-secondary); color: var(--color-on-secondary-container); }
+.slot-btn.booked.status-busy { background: var(--color-tertiary-fixed); border-left: 3px solid var(--color-tertiary); color: var(--color-on-tertiary-fixed); }
+.slot-btn.booked.status-followup { background: #fffbeb; border-left: 3px solid #d97706; color: #b45309; }
+.slot-btn.booked.status-break { background: var(--color-surface-variant); border-left: 3px solid var(--color-outline); color: var(--color-on-surface-variant); border-style: dashed; }
+
+.slot-btn.booked span.patient-lbl { display: block; font-size: 11px; font-weight: 700; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; width: 100%; }
+.slot-btn.booked span.procedure-lbl { display: block; font-size: 9px; opacity: 0.8; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; width: 100%; }
+
+/* Modals */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s; padding: 16px; }
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+.modal-content { background: var(--color-surface-container-lowest); border-radius: 24px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; transform: translateY(20px); transition: transform 0.3s; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+.modal-overlay.active .modal-content { transform: translateY(0); }
+.modal-header { padding: 24px; border-bottom: 1px solid var(--color-surface-variant); display: flex; justify-content: space-between; align-items: center; }
+.modal-body { padding: 24px; }
+
+/* Custom Inputs */
+input[type="text"], input[type="tel"], select, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--color-outline-variant); background: var(--color-surface-bright); color: var(--color-on-surface); outline: none; }
+input:focus, select:focus, textarea:focus { border-color: var(--color-primary); }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 14px; font-weight: 600; color: var(--color-on-surface-variant); margin-bottom: 6px; }
+
+/* Toggle */
+.toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--color-surface-variant); transition: .4s; border-radius: 24px; }
+.slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+input:checked + .slider { background-color: var(--color-primary); }
+input:checked + .slider:before { transform: translateX(20px); }
+
+/* Suggestions */
+.suggestions-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: var(--color-surface-container-lowest); border: 1px solid var(--color-outline-variant); border-radius: 8px; max-height: 200px; overflow-y: auto; z-index: 50; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-top: 4px; }
+.suggestion-item { padding: 12px; cursor: pointer; border-bottom: 1px solid var(--color-surface-variant); font-size: 14px; }
+.suggestion-item:hover { background: var(--color-surface-container-low); color: var(--color-primary); }
+
+.toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+.toast { background: var(--color-inverse-surface); color: var(--color-inverse-on-surface); padding: 12px 24px; border-radius: 12px; font-size: 14px; display: flex; align-items: center; gap: 12px; transition: all 0.4s; opacity: 0; transform: translateY(-20px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+.toast.show { opacity: 1; transform: translateY(0); }
+</style>
+`;
+
+const htmlTemplate = `<!DOCTYPE html>
 <html lang="uz" class="light">
 <head>
     <meta charset="utf-8"/>
@@ -6,8 +154,8 @@
     <title>Shifokor Paneli | CLINOVA</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Atkinson+Hyperlegible+Next:wght@400&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    ${tailwindConfig}
-    ${globalStyles}
+    \${tailwindConfig}
+    \${globalStyles}
 </head>
 <body class="bg-background text-on-background font-body-md antialiased min-h-screen flex selection:bg-primary-container selection:text-on-primary-container">
     
@@ -294,7 +442,10 @@
     </div>
 
     <script>
-        ${jsContent}
+        \${jsContent}
     </script>
 </body>
-</html>
+</html>`;
+
+fs.writeFileSync('D:/AI_Workplace/Habbullo-Hilola/booking-module/public/doctor.html', htmlTemplate);
+console.log('Successfully generated new doctor.html');

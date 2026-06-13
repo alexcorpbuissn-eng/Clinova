@@ -1,15 +1,143 @@
-<!DOCTYPE html>
+const fs = require('fs');
+
+const jsContent = fs.readFileSync('D:/AI_Workplace/Habbullo-Hilola/booking-module/public/reception_logic_clean.js', 'utf8');
+
+const tailwindConfig = `
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+        "on-surface-variant": "#404943",
+        "inverse-on-surface": "#f0f1ed",
+        "tertiary-container": "#4d6553",
+        "surface-tint": "#2c694e",
+        "secondary": "#0e6c4a",
+        "on-secondary": "#ffffff",
+        "on-error-container": "#93000a",
+        "on-surface": "#1a1c1a",
+        "on-tertiary": "#ffffff",
+        "surface-dim": "#d9dad7",
+        "tertiary-fixed": "#cee9d3",
+        "on-tertiary-container": "#c6e1ca",
+        "surface": "#f9faf6",
+        "on-primary-fixed-variant": "#0e5138",
+        "secondary-fixed-dim": "#85d7ad",
+        "outline-variant": "#bfc9c1",
+        "inverse-surface": "#2e312f",
+        "on-primary-container": "#a8e7c5",
+        "primary-container": "#2d6a4f",
+        "error-container": "#ffdad6",
+        "on-tertiary-fixed-variant": "#354c3b",
+        "background": "#f9faf6",
+        "primary-fixed-dim": "#95d4b3",
+        "surface-container-low": "#f3f4f0",
+        "surface-variant": "#e2e3df",
+        "on-background": "#1a1c1a",
+        "tertiary": "#364d3c",
+        "on-secondary-fixed": "#002113",
+        "surface-container": "#edeeea",
+        "on-primary": "#ffffff",
+        "on-error": "#ffffff",
+        "surface-container-high": "#e7e9e5",
+        "on-tertiary-fixed": "#092012",
+        "primary": "#0f5238",
+        "primary-fixed": "#b1f0ce",
+        "surface-container-highest": "#e2e3df",
+        "surface-bright": "#f9faf6",
+        "secondary-container": "#a0f4c8",
+        "surface-container-lowest": "#ffffff",
+        "secondary-fixed": "#a0f4c8",
+        "on-primary-fixed": "#002114",
+        "inverse-primary": "#95d4b3",
+        "tertiary-fixed-dim": "#b3cdb7",
+        "on-secondary-container": "#19724f",
+        "error": "#ba1a1a",
+        "on-secondary-fixed-variant": "#005236",
+        "outline": "#707973"
+      },
+      "fontFamily": {
+        "body-md": ["Atkinson Hyperlegible Next"],
+        "headline-lg-mobile": ["Plus Jakarta Sans"],
+        "label-md": ["Plus Jakarta Sans"],
+        "label-sm": ["Plus Jakarta Sans"],
+        "headline-lg": ["Plus Jakarta Sans"],
+        "body-lg": ["Atkinson Hyperlegible Next"],
+        "body-sm": ["Atkinson Hyperlegible Next"],
+        "headline-xl": ["Plus Jakarta Sans"],
+        "headline-md": ["Plus Jakarta Sans"]
+      }
+    }
+  }
+}
+</script>
+`;
+
+const globalStyles = `
+<style type="text/tailwindcss">
+  @layer utilities {
+    .soft-shadow {
+      box-shadow: 0 4px 24px -4px rgba(45, 106, 79, 0.05);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: theme('colors.surface-variant'); border-radius: 4px; }
+  }
+
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+  .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+  .toast { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-radius: 12px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); min-width: 300px; max-width: 400px; }
+  .toast.show { transform: translateX(0); }
+  .toast.success { border-left: 5px solid #10b981; }
+  .toast.error { border-left: 5px solid #ef4444; }
+  .toast.info { border-left: 5px solid #3b82f6; }
+  .toast-icon { font-size: 1.5rem; }
+  .toast-content { flex: 1; font-size: 0.95rem; font-weight: 500; color: #1e293b; }
+  .toast-close { background: none; border: none; font-size: 1.2rem; color: #94a3b8; cursor: pointer; padding: 0 4px; transition: color 0.2s; }
+  .toast-close:hover { color: #475569; }
+
+  /* Tom Select tweaks */
+  .ts-control { border-radius: 0.5rem !important; border-color: var(--color-outline-variant) !important; padding: 0.75rem !important; font-family: inherit !important; }
+  .ts-control.focus { border-color: var(--color-primary) !important; box-shadow: 0 0 0 1px var(--color-primary) !important; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 12px 16px; font-size: 0.85rem; font-weight: 600; color: var(--color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--color-surface-variant); }
+  td { padding: 16px; border-bottom: 1px solid var(--color-surface-variant); font-size: 0.95rem; }
+  tr:last-child td { border-bottom: none; }
+  
+  .btn-action { padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; cursor: pointer; border: none; }
+  .btn-start { background: var(--color-primary); color: white; }
+  .btn-start:hover { background: var(--color-primary-container); }
+  .btn-cancel { background: var(--color-error-container); color: var(--color-error); }
+  .btn-cancel:hover { background: #fecdd3; }
+
+  .slot-pill { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--color-outline-variant); background: #fff; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+  .slot-pill:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  .slot-pill.selected { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--color-on-surface-variant); font-size: 0.95rem; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+`;
+
+const htmlTemplate = `<!DOCTYPE html>
 <html class="light" lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>CLINOVA - Reception Panel</title>
-  ${tailwindConfig}
+  \${tailwindConfig}
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  ${globalStyles}
+  \${globalStyles}
 </head>
 <body class="bg-surface text-on-surface font-body-md h-screen overflow-hidden flex">
 
@@ -481,7 +609,10 @@
   </style>
 
   <script>
-    ${jsContent}
+    \${jsContent}
   </script>
 </body>
-</html>
+</html>`;
+
+fs.writeFileSync('D:/AI_Workplace/Habbullo-Hilola/booking-module/public/reception.html', htmlTemplate);
+console.log('Successfully generated new reception.html');

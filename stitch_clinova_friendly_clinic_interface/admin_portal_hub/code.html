@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CLINOVA Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Atkinson+Hyperlegible+Next:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary-container": "#19724f",
+                      "inverse-on-surface": "#f0f1ed",
+                      "error": "#ba1a1a",
+                      "on-primary-fixed-variant": "#0e5138",
+                      "tertiary-container": "#4d6553",
+                      "primary-container": "#2d6a4f",
+                      "secondary": "#0e6c4a",
+                      "primary-fixed": "#b1f0ce",
+                      "on-primary": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "surface-bright": "#f9faf6",
+                      "secondary-container": "#a0f4c8",
+                      "surface-container-highest": "#e2e3df",
+                      "outline": "#707973",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary-fixed": "#a0f4c8",
+                      "tertiary": "#364d3c",
+                      "surface-container": "#edeeea",
+                      "on-surface-variant": "#404943",
+                      "surface": "#f9faf6",
+                      "inverse-primary": "#95d4b3",
+                      "on-tertiary-fixed-variant": "#354c3b",
+                      "surface-container-low": "#f3f4f0",
+                      "surface-dim": "#d9dad7",
+                      "on-tertiary-container": "#c6e1ca",
+                      "on-error-container": "#93000a",
+                      "on-secondary-fixed": "#002113",
+                      "on-primary-container": "#a8e7c5",
+                      "background": "#f9faf6",
+                      "tertiary-fixed": "#cee9d3",
+                      "on-background": "#1a1c1a",
+                      "secondary-fixed-dim": "#85d7ad",
+                      "on-secondary": "#ffffff",
+                      "surface-variant": "#e2e3df",
+                      "on-surface": "#1a1c1a",
+                      "inverse-surface": "#2e312f",
+                      "error-container": "#ffdad6",
+                      "surface-tint": "#2c694e",
+                      "on-primary-fixed": "#002114",
+                      "on-secondary-fixed-variant": "#005236",
+                      "tertiary-fixed-dim": "#b3cdb7",
+                      "on-tertiary-fixed": "#092012",
+                      "surface-container-high": "#e7e9e5",
+                      "primary": "#0f5238",
+                      "on-error": "#ffffff",
+                      "outline-variant": "#bfc9c1",
+                      "primary-fixed-dim": "#95d4b3"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "margin-desktop": "32px",
+                      "sidebar-width": "260px",
+                      "container-max": "1280px",
+                      "unit": "8px",
+                      "gutter": "24px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-md": [
+                              "Atkinson Hyperlegible Next"
+                      ],
+                      "body-sm": [
+                              "Atkinson Hyperlegible Next"
+                      ],
+                      "label-sm": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-lg": [
+                              "Atkinson Hyperlegible Next"
+                      ],
+                      "headline-xl": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "14px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-xl": [
+                              "40px",
+                              {
+                                      "lineHeight": "48px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24;
+        }
+        
+        .soft-shadow {
+            box-shadow: 0 8px 32px rgba(45, 106, 79, 0.04);
+        }
+        
+        .hover-lift {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(45, 106, 79, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased font-body-md flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen flex flex-col py-margin-desktop border-r border-outline-variant bg-surface-container-low w-[260px] hidden md:flex z-50">
+<!-- Header -->
+<div class="px-6 mb-8 flex items-center gap-4">
+<div class="w-12 h-12 rounded-full overflow-hidden border-2 border-surface-container-lowest bg-surface flex-shrink-0">
+<img alt="Staff Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a medical staff member, warm lighting, approachable smile, in a clean modern clinical setting with soft natural light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaL_PwJC4lQocmxvKW0HBOn6t4zEjpDYR46tQo8W-iBze4MCQpZD0RlhwKLGPOR63hCW_Xr_KB2FR4NyTq8LUXit9XXfDRnDFmAwJvPWBrN9YarjzOw8qSzBPGKc9t6rsd3soJDbLOc4dmmHHoMdc6ukgZC86JQUYn6jfWVXqsWnTcUCes7Xzx8Dl4OSOK4zYdeqafiLTZdClwGTu2A-BOTP5ghFaMsQVVDp6wnmgAvOvMt18mSU1WzzQm7nfsyon8Rx_JbK6_N3vb"/>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-bold text-primary">Clinova Staff</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Medical Portal</span>
+</div>
+</div>
+<!-- CTA -->
+<div class="px-6 mb-8">
+<button class="w-full py-3 px-4 bg-primary text-on-primary rounded-lg font-label-md text-label-md flex justify-center items-center gap-2 hover:bg-surface-tint transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+                New Appointment
+            </button>
+</div>
+<!-- Navigation Links -->
+<nav class="flex-1 px-4 space-y-1 overflow-y-auto">
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-label-md text-label-md">Appointments</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md text-label-md">Patients</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+<span class="font-label-md text-label-md">Doctors</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings_heart">settings_heart</span>
+<span class="font-label-md text-label-md">Services</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="event_note">event_note</span>
+<span class="font-label-md text-label-md">Schedule</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span class="font-label-md text-label-md">Stats</span>
+</a>
+</nav>
+<!-- Footer Links -->
+<div class="px-4 mt-auto space-y-1">
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-label-md text-label-md">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-[260px] p-margin-mobile md:p-margin-desktop bg-surface min-h-screen">
+<div class="max-w-container-max mx-auto space-y-gutter">
+<!-- Header -->
+<header class="mb-12 mt-8">
+<h1 class="font-headline-xl text-headline-xl text-primary mb-2">Good Morning, Admin.</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">What would you like to manage today?</p>
+</header>
+<!-- Command Center Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Appointments Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant soft-shadow hover-lift group cursor-pointer relative overflow-hidden flex flex-col h-full">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary-container opacity-5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+<div class="w-14 h-14 rounded-lg bg-tertiary-fixed flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-[32px] text-tertiary" data-icon="calendar_today" data-weight="fill" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Appointments</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8 flex-1">Manage daily clinic bookings, view patient arrivals, and coordinate room assignments smoothly.</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-label-md text-label-md text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
+                            View Schedule
+                            <span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
+</span>
+<div class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label-sm text-label-sm">
+                            12 Today
+                        </div>
+</div>
+</div>
+<!-- Patients Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant soft-shadow hover-lift group cursor-pointer relative overflow-hidden flex flex-col h-full">
+<div class="absolute top-0 right-0 w-32 h-32 bg-secondary-container opacity-10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+<div class="w-14 h-14 rounded-lg bg-secondary-fixed flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-[32px] text-secondary" data-icon="person" data-weight="fill" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Patients</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8 flex-1">Access patient records, update medical histories, and process new registrations with care.</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-label-md text-label-md text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
+                            Patient Directory
+                            <span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
+</span>
+</div>
+</div>
+<!-- Doctors Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant soft-shadow hover-lift group cursor-pointer relative overflow-hidden flex flex-col h-full">
+<div class="absolute top-0 right-0 w-32 h-32 bg-tertiary-container opacity-10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+<div class="w-14 h-14 rounded-lg bg-tertiary-fixed flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-[32px] text-tertiary" data-icon="medical_services" data-weight="fill" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Doctors</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8 flex-1">Coordinate specialist availability, manage individual doctor schedules, and review performance.</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-label-md text-label-md text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
+                            Staff Roster
+                            <span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
+</span>
+</div>
+</div>
+<!-- Services Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant soft-shadow hover-lift group cursor-pointer relative overflow-hidden flex flex-col h-full">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary-container opacity-5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+<div class="w-14 h-14 rounded-lg bg-primary-fixed flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-[32px] text-primary" data-icon="settings_heart" data-weight="fill" style="font-variation-settings: 'FILL' 1;">settings_heart</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Services</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8 flex-1">Configure clinical offerings, update pricing, and manage department resources efficiently.</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-label-md text-label-md text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
+                            Manage Services
+                            <span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
+</span>
+</div>
+</div>
+<!-- Schedule Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant soft-shadow hover-lift group cursor-pointer relative overflow-hidden flex flex-col h-full">
+<div class="absolute top-0 right-0 w-32 h-32 bg-secondary-container opacity-10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+<div class="w-14 h-14 rounded-lg bg-secondary-fixed flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-[32px] text-secondary" data-icon="event_note" data-weight="fill" style="font-variation-settings: 'FILL' 1;">event_note</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Schedule</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8 flex-1">Oversee the master clinic calendar, handle shift rotations, and balance workload distribution.</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-label-md text-label-md text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
+                            Master Calendar
+                            <span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
+</span>
+</div>
+</div>
+<!-- Stats Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant soft-shadow hover-lift group cursor-pointer relative overflow-hidden flex flex-col h-full">
+<div class="absolute top-0 right-0 w-32 h-32 bg-tertiary-container opacity-10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+<div class="w-14 h-14 rounded-lg bg-tertiary-fixed flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-[32px] text-tertiary" data-icon="bar_chart" data-weight="fill" style="font-variation-settings: 'FILL' 1;">bar_chart</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Stats</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8 flex-1">Review operational metrics, patient satisfaction scores, and clinic utilization reports.</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-label-md text-label-md text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
+                            View Analytics
+                            <span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
+</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>
