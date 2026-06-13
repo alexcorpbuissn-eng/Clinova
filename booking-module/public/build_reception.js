@@ -132,12 +132,12 @@ const htmlTemplate = `<!DOCTYPE html>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>CLINOVA - Reception Panel</title>
-  \${tailwindConfig}
+  ${tailwindConfig}
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  \${globalStyles}
+  ${globalStyles}
 </head>
 <body class="bg-surface text-on-surface font-body-md h-screen overflow-hidden flex">
 
@@ -609,7 +609,7 @@ const htmlTemplate = `<!DOCTYPE html>
   </style>
 
   <script>
-    \${jsContent}
+    ${jsContent}
   </script>
 </body>
 </html>`;

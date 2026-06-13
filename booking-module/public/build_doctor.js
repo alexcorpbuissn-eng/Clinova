@@ -154,8 +154,8 @@ const htmlTemplate = `<!DOCTYPE html>
     <title>Shifokor Paneli | CLINOVA</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Atkinson+Hyperlegible+Next:wght@400&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    \${tailwindConfig}
-    \${globalStyles}
+    ${tailwindConfig}
+    ${globalStyles}
 </head>
 <body class="bg-background text-on-background font-body-md antialiased min-h-screen flex selection:bg-primary-container selection:text-on-primary-container">
     
@@ -442,7 +442,7 @@ const htmlTemplate = `<!DOCTYPE html>
     </div>
 
     <script>
-        \${jsContent}
+        ${jsContent}
     </script>
 </body>
 </html>`;
