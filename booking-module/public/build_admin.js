@@ -463,36 +463,10 @@ const htmlTemplate = `<!DOCTYPE html>
                 </div>
                 
                 <h4 class="font-headline-sm text-primary mb-4 border-b pb-2">Stomatologiya</h4>
-                <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-sm overflow-hidden mb-8">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase">
-                                <th class="py-3 px-6">Shifokor</th>
-                                <th class="py-3 px-6">Mutaxassislik</th>
-                                <th class="py-3 px-6">Tizimdagi Rol</th>
-                                <th class="py-3 px-6">Telegram</th>
-                                <th class="py-3 px-6 text-right">Amallar</th>
-                            </tr>
-                        </thead>
-                        <tbody id="doc-stomatolog-tbody" class="divide-y divide-outline-variant/20 text-body-sm text-on-surface"></tbody>
-                    </table>
-                </div>
+                <div id="doc-stomatolog-tbody" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8"></div>
 
                 <h4 class="font-headline-sm text-primary mb-4 border-b pb-2">LOR (Otolaringologiya)</h4>
-                <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-sm overflow-hidden">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase">
-                                <th class="py-3 px-6">Shifokor</th>
-                                <th class="py-3 px-6">Mutaxassislik</th>
-                                <th class="py-3 px-6">Tizimdagi Rol</th>
-                                <th class="py-3 px-6">Telegram</th>
-                                <th class="py-3 px-6 text-right">Amallar</th>
-                            </tr>
-                        </thead>
-                        <tbody id="doc-lor-tbody" class="divide-y divide-outline-variant/20 text-body-sm text-on-surface"></tbody>
-                    </table>
-                </div>
+                <div id="doc-lor-tbody" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
             </div>
 
             <div id="tab-users" class="tab-content hidden">
