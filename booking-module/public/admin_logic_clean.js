@@ -129,23 +129,42 @@
             }
           }
 
-          tbody.innerHTML = grouped.map((g, idx) => `
-            <tr>
-              <td>
-                <span class="badge badge-scheduled" style="font-size: 0.85rem; padding: 6px 12px; background: #e0f2fe; color: #0369a1;">
-                  ${g.specialty === 'Stomatolog' ? 'Stomatologiya' : g.specialty}
-                </span>
-              </td>
-              <td><strong>${g.name}</strong></td>
-              <td>${g.durationMinutes} min</td>
-              <td>
-                <input type="number" id="price-group-${idx}" value="${g.price}" style="padding:8px; border:1px solid var(--border); border-radius:6px; width:120px;" /> so'm
-              </td>
-              <td>
-                <button onclick="saveGroupedProcedurePrice('${g.id}', ${idx})" class="btn" style="padding:8px 12px; font-size:0.8rem; width:auto;">Saqlash</button>
-              </td>
-            </tr>
-          `).join('');
+          tbody.innerHTML = grouped.map((g, idx) => {
+            const isDental = g.specialty === 'Stomatolog';
+            const specName = isDental ? 'Stomatologiya' : g.specialty;
+            const badgeClass = isDental ? 'bg-primary-container text-on-primary-container' : 'bg-secondary-container text-on-secondary-container';
+            
+            return `
+              <tr class="hover:bg-surface-container/30 transition-colors even:bg-surface-container-lowest odd:bg-surface-container-low/30 group">
+                <td class="py-4 px-6 border-r border-outline-variant/50">
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase ${badgeClass}">
+                    <span class="material-symbols-outlined" style="font-size: 14px;">${isDental ? 'dentistry' : 'hearing'}</span>
+                    ${specName}
+                  </span>
+                </td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 font-medium text-on-surface">${g.name}</td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center text-on-surface-variant">
+                  <div class="flex items-center justify-center gap-1 text-sm">
+                    <span class="material-symbols-outlined opacity-70" style="font-size: 16px;">schedule</span>
+                    ${g.durationMinutes} min
+                  </div>
+                </td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <div class="relative">
+                      <input type="number" id="price-group-${idx}" value="${g.price}" class="w-36 bg-surface-container-lowest border border-outline-variant/50 rounded-lg py-2 pl-4 pr-12 text-on-surface font-mono text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all group-hover:border-primary/50" />
+                      <span class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant font-label-sm opacity-50">UZS</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-center">
+                  <button onclick="saveGroupedProcedurePrice('${g.id}', ${idx})" class="inline-flex items-center justify-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-full font-label-sm hover:bg-primary-container transition-colors shadow-sm hover:shadow-md active:scale-95">
+                    <span class="material-symbols-outlined" style="font-size: 16px;">save</span> Saqlash
+                  </button>
+                </td>
+              </tr>
+            `;
+          }).join('');
         }
       } catch (err) {
         if(err.message !== 'Unauthorized') tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:red">Xatolik yuz berdi</td></tr>';
