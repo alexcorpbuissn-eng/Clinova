@@ -8,6 +8,20 @@
 
 ---
 
+## 2026-06-14 - Admin Jadvallar UI Fix
+**Author:** Antigravity
+- Fixed a bug where clicking "Jadvalni boshqarish" (Manage Schedule) on the Jadvallar tab did nothing. Restored the missing schedule grid HTML layout (`admin-schedule-container`) inside `build_admin.js` which was causing the script to crash.
+- Fixed an additional bug where the schedule grid would show "Yuklashda xatolik yuz berdi" (Loading error). This was caused by the time labels column (`admin-time-labels`) being accidentally overwritten and deleted from the DOM. Separated it from `admin-grid-columns` to restore correct functionality.
+
+## 2026-06-14 - Редизайн Reception Portal
+**Автор:** Antigravity
+- Полностью переработан UI страницы Reception: старые таблицы (Upcoming, Missed, In Progress) заменены на современные карточки.
+- Использована библиотека TomSelect для выпадающего списка "Shifokor".
+- Устранены отступы по краям для максимального использования пространства на широких экранах (`w-full` вместо `max-w-[1280px]`).
+- Добавлены красивые Empty States для вкладки "Muolajada" вместо полного скрытия блока при отсутствии активных сеансов.
+- Все изменения скомпилированы через скрипт-генератор `build_reception.js` в `reception.html`.
+
+
 ## 2026-06-13 - Редизайн интерфейса (Clinova)
 **Автор:** Antigravity
 - Начало работы над редизайном интерфейса Clinova (8 экранов: admin, doctor, patient, reception и др.) согласно `DESIGN.md`.
