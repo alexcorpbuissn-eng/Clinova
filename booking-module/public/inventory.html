@@ -1,149 +1,252 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sklad va Xarajatlar | Habibullo-Hilola</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --navy: #0f172a; --teal: #0d9488; --teal-dark: #0f766e; --teal-light: #f0fdfa;
-      --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --text: #334155; --text-muted: #64748b;
-      --red: #ef4444; --red-bg: #fef2f2; --green: #16a34a; --green-bg: #dcfce7;
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Sklad va Xarajatlar | CLINOVA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Atkinson+Hyperlegible+Next:wght@400;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                "colors": {
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#2d6a4f",
+                    "outline": "#707973",
+                    "on-primary-fixed-variant": "#0e5138",
+                    "tertiary-fixed": "#cee9d3",
+                    "surface": "#f9faf6",
+                    "surface-tint": "#2c694e",
+                    "error": "#ba1a1a",
+                    "on-error-container": "#93000a",
+                    "surface-bright": "#f9faf6",
+                    "on-primary-container": "#a8e7c5",
+                    "on-tertiary-fixed": "#092012",
+                    "secondary-fixed": "#a0f4c8",
+                    "on-secondary": "#ffffff",
+                    "surface-container-high": "#e7e9e5",
+                    "outline-variant": "#bfc9c1",
+                    "on-primary-fixed": "#002114",
+                    "tertiary-container": "#4d6553",
+                    "on-surface-variant": "#404943",
+                    "on-surface": "#1a1c1a",
+                    "primary-fixed": "#b1f0ce",
+                    "on-secondary-container": "#19724f",
+                    "secondary-fixed-dim": "#85d7ad",
+                    "on-tertiary-fixed-variant": "#354c3b",
+                    "on-primary": "#ffffff",
+                    "primary": "#0f5238",
+                    "surface-dim": "#d9dad7",
+                    "secondary": "#0e6c4a",
+                    "inverse-on-surface": "#f0f1ed",
+                    "on-tertiary": "#ffffff",
+                    "surface-variant": "#e2e3df",
+                    "background": "#f9faf6",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#364d3c",
+                    "on-secondary-fixed": "#002113",
+                    "surface-container-low": "#f3f4f0",
+                    "inverse-surface": "#2e312f",
+                    "on-tertiary-container": "#c6e1ca",
+                    "on-background": "#1a1c1a",
+                    "surface-container-highest": "#e2e3df",
+                    "on-error": "#ffffff",
+                    "on-secondary-fixed-variant": "#005236",
+                    "tertiary-fixed-dim": "#b3cdb7",
+                    "primary-fixed-dim": "#95d4b3",
+                    "surface-container": "#edeeea",
+                    "inverse-primary": "#95d4b3",
+                    "secondary-container": "#a0f4c8"
+                },
+                "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+                },
+                "spacing": {
+                    "margin-desktop": "32px",
+                    "gutter": "24px",
+                    "margin-mobile": "16px",
+                    "unit": "8px",
+                    "container-max": "1280px",
+                    "sidebar-width": "260px"
+                },
+                "fontFamily": {
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "body-sm": ["Atkinson Hyperlegible Next"],
+                    "body-md": ["Atkinson Hyperlegible Next"],
+                    "headline-xl": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-lg": ["Atkinson Hyperlegible Next"],
+                    "label-sm": ["Plus Jakarta Sans"],
+                    "label-md": ["Plus Jakarta Sans"]
+                },
+                "fontSize": {
+                    "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                    "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                    "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                    "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                    "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                    "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                    "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                    "label-sm": ["12px", { "lineHeight": "14px", "fontWeight": "500" }],
+                    "label-md": ["14px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }]
+                }
+            }
+        }
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+</script>
 
-    /* Login */
-    #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 100vh; background: var(--navy); }
-    .login-card { background: var(--surface); padding: 40px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 400px; }
-    .login-logo { text-align: center; margin-bottom: 28px; }
-    .login-logo h1 { color: var(--navy); font-size: 1.4rem; }
-    .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--navy); margin-bottom: 7px; }
-    .form-group input { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
-    .form-group input:focus { border-color: var(--teal); }
-    .btn-full { display: block; width: 100%; background: var(--teal); color: #fff; padding: 13px 20px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-    .btn-full:hover { background: var(--teal-dark); }
-    .err-msg { color: var(--red); font-size: 0.83rem; margin-bottom: 14px; text-align: center; min-height: 20px; }
 
-    /* App layout */
-    #app { display: none; }
-    .top-bar { background: var(--navy); color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
-    .top-bar-title { font-size: 1.1rem; font-weight: 700; }
-    .btn-logout { background: none; border: 1px solid #334155; color: #94a3b8; padding: 6px 14px; border-radius: 8px; cursor: pointer; }
-    .btn-logout:hover { border-color: #64748b; color: #fff; }
+<style>
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .fill-icon {
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Simple reset for table loader from js */
+    .admin-loader { text-align: center; padding: 20px; }
+    .admin-skeleton-bar { background: #e2e3df; margin-bottom: 8px; border-radius: 4px; height: 16px; }
+    .badge { padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 500; }
+    .badge-scheduled { background-color: var(--color-surface-variant); color: var(--color-on-surface-variant); }
+    .badge-completed { background-color: var(--color-tertiary-fixed); color: var(--color-on-tertiary-fixed); }
+    .badge-cancelled-admin { background-color: var(--color-error-container); color: var(--color-on-error-container); }
+    .badge-cancelled-patient { background-color: var(--color-error-container); color: var(--color-on-error-container); }
+    .badge-noshow { background-color: var(--color-error-container); color: var(--color-on-error-container); }
+</style>
 
-    .page-body { max-width: 1200px; margin: 0 auto; padding: 30px 20px; display: grid; grid-template-columns: 400px 1fr; gap: 28px; align-items: start; }
-    @media(max-width: 860px) { .page-body { grid-template-columns: 1fr; } }
-
-    /* Cards */
-    .card { background: var(--surface); border-radius: 16px; padding: 28px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
-    .card h2 { font-size: 1.05rem; color: var(--navy); margin-bottom: 22px; }
-    
-    .price-input-wrap { position: relative; }
-    .price-input-wrap input { padding-right: 60px; }
-    .price-suffix { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 0.82rem; color: var(--text-muted); font-weight: 600; }
-    
-    .btn-submit { display: block; width: 100%; background: var(--teal); color: #fff; padding: 14px 20px; border: none; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 20px; }
-    
-    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-    th { background: #f1f5f9; padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border); }
-    td { padding: 13px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    
-    /* Toast */
-    #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
-    .toast { pointer-events: auto; background: rgba(15, 23, 42, 0.9); padding: 16px 20px; color: #fff; border-radius: 12px; transform: translateX(120%); opacity: 0; transition: all 0.4s; display:flex; align-items:center; gap:12px;}
-    .toast.show { transform: translateX(0); opacity: 1; }
-    .toast.success { border-left: 4px solid var(--teal); }
-    .toast.error { border-left: 4px solid var(--red); }
-  </style>
+    <style>
+        /* Toast overrides for Clinova */
+        #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+        .toast { pointer-events: auto; background: var(--color-inverse-surface); padding: 16px 20px; color: var(--color-inverse-on-surface); border-radius: 16px; transform: translateX(120%); opacity: 0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); display:flex; align-items:center; gap:12px; font-family: 'Atkinson Hyperlegible Next', sans-serif;}
+        .toast.show { transform: translateX(0); opacity: 1; }
+        .toast.success { border-left: 4px solid var(--color-primary); }
+        .toast.error { border-left: 4px solid var(--color-error); }
+    </style>
 </head>
-<body>
+<body class="bg-background text-on-background font-body-md text-body-md flex antialiased selection:bg-primary-container selection:text-on-primary-container">
 
 <div id="toast-container"></div>
 
 <!-- LOGIN SCREEN -->
-<div id="login-screen">
-  <div class="login-card">
-    <div class="login-logo">
-      <h1>📦 Sklad va Xarajatlar</h1>
-      <p style="color:var(--text-muted); font-size:0.85rem; margin-top:4px;">Ta'minotchi Paneli</p>
+<div id="login-screen" class="min-h-screen w-full flex flex-col items-center justify-center bg-surface-container-lowest p-6">
+    <div class="bg-surface-container-lowest p-8 rounded-[24px] border border-outline-variant/30 shadow-[0_8px_32px_rgba(45,106,79,0.06)] w-full max-w-md">
+        <div class="text-center mb-8">
+            <h1 class="font-headline-lg text-primary flex items-center justify-center gap-3">
+                <span class="material-symbols-outlined text-[32px] fill-icon">inventory_2</span>
+                CLINOVA Sklad
+            </h1>
+            <p class="text-on-surface-variant mt-2 font-body-sm">Ta'minotchi Paneli</p>
+        </div>
+        
+        <div id="login-err" class="text-error text-center font-medium mb-6 min-h-[24px]"></div>
+
+        <form id="phone-form" onsubmit="event.preventDefault();" class="space-y-6">
+            <div>
+                <label class="block font-label-md text-on-surface-variant mb-2">Telegram raqamingiz</label>
+                <input type="tel" id="telegram-phone" required placeholder="+998 90 000 00 00" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-body-lg hover:border-outline placeholder:text-outline-variant" />
+            </div>
+            <button type="submit" id="btn-phone" class="w-full bg-primary text-on-primary py-3 rounded-xl font-label-md hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm active:scale-[0.98]">
+                Kodni Olish
+            </button>
+        </form>
+
+        <form id="otp-form" style="display:none;" onsubmit="event.preventDefault();" class="space-y-6">
+            <div>
+                <label class="block font-label-md text-on-surface-variant mb-2">Tasdiqlash kodi</label>
+                <input type="text" id="otp-code" required placeholder="123456" maxlength="6" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-headline-md tracking-[0.25em] text-center hover:border-outline placeholder:text-outline-variant" />
+            </div>
+            <button type="submit" id="btn-otp" class="w-full bg-primary text-on-primary py-3 rounded-xl font-label-md hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm active:scale-[0.98]">
+                Kirish
+            </button>
+        </form>
     </div>
-    <div id="login-err" class="err-msg"></div>
-
-    <form id="phone-form" onsubmit="event.preventDefault();">
-      <div class="form-group">
-        <label>Telegram raqamingiz</label>
-        <input type="tel" id="telegram-phone" required placeholder="+998 90 000 00 00" />
-      </div>
-      <button type="submit" class="btn-full" id="btn-phone">Kodni Olish</button>
-    </form>
-
-    <form id="otp-form" style="display:none;" onsubmit="event.preventDefault();">
-      <div class="form-group">
-        <label>Tasdiqlash kodi</label>
-        <input type="text" id="otp-code" required placeholder="123456" maxlength="6" style="text-align:center; letter-spacing:4px; font-size:1.2rem;"/>
-      </div>
-      <button type="submit" class="btn-full" id="btn-otp">Kirish</button>
-    </form>
-  </div>
 </div>
 
 <!-- APP -->
-<div id="app">
-  <div class="top-bar">
-    <div class="top-bar-title">📦 Xarajatlar va Sklad Paneli</div>
-    <button class="btn-logout" onclick="logout()">🚪 Chiqish</button>
-  </div>
+<div id="app" class="min-h-screen w-full hidden flex-col">
+    <!-- Topbar -->
+    <header class="bg-surface-container-lowest border-b border-outline-variant/30 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined fill-icon">inventory_2</span>
+            </div>
+            <h1 class="font-headline-md text-primary">Xarajatlar va Sklad Paneli</h1>
+        </div>
+        <button onclick="logout()" class="flex items-center gap-2 px-4 py-2 rounded-full border border-outline-variant text-on-surface hover:bg-error/10 hover:text-error hover:border-error transition-colors font-label-md">
+            <span class="material-symbols-outlined text-[1.2rem]">logout</span> Chiqish
+        </button>
+    </header>
 
-  <div class="page-body">
-    <!-- Left: Add Form -->
-    <div class="card">
-      <h2>➕ Yangi xarajat qo'shish</h2>
-      <form id="add-form" onsubmit="event.preventDefault(); submitPurchase();">
-        <div class="form-group">
-          <label>Nima xarid qilindi? (Nomi) *</label>
-          <input type="text" id="p-item" required placeholder="Masalan: Zirconium implanti 5 dona" />
+    <!-- Main Content -->
+    <main class="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full grid lg:grid-cols-[400px_1fr] gap-8 items-start">
+        
+        <!-- Left: Add Form -->
+        <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-sm p-6 lg:sticky lg:top-28">
+            <h2 class="font-headline-md text-on-surface mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">add_circle</span> Yangi xarajat
+            </h2>
+            
+            <form id="add-form" onsubmit="event.preventDefault(); submitPurchase();" class="space-y-5">
+                <div>
+                    <label class="block font-label-md text-on-surface-variant mb-2">Nima xarid qilindi? (Nomi) <span class="text-error">*</span></label>
+                    <input type="text" id="p-item" required placeholder="Masalan: Zirconium implanti 5 dona" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-body-lg hover:border-outline placeholder:text-outline-variant" />
+                </div>
+                
+                <div>
+                    <label class="block font-label-md text-on-surface-variant mb-2">Sotuvchi / Yetkazib beruvchi <span class="text-error">*</span></label>
+                    <input type="text" id="p-seller" required placeholder="Masalan: Ahmad Aka / DentMed LLC" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-body-lg hover:border-outline placeholder:text-outline-variant" />
+                </div>
+                
+                <div>
+                    <label class="block font-label-md text-on-surface-variant mb-2">Umumiy narxi <span class="text-error">*</span></label>
+                    <div class="relative">
+                        <input type="text" id="p-price" required placeholder="500 000" oninput="this.value = this.value.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ' ')" class="w-full px-4 py-3 pr-14 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-body-lg hover:border-outline placeholder:text-outline-variant" />
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 font-label-md text-outline">so'm</span>
+                    </div>
+                </div>
+                
+                <button type="submit" id="btn-submit" class="w-full bg-primary text-on-primary py-3 mt-4 rounded-xl font-label-md flex items-center justify-center gap-2 hover:bg-primary-container transition-colors shadow-sm active:scale-[0.98]">
+                    <span class="material-symbols-outlined">check_circle</span> Saqlash
+                </button>
+            </form>
         </div>
-        <div class="form-group">
-          <label>Sotuvchi / Yetkazib beruvchi *</label>
-          <input type="text" id="p-seller" required placeholder="Masalan: Ahmad Aka / DentMed LLC" />
-        </div>
-        <div class="form-group">
-          <label>Umumiy narxi (so'm) *</label>
-          <div class="price-input-wrap">
-            <input type="text" id="p-price" required placeholder="500.000" oninput="this.value = this.value.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" />
-            <span class="price-suffix">so'm</span>
-          </div>
-        </div>
-        <button type="submit" class="btn-submit" id="btn-submit">✅ Saqlash</button>
-      </form>
-    </div>
 
-    <!-- Right: List -->
-    <div class="card" style="padding:0; overflow:hidden;">
-      <div style="padding:24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-        <h2 style="margin:0;">🕐 Xarajatlar tarixi</h2>
-        <button onclick="loadPurchases()" style="background:none; border:1.5px solid var(--border); padding:6px 12px; border-radius:8px; cursor:pointer;">Yangilash</button>
-      </div>
-      <div style="overflow-x:auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Sana</th>
-              <th>Xarid narsasi</th>
-              <th>Sotuvchi</th>
-              <th>Summa</th>
-            </tr>
-          </thead>
-          <tbody id="purchases-tbody">
-            <tr><td colspan="4" style="text-align:center; padding:20px;">Yuklanmoqda...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+        <!-- Right: List -->
+        <div>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="font-headline-md text-on-surface flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">history</span> Xarajatlar tarixi
+                </h2>
+                <button onclick="loadPurchases()" class="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md">
+                    <span class="material-symbols-outlined text-[1.2rem]">refresh</span> Yangilash
+                </button>
+            </div>
+            
+            <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-sm overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase border-b border-outline-variant/50">
+                            <th class="py-4 px-6 border-r border-outline-variant/50">Sana</th>
+                            <th class="py-4 px-6 border-r border-outline-variant/50">Xarid narsasi</th>
+                            <th class="py-4 px-6 border-r border-outline-variant/50">Sotuvchi</th>
+                            <th class="py-4 px-6 text-right">Summa</th>
+                        </tr>
+                    </thead>
+                    <tbody id="purchases-tbody" class="divide-y divide-outline-variant/20 text-body-sm text-on-surface">
+                        <tr><td colspan="4" class="py-8 text-center text-outline font-medium bg-surface-container-lowest">Yuklanmoqda...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 </div>
 
 <script>
@@ -153,7 +256,8 @@
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
     toast.className = `toast ${isError ? 'error' : 'success'}`;
-    toast.innerHTML = `<div class="toast-content">${msg}</div>`;
+    const icon = isError ? 'error' : 'check_circle';
+    toast.innerHTML = `<span class="material-symbols-outlined">${icon}</span> <span>${msg}</span>`;
     container.appendChild(toast);
     setTimeout(() => toast.classList.add('show'), 10);
     setTimeout(() => {
@@ -190,7 +294,7 @@
       });
       const data = await res.json();
       if (res.ok && (data.success || data.action)) {
-        if(data.action === 'deep_link') errEl.innerHTML = `<a href="${data.deepLink}" target="_blank">Botdan ro'yxatdan o'ting</a>`;
+        if(data.action === 'deep_link') errEl.innerHTML = `<a href="${data.deepLink}" target="_blank" class="underline hover:text-primary">Botdan ro'yxatdan o'ting</a>`;
         else {
           document.getElementById('phone-form').style.display = 'none';
           document.getElementById('otp-form').style.display = 'block';
@@ -230,7 +334,9 @@
 
   function showApp() {
     document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
+    const app = document.getElementById('app');
+    app.classList.remove('hidden');
+    app.classList.add('flex');
     loadPurchases();
   }
 
@@ -243,7 +349,8 @@
     if(!item || !seller || !priceStr) return showToast("Barcha maydonlarni to'ldiring", true);
 
     const btn = document.getElementById('btn-submit');
-    btn.disabled = true; btn.textContent = 'Saqlanmoqda...';
+    const originalContent = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Saqlanmoqda...';
 
     try {
       const res = await fetch('/api/inventory/purchases', {
@@ -261,12 +368,12 @@
       }
     } catch { showToast('Tarmoq xatosi', true); }
     
-    btn.disabled = false; btn.textContent = '✅ Saqlash';
+    btn.disabled = false; btn.innerHTML = originalContent;
   }
 
   async function loadPurchases() {
     const tbody = document.getElementById('purchases-tbody');
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Yuklanmoqda...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" class="py-8 text-center text-outline font-medium bg-surface-container-lowest">Yuklanmoqda...</td></tr>';
     try {
       const res = await fetch('/api/inventory/purchases', {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -274,23 +381,27 @@
       const data = await res.json();
       if(data.success) {
         if(data.purchases.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--text-muted);">Hech qanday xarajat yo\'q</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="4" class="py-8 text-center text-outline font-medium bg-surface-container-lowest"><div class="flex flex-col items-center gap-2"><span class="material-symbols-outlined text-[2rem] text-outline-variant">inventory_2</span>Hech qanday xarajat yo\'q</div></td></tr>';
           return;
         }
         tbody.innerHTML = data.purchases.map(p => `
-          <tr>
-            <td>${new Date(p.createdAt).toLocaleString('ru-RU')}</td>
-            <td><strong>${p.itemName}</strong></td>
-            <td>${p.sellerName}</td>
-            <td style="color:var(--teal); font-weight:700;">${p.price.toLocaleString('ru-RU')} so'm</td>
+          <tr class="hover:bg-surface-container-lowest transition-colors group">
+            <td class="py-4 px-6 border-r border-outline-variant/50">${new Date(p.createdAt).toLocaleString('ru-RU')}</td>
+            <td class="py-4 px-6 border-r border-outline-variant/50">
+              <div class="font-semibold text-on-surface">${p.itemName}</div>
+            </td>
+            <td class="py-4 px-6 border-r border-outline-variant/50">${p.sellerName}</td>
+            <td class="py-4 px-6 text-right">
+              <span class="font-bold text-primary">${p.price.toLocaleString('ru-RU')} so'm</span>
+            </td>
           </tr>
         `).join('');
       } else {
         if(res.status === 401 || res.status === 403) logout();
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:red;">${data.error}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-error font-medium bg-surface-container-lowest">${data.error}</td></tr>`;
       }
     } catch {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:red;">Tarmoq xatosi</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" class="py-8 text-center text-error font-medium bg-surface-container-lowest">Tarmoq xatosi</td></tr>';
     }
   }
 
