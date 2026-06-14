@@ -359,7 +359,6 @@
       if (tab === 'doctors') loadDoctors();
       if (tab === 'users') loadUsers();
       if (tab === 'procedures') loadProcedures();
-      if (tab === 'schedule') loadScheduleTab();
       if (tab === 'leaves') loadLeaves();
       if (tab === 'purchases') loadPurchases();
     }
@@ -1143,6 +1142,12 @@
                   </div>
                 </div>
               </div>
+              
+              <div class="px-5 pb-5">
+                <button onclick="openDoctorSchedule('${d.id}', '${d.firstName} ${d.lastName}')" class="w-full flex items-center justify-center gap-2 bg-primary text-on-primary px-4 py-2.5 rounded-xl font-label-md hover:bg-primary/90 transition-colors shadow-sm active:scale-95">
+                  <span class="material-symbols-outlined text-[18px]">edit_calendar</span> Jadvalni boshqarish
+                </button>
+              </div>
 
               <!-- Actions -->
               <div class="p-3 border-t border-outline-variant/20 bg-surface-container-low/10 flex items-center justify-between">
@@ -1433,48 +1438,25 @@
       return new Date(`${isoDateStr}T${timeStr}:00+05:00`);
     }
 
-    async function loadScheduleTab() {
-      const select = document.getElementById('schedule-doc-select');
-      select.innerHTML = '<option value="">Shifokor yuklanmoqda...</option>';
-      try {
-        const data = await apiGet('/api/admin/doctors');
-        if (data.success) {
-          select.innerHTML = '<option value="">Shifokor tanlang...</option>' +
-            data.doctors.map(d => `<option value="${d.id}" ${adminCurrentDoctorId === d.id ? 'selected' : ''}>Dr. ${d.firstName} ${d.lastName} (${d.specialty})</option>`).join('');
-          
-          if (adminCurrentDoctorId) {
-            document.getElementById('admin-schedule-overview-dashboard').style.display = 'none';
-            document.getElementById('admin-month-calendar-wrap').style.display = 'block';
-            document.getElementById('admin-schedule-container').style.display = 'block';
-            loadAdminScheduleGrid();
-          } else {
-            document.getElementById('admin-schedule-overview-dashboard').style.display = 'block';
-            document.getElementById('admin-month-calendar-wrap').style.display = 'none';
-            document.getElementById('admin-schedule-container').style.display = 'none';
-            loadAdminScheduleDashboard();
-          }
-        }
-      } catch (err) {
-        select.innerHTML = '<option value="">Yuklashda xatolik</option>';
-      }
-    }
-
-    function switchScheduleDoctor(docId) {
-      adminCurrentDoctorId = docId || null;
+    function openDoctorSchedule(docId, docName) {
+      document.getElementById('doctors-list-view').classList.add('hidden');
+      document.getElementById('doctor-schedule-view').classList.remove('hidden');
+      document.getElementById('schedule-doctor-name').innerText = `${docName} jadvali`;
+      
+      adminCurrentDoctorId = docId;
       adminPendingChanges = {};
       adminCancelCopyState();
       
-      if (adminCurrentDoctorId) {
-        document.getElementById('admin-schedule-overview-dashboard').style.display = 'none';
-        document.getElementById('admin-month-calendar-wrap').style.display = 'block';
-        document.getElementById('admin-schedule-container').style.display = 'block';
-        loadAdminScheduleGrid();
-      } else {
-        document.getElementById('admin-schedule-overview-dashboard').style.display = 'block';
-        document.getElementById('admin-month-calendar-wrap').style.display = 'none';
-        document.getElementById('admin-schedule-container').style.display = 'none';
-        loadAdminScheduleDashboard();
-      }
+      document.getElementById('admin-month-calendar-wrap').style.display = 'block';
+      document.getElementById('admin-schedule-container').style.display = 'block';
+      
+      loadAdminScheduleGrid();
+    }
+
+    function closeDoctorSchedule() {
+      document.getElementById('doctors-list-view').classList.remove('hidden');
+      document.getElementById('doctor-schedule-view').classList.add('hidden');
+      adminCurrentDoctorId = null;
     }
 
     async function loadAdminScheduleDashboard() {
@@ -1626,7 +1608,7 @@
                   </div>
                 </div>
                 
-                <button onclick="selectDoctorFromDashboard('${doc.id}')" class="w-full flex items-center justify-center gap-2 bg-primary text-on-primary px-4 py-3 rounded-full font-label-md hover:bg-primary-container transition-colors shadow-sm hover:shadow-md active:scale-95">
+                <button onclick="openDoctorSchedule('${doc.id}', 'Dr. ${doc.firstName} ${doc.lastName}')" class="w-full flex items-center justify-center gap-2 bg-primary text-on-primary px-4 py-3 rounded-full font-label-md hover:bg-primary-container transition-colors shadow-sm hover:shadow-md active:scale-95">
                   <span class="material-symbols-outlined text-[18px]">edit_calendar</span> Jadvalni boshqarish
                 </button>
               </div>
@@ -1638,14 +1620,6 @@
         dashboard.innerHTML = html;
       } catch (err) {
         dashboard.innerHTML = '<div class="text-center p-10 text-error bg-error-container rounded-2xl border border-error/20 font-medium">Tarmoq xatosi. Iltimos, sahifani yangilang.</div>';
-      }
-    }
-
-    function selectDoctorFromDashboard(docId) {
-      const select = document.getElementById('schedule-doc-select');
-      if (select) {
-        select.value = docId;
-        switchScheduleDoctor(docId);
       }
     }
 

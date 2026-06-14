@@ -203,11 +203,7 @@ const htmlTemplate = `<!DOCTYPE html>
                         <span class="material-symbols-outlined">calendar_today</span> Qabullar
                     </button>
                 </li>
-                <li>
-                    <button id="nav-schedule" onclick="switchTab('schedule')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
-                        <span class="material-symbols-outlined">event_note</span> Jadvallar
-                    </button>
-                </li>
+
                 <li>
                     <button id="nav-patients" onclick="switchTab('patients')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
                         <span class="material-symbols-outlined">person</span> Bemorlar
@@ -312,15 +308,6 @@ const htmlTemplate = `<!DOCTYPE html>
                         <p class="font-body-sm text-on-surface-variant mb-4">Xizmat turlari va narxlarini belgilash</p>
                         <div class="flex items-center text-primary font-label-md">Batafsil <span class="material-symbols-outlined text-[18px] ml-1">arrow_forward</span></div>
                     </div>
-                    <div onclick="switchTab('schedule')" class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-[0_4px_16px_rgba(45,106,79,0.08)] hover:-translate-y-1 transition-transform cursor-pointer relative overflow-hidden group">
-                        <div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-                        <div class="w-12 h-12 bg-tertiary-container text-on-tertiary-container rounded-lg flex items-center justify-center mb-4">
-                            <span class="material-symbols-outlined text-2xl">event_note</span>
-                        </div>
-                        <h3 class="font-headline-md text-on-surface mb-2">Jadvallar</h3>
-                        <p class="font-body-sm text-on-surface-variant mb-4">Ish vaqtlari va kunlik jadvallar</p>
-                        <div class="flex items-center text-primary font-label-md">Batafsil <span class="material-symbols-outlined text-[18px] ml-1">arrow_forward</span></div>
-                    </div>
                     <div onclick="switchTab('dashboard')" class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-[0_4px_16px_rgba(45,106,79,0.08)] hover:-translate-y-1 transition-transform cursor-pointer relative overflow-hidden group">
                         <div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                         <div class="w-12 h-12 bg-primary-container text-on-primary-container rounded-lg flex items-center justify-center mb-4">
@@ -413,94 +400,6 @@ const htmlTemplate = `<!DOCTYPE html>
                             <tbody id="appt-tbody" class="divide-y divide-outline-variant/20 text-body-sm text-on-surface">
                             </tbody>
                         </table>
-                    </div>
-                </div>
-            </div>
-
-            <div id="tab-schedule" class="tab-content hidden">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h3 class="font-headline-md text-on-surface">Ish Jadvallari</h3>
-                        <p class="font-body-sm text-on-surface-variant">Shifokorlarning ish kunlari va vaqtlarini boshqarish</p>
-                    </div>
-                    <div class="w-64">
-                        <select id="schedule-doc-select" onchange="switchScheduleDoctor(this.value)" class="w-full bg-surface border-outline-variant rounded-lg px-4 py-2 focus:border-primary outline-none">
-                            <option value="">Shifokor yuklanmoqda...</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Overview Dashboard when no doctor selected -->
-                <div id="admin-schedule-overview-dashboard" class="space-y-6">
-                    <!-- JS will populate overview here -->
-                </div>
-
-                <!-- Month Calendar Header (when doctor selected) -->
-                <div id="admin-month-calendar-wrap" class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/30 shadow-sm mb-6" style="display:none;">
-                    <div class="flex items-center justify-between mb-6">
-                        <h4 class="font-headline-sm text-on-surface" id="admin-calendar-month-year">...</h4>
-                        <div class="flex items-center gap-2">
-                            <button onclick="adminCalendarPrevMonth()" class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
-                                <span class="material-symbols-outlined">chevron_left</span>
-                            </button>
-                            <button onclick="adminCalendarNextMonth()" class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
-                                <span class="material-symbols-outlined">chevron_right</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-7 gap-2 mb-2 text-center font-label-sm text-on-surface-variant uppercase">
-                        <div>Du</div><div>Se</div><div>Ch</div><div>Pa</div><div>Ju</div><div>Sh</div><div>Ya</div>
-                    </div>
-                    <div id="admin-calendar-grid" class="grid grid-cols-7 gap-2 text-center text-body-sm">
-                        <!-- JS fills days -->
-                    </div>
-                </div>
-
-                <!-- Schedule container (when doctor selected) -->
-                <div id="admin-schedule-container" style="display:none;">
-                    <div id="admin-paste-actions-wrap" class="mb-4 bg-primary-container/10 p-4 rounded-xl flex items-center justify-between border border-primary/20" style="display:none;">
-                        <div class="flex items-center gap-3">
-                            <span class="material-symbols-outlined text-primary">content_paste</span>
-                            <span id="admin-copied-status-msg" class="text-on-surface font-medium"></span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="adminApplyToAllDays()" class="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-md hover:bg-primary/90 transition-colors shadow-sm active:scale-95">Hamma kunlarga qo'llash</button>
-                            <button onclick="adminCancelCopyState()" class="border border-outline-variant text-on-surface-variant hover:bg-surface-container px-4 py-2 rounded-lg font-label-md transition-colors active:scale-95">Bekor qilish</button>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-4">
-                            <div class="flex items-center gap-2">
-                                <label class="font-label-md text-on-surface-variant">Shablon nusxalash:</label>
-                                <select id="admin-copy-day-select" class="bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-1.5 text-sm focus:border-primary outline-none">
-                                    <option value="">Kunni tanlang...</option>
-                                </select>
-                                <button onclick="adminCopySelectedDay()" class="bg-secondary-container text-on-secondary-container px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-secondary-container/80 transition-colors">Nusxalash</button>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-4 text-sm font-medium">
-                            <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-primary-fixed"></div> Ochiq slot</div>
-                            <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-surface-container-high border border-outline-variant/30"></div> Yopiq</div>
-                            <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-error-container text-on-error-container flex items-center justify-center text-[10px]"><span class="material-symbols-outlined text-[12px]">person</span></div> Band</div>
-                            <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-tertiary-container border-2 border-primary"></div> Yangi o'zgarish</div>
-                        </div>
-                    </div>
-
-                    <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-sm overflow-hidden flex flex-col mb-6">
-                        <div id="admin-grid-header" class="grid grid-cols-8 border-b border-outline-variant/50 bg-surface-container-low/50 sticky top-0 z-10 text-center"></div>
-                        <div class="relative flex-1 overflow-y-auto max-h-[600px] bg-surface-container-lowest custom-scrollbar" id="admin-grid-scroll">
-                            <div class="grid grid-cols-8 relative min-h-[800px]">
-                                <div id="admin-time-labels" class="border-r border-outline-variant/30 relative bg-surface-container-lowest z-10"></div>
-                                <div id="admin-grid-columns" style="display: contents;"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-end pt-4 border-t border-outline-variant/30">
-                        <button id="admin-btn-save-schedule" onclick="adminSaveScheduleChanges()" class="bg-primary text-on-primary px-8 py-3 rounded-full font-label-lg hover:bg-primary/90 transition-all shadow-md shadow-primary/20 active:scale-[0.98] flex items-center gap-2">
-                            <span class="material-symbols-outlined text-[20px]">save</span> O'zgarishlarni saqlash
-                        </button>
                     </div>
                 </div>
             </div>
