@@ -476,8 +476,9 @@ const htmlTemplate = `<!DOCTYPE html>
                     <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-sm overflow-hidden flex flex-col mb-6">
                         <div id="admin-grid-header" class="grid grid-cols-8 border-b border-outline-variant/50 bg-surface-container-low/50 sticky top-0 z-10 text-center"></div>
                         <div class="relative flex-1 overflow-y-auto max-h-[600px] bg-surface-container-lowest custom-scrollbar" id="admin-grid-scroll">
-                            <div id="admin-grid-columns" class="grid grid-cols-8 relative min-h-[800px]">
+                            <div class="grid grid-cols-8 relative min-h-[800px]">
                                 <div id="admin-time-labels" class="border-r border-outline-variant/30 relative bg-surface-container-lowest z-10"></div>
+                                <div id="admin-grid-columns" style="display: contents;"></div>
                             </div>
                         </div>
                     </div>
