@@ -227,6 +227,16 @@ const htmlTemplate = `<!DOCTYPE html>
           <h2 class="font-headline-lg text-primary tracking-tight">Daily Operations</h2>
           <p id="top-date" class="font-body-md text-on-surface-variant mt-1">Loading date...</p>
         </div>
+        <div class="flex gap-4">
+            <div class="bg-surface-variant px-4 py-2 rounded-full font-label-md flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+                <span id="stat-expected">...</span> Kutilmoqda
+            </div>
+            <div class="bg-surface-variant px-4 py-2 rounded-full font-label-md flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-primary"></span>
+                <span id="stat-completed">...</span> Yakunlangan
+            </div>
+        </div>
       </header>
 
       <div class="max-w-[1280px] mx-auto">
@@ -354,10 +364,27 @@ const htmlTemplate = `<!DOCTYPE html>
                   </div>
                 </form>
               </div>
+
+              <!-- Missed Today -->
+              <div class="bg-surface-container-lowest rounded-xl p-6 soft-shadow border border-surface-variant">
+                  <h3 class="font-headline-md text-[18px] text-error mb-4 border-b border-surface-variant pb-2">Bugun Kelmaganlar</h3>
+                  <div id="missed-today-container" class="space-y-2">
+                      <div class="empty-state py-4 text-sm">Yuklanmoqda...</div>
+                  </div>
+              </div>
             </div>
 
             <!-- Right Column: Today's Schedule -->
             <div class="lg:col-span-8 flex flex-col gap-6">
+              
+              <!-- In Progress Section -->
+              <div class="bg-surface-container-lowest rounded-xl p-6 soft-shadow border border-surface-variant border-l-4 border-l-secondary">
+                  <h3 class="font-headline-md text-[18px] mb-4 border-b border-surface-variant pb-2 text-secondary">Jarayonda (Xonalarda)</h3>
+                  <div id="in-progress-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div class="empty-state py-4 text-sm">Hozirda muolajada bemorlar yo'q</div>
+                  </div>
+              </div>
+
               <div class="bg-surface-container-lowest rounded-xl p-6 soft-shadow border border-surface-variant">
                 <div class="flex justify-between items-center mb-6">
                   <h3 class="font-headline-md text-[20px]">Bugungi Qabullar</h3>

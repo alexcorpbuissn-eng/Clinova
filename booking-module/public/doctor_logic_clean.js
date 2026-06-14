@@ -923,69 +923,122 @@
     }
   }
 
-  // ---- Appointments list inside sidebar ----
+  // ---- Appointments list and Home tab ----
   async function loadAppointments() {
-    const container = document.getElementById('appointments-container');
+    const tbody = document.getElementById('appointments-tbody');
+    const homeNext = document.getElementById('home-next-patients');
+    
     if (!currentDoctorId) {
-      container.innerHTML = '<div class="empty-state">Shifokorni tanlang...</div>';
+      if(tbody) tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-on-surface-variant">Shifokorni tanlang...</td></tr>';
       return;
     }
-    container.innerHTML = '<div class="empty-state">Yuklanmoqda...</div>';
+    if(tbody) tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-on-surface-variant">Yuklanmoqda...</td></tr>';
+    
     try {
       const res = await fetch(`/api/doctor/appointments?doctorId=${currentDoctorId}`, { headers: { 'Authorization': `Bearer ${doctorToken}` } });
       if (res.status === 401) return logout();
       const data = await res.json();
+      
       if (res.ok && data.success) {
-        // filter out cancelled
-        const activeAppts = data.appointments.filter(a => a.status === 'SCHEDULED');
-        if (activeAppts.length === 0) {
-          container.innerHTML = '<div class="empty-state">Bugun kelgusi qabullar yo\'q</div>';
-          return;
+        const activeAppts = data.appointments.filter(a => a.status === 'SCHEDULED' || a.status === 'IN_PROGRESS' || a.status === 'ARRIVED');
+        
+        // Populate Table (all appointments)
+        if (tbody) {
+          if (data.appointments.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-on-surface-variant">Qabullar topilmadi</td></tr>';
+          } else {
+            tbody.innerHTML = data.appointments.map(a => {
+              const st = new Date(a.slot.startTime);
+              const timeStr = st.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent' });
+              const dateText = `${String(st.getDate()).padStart(2, '0')}.${String(st.getMonth()+1).padStart(2, '0')}.${st.getFullYear()}`;
+              
+              const isBreak = a.patientPhone === '+998000000000' || a.patientFirst === 'Tanaffus';
+              const patientName = isBreak ? "☕ Tanaffus / Dam olish" : `${a.patientFirst} ${a.patientLast}`;
+              const procName = isBreak ? "Tanaffus" : (a.procedure ? a.procedure.name : "Birlamchi qabul");
+              
+              let statusBadge = '';
+              if (a.status === 'SCHEDULED') statusBadge = '<span class="px-3 py-1 bg-surface-variant text-on-surface-variant rounded-full text-xs font-bold">Kutilmoqda</span>';
+              if (a.status === 'IN_PROGRESS') statusBadge = '<span class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-xs font-bold">Jarayonda</span>';
+              if (a.status === 'COMPLETED') statusBadge = '<span class="px-3 py-1 bg-tertiary-container text-on-tertiary-container rounded-full text-xs font-bold">Yakunlangan</span>';
+              if (a.status === 'CANCELLED') statusBadge = '<span class="px-3 py-1 bg-error-container text-on-error-container rounded-full text-xs font-bold">Bekor qilingan</span>';
+
+              let actionBtns = '';
+              if(a.status === 'SCHEDULED') {
+                actionBtns = `
+                  <button onclick="sidebarComplete('${a.id}')" class="px-3 py-1 bg-primary text-on-primary rounded-lg text-xs hover:opacity-90">Boshlash</button>
+                  <button onclick="sidebarCancel('${a.id}')" class="px-3 py-1 bg-error-container text-error rounded-lg text-xs hover:opacity-90">Kelmadi</button>
+                `;
+              } else if(a.status === 'IN_PROGRESS') {
+                actionBtns = `
+                  <button onclick="sidebarComplete('${a.id}')" class="px-3 py-1 bg-secondary text-on-secondary rounded-lg text-xs hover:opacity-90">Tugatish</button>
+                `;
+              }
+
+              return `
+                <tr class="hover:bg-surface-variant/50 transition-colors">
+                  <td class="p-4 whitespace-nowrap"><span class="font-bold">${timeStr}</span><br><span class="text-xs text-on-surface-variant">${dateText}</span></td>
+                  <td class="p-4 font-bold">${patientName}</td>
+                  <td class="p-4 text-on-surface-variant">${procName}</td>
+                  <td class="p-4">${statusBadge}</td>
+                  <td class="p-4 text-right flex gap-2 justify-end">${actionBtns}</td>
+                </tr>
+              `;
+            }).join('');
+          }
+        }
+        
+        // Populate Next 3 Patients in Home Dashboard
+        if (homeNext) {
+          const next3 = activeAppts.filter(a => !(a.patientPhone === '+998000000000' || a.patientFirst === 'Tanaffus'))
+            .sort((a,b) => new Date(a.slot.startTime) - new Date(b.slot.startTime))
+            .slice(0, 3);
+            
+          if (next3.length === 0) {
+            homeNext.innerHTML = '<div class="p-4 text-center text-on-surface-variant">Navbatdagi bemorlar yo\'q</div>';
+          } else {
+            homeNext.innerHTML = next3.map(a => {
+              const st = new Date(a.slot.startTime);
+              const timeStr = st.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent' });
+              return `
+                <div class="p-4 grid grid-cols-4 items-center hover:bg-surface-variant/30 transition-colors">
+                    <div class="font-bold text-on-surface">${timeStr}</div>
+                    <div class="font-bold">${a.patientFirst} ${a.patientLast}</div>
+                    <div class="text-on-surface-variant text-sm">${a.procedure ? a.procedure.name : "Birlamchi qabul"}</div>
+                    <div><span class="px-3 py-1 bg-surface-variant text-on-surface-variant rounded-full text-[10px] font-bold">Kutilmoqda</span></div>
+                </div>
+              `;
+            }).join('');
+          }
         }
 
-        container.innerHTML = activeAppts.map(a => {
-          const st = new Date(a.slot.startTime);
-          const timeStr = st.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent' });
-          
-          const today = new Date();
-          const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
-          let dateText = `${String(st.getDate()).padStart(2, '0')}.${String(st.getMonth()+1).padStart(2, '0')}.${st.getFullYear()}`;
-          if (st.toDateString() === today.toDateString()) {
-            dateText = "Bugun";
-          } else if (st.toDateString() === tomorrow.toDateString()) {
-            dateText = "Ertaga";
-          }
-          
-          const isBreak = a.patientPhone === '+998000000000' || a.patientFirst === 'Tanaffus';
-          const patientName = isBreak ? "☕ Tanaffus / Dam olish" : `${a.patientFirst} ${a.patientLast}`;
-          const phone = isBreak ? "-" : (a.patient ? a.patient.phone : a.patientPhone);
-          const procName = isBreak ? "Tanaffus" : (a.procedure ? a.procedure.name : "Birlamchi qabul");
-          const attempts = a.callAttempts || 0;
-
-          // Main actions section removed for upcoming appointments as they are confusing
-          const actionsSection = '';
-
-          return `
-            <div class="appt-card" style="${isBreak ? 'border-left: 3px solid var(--color-break);' : 'border-left: 3px solid var(--color-busy);'}">
-              <div class="appt-time-wrap">
-                <div class="appt-time">🕒 ${timeStr}</div>
-                <div class="appt-date">${dateText}</div>
-              </div>
-              <div class="appt-patient">${patientName}</div>
-              <div class="appt-procedure">${procName}</div>
-              ${isBreak ? '' : `<div class="appt-phone">📱 ${phone}</div>`}
-              ${actionsSection}
-            </div>
-          `;
-        }).join('');
       } else {
-        container.innerHTML = `<div class="empty-state" style="color:var(--red);">❌ Xatolik: ${data.error || "Noma'lum xato"}</div>`;
+        if(tbody) tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-error">❌ Xatolik</td></tr>`;
       }
     } catch (err) {
-      console.error('loadAppointments xatosi:', err);
-      container.innerHTML = '<div class="empty-state" style="color:var(--red);">❌ Ulanishda xatolik yuz berdi</div>';
+      if(tbody) tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-error">❌ Ulanishda xatolik yuz berdi</td></tr>';
     }
   }
+
+  function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.nav-item').forEach(el => {
+          el.classList.remove('bg-surface-variant');
+          el.classList.add('bg-surface-container');
+      });
+      
+      document.getElementById(`tab-${tabId}`).style.display = 'block';
+      
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if(activeNav) {
+          activeNav.classList.remove('bg-surface-container');
+          activeNav.classList.add('bg-surface-variant');
+      }
+  }
+  
+  // Set initial tab
+  document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => { switchTab('home'); }, 100);
+  });
 
   // Sidebar fast actions
 
@@ -1033,18 +1086,63 @@
     });
 
     const todayAppts = todaySlots.filter(s => s.appointment && s.appointment.status !== 'CANCELLED');
-    const todayRevenue = todayAppts.reduce((sum, s) => sum + (s.appointment.procedure ? s.appointment.procedure.price : 200000), 0);
+    const todayPatients = todayAppts.filter(s => !(s.appointment.patientPhone === '+998000000000' || s.appointment.patientFirst === 'Tanaffus'));
+    
+    // Update Home Tab
+    const homeDateEl = document.getElementById('home-date');
+    if(homeDateEl) {
+        homeDateEl.textContent = new Date().toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Asia/Tashkent' });
+    }
+    
+    const homeGreeting = document.getElementById('home-greeting');
+    if(homeGreeting) {
+        if(doctorInfo) {
+            homeGreeting.textContent = `Assalomu alaykum, Dr. ${doctorInfo.lastName}`;
+        } else if(currentDoctorId) {
+            const select = document.getElementById('doc-select');
+            if(select && select.options[select.selectedIndex]) {
+                homeGreeting.textContent = `Assalomu alaykum, Dr. ${select.options[select.selectedIndex].text.split(' ')[1] || ''}`;
+            }
+        } else {
+            homeGreeting.textContent = `Assalomu alaykum`;
+        }
+    }
+    
+    const statHours = document.getElementById('stat-hours');
+    if(statHours) {
+        const hours = (todaySlots.length * INTERVAL) / 60;
+        statHours.textContent = hours > 0 ? `${hours} soat` : 'Dam olish';
+    }
+    
+    const statPatients = document.getElementById('stat-patients');
+    if(statPatients) {
+        statPatients.textContent = `${todayPatients.length} ta`;
+    }
+    
+    const statNotes = document.getElementById('stat-notes');
+    if(statNotes) {
+        // Mock pending notes for now
+        const completedAppts = todayAppts.filter(s => s.appointment.status === 'COMPLETED');
+        statNotes.textContent = completedAppts.length;
+    }
 
-    document.getElementById('stat-today-count').textContent = todayAppts.length;
+    // Previous legacy stats elements (if any still exist)
+    const statTodayCount = document.getElementById('stat-today-count');
+    if(statTodayCount) statTodayCount.textContent = todayAppts.length;
+    
     const revEl = document.getElementById('stat-today-revenue');
     if (revEl) {
+      const todayRevenue = todayAppts.reduce((sum, s) => sum + (s.appointment.procedure ? s.appointment.procedure.price : 200000), 0);
       revEl.textContent = todayRevenue.toLocaleString() + " so'm";
     }
     
-    const weekTotal = allSlots.length;
-    const weekBooked = allSlots.filter(s => s.appointment && s.appointment.status !== 'CANCELLED').length;
-    const occupancy = weekTotal > 0 ? Math.round((weekBooked / weekTotal) * 100) : 0;
-    document.getElementById('stat-week-occupancy').textContent = occupancy + "%";
+    const statOccupancy = document.getElementById('stat-week-occupancy');
+    if(statOccupancy) {
+        const weekTotal = allSlots.length;
+        const weekBooked = allSlots.filter(s => s.appointment && s.appointment.status !== 'CANCELLED').length;
+        const occupancy = weekTotal > 0 ? Math.round((weekBooked / weekTotal) * 100) : 0;
+        statOccupancy.textContent = occupancy + "%";
+    }
   }
 
   // ---- Copy/Paste Shablon (Admin Only) ----

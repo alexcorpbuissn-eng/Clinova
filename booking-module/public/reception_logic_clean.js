@@ -508,6 +508,33 @@ const API = '';
       }
       
       container.innerHTML = html;
+      
+      // Update counters
+      const statExpectedEl = document.getElementById('stat-expected');
+      const statCompletedEl = document.getElementById('stat-completed');
+      if (statExpectedEl) statExpectedEl.textContent = upcoming.length;
+      
+      // To get completed for today, we might need data from loadVisits, or we can just count completed from data.appointments if returned. 
+      // Actually, data.appointments might not return completed for the day depending on API. Let's just update expected.
+      
+      // Update missed today
+      const missedContainer = document.getElementById('missed-today-container');
+      if (missedContainer) {
+          if (missed.length === 0) {
+              missedContainer.innerHTML = '<div class="empty-state py-4 text-sm">Barcha bemorlar kelgan</div>';
+          } else {
+              missedContainer.innerHTML = missed.map(m => `
+                <div class="flex justify-between items-center p-3 bg-error-container rounded-lg border border-[#fecdd3]">
+                    <div>
+                        <p class="font-label-sm text-error">${m.patient ? m.patient.firstName : (m.patientFirst || 'Noma\'lum')}</p>
+                        <p class="text-xs text-error opacity-80">${new Date(m.slot.startTime).toLocaleTimeString('uz-UZ', { hour:'2-digit', minute:'2-digit' })}</p>
+                    </div>
+                    <button class="text-xs bg-error text-white px-2 py-1 rounded" onclick="openContactedModal('${m.id}', '${encodeURIComponent(JSON.stringify(m))}')">Bog'lanish</button>
+                </div>
+              `).join('');
+          }
+      }
+
     } catch (err) {
       console.error(err);
       container.innerHTML = '<div class="empty-state" style="color:red;">Xatolik yuz berdi.</div>';
@@ -1317,14 +1344,17 @@ const API = '';
   function renderActiveVisits() {
     const section = document.getElementById('active-treatments-section');
     const container = document.getElementById('active-visits-container');
+    const inProgressContainer = document.getElementById('in-progress-container');
     
     if (activeVisits.length === 0) {
-      section.style.display = 'none';
+      if(section) section.style.display = 'none';
+      if(inProgressContainer) inProgressContainer.innerHTML = '<div class="empty-state py-4 text-sm">Hozirda muolajada bemorlar yo\'q</div>';
       return;
     }
 
-    section.style.display = 'block';
-    container.innerHTML = activeVisits.map(v => `
+    if(section) section.style.display = 'block';
+    
+    const htmlCards = activeVisits.map(v => `
       <div class="active-card" id="card-${v.id}">
         <div style="display:flex; justify-content:space-between; align-items:start;">
           <div>
@@ -1341,6 +1371,10 @@ const API = '';
         </div>
       </div>
     `).join('');
+    
+    if(container) container.innerHTML = htmlCards;
+    if(inProgressContainer) inProgressContainer.innerHTML = htmlCards;
+    
     updateTimers();
   }
 
@@ -1438,8 +1472,12 @@ const API = '';
       if (!data.success) return;
       
       const history = data.visits.filter(v => v.status === 'COMPLETED');
+      
+      const statCompletedEl = document.getElementById('stat-completed');
+      if (statCompletedEl) statCompletedEl.textContent = history.length;
+      
       if (history.length === 0) {
-        container.innerHTML = '<div class="empty-state">Hozircha tashriflar yo\'q.</div>';
+        if(container) container.innerHTML = '<div class="empty-state">Hozircha tashriflar yo\'q.</div>';
         return;
       }
 
@@ -1471,12 +1509,12 @@ const API = '';
           <td>${sourceBadge}</td>
         </tr>`;
       }).join('');
-      container.innerHTML = `<table>
+      if(container) container.innerHTML = `<table>
         <thead><tr><th>Vaqt</th><th>Bemor</th><th>Shifokor</th><th>Xizmat</th><th>To'lov</th><th>Tur</th></tr></thead>
         <tbody>${tbody}</tbody>
       </table>`;
     } catch {
-      container.innerHTML = '<div class="empty-state" style="color:red;">Xatolik yuz berdi.</div>';
+      if(container) container.innerHTML = '<div class="empty-state" style="color:red;">Xatolik yuz berdi.</div>';
     }
   }
 

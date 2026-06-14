@@ -164,7 +164,17 @@
             
             <ul class="flex-1 overflow-y-auto px-2 space-y-1">
                 <li>
-                    <button onclick="switchTab('appointments')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full active bg-secondary-container text-on-secondary-container">
+                    <button onclick="switchTab('home')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full active bg-secondary-container text-on-secondary-container">
+                        <span class="material-symbols-outlined">home</span> Bosh sahifa
+                    </button>
+                </li>
+                <li>
+                    <button onclick="switchTab('dashboard')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
+                        <span class="material-symbols-outlined">dashboard</span> Asosiy panel
+                    </button>
+                </li>
+                <li>
+                    <button onclick="switchTab('appointments')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
                         <span class="material-symbols-outlined">calendar_today</span> Qabullar
                     </button>
                 </li>
@@ -213,17 +223,139 @@
 
         <!-- Main Content -->
         <main class="ml-[260px] flex-1 p-margin-desktop min-h-screen bg-background w-full">
-            <!-- Header -->
-            <header class="flex justify-between items-center mb-10">
+            <!-- Header (Top right: search bar + notification bell + avatar) -->
+            <header class="flex justify-between items-center mb-10 w-full">
                 <div>
-                    <h2 class="font-headline-lg text-headline-lg text-on-surface">Admin Panel</h2>
-                    <p class="font-body-md text-body-md text-on-surface-variant mt-1">Clinova klinika boshqaruvi</p>
+                    <h2 class="font-headline-lg text-headline-lg text-on-surface">Klinika Boshqaruvi</h2>
+                    <p class="font-body-md text-body-md text-on-surface-variant mt-1">Admin boshqaruv paneli</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="relative hidden md:block">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+                        <input type="text" placeholder="Qidirish..." class="bg-surface-container-lowest border border-outline-variant rounded-full py-2 pl-10 pr-4 text-body-sm outline-none focus:border-primary transition-colors w-64">
+                    </div>
+                    <button class="w-10 h-10 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors relative">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+                    </button>
+                    <div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-md font-bold cursor-pointer">
+                        AD
+                    </div>
                 </div>
             </header>
 
             <!-- TABS -->
-            <div id="tab-appointments" class="tab-content block">
-                <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-sm overflow-hidden">
+            <div id="tab-home" class="tab-content block">
+                <div class="mb-8">
+                    <h2 class="font-headline-xl text-primary font-bold">Xayrli tong, Admin.</h2>
+                    <p class="font-body-lg text-on-surface-variant mt-2">Klinika ko'rsatkichlari va boshqaruv modullari</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div onclick="switchTab('appointments')" class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-[0_4px_16px_rgba(45,106,79,0.08)] hover:-translate-y-1 transition-transform cursor-pointer relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                        <div class="w-12 h-12 bg-secondary-container text-on-secondary-container rounded-lg flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined text-2xl">calendar_today</span>
+                        </div>
+                        <h3 class="font-headline-md text-on-surface mb-2">Qabullar</h3>
+                        <p class="font-body-sm text-on-surface-variant mb-4">Barcha qabullarni boshqarish va ko'rish</p>
+                        <div class="flex items-center text-primary font-label-md">Batafsil <span class="material-symbols-outlined text-[18px] ml-1">arrow_forward</span></div>
+                    </div>
+                    <div onclick="switchTab('patients')" class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-[0_4px_16px_rgba(45,106,79,0.08)] hover:-translate-y-1 transition-transform cursor-pointer relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                        <div class="w-12 h-12 bg-tertiary-container text-on-tertiary-container rounded-lg flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined text-2xl">person</span>
+                        </div>
+                        <h3 class="font-headline-md text-on-surface mb-2">Bemorlar</h3>
+                        <p class="font-body-sm text-on-surface-variant mb-4">Bemorlar ro'yxati va ularning tarixi</p>
+                        <div class="flex items-center text-primary font-label-md">Batafsil <span class="material-symbols-outlined text-[18px] ml-1">arrow_forward</span></div>
+                    </div>
+                    <div onclick="switchTab('doctors')" class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-[0_4px_16px_rgba(45,106,79,0.08)] hover:-translate-y-1 transition-transform cursor-pointer relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                        <div class="w-12 h-12 bg-primary-container text-on-primary-container rounded-lg flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined text-2xl">medical_services</span>
+                        </div>
+                        <h3 class="font-headline-md text-on-surface mb-2">Shifokorlar</h3>
+                        <p class="font-body-sm text-on-surface-variant mb-4">Shifokorlar jamoasi va profillari</p>
+                        <div class="flex items-center text-primary font-label-md">Batafsil <span class="material-symbols-outlined text-[18px] ml-1">arrow_forward</span></div>
+                    </div>
+                    <div onclick="switchTab('procedures')" class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-[0_4px_16px_rgba(45,106,79,0.08)] hover:-translate-y-1 transition-transform cursor-pointer relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                        <div class="w-12 h-12 bg-secondary-container text-on-secondary-container rounded-lg flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined text-2xl">settings_heart</span>
+                        </div>
+                        <h3 class="font-headline-md text-on-surface mb-2">Xizmatlar</h3>
+                        <p class="font-body-sm text-on-surface-variant mb-4">Xizmat turlari va narxlarini belgilash</p>
+                        <div class="flex items-center text-primary font-label-md">Batafsil <span class="material-symbols-outlined text-[18px] ml-1">arrow_forward</span></div>
+                    </div>
+                    <div onclick="switchTab('schedule')" class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-[0_4px_16px_rgba(45,106,79,0.08)] hover:-translate-y-1 transition-transform cursor-pointer relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                        <div class="w-12 h-12 bg-tertiary-container text-on-tertiary-container rounded-lg flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined text-2xl">event_note</span>
+                        </div>
+                        <h3 class="font-headline-md text-on-surface mb-2">Jadvallar</h3>
+                        <p class="font-body-sm text-on-surface-variant mb-4">Ish vaqtlari va kunlik jadvallar</p>
+                        <div class="flex items-center text-primary font-label-md">Batafsil <span class="material-symbols-outlined text-[18px] ml-1">arrow_forward</span></div>
+                    </div>
+                    <div onclick="switchTab('dashboard')" class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-[0_4px_16px_rgba(45,106,79,0.08)] hover:-translate-y-1 transition-transform cursor-pointer relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                        <div class="w-12 h-12 bg-primary-container text-on-primary-container rounded-lg flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined text-2xl">analytics</span>
+                        </div>
+                        <h3 class="font-headline-md text-on-surface mb-2">Statistika</h3>
+                        <p class="font-body-sm text-on-surface-variant mb-4">Klinika daromadi va analitikalar</p>
+                        <div class="flex items-center text-primary font-label-md">Batafsil <span class="material-symbols-outlined text-[18px] ml-1">arrow_forward</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-dashboard" class="tab-content hidden">
+                <div class="mb-8">
+                    <h2 class="font-headline-lg text-on-surface">Asosiy Panel</h2>
+                    <p class="font-body-sm text-on-surface-variant">Klinikaning asosiy ko'rsatkichlari</p>
+                </div>
+                
+                <!-- Stat Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-[0_4px_16px_rgba(45,106,79,0.08)] flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center">
+                            <span class="material-symbols-outlined text-3xl">calendar_month</span>
+                        </div>
+                        <div>
+                            <p class="font-label-md text-on-surface-variant uppercase tracking-wider mb-1">Jami Qabullar</p>
+                            <div class="flex items-end gap-3">
+                                <h4 class="font-headline-xl text-on-surface leading-none">124</h4>
+                                <span class="font-label-sm text-primary flex items-center"><span class="material-symbols-outlined text-[16px]">arrow_upward</span> 12%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-[0_4px_16px_rgba(45,106,79,0.08)] flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center">
+                            <span class="material-symbols-outlined text-3xl">payments</span>
+                        </div>
+                        <div>
+                            <p class="font-label-md text-on-surface-variant uppercase tracking-wider mb-1">Kutilayotgan Daromad</p>
+                            <div class="flex items-end gap-3">
+                                <h4 class="font-headline-xl text-on-surface leading-none">12.4M</h4>
+                                <span class="font-label-sm text-primary flex items-center"><span class="material-symbols-outlined text-[16px]">arrow_upward</span> 8%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-[0_4px_16px_rgba(45,106,79,0.08)] flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center">
+                            <span class="material-symbols-outlined text-3xl">group_add</span>
+                        </div>
+                        <div>
+                            <p class="font-label-md text-on-surface-variant uppercase tracking-wider mb-1">Yangi Bemorlar</p>
+                            <div class="flex items-end gap-3">
+                                <h4 class="font-headline-xl text-on-surface leading-none">48</h4>
+                                <span class="font-label-sm text-primary flex items-center"><span class="material-symbols-outlined text-[16px]">arrow_upward</span> 24%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            <div id="tab-appointments" class="tab-content hidden">
+                <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-[0_4px_16px_rgba(45,106,79,0.08)] overflow-hidden">
                     <div class="p-6 border-b border-outline-variant/30 flex justify-between items-center">
                         <h3 class="font-headline-md text-on-surface">Bugungi Qabullar</h3>
                     </div>
@@ -877,7 +1009,7 @@
         contentEl.style.display = 'block';
       }
 
-      if (tab === 'appointments') loadAppointments();
+      if (tab === 'appointments' || tab === 'dashboard') loadAppointments();
       if (tab === 'patients') loadPatients();
       if (tab === 'doctors') loadDoctors();
       if (tab === 'users') loadUsers();

@@ -195,8 +195,16 @@ input:checked + .slider:before { transform: translateX(20px); }
                 </div>
             </div>
             <div class="flex-1 px-4 space-y-2">
-                <a href="#" class="bg-secondary-container text-on-secondary-container rounded-full flex items-center gap-3 px-4 py-3 translate-x-1 transition-transform">
-                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">event_note</span>
+                <a href="#" onclick="switchTab('home')" id="nav-home" class="nav-item bg-surface-container text-on-surface-variant hover:bg-surface-variant rounded-full flex items-center gap-3 px-4 py-3 transition-colors">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span class="font-label-md">Bosh sahifa</span>
+                </a>
+                <a href="#" onclick="switchTab('appointments')" id="nav-appointments" class="nav-item bg-surface-container text-on-surface-variant hover:bg-surface-variant rounded-full flex items-center gap-3 px-4 py-3 transition-colors">
+                    <span class="material-symbols-outlined">calendar_today</span>
+                    <span class="font-label-md">Qabullar</span>
+                </a>
+                <a href="#" onclick="switchTab('schedule')" id="nav-schedule" class="nav-item bg-surface-container text-on-surface-variant hover:bg-surface-variant rounded-full flex items-center gap-3 px-4 py-3 transition-colors">
+                    <span class="material-symbols-outlined">event_note</span>
                     <span class="font-label-md">Ish Grafigi</span>
                 </a>
             </div>
@@ -210,6 +218,94 @@ input:checked + .slider:before { transform: translateX(20px); }
 
         <!-- Main Content -->
         <main class="flex-1 md:ml-[260px] min-w-0 p-6 md:p-8 flex flex-col gap-6 bg-background">
+            
+            <!-- TAB: HOME -->
+            <div id="tab-home" class="tab-content" style="display:none;">
+                <header class="mb-8">
+                    <p id="home-date" class="font-label-md text-on-surface-variant mb-1"></p>
+                    <h1 class="font-headline-lg text-on-surface" id="home-greeting">Assalomu alaykum, Dr.</h1>
+                </header>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- My Schedule -->
+                    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm flex flex-col items-center text-center justify-center">
+                        <div class="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined">schedule</span>
+                        </div>
+                        <h3 class="font-label-md text-on-surface-variant mb-1">Mening Ish Vaqtim (Bugun)</h3>
+                        <p class="font-headline-md text-on-surface" id="stat-hours">...</p>
+                    </div>
+                    <!-- Today's Queue Summary -->
+                    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm flex flex-col items-center text-center justify-center">
+                        <div class="w-12 h-12 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined">groups</span>
+                        </div>
+                        <h3 class="font-label-md text-on-surface-variant mb-1">Bugungi Bemorlar</h3>
+                        <p class="font-headline-md text-on-surface" id="stat-patients">...</p>
+                    </div>
+                    <!-- Pending Notes -->
+                    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm flex flex-col items-center text-center justify-center">
+                        <div class="w-12 h-12 rounded-full bg-error-container text-on-error-container flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined">assignment_late</span>
+                        </div>
+                        <h3 class="font-label-md text-on-surface-variant mb-1">Kutilayotgan xulosalar</h3>
+                        <p class="font-headline-md text-on-surface" id="stat-notes">0</p>
+                    </div>
+                </div>
+
+                <h2 class="font-headline-md text-on-surface mb-4">Navbatdagi 3 ta Bemor</h2>
+                <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
+                    <div class="p-4 grid grid-cols-4 font-label-sm text-on-surface-variant uppercase tracking-wider border-b border-surface-variant bg-surface-container-lowest">
+                        <div>Vaqt</div>
+                        <div>Bemor</div>
+                        <div>Muolaja</div>
+                        <div>Holat</div>
+                    </div>
+                    <div id="home-next-patients" class="divide-y divide-surface-variant">
+                        <!-- Filled via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: APPOINTMENTS -->
+            <div id="tab-appointments" class="tab-content" style="display:none;">
+                <header class="flex flex-col md:flex-row justify-between items-end gap-4 mb-6">
+                    <div>
+                        <h1 class="font-headline-lg text-on-surface mb-2">Qabullar ro'yxati</h1>
+                    </div>
+                    <div class="flex gap-4 items-center">
+                        <input type="date" id="filter-date" class="py-2 px-4 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface font-body-sm outline-none focus:border-primary">
+                        <select id="filter-status" class="py-2 px-4 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface font-body-sm outline-none focus:border-primary">
+                            <option value="">Barcha holatlar</option>
+                            <option value="CONFIRMED">Tasdiqlangan</option>
+                            <option value="ARRIVED">Kelgan</option>
+                            <option value="IN_PROGRESS">Jarayonda</option>
+                            <option value="COMPLETED">Yakunlangan</option>
+                            <option value="NO_SHOW">Kelmagan</option>
+                            <option value="CANCELLED">Bekor qilingan</option>
+                        </select>
+                    </div>
+                </header>
+
+                <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-sm overflow-hidden overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-surface-container-lowest border-b border-surface-variant text-on-surface-variant font-label-sm tracking-wider uppercase">
+                                <th class="p-4 whitespace-nowrap">Vaqt</th>
+                                <th class="p-4">Bemor</th>
+                                <th class="p-4">Xizmat</th>
+                                <th class="p-4">Holat</th>
+                                <th class="p-4 text-right">Harakat</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointments-tbody" class="divide-y divide-surface-variant font-body-md text-on-surface">
+                            <!-- JS fills -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB: SCHEDULE -->
+            <div id="tab-schedule" class="tab-content" style="display:none;">
             <!-- Header Section -->
             <header class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-4 border-b border-surface-variant">
                 <div>
@@ -269,6 +365,7 @@ input:checked + .slider:before { transform: translateX(20px); }
                     </div>
                 </section>
             </div>
+            </div> <!-- End Tab Schedule -->
         </main>
     </div>
 
@@ -1359,69 +1456,122 @@ input:checked + .slider:before { transform: translateX(20px); }
     }
   }
 
-  // ---- Appointments list inside sidebar ----
+  // ---- Appointments list and Home tab ----
   async function loadAppointments() {
-    const container = document.getElementById('appointments-container');
+    const tbody = document.getElementById('appointments-tbody');
+    const homeNext = document.getElementById('home-next-patients');
+    
     if (!currentDoctorId) {
-      container.innerHTML = '<div class="empty-state">Shifokorni tanlang...</div>';
+      if(tbody) tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-on-surface-variant">Shifokorni tanlang...</td></tr>';
       return;
     }
-    container.innerHTML = '<div class="empty-state">Yuklanmoqda...</div>';
+    if(tbody) tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-on-surface-variant">Yuklanmoqda...</td></tr>';
+    
     try {
       const res = await fetch(`/api/doctor/appointments?doctorId=${currentDoctorId}`, { headers: { 'Authorization': `Bearer ${doctorToken}` } });
       if (res.status === 401) return logout();
       const data = await res.json();
+      
       if (res.ok && data.success) {
-        // filter out cancelled
-        const activeAppts = data.appointments.filter(a => a.status === 'SCHEDULED');
-        if (activeAppts.length === 0) {
-          container.innerHTML = '<div class="empty-state">Bugun kelgusi qabullar yo\'q</div>';
-          return;
+        const activeAppts = data.appointments.filter(a => a.status === 'SCHEDULED' || a.status === 'IN_PROGRESS' || a.status === 'ARRIVED');
+        
+        // Populate Table (all appointments)
+        if (tbody) {
+          if (data.appointments.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-on-surface-variant">Qabullar topilmadi</td></tr>';
+          } else {
+            tbody.innerHTML = data.appointments.map(a => {
+              const st = new Date(a.slot.startTime);
+              const timeStr = st.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent' });
+              const dateText = `${String(st.getDate()).padStart(2, '0')}.${String(st.getMonth()+1).padStart(2, '0')}.${st.getFullYear()}`;
+              
+              const isBreak = a.patientPhone === '+998000000000' || a.patientFirst === 'Tanaffus';
+              const patientName = isBreak ? "☕ Tanaffus / Dam olish" : `${a.patientFirst} ${a.patientLast}`;
+              const procName = isBreak ? "Tanaffus" : (a.procedure ? a.procedure.name : "Birlamchi qabul");
+              
+              let statusBadge = '';
+              if (a.status === 'SCHEDULED') statusBadge = '<span class="px-3 py-1 bg-surface-variant text-on-surface-variant rounded-full text-xs font-bold">Kutilmoqda</span>';
+              if (a.status === 'IN_PROGRESS') statusBadge = '<span class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-xs font-bold">Jarayonda</span>';
+              if (a.status === 'COMPLETED') statusBadge = '<span class="px-3 py-1 bg-tertiary-container text-on-tertiary-container rounded-full text-xs font-bold">Yakunlangan</span>';
+              if (a.status === 'CANCELLED') statusBadge = '<span class="px-3 py-1 bg-error-container text-on-error-container rounded-full text-xs font-bold">Bekor qilingan</span>';
+
+              let actionBtns = '';
+              if(a.status === 'SCHEDULED') {
+                actionBtns = `
+                  <button onclick="sidebarComplete('${a.id}')" class="px-3 py-1 bg-primary text-on-primary rounded-lg text-xs hover:opacity-90">Boshlash</button>
+                  <button onclick="sidebarCancel('${a.id}')" class="px-3 py-1 bg-error-container text-error rounded-lg text-xs hover:opacity-90">Kelmadi</button>
+                `;
+              } else if(a.status === 'IN_PROGRESS') {
+                actionBtns = `
+                  <button onclick="sidebarComplete('${a.id}')" class="px-3 py-1 bg-secondary text-on-secondary rounded-lg text-xs hover:opacity-90">Tugatish</button>
+                `;
+              }
+
+              return `
+                <tr class="hover:bg-surface-variant/50 transition-colors">
+                  <td class="p-4 whitespace-nowrap"><span class="font-bold">${timeStr}</span><br><span class="text-xs text-on-surface-variant">${dateText}</span></td>
+                  <td class="p-4 font-bold">${patientName}</td>
+                  <td class="p-4 text-on-surface-variant">${procName}</td>
+                  <td class="p-4">${statusBadge}</td>
+                  <td class="p-4 text-right flex gap-2 justify-end">${actionBtns}</td>
+                </tr>
+              `;
+            }).join('');
+          }
+        }
+        
+        // Populate Next 3 Patients in Home Dashboard
+        if (homeNext) {
+          const next3 = activeAppts.filter(a => !(a.patientPhone === '+998000000000' || a.patientFirst === 'Tanaffus'))
+            .sort((a,b) => new Date(a.slot.startTime) - new Date(b.slot.startTime))
+            .slice(0, 3);
+            
+          if (next3.length === 0) {
+            homeNext.innerHTML = '<div class="p-4 text-center text-on-surface-variant">Navbatdagi bemorlar yo\'q</div>';
+          } else {
+            homeNext.innerHTML = next3.map(a => {
+              const st = new Date(a.slot.startTime);
+              const timeStr = st.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent' });
+              return `
+                <div class="p-4 grid grid-cols-4 items-center hover:bg-surface-variant/30 transition-colors">
+                    <div class="font-bold text-on-surface">${timeStr}</div>
+                    <div class="font-bold">${a.patientFirst} ${a.patientLast}</div>
+                    <div class="text-on-surface-variant text-sm">${a.procedure ? a.procedure.name : "Birlamchi qabul"}</div>
+                    <div><span class="px-3 py-1 bg-surface-variant text-on-surface-variant rounded-full text-[10px] font-bold">Kutilmoqda</span></div>
+                </div>
+              `;
+            }).join('');
+          }
         }
 
-        container.innerHTML = activeAppts.map(a => {
-          const st = new Date(a.slot.startTime);
-          const timeStr = st.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent' });
-          
-          const today = new Date();
-          const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
-          let dateText = `${String(st.getDate()).padStart(2, '0')}.${String(st.getMonth()+1).padStart(2, '0')}.${st.getFullYear()}`;
-          if (st.toDateString() === today.toDateString()) {
-            dateText = "Bugun";
-          } else if (st.toDateString() === tomorrow.toDateString()) {
-            dateText = "Ertaga";
-          }
-          
-          const isBreak = a.patientPhone === '+998000000000' || a.patientFirst === 'Tanaffus';
-          const patientName = isBreak ? "☕ Tanaffus / Dam olish" : `${a.patientFirst} ${a.patientLast}`;
-          const phone = isBreak ? "-" : (a.patient ? a.patient.phone : a.patientPhone);
-          const procName = isBreak ? "Tanaffus" : (a.procedure ? a.procedure.name : "Birlamchi qabul");
-          const attempts = a.callAttempts || 0;
-
-          // Main actions section removed for upcoming appointments as they are confusing
-          const actionsSection = '';
-
-          return `
-            <div class="appt-card" style="${isBreak ? 'border-left: 3px solid var(--color-break);' : 'border-left: 3px solid var(--color-busy);'}">
-              <div class="appt-time-wrap">
-                <div class="appt-time">🕒 ${timeStr}</div>
-                <div class="appt-date">${dateText}</div>
-              </div>
-              <div class="appt-patient">${patientName}</div>
-              <div class="appt-procedure">${procName}</div>
-              ${isBreak ? '' : `<div class="appt-phone">📱 ${phone}</div>`}
-              ${actionsSection}
-            </div>
-          `;
-        }).join('');
       } else {
-        container.innerHTML = `<div class="empty-state" style="color:var(--red);">❌ Xatolik: ${data.error || "Noma'lum xato"}</div>`;
+        if(tbody) tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-error">❌ Xatolik</td></tr>`;
       }
     } catch (err) {
-      console.error('loadAppointments xatosi:', err);
-      container.innerHTML = '<div class="empty-state" style="color:var(--red);">❌ Ulanishda xatolik yuz berdi</div>';
+      if(tbody) tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-error">❌ Ulanishda xatolik yuz berdi</td></tr>';
     }
   }
+
+  function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.nav-item').forEach(el => {
+          el.classList.remove('bg-surface-variant');
+          el.classList.add('bg-surface-container');
+      });
+      
+      document.getElementById(`tab-${tabId}`).style.display = 'block';
+      
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if(activeNav) {
+          activeNav.classList.remove('bg-surface-container');
+          activeNav.classList.add('bg-surface-variant');
+      }
+  }
+  
+  // Set initial tab
+  document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => { switchTab('home'); }, 100);
+  });
 
   // Sidebar fast actions
 
@@ -1469,18 +1619,63 @@ input:checked + .slider:before { transform: translateX(20px); }
     });
 
     const todayAppts = todaySlots.filter(s => s.appointment && s.appointment.status !== 'CANCELLED');
-    const todayRevenue = todayAppts.reduce((sum, s) => sum + (s.appointment.procedure ? s.appointment.procedure.price : 200000), 0);
+    const todayPatients = todayAppts.filter(s => !(s.appointment.patientPhone === '+998000000000' || s.appointment.patientFirst === 'Tanaffus'));
+    
+    // Update Home Tab
+    const homeDateEl = document.getElementById('home-date');
+    if(homeDateEl) {
+        homeDateEl.textContent = new Date().toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Asia/Tashkent' });
+    }
+    
+    const homeGreeting = document.getElementById('home-greeting');
+    if(homeGreeting) {
+        if(doctorInfo) {
+            homeGreeting.textContent = `Assalomu alaykum, Dr. ${doctorInfo.lastName}`;
+        } else if(currentDoctorId) {
+            const select = document.getElementById('doc-select');
+            if(select && select.options[select.selectedIndex]) {
+                homeGreeting.textContent = `Assalomu alaykum, Dr. ${select.options[select.selectedIndex].text.split(' ')[1] || ''}`;
+            }
+        } else {
+            homeGreeting.textContent = `Assalomu alaykum`;
+        }
+    }
+    
+    const statHours = document.getElementById('stat-hours');
+    if(statHours) {
+        const hours = (todaySlots.length * INTERVAL) / 60;
+        statHours.textContent = hours > 0 ? `${hours} soat` : 'Dam olish';
+    }
+    
+    const statPatients = document.getElementById('stat-patients');
+    if(statPatients) {
+        statPatients.textContent = `${todayPatients.length} ta`;
+    }
+    
+    const statNotes = document.getElementById('stat-notes');
+    if(statNotes) {
+        // Mock pending notes for now
+        const completedAppts = todayAppts.filter(s => s.appointment.status === 'COMPLETED');
+        statNotes.textContent = completedAppts.length;
+    }
 
-    document.getElementById('stat-today-count').textContent = todayAppts.length;
+    // Previous legacy stats elements (if any still exist)
+    const statTodayCount = document.getElementById('stat-today-count');
+    if(statTodayCount) statTodayCount.textContent = todayAppts.length;
+    
     const revEl = document.getElementById('stat-today-revenue');
     if (revEl) {
+      const todayRevenue = todayAppts.reduce((sum, s) => sum + (s.appointment.procedure ? s.appointment.procedure.price : 200000), 0);
       revEl.textContent = todayRevenue.toLocaleString() + " so'm";
     }
     
-    const weekTotal = allSlots.length;
-    const weekBooked = allSlots.filter(s => s.appointment && s.appointment.status !== 'CANCELLED').length;
-    const occupancy = weekTotal > 0 ? Math.round((weekBooked / weekTotal) * 100) : 0;
-    document.getElementById('stat-week-occupancy').textContent = occupancy + "%";
+    const statOccupancy = document.getElementById('stat-week-occupancy');
+    if(statOccupancy) {
+        const weekTotal = allSlots.length;
+        const weekBooked = allSlots.filter(s => s.appointment && s.appointment.status !== 'CANCELLED').length;
+        const occupancy = weekTotal > 0 ? Math.round((weekBooked / weekTotal) * 100) : 0;
+        statOccupancy.textContent = occupancy + "%";
+    }
   }
 
   // ---- Copy/Paste Shablon (Admin Only) ----

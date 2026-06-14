@@ -165,27 +165,36 @@ const htmlTemplate = `<!DOCTYPE html>
         </div>
 
         <div class="w-full mb-12">
-            <div class="flex justify-between items-center relative max-w-md mx-auto">
+            <div class="flex justify-between items-center relative max-w-2xl mx-auto">
                 <!-- Progress Line -->
                 <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-surface-container-highest rounded-full -z-10"></div>
                 
                 <!-- Steps Indicators -->
                 <div class="flex flex-col items-center gap-2 bg-background px-2" id="sb1-wrap">
                     <div id="sb1" class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-label-md transition-colors">1</div>
+                    <span class="font-label-sm text-on-surface-variant hidden sm:block">Shifokor</span>
                 </div>
                 <div class="flex flex-col items-center gap-2 bg-background px-2" id="sb2-wrap">
                     <div id="sb2" class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-label-md transition-colors">2</div>
+                    <span class="font-label-sm text-on-surface-variant hidden sm:block">Xizmat</span>
                 </div>
                 <div class="flex flex-col items-center gap-2 bg-background px-2" id="sb3-wrap">
                     <div id="sb3" class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-label-md transition-colors">3</div>
+                    <span class="font-label-sm text-on-surface-variant hidden sm:block">Vaqt</span>
                 </div>
                 <div class="flex flex-col items-center gap-2 bg-background px-2" id="sb4-wrap">
-                    <div id="sb4" class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-label-md transition-colors">
+                    <div id="sb4" class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-label-md transition-colors">4</div>
+                    <span class="font-label-sm text-on-surface-variant hidden sm:block">Tasdiqlash</span>
+                </div>
+                <div class="flex flex-col items-center gap-2 bg-background px-2" id="sb5-wrap">
+                    <div id="sb5" class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-label-md transition-colors">
                         <span class="material-symbols-outlined text-[16px]">check</span>
                     </div>
+                    <span class="font-label-sm text-on-surface-variant hidden sm:block">Tayyor</span>
                 </div>
                 <style>
-                    .step-dot.on { background: var(--color-primary) !important; color: white !important; }
+                    .step-dot.on, #sb1.on, #sb2.on, #sb3.on, #sb4.on, #sb5.on { background: var(--color-primary) !important; color: white !important; }
+                    #sb1-wrap:has(> .on) span, #sb2-wrap:has(> .on) span, #sb3-wrap:has(> .on) span, #sb4-wrap:has(> .on) span, #sb5-wrap:has(> .on) span { color: var(--color-primary); font-weight: bold; }
                 </style>
             </div>
         </div>

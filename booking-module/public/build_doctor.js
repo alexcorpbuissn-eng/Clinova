@@ -203,8 +203,16 @@ const htmlTemplate = `<!DOCTYPE html>
                 </div>
             </div>
             <div class="flex-1 px-4 space-y-2">
-                <a href="#" class="bg-secondary-container text-on-secondary-container rounded-full flex items-center gap-3 px-4 py-3 translate-x-1 transition-transform">
-                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">event_note</span>
+                <a href="#" onclick="switchTab('home')" id="nav-home" class="nav-item bg-surface-container text-on-surface-variant hover:bg-surface-variant rounded-full flex items-center gap-3 px-4 py-3 transition-colors">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span class="font-label-md">Bosh sahifa</span>
+                </a>
+                <a href="#" onclick="switchTab('appointments')" id="nav-appointments" class="nav-item bg-surface-container text-on-surface-variant hover:bg-surface-variant rounded-full flex items-center gap-3 px-4 py-3 transition-colors">
+                    <span class="material-symbols-outlined">calendar_today</span>
+                    <span class="font-label-md">Qabullar</span>
+                </a>
+                <a href="#" onclick="switchTab('schedule')" id="nav-schedule" class="nav-item bg-surface-container text-on-surface-variant hover:bg-surface-variant rounded-full flex items-center gap-3 px-4 py-3 transition-colors">
+                    <span class="material-symbols-outlined">event_note</span>
                     <span class="font-label-md">Ish Grafigi</span>
                 </a>
             </div>
@@ -218,6 +226,94 @@ const htmlTemplate = `<!DOCTYPE html>
 
         <!-- Main Content -->
         <main class="flex-1 md:ml-[260px] min-w-0 p-6 md:p-8 flex flex-col gap-6 bg-background">
+            
+            <!-- TAB: HOME -->
+            <div id="tab-home" class="tab-content" style="display:none;">
+                <header class="mb-8">
+                    <p id="home-date" class="font-label-md text-on-surface-variant mb-1"></p>
+                    <h1 class="font-headline-lg text-on-surface" id="home-greeting">Assalomu alaykum, Dr.</h1>
+                </header>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- My Schedule -->
+                    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm flex flex-col items-center text-center justify-center">
+                        <div class="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined">schedule</span>
+                        </div>
+                        <h3 class="font-label-md text-on-surface-variant mb-1">Mening Ish Vaqtim (Bugun)</h3>
+                        <p class="font-headline-md text-on-surface" id="stat-hours">...</p>
+                    </div>
+                    <!-- Today's Queue Summary -->
+                    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm flex flex-col items-center text-center justify-center">
+                        <div class="w-12 h-12 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined">groups</span>
+                        </div>
+                        <h3 class="font-label-md text-on-surface-variant mb-1">Bugungi Bemorlar</h3>
+                        <p class="font-headline-md text-on-surface" id="stat-patients">...</p>
+                    </div>
+                    <!-- Pending Notes -->
+                    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm flex flex-col items-center text-center justify-center">
+                        <div class="w-12 h-12 rounded-full bg-error-container text-on-error-container flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined">assignment_late</span>
+                        </div>
+                        <h3 class="font-label-md text-on-surface-variant mb-1">Kutilayotgan xulosalar</h3>
+                        <p class="font-headline-md text-on-surface" id="stat-notes">0</p>
+                    </div>
+                </div>
+
+                <h2 class="font-headline-md text-on-surface mb-4">Navbatdagi 3 ta Bemor</h2>
+                <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
+                    <div class="p-4 grid grid-cols-4 font-label-sm text-on-surface-variant uppercase tracking-wider border-b border-surface-variant bg-surface-container-lowest">
+                        <div>Vaqt</div>
+                        <div>Bemor</div>
+                        <div>Muolaja</div>
+                        <div>Holat</div>
+                    </div>
+                    <div id="home-next-patients" class="divide-y divide-surface-variant">
+                        <!-- Filled via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: APPOINTMENTS -->
+            <div id="tab-appointments" class="tab-content" style="display:none;">
+                <header class="flex flex-col md:flex-row justify-between items-end gap-4 mb-6">
+                    <div>
+                        <h1 class="font-headline-lg text-on-surface mb-2">Qabullar ro'yxati</h1>
+                    </div>
+                    <div class="flex gap-4 items-center">
+                        <input type="date" id="filter-date" class="py-2 px-4 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface font-body-sm outline-none focus:border-primary">
+                        <select id="filter-status" class="py-2 px-4 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface font-body-sm outline-none focus:border-primary">
+                            <option value="">Barcha holatlar</option>
+                            <option value="CONFIRMED">Tasdiqlangan</option>
+                            <option value="ARRIVED">Kelgan</option>
+                            <option value="IN_PROGRESS">Jarayonda</option>
+                            <option value="COMPLETED">Yakunlangan</option>
+                            <option value="NO_SHOW">Kelmagan</option>
+                            <option value="CANCELLED">Bekor qilingan</option>
+                        </select>
+                    </div>
+                </header>
+
+                <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-sm overflow-hidden overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-surface-container-lowest border-b border-surface-variant text-on-surface-variant font-label-sm tracking-wider uppercase">
+                                <th class="p-4 whitespace-nowrap">Vaqt</th>
+                                <th class="p-4">Bemor</th>
+                                <th class="p-4">Xizmat</th>
+                                <th class="p-4">Holat</th>
+                                <th class="p-4 text-right">Harakat</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointments-tbody" class="divide-y divide-surface-variant font-body-md text-on-surface">
+                            <!-- JS fills -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB: SCHEDULE -->
+            <div id="tab-schedule" class="tab-content" style="display:none;">
             <!-- Header Section -->
             <header class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-4 border-b border-surface-variant">
                 <div>
@@ -277,6 +373,7 @@ const htmlTemplate = `<!DOCTYPE html>
                     </div>
                 </section>
             </div>
+            </div> <!-- End Tab Schedule -->
         </main>
     </div>
 

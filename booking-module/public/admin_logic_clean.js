@@ -312,7 +312,7 @@
         contentEl.style.display = 'block';
       }
 
-      if (tab === 'appointments') loadAppointments();
+      if (tab === 'appointments' || tab === 'dashboard') loadAppointments();
       if (tab === 'patients') loadPatients();
       if (tab === 'doctors') loadDoctors();
       if (tab === 'users') loadUsers();

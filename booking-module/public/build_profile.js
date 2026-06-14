@@ -146,14 +146,31 @@ const htmlTemplate = `<!DOCTYPE html>
               U
             </div>
             <h1 id="sidebar-name" class="font-headline-md text-on-surface text-center mb-1">Foydalanuvchi</h1>
+            <p class="font-label-sm text-outline mb-2">ID: <span id="sidebar-id">Bemor ID Yuklanmoqda...</span></p>
             <p id="sidebar-phone" class="font-body-sm text-on-surface-variant text-center mb-6">+998 ...</p>
             
+            <button class="bg-surface-variant text-on-surface-variant border border-outline-variant font-label-md px-6 py-2 rounded-full hover:bg-surface-container-high transition-colors mb-6 w-full flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">send</span> Telegram orqali bog'lanish
+            </button>
+            
+            <!-- Vitals mini cards -->
+            <div class="w-full flex gap-3 mb-6">
+                <div class="flex-1 bg-surface-container-low p-3 rounded-xl border border-surface-variant text-center">
+                    <p class="font-label-sm text-outline">Qon guruhi</p>
+                    <p class="font-headline-sm text-on-surface">O+</p>
+                </div>
+                <div class="flex-1 bg-surface-container-low p-3 rounded-xl border border-surface-variant text-center">
+                    <p class="font-label-sm text-outline">Og'irlik</p>
+                    <p class="font-headline-sm text-on-surface">75 kg</p>
+                </div>
+            </div>
+            
             <div class="w-full space-y-2">
-              <button onclick="switchProfileTab('profile', this)" class="sidebar-link active flex w-full items-center gap-3 p-3 rounded-lg bg-surface hover:bg-surface-container-low transition-colors text-left text-on-surface font-label-md">
-                <span class="material-symbols-outlined text-[18px]">person</span> Ma'lumotlarim
-              </button>
-              <button onclick="switchProfileTab('appointments', this)" class="sidebar-link flex w-full items-center gap-3 p-3 rounded-lg bg-surface hover:bg-surface-container-low transition-colors text-left text-on-surface font-label-md">
+              <button onclick="switchProfileTab('appointments', this)" class="sidebar-link active flex w-full items-center gap-3 p-3 rounded-lg bg-surface hover:bg-surface-container-low transition-colors text-left text-on-surface font-label-md">
                 <span class="material-symbols-outlined text-[18px]">calendar_today</span> Mening Qabullarim
+              </button>
+              <button onclick="switchProfileTab('profile', this)" class="sidebar-link flex w-full items-center gap-3 p-3 rounded-lg bg-surface hover:bg-surface-container-low transition-colors text-left text-on-surface font-label-md">
+                <span class="material-symbols-outlined text-[18px]">person</span> Ma'lumotlarim
               </button>
               
               <button onclick="logout()" class="flex w-full items-center gap-3 p-3 rounded-lg bg-error-container text-on-error-container hover:bg-error hover:text-on-error transition-colors mt-4 text-left font-label-md">
@@ -184,8 +201,31 @@ const htmlTemplate = `<!DOCTYPE html>
         <div id="err" class="msg"></div>
         <div id="success" class="msg"></div>
 
-        <!-- Tab 1: Profile Info -->
-        <section id="tab-profile" class="profile-tab-content active bg-surface-container-lowest rounded-xl p-6 soft-shadow border border-surface-variant">
+        <!-- Tab 1: Appointments -->
+        <section id="tab-appointments" class="profile-tab-content active">
+          
+          <div class="flex justify-between items-end mb-6">
+            <div>
+              <h2 class="font-headline-lg text-on-surface">Kelgusi Tashriflar</h2>
+              <p class="font-body-sm text-on-surface-variant mt-1">Faol qabullaringiz ro'yxati</p>
+            </div>
+          </div>
+
+          <div id="cancel-info" class="p-4 rounded-lg text-body-sm mb-6 bg-surface-variant border border-outline-variant" style="display:none;"></div>
+
+          <div id="appt-container" class="space-y-4">
+            <div class="text-center py-10 text-on-surface-variant">Yuklanmoqda...</div>
+          </div>
+
+          <div class="mt-10 bg-surface-container-lowest rounded-xl p-6 soft-shadow border border-surface-variant">
+            <h3 class="font-headline-md text-on-surface mb-4 border-b border-surface-variant pb-2">Tashriflar Tarixi</h3>
+            <div id="drafts-container" class="space-y-4"></div>
+          </div>
+
+        </section>
+
+        <!-- Tab 2: Profile Info -->
+        <section id="tab-profile" class="profile-tab-content bg-surface-container-lowest rounded-xl p-6 soft-shadow border border-surface-variant">
           <div class="mb-6 border-b border-surface-variant pb-4">
             <h2 class="font-headline-lg text-on-surface">Shaxsiy ma'lumotlar</h2>
             <p class="font-body-sm text-on-surface-variant mt-1">Profil ma'lumotlaringizni tahrirlashingiz mumkin.</p>
@@ -216,28 +256,6 @@ const htmlTemplate = `<!DOCTYPE html>
           </form>
         </section>
 
-        <!-- Tab 2: Appointments -->
-        <section id="tab-appointments" class="profile-tab-content">
-          
-          <div class="flex justify-between items-end mb-6">
-            <div>
-              <h2 class="font-headline-lg text-on-surface">Mening qabullarim</h2>
-              <p class="font-body-sm text-on-surface-variant mt-1">Faol qabullaringiz ro'yxati</p>
-            </div>
-          </div>
-
-          <div id="cancel-info" class="p-4 rounded-lg text-body-sm mb-6 bg-surface-variant border border-outline-variant" style="display:none;"></div>
-
-          <div id="appt-container" class="space-y-4">
-            <div class="text-center py-10 text-on-surface-variant">Yuklanmoqda...</div>
-          </div>
-
-          <div class="mt-10">
-            <h3 class="font-headline-md text-on-surface mb-4">Rejalashtirilgan muolajalar (Saqlangan)</h3>
-            <div id="drafts-container" class="space-y-4"></div>
-          </div>
-
-        </section>
 
       </div>
     </div>

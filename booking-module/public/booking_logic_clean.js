@@ -8,13 +8,25 @@ let selDoctor = null, selProc = null, selSlot = null, patientId = null, selDateK
 function setStep(n) {
   [1,2,3].forEach(i => {
     document.getElementById('s'+i).style.display = i===n?'':'none';
-    document.getElementById('sb'+i).classList.toggle('on', i<=n);
+  });
+  
+  // Visual mapping:
+  // n=1 -> sb1
+  // n=2 -> sb1, sb2, sb3 (Service and Time are together in s2)
+  // n=3 -> sb1, sb2, sb3, sb4 (Verify)
+  const maxSb = n === 1 ? 1 : (n === 2 ? 3 : 4);
+  [1,2,3,4,5].forEach(i => {
+    const el = document.getElementById('sb'+i);
+    if(el) el.classList.toggle('on', i <= maxSb);
   });
 }
 function showSuccess(detail) {
   ['s1','s2','s3'].forEach(id => document.getElementById(id).style.display='none');
   document.getElementById('s-success').style.display='';
-  ['sb1','sb2','sb3','sb4'].forEach(id => document.getElementById(id).classList.add('on'));
+  [1,2,3,4,5].forEach(i => {
+    const el = document.getElementById('sb'+i);
+    if(el) el.classList.add('on');
+  });
   document.getElementById('success-detail').textContent = detail;
 }
 function err(id, msg) {
@@ -74,6 +86,27 @@ async function loadDoctors() {
     const {doctors} = await fetch(`${API}/api/public/doctors`).then(r=>r.json());
     if (!doctors?.length) { c.innerHTML='<div class="state-msg">Shifokorlar topilmadi.</div>'; return; }
     const g = document.createElement('div'); g.className='doctor-grid';
+    
+    // "No Preference" card
+    const noPrefCard = document.createElement('div'); noPrefCard.className='doc-card';
+    noPrefCard.innerHTML=`
+      <div class="doc-card-check">✓</div>
+      <div style="width:100%;aspect-ratio:1/1;background:linear-gradient(135deg,#e0f7f5,#b2ebe4);display:flex;align-items:center;justify-content:center;font-size:3rem;color:var(--teal-dark);">
+        <span class="material-symbols-outlined" style="font-size:3rem;">group</span>
+      </div>
+      <div class="doc-card-body">
+        <div class="doc-card-name">Farqi yo'q</div>
+        <div class="doc-card-spec">Istalgan shifokor</div>
+      </div>`;
+    noPrefCard.onclick = () => { 
+      document.querySelectorAll('.doc-card').forEach(x=>x.classList.remove('sel')); 
+      noPrefCard.classList.add('sel'); 
+      selDoctor=doctors[0]; // just pick the first doctor for "No Preference" logic under the hood
+      loadProcedures(selDoctor.id); 
+      setStep(2); 
+    };
+    g.appendChild(noPrefCard);
+
     doctors.forEach(d => {
       const card = document.createElement('div'); card.className='doc-card';
       const avatar = d.photoUrl || `https://ui-avatars.com/api/?name=${d.firstName}+${d.lastName}&background=4bcbba&color=fff&size=300`;

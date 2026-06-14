@@ -219,6 +219,16 @@ tailwind.config = {
           <h2 class="font-headline-lg text-primary tracking-tight">Daily Operations</h2>
           <p id="top-date" class="font-body-md text-on-surface-variant mt-1">Loading date...</p>
         </div>
+        <div class="flex gap-4">
+            <div class="bg-surface-variant px-4 py-2 rounded-full font-label-md flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+                <span id="stat-expected">...</span> Kutilmoqda
+            </div>
+            <div class="bg-surface-variant px-4 py-2 rounded-full font-label-md flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-primary"></span>
+                <span id="stat-completed">...</span> Yakunlangan
+            </div>
+        </div>
       </header>
 
       <div class="max-w-[1280px] mx-auto">
@@ -346,10 +356,27 @@ tailwind.config = {
                   </div>
                 </form>
               </div>
+
+              <!-- Missed Today -->
+              <div class="bg-surface-container-lowest rounded-xl p-6 soft-shadow border border-surface-variant">
+                  <h3 class="font-headline-md text-[18px] text-error mb-4 border-b border-surface-variant pb-2">Bugun Kelmaganlar</h3>
+                  <div id="missed-today-container" class="space-y-2">
+                      <div class="empty-state py-4 text-sm">Yuklanmoqda...</div>
+                  </div>
+              </div>
             </div>
 
             <!-- Right Column: Today's Schedule -->
             <div class="lg:col-span-8 flex flex-col gap-6">
+              
+              <!-- In Progress Section -->
+              <div class="bg-surface-container-lowest rounded-xl p-6 soft-shadow border border-surface-variant border-l-4 border-l-secondary">
+                  <h3 class="font-headline-md text-[18px] mb-4 border-b border-surface-variant pb-2 text-secondary">Jarayonda (Xonalarda)</h3>
+                  <div id="in-progress-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div class="empty-state py-4 text-sm">Hozirda muolajada bemorlar yo'q</div>
+                  </div>
+              </div>
+
               <div class="bg-surface-container-lowest rounded-xl p-6 soft-shadow border border-surface-variant">
                 <div class="flex justify-between items-center mb-6">
                   <h3 class="font-headline-md text-[20px]">Bugungi Qabullar</h3>
@@ -1111,6 +1138,33 @@ tailwind.config = {
       }
       
       container.innerHTML = html;
+      
+      // Update counters
+      const statExpectedEl = document.getElementById('stat-expected');
+      const statCompletedEl = document.getElementById('stat-completed');
+      if (statExpectedEl) statExpectedEl.textContent = upcoming.length;
+      
+      // To get completed for today, we might need data from loadVisits, or we can just count completed from data.appointments if returned. 
+      // Actually, data.appointments might not return completed for the day depending on API. Let's just update expected.
+      
+      // Update missed today
+      const missedContainer = document.getElementById('missed-today-container');
+      if (missedContainer) {
+          if (missed.length === 0) {
+              missedContainer.innerHTML = '<div class="empty-state py-4 text-sm">Barcha bemorlar kelgan</div>';
+          } else {
+              missedContainer.innerHTML = missed.map(m => `
+                <div class="flex justify-between items-center p-3 bg-error-container rounded-lg border border-[#fecdd3]">
+                    <div>
+                        <p class="font-label-sm text-error">${m.patient ? m.patient.firstName : (m.patientFirst || 'Noma\'lum')}</p>
+                        <p class="text-xs text-error opacity-80">${new Date(m.slot.startTime).toLocaleTimeString('uz-UZ', { hour:'2-digit', minute:'2-digit' })}</p>
+                    </div>
+                    <button class="text-xs bg-error text-white px-2 py-1 rounded" onclick="openContactedModal('${m.id}', '${encodeURIComponent(JSON.stringify(m))}')">Bog'lanish</button>
+                </div>
+              `).join('');
+          }
+      }
+
     } catch (err) {
       console.error(err);
       container.innerHTML = '<div class="empty-state" style="color:red;">Xatolik yuz berdi.</div>';
@@ -1920,14 +1974,17 @@ tailwind.config = {
   function renderActiveVisits() {
     const section = document.getElementById('active-treatments-section');
     const container = document.getElementById('active-visits-container');
+    const inProgressContainer = document.getElementById('in-progress-container');
     
     if (activeVisits.length === 0) {
-      section.style.display = 'none';
+      if(section) section.style.display = 'none';
+      if(inProgressContainer) inProgressContainer.innerHTML = '<div class="empty-state py-4 text-sm">Hozirda muolajada bemorlar yo\'q</div>';
       return;
     }
 
-    section.style.display = 'block';
-    container.innerHTML = activeVisits.map(v => `
+    if(section) section.style.display = 'block';
+    
+    const htmlCards = activeVisits.map(v => `
       <div class="active-card" id="card-${v.id}">
         <div style="display:flex; justify-content:space-between; align-items:start;">
           <div>
@@ -1944,6 +2001,10 @@ tailwind.config = {
         </div>
       </div>
     `).join('');
+    
+    if(container) container.innerHTML = htmlCards;
+    if(inProgressContainer) inProgressContainer.innerHTML = htmlCards;
+    
     updateTimers();
   }
 
@@ -2041,8 +2102,12 @@ tailwind.config = {
       if (!data.success) return;
       
       const history = data.visits.filter(v => v.status === 'COMPLETED');
+      
+      const statCompletedEl = document.getElementById('stat-completed');
+      if (statCompletedEl) statCompletedEl.textContent = history.length;
+      
       if (history.length === 0) {
-        container.innerHTML = '<div class="empty-state">Hozircha tashriflar yo\'q.</div>';
+        if(container) container.innerHTML = '<div class="empty-state">Hozircha tashriflar yo\'q.</div>';
         return;
       }
 
@@ -2074,12 +2139,12 @@ tailwind.config = {
           <td>${sourceBadge}</td>
         </tr>`;
       }).join('');
-      container.innerHTML = `<table>
+      if(container) container.innerHTML = `<table>
         <thead><tr><th>Vaqt</th><th>Bemor</th><th>Shifokor</th><th>Xizmat</th><th>To'lov</th><th>Tur</th></tr></thead>
         <tbody>${tbody}</tbody>
       </table>`;
     } catch {
-      container.innerHTML = '<div class="empty-state" style="color:red;">Xatolik yuz berdi.</div>';
+      if(container) container.innerHTML = '<div class="empty-state" style="color:red;">Xatolik yuz berdi.</div>';
     }
   }
 

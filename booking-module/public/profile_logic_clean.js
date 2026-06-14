@@ -52,6 +52,9 @@ const API = '';
         document.getElementById('sidebar-name').textContent = `${data.patient.firstName || ''} ${data.patient.lastName || ''}`;
         document.getElementById('sidebar-avatar').textContent = (data.patient.firstName || 'B')[0].toUpperCase();
         
+        const idEl = document.getElementById('sidebar-id');
+        if(idEl) idEl.textContent = data.patient.id || patientId;
+        
         // Populate stats
         if (data.stats) {
           document.getElementById('hist-total-visits').textContent = data.stats.totalVisits;
