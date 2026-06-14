@@ -299,17 +299,25 @@
         document.getElementById('admin-sidebar').classList.remove('open');
         document.querySelector('.sidebar-overlay').classList.remove('active');
       }
-      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-      event.currentTarget.classList.add('active');
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       
-      // Some elements have display:none initially, others rely on .active
+      // Reset all nav items
+      document.querySelectorAll('.nav-item').forEach(el => {
+          el.classList.remove('active', 'bg-secondary-container', 'text-on-secondary-container');
+          el.classList.add('text-on-surface-variant', 'hover:bg-surface-container-high');
+      });
+      
+      // Show active tab
       document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-      
       const contentEl = document.getElementById(`tab-${tab}`);
       if (contentEl) {
-        contentEl.classList.add('active');
         contentEl.style.display = 'block';
+      }
+
+      // Highlight active nav
+      const navEl = document.getElementById(`nav-${tab}`);
+      if (navEl) {
+          navEl.classList.remove('text-on-surface-variant', 'hover:bg-surface-container-high');
+          navEl.classList.add('active', 'bg-secondary-container', 'text-on-secondary-container');
       }
 
       if (tab === 'appointments' || tab === 'dashboard') loadAppointments();
@@ -612,16 +620,16 @@
           tbody.innerHTML = data.patients.map(p => {
             const escapedName = `${p.firstName.replace(/'/g, "\\'")} ${p.lastName.replace(/'/g, "\\'")}`;
             return `
-              <tr>
-                <td><strong>${p.firstName} ${p.lastName}</strong></td>
-                <td>${p.phone}</td>
-                <td>${p.telegramUsername ? '@' + p.telegramUsername : (p.telegramChatId || 'Yo\'q')}</td>
-                <td>${p.cancellationsToday > 0 ? `<span style="color:var(--red)">${p.cancellationsToday}</span>` : '0'}</td>
-                <td>${p._count.appointments}</td>
-                <td>
-                  <button class="btn" style="padding:6px 12px; font-size:0.8rem; width:auto; background:var(--navy); border-color:var(--navy)" 
+              <tr class="hover:bg-surface-container/30 transition-colors">
+                <td class="py-4 px-6 border-r border-outline-variant/30 font-medium"><strong>${p.firstName} ${p.lastName}</strong></td>
+                <td class="py-4 px-6 border-r border-outline-variant/30 text-center font-mono text-xs">${p.phone}</td>
+                <td class="py-4 px-6 border-r border-outline-variant/30 text-center text-primary">${p.telegramUsername ? '@' + p.telegramUsername : (p.telegramChatId || '<span class="text-on-surface-variant opacity-50">Yo\'q</span>')}</td>
+                <td class="py-4 px-6 border-r border-outline-variant/30 text-center">${p.cancellationsToday > 0 ? `<span class="bg-error-container text-on-error-container px-2 py-1 rounded-full text-xs font-bold">${p.cancellationsToday}</span>` : '<span class="text-outline-variant">-</span>'}</td>
+                <td class="py-4 px-6 border-r border-outline-variant/30 text-center font-bold">${p._count.appointments}</td>
+                <td class="py-4 px-6 text-center">
+                  <button class="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-label-sm hover:bg-primary hover:text-on-primary transition-colors flex items-center gap-2 mx-auto" 
                           onclick="promotePatient('${p.telegramPhone}', '${escapedName}')">
-                    🔑 Lavozim
+                    <span class="material-symbols-outlined text-[16px]">key</span> Lavozim
                   </button>
                 </td>
               </tr>

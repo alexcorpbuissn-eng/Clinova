@@ -1555,16 +1555,16 @@ input:checked + .slider:before { transform: translateX(20px); }
   function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
       document.querySelectorAll('.nav-item').forEach(el => {
-          el.classList.remove('bg-surface-variant');
-          el.classList.add('bg-surface-container');
+          el.classList.remove('bg-secondary-container', 'text-on-secondary-container', 'active');
+          el.classList.add('text-on-surface-variant', 'hover:bg-surface-variant');
       });
       
       document.getElementById(`tab-${tabId}`).style.display = 'block';
       
       const activeNav = document.getElementById(`nav-${tabId}`);
       if(activeNav) {
-          activeNav.classList.remove('bg-surface-container');
-          activeNav.classList.add('bg-surface-variant');
+          activeNav.classList.remove('text-on-surface-variant', 'hover:bg-surface-variant');
+          activeNav.classList.add('bg-secondary-container', 'text-on-secondary-container', 'active');
       }
   }
   

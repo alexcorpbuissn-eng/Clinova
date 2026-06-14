@@ -172,52 +172,52 @@ const htmlTemplate = `<!DOCTYPE html>
             
             <ul class="flex-1 overflow-y-auto px-2 space-y-1">
                 <li>
-                    <button onclick="switchTab('home')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full active bg-secondary-container text-on-secondary-container">
+                    <button id="nav-home" onclick="switchTab('home')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full active bg-secondary-container text-on-secondary-container">
                         <span class="material-symbols-outlined">home</span> Bosh sahifa
                     </button>
                 </li>
                 <li>
-                    <button onclick="switchTab('dashboard')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
+                    <button id="nav-dashboard" onclick="switchTab('dashboard')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
                         <span class="material-symbols-outlined">dashboard</span> Asosiy panel
                     </button>
                 </li>
                 <li>
-                    <button onclick="switchTab('appointments')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
+                    <button id="nav-appointments" onclick="switchTab('appointments')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
                         <span class="material-symbols-outlined">calendar_today</span> Qabullar
                     </button>
                 </li>
                 <li>
-                    <button onclick="switchTab('schedule')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
+                    <button id="nav-schedule" onclick="switchTab('schedule')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
                         <span class="material-symbols-outlined">event_note</span> Jadvallar
                     </button>
                 </li>
                 <li>
-                    <button onclick="switchTab('patients')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
+                    <button id="nav-patients" onclick="switchTab('patients')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
                         <span class="material-symbols-outlined">person</span> Bemorlar
                     </button>
                 </li>
                 <li>
-                    <button onclick="switchTab('doctors')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
+                    <button id="nav-doctors" onclick="switchTab('doctors')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
                         <span class="material-symbols-outlined">medical_services</span> Shifokorlar
                     </button>
                 </li>
                 <li>
-                    <button onclick="switchTab('users')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
+                    <button id="nav-users" onclick="switchTab('users')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
                         <span class="material-symbols-outlined">group</span> Foydalanuvchilar
                     </button>
                 </li>
                 <li>
-                    <button onclick="switchTab('procedures')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
+                    <button id="nav-procedures" onclick="switchTab('procedures')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
                         <span class="material-symbols-outlined">settings_heart</span> Xizmatlar
                     </button>
                 </li>
                 <li>
-                    <button onclick="switchTab('leaves')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
+                    <button id="nav-leaves" onclick="switchTab('leaves')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
                         <span class="material-symbols-outlined">event_busy</span> Dam Olish
                     </button>
                 </li>
                 <li>
-                    <button onclick="switchTab('purchases')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
+                    <button id="nav-purchases" onclick="switchTab('purchases')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
                         <span class="material-symbols-outlined">inventory_2</span> Sklad
                     </button>
                 </li>
@@ -387,8 +387,46 @@ const htmlTemplate = `<!DOCTYPE html>
             </div>
 
             <div id="tab-schedule" class="tab-content hidden">
-                <h3 class="font-headline-md text-on-surface mb-6">Ish Jadvallari</h3>
-                <div id="admin-schedule-container"></div>
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="font-headline-md text-on-surface">Ish Jadvallari</h3>
+                        <p class="font-body-sm text-on-surface-variant">Shifokorlarning ish kunlari va vaqtlarini boshqarish</p>
+                    </div>
+                    <div class="w-64">
+                        <select id="schedule-doc-select" onchange="switchScheduleDoctor(this.value)" class="w-full bg-surface border-outline-variant rounded-lg px-4 py-2 focus:border-primary outline-none">
+                            <option value="">Shifokor yuklanmoqda...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Overview Dashboard when no doctor selected -->
+                <div id="admin-schedule-overview-dashboard" class="space-y-6">
+                    <!-- JS will populate overview here -->
+                </div>
+
+                <!-- Month Calendar Header (when doctor selected) -->
+                <div id="admin-month-calendar-wrap" class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/30 shadow-sm mb-6" style="display:none;">
+                    <div class="flex items-center justify-between mb-6">
+                        <h4 class="font-headline-sm text-on-surface" id="admin-calendar-month-year">...</h4>
+                        <div class="flex items-center gap-2">
+                            <button onclick="adminCalendarPrevMonth()" class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </button>
+                            <button onclick="adminCalendarNextMonth()" class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-7 gap-2 mb-2 text-center font-label-sm text-on-surface-variant uppercase">
+                        <div>Du</div><div>Se</div><div>Ch</div><div>Pa</div><div>Ju</div><div>Sh</div><div>Ya</div>
+                    </div>
+                    <div id="admin-calendar-grid" class="grid grid-cols-7 gap-2 text-center text-body-sm">
+                        <!-- JS fills days -->
+                    </div>
+                </div>
+
+                <!-- Schedule container (when doctor selected) -->
+                <div id="admin-schedule-container" style="display:none;"></div>
             </div>
 
             <div id="tab-patients" class="tab-content hidden">
@@ -399,13 +437,13 @@ const htmlTemplate = `<!DOCTYPE html>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase">
-                                    <th class="py-3 px-6">F.I.O</th>
-                                    <th class="py-3 px-6">Telefon</th>
-                                    <th class="py-3 px-6">Telegram</th>
-                                    <th class="py-3 px-6">Bekor qilingan</th>
-                                    <th class="py-3 px-6">Qabullar</th>
-                                    <th class="py-3 px-6 text-right">Lavozim</th>
+                                <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase border-b border-outline-variant/30">
+                                    <th class="py-4 px-6 border-r border-outline-variant/30">F.I.O</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/30 text-center">Telefon</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/30 text-center">Telegram</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/30 text-center">Bekor qilingan</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/30 text-center">Qabullar</th>
+                                    <th class="py-4 px-6 text-center">Lavozim</th>
                                 </tr>
                             </thead>
                             <tbody id="pat-tbody" class="divide-y divide-outline-variant/20 text-body-sm text-on-surface">
