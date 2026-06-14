@@ -94,17 +94,17 @@ const globalStyles = `
 .weekly-header-cell.today .day-name { color: var(--color-primary); }
 .weekly-header-cell.today .day-date { color: var(--color-primary); }
 
-.time-cell { height: 60px; display: flex; align-items: start; justify-content: center; padding-top: 8px; font-size: 12px; color: var(--color-outline); border-bottom: 1px solid var(--color-surface-variant); }
+.time-cell { height: 60px; display: flex; align-items: start; justify-content: center; padding-top: 8px; font-size: 13px; font-weight: 500; color: var(--color-outline); border-bottom: 1px solid var(--color-surface-variant); }
 .day-col { border-right: 1px solid var(--color-surface-variant); }
 
 .grid-cell { height: 60px; border-bottom: 1px solid var(--color-surface-variant); padding: 2px; position: relative; }
-.slot-btn { width: 100%; height: 100%; border-radius: 6px; border: 1px dashed var(--color-outline-variant); background: transparent; font-size: 10px; font-weight: 600; color: var(--color-on-surface-variant); display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; padding: 2px; cursor: pointer; transition: all 0.2s; }
-.slot-btn:hover:not(.disabled):not(.booked):not(.active) { border-color: var(--color-primary); background: var(--color-surface-container-high); }
-.slot-btn.active { background: rgba(15, 82, 56, 0.1); border: 1px solid var(--color-primary); color: var(--color-primary); }
+.slot-btn { width: 100%; height: 100%; border-radius: 8px; background: transparent; font-size: 10px; font-weight: 600; color: transparent; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; padding: 2px; cursor: pointer; transition: all 0.2s; }
+.slot-btn:hover:not(.disabled):not(.booked):not(.active) { background: var(--color-primary-container); color: var(--color-on-primary-container); opacity: 0.8; }
+.slot-btn.active { background: rgba(15, 82, 56, 0.1); border: 2px solid var(--color-primary); color: var(--color-primary); }
 .slot-btn.pending { background: var(--color-secondary-container); border: 1px dashed var(--color-secondary); color: var(--color-on-secondary-container); }
-.slot-btn.disabled { opacity: 0.3; cursor: not-allowed; border: none; background: var(--color-surface-container); }
+.slot-btn.disabled { background: repeating-linear-gradient(45deg, var(--color-surface-container-lowest), var(--color-surface-container-lowest) 10px, var(--color-surface-variant) 10px, var(--color-surface-variant) 20px); opacity: 0.4; cursor: not-allowed; border: none; }
 
-.slot-btn.booked { border: 1px solid var(--color-outline-variant); text-align: left; align-items: flex-start; padding: 4px; }
+.slot-btn.booked { border: 1px solid var(--color-outline-variant); border-radius: 8px; text-align: left; align-items: flex-start; padding: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
 .slot-btn.booked.status-open { background: var(--color-secondary-container); border-left: 3px solid var(--color-secondary); color: var(--color-on-secondary-container); }
 .slot-btn.booked.status-busy { background: var(--color-tertiary-fixed); border-left: 3px solid var(--color-tertiary); color: var(--color-on-tertiary-fixed); }
 .slot-btn.booked.status-followup { background: #fffbeb; border-left: 3px solid #d97706; color: #b45309; }

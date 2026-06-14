@@ -263,14 +263,19 @@
         }
 
         listEl.innerHTML = patients.map(p => `
-          <div class="patient-result-item" onclick="openDoctorPatientCard('${p.id}')" style="flex-direction: row; align-items: center; justify-content: space-between; gap: 8px;">
-            <div style="display:flex; flex-direction:column; gap:2px;">
-              <span style="font-weight:600; font-size:0.88rem; color: var(--text-bright);">👤 ${p.firstName} ${p.lastName}</span>
-              <span style="font-size:0.75rem; color:var(--text-muted);">📞 ${p.phone}</span>
+          <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-4 flex items-center justify-between cursor-pointer hover:border-primary/50 hover:shadow-sm transition-all group" onclick="openDoctorPatientCard('${p.id}')">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-headline-sm uppercase border border-primary/20">
+                ${p.firstName.charAt(0)}${p.lastName ? p.lastName.charAt(0) : ''}
+              </div>
+              <div class="flex flex-col">
+                <span class="font-headline-sm text-on-surface group-hover:text-primary transition-colors">${p.firstName} ${p.lastName}</span>
+                <span class="font-body-sm text-on-surface-variant flex items-center gap-1 mt-0.5"><span class="material-symbols-outlined text-[16px] text-outline">call</span> ${p.phone}</span>
+              </div>
             </div>
-            <span style="font-size:0.75rem; background:rgba(30, 41, 59, 0.7); border:1px solid var(--border); padding:3px 8px; border-radius:12px; color:var(--text-muted); font-weight:600; white-space:nowrap;">
+            <div class="bg-tertiary-fixed text-on-tertiary-fixed px-3 py-1 rounded-full font-label-md flex items-center gap-1">
               ${p.visitCount} marta
-            </span>
+            </div>
           </div>
         `).join('');
       } else {
