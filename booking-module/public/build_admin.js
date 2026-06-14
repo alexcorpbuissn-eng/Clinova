@@ -499,12 +499,12 @@ const htmlTemplate = `<!DOCTYPE html>
                     </div>
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase">
-                                <th class="py-3 px-6">Bo'lim</th>
-                                <th class="py-3 px-6">Xizmat nomi</th>
-                                <th class="py-3 px-6">Davomiylik</th>
-                                <th class="py-3 px-6">Narx</th>
-                                <th class="py-3 px-6">Amal</th>
+                            <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase border-b border-outline-variant/50">
+                                <th class="py-4 px-6 border-r border-outline-variant/50">Bo'lim</th>
+                                <th class="py-4 px-6 border-r border-outline-variant/50">Xizmat nomi</th>
+                                <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Davomiylik</th>
+                                <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Narx (so'm)</th>
+                                <th class="py-4 px-6 text-center">Amallar</th>
                             </tr>
                         </thead>
                         <tbody id="proc-tbody" class="divide-y divide-outline-variant/20 text-body-sm text-on-surface"></tbody>
