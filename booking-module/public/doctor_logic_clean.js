@@ -185,7 +185,7 @@
 
   async function showApp() {
     document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
+    document.getElementById('app').style.display = 'flex';
     
     if (userRole === 'ADMIN') {
       document.getElementById('admin-doc-selector').style.display = 'flex';

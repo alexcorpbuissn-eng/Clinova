@@ -178,7 +178,7 @@ const API = '';
 
   async function showApp() {
     document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
+    document.getElementById('app').style.display = 'flex';
     initDatePicker();
     initServiceSelect();
     updateClock();
