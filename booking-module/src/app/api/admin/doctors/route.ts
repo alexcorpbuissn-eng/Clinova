@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { generateSlotsForDoctor } from '@/lib/slot-generator';
 
 async function requireAdmin(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { firstName, lastName, specialty, bio, photoUrl, telegramUsername } = await request.json();
+    const { firstName, lastName, specialty, bio, photoUrl, telegramUsername, workStartTime, workEndTime, breakStartTime, breakEndTime, workingDays } = await request.json();
     if (!firstName || !lastName || !specialty) {
       return NextResponse.json({ error: 'firstName, lastName, specialty are required' }, { status: 400 });
     }
@@ -56,9 +57,17 @@ export async function POST(request: NextRequest) {
         bio, 
         photoUrl,
         telegramUsername: cleanUsername,
-        telegramChatId
+        telegramChatId,
+        workStartTime: workStartTime || "09:00",
+        workEndTime: workEndTime || "18:00",
+        breakStartTime: breakStartTime || "13:00",
+        breakEndTime: breakEndTime || "14:00",
+        workingDays: workingDays || [1, 2, 3, 4, 5, 6]
       },
     });
+
+    // Auto-generate initial slots for the new doctor
+    await generateSlotsForDoctor(doctor.id);
 
     return NextResponse.json({ success: true, doctor, chatFound: !!telegramChatId }, { status: 201 });
   } catch (error: any) {

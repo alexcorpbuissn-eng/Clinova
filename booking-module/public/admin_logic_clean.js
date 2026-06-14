@@ -903,6 +903,10 @@
         document.getElementById('edit-doc-bio').value = doc.bio || '';
         document.getElementById('edit-doc-photo').value = doc.photoUrl || '';
         document.getElementById('edit-doc-tg').value = doc.telegramUsername || '';
+        document.getElementById('edit-doc-work-start').value = doc.workStartTime || '09:00';
+        document.getElementById('edit-doc-work-end').value = doc.workEndTime || '18:00';
+        document.getElementById('edit-doc-break-start').value = doc.breakStartTime || '13:00';
+        document.getElementById('edit-doc-break-end').value = doc.breakEndTime || '14:00';
         
         if (doc.photoUrl) {
           document.getElementById('photo-preview-img').src = doc.photoUrl;
@@ -922,6 +926,10 @@
         document.getElementById('edit-doc-bio').value = '';
         document.getElementById('edit-doc-photo').value = '';
         document.getElementById('edit-doc-tg').value = '';
+        document.getElementById('edit-doc-work-start').value = '09:00';
+        document.getElementById('edit-doc-work-end').value = '18:00';
+        document.getElementById('edit-doc-break-start').value = '13:00';
+        document.getElementById('edit-doc-break-end').value = '14:00';
         
         document.getElementById('photo-preview-img').src = '';
         document.getElementById('photo-preview-container').style.display = 'none';
@@ -1034,6 +1042,10 @@
       const bio = document.getElementById('edit-doc-bio').value;
       const photoUrl = document.getElementById('edit-doc-photo').value;
       const telegramUsername = document.getElementById('edit-doc-tg').value;
+      const workStartTime = document.getElementById('edit-doc-work-start').value;
+      const workEndTime = document.getElementById('edit-doc-work-end').value;
+      const breakStartTime = document.getElementById('edit-doc-break-start').value;
+      const breakEndTime = document.getElementById('edit-doc-break-end').value;
       
       if(!firstName || !lastName || !specialty) {
         alert("Ism, familiya va mutaxassislikni kiriting!");
@@ -1046,10 +1058,10 @@
           res = await fetch(`/api/admin/doctors/${id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
-            body: JSON.stringify({ firstName, lastName, specialty, bio, photoUrl, telegramUsername })
+            body: JSON.stringify({ firstName, lastName, specialty, bio, photoUrl, telegramUsername, workStartTime, workEndTime, breakStartTime, breakEndTime })
           }).then(r => r.json());
         } else {
-          res = await apiPost('/api/admin/doctors', { firstName, lastName, specialty, bio, photoUrl, telegramUsername });
+          res = await apiPost('/api/admin/doctors', { firstName, lastName, specialty, bio, photoUrl, telegramUsername, workStartTime, workEndTime, breakStartTime, breakEndTime });
         }
 
         if(res.success) {

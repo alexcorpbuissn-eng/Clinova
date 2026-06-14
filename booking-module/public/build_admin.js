@@ -118,15 +118,15 @@ const globalStyles = `
     .badge-cancelled-patient { background-color: var(--color-error-container); color: var(--color-on-error-container); }
     .badge-noshow { background-color: var(--color-error-container); color: var(--color-on-error-container); }
     /* SCHEDULE GRID CSS */
-    .grid-cell { height: 60px; border-bottom: 1px solid var(--color-surface-variant); padding: 2px; position: relative; }
-    .time-cell { height: 60px; display: flex; align-items: flex-start; justify-content: center; font-size: 11px; font-weight: 500; color: var(--color-on-surface-variant); padding-top: 4px; border-bottom: 1px solid var(--color-surface-variant); }
-    .slot-btn { width: 100%; height: 100%; border-radius: 6px; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; transition: all 0.2s; border: 1px dashed var(--color-outline-variant); background: transparent; color: var(--color-on-surface-variant); }
-    .slot-btn:hover:not(.disabled) { background: var(--color-surface-variant); border-style: solid; }
-    .slot-btn.active { background: var(--color-primary-fixed); border: 1px solid var(--color-primary-fixed-dim); color: var(--color-on-primary-fixed); }
-    .slot-btn.booked { background: var(--color-error-container); border: 1px solid var(--color-error); color: var(--color-on-error-container); cursor: not-allowed; }
-    .slot-btn.pending { background: var(--color-tertiary-container); border: 2px dashed var(--color-primary); color: var(--color-on-tertiary-container); }
-    .slot-btn.disabled { opacity: 0.5; cursor: not-allowed; background: var(--color-surface-container-high); border: 1px solid var(--color-outline-variant); }
-    .day-col { border-right: 1px solid var(--color-outline-variant); }
+    .grid-cell { height: 60px; border-bottom: 1px solid #bfc9c1; padding: 2px; position: relative; }
+    .time-cell { height: 60px; display: flex; align-items: flex-start; justify-content: center; font-size: 11px; font-weight: 500; color: #404943; padding-top: 4px; border-bottom: 1px solid #e2e3df; }
+    .slot-btn { width: 100%; height: 100%; border-radius: 6px; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; transition: all 0.2s; border: 1px dashed #bfc9c1; background: transparent; color: #404943; }
+    .slot-btn:hover:not(.disabled) { background: #e2e3df; border-style: solid; }
+    .slot-btn.active { background: #b1f0ce; border: 1px solid #85d7ad; color: #002114; }
+    .slot-btn.booked { background: #ffdad6; border: 1px solid #ba1a1a; color: #93000a; cursor: not-allowed; }
+    .slot-btn.pending { background: #4d6553; border: 2px dashed #0f5238; color: #c6e1ca; }
+    .slot-btn.disabled { opacity: 0.5; cursor: not-allowed; background: #e7e9e5; border: 1px solid #bfc9c1; }
+    .day-col { border-right: 1px solid #bfc9c1; }
 </style>
 `;
 
@@ -659,10 +659,34 @@ const htmlTemplate = `<!DOCTYPE html>
                     </div>
                 </div>
                 <div>
-                    <label class="block font-label-md text-on-surface-variant mb-1">Telegram Username (ixtiyoriy)</label>
-                    <input type="text" id="edit-doc-tg" placeholder="@username" class="w-full px-4 py-2 rounded-lg border border-outline-variant focus:ring-primary">
-                </div>
-                <button onclick="submitDoctorModal()" class="w-full bg-primary text-on-primary py-3 rounded-full font-label-md hover:bg-primary-container">Saqlash</button>
+                  <div>
+                      <label class="block font-label-md text-on-surface-variant mb-1">Telegram Username (ixtiyoriy)</label>
+                      <input type="text" id="edit-doc-tg" placeholder="@username" class="w-full px-4 py-2 rounded-lg border border-outline-variant focus:ring-primary">
+                  </div>
+                  
+                  <div class="border-t border-outline-variant/30 pt-4 mt-4">
+                      <h4 class="font-label-lg text-primary mb-3">Ish vaqti va Tushlik (Avtomatik to'ldirish uchun)</h4>
+                      <div class="grid grid-cols-2 gap-4">
+                          <div>
+                              <label class="block font-label-md text-on-surface-variant mb-1">Ish boshlanishi</label>
+                              <input type="time" id="edit-doc-work-start" value="09:00" class="w-full px-4 py-2 rounded-lg border border-outline-variant focus:ring-primary">
+                          </div>
+                          <div>
+                              <label class="block font-label-md text-on-surface-variant mb-1">Ish tugashi</label>
+                              <input type="time" id="edit-doc-work-end" value="18:00" class="w-full px-4 py-2 rounded-lg border border-outline-variant focus:ring-primary">
+                          </div>
+                          <div>
+                              <label class="block font-label-md text-on-surface-variant mb-1">Tushlik boshlanishi</label>
+                              <input type="time" id="edit-doc-break-start" value="13:00" class="w-full px-4 py-2 rounded-lg border border-outline-variant focus:ring-primary">
+                          </div>
+                          <div>
+                              <label class="block font-label-md text-on-surface-variant mb-1">Tushlik tugashi</label>
+                              <input type="time" id="edit-doc-break-end" value="14:00" class="w-full px-4 py-2 rounded-lg border border-outline-variant focus:ring-primary">
+                          </div>
+                      </div>
+                  </div>
+
+                  <button onclick="submitDoctorModal()" class="w-full bg-primary text-on-primary py-3 rounded-full font-label-md hover:bg-primary-container">Saqlash</button>
             </div>
         </div>
     </div>

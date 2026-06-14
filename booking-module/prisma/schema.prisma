@@ -17,6 +17,13 @@ model Doctor {
   bio          String?       @db.Text
   photoUrl     String?
   isActive     Boolean       @default(true)
+  
+  workStartTime  String      @default("09:00")
+  workEndTime    String      @default("18:00")
+  breakStartTime String      @default("13:00")
+  breakEndTime   String      @default("14:00")
+  workingDays    Int[]       @default([1, 2, 3, 4, 5, 6]) // 1=Mon, 2=Tue, ..., 6=Sat, 0=Sun
+
   slots        Slot[]
   leaves       Leave[]
   appointments Appointment[]
