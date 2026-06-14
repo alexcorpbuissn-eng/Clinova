@@ -364,7 +364,7 @@ const API = '';
         document.getElementById('monitor-stat-active').textContent = activeCount;
 
         if (activeCount === 0) {
-          activeContainer.innerHTML = '<div class="empty-state text-lg">Muolajada hech kim yo\\'q</div>';
+          activeContainer.innerHTML = `<div class="empty-state text-lg">Muolajada hech kim yo'q</div>`;
         } else {
           activeContainer.innerHTML = active.map(v => {
             const timeStart = new Date(v.startTime);
