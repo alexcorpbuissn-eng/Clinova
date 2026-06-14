@@ -412,31 +412,73 @@
     // ---- LEAVES / TIME OFF ----
     async function loadLeaves() {
       const tbody = document.getElementById('leave-tbody');
-      tbody.innerHTML = adminLoaderHTML(6, 'Dam olish ro\'yxati yuklanmoqda...');
+      tbody.innerHTML = `<div class="col-span-full py-12 flex flex-col items-center justify-center text-outline-variant"><span class="material-symbols-outlined animate-spin text-[2rem] mb-2">refresh</span>Dam olish ro'yxati yuklanmoqda...</div>`;
       try {
         const data = await apiGet('/api/admin/leaves');
         if (data.success) {
           if (data.leaves.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-outline font-medium bg-surface-container-lowest"><div class="flex flex-col items-center gap-2"><span class="material-symbols-outlined text-[2rem] text-outline-variant">event_available</span>Hech qanday dam olish kiritilmagan</div></td></tr>';
+            tbody.innerHTML = `<div class="col-span-full py-16 bg-surface-container-lowest rounded-2xl border border-outline-variant/30 flex flex-col items-center justify-center text-outline"><span class="material-symbols-outlined text-[3rem] text-outline-variant mb-4">event_available</span><p class="font-medium text-lg">Hech qanday dam olish kiritilmagan</p></div>`;
             return;
           }
-          tbody.innerHTML = data.leaves.map(l => `
-            <tr class="hover:bg-surface-container-lowest transition-colors group">
-              <td class="py-4 px-6 border-r border-outline-variant/50">
-                <div style="font-weight:600; color:var(--on-surface);">${l.doctor.firstName} ${l.doctor.lastName}</div>
-                <div style="font-size:0.8rem; color:var(--on-surface-variant);">${l.doctor.specialty}</div>
-              </td>
-              <td class="py-4 px-6 border-r border-outline-variant/50 text-center font-medium">${new Date(l.startTime).toLocaleDateString('ru-RU')}</td>
-              <td class="py-4 px-6 border-r border-outline-variant/50 text-center font-medium">${new Date(l.endTime).toLocaleDateString('ru-RU')}</td>
-              <td class="py-4 px-6 border-r border-outline-variant/50 text-on-surface-variant">${l.reason || '<span class="text-outline italic">Kiritilmagan</span>'}</td>
-              <td class="py-4 px-6 border-r border-outline-variant/50 text-center text-outline">${new Date(l.createdAt).toLocaleDateString('ru-RU')}</td>
-              <td class="py-4 px-6 text-center">
-                <button class="bg-error/10 text-error hover:bg-error hover:text-on-error px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm active:scale-95 inline-flex items-center gap-1" onclick="deleteLeave('${l.id}')">
-                  <span class="material-symbols-outlined text-[1.1rem]">delete</span> Bekor qilish
-                </button>
-              </td>
-            </tr>
-          `).join('');
+          tbody.innerHTML = data.leaves.map(l => {
+            const start = new Date(l.startTime);
+            const end = new Date(l.endTime);
+            const now = new Date();
+            let timerHtml = '';
+            
+            if (now < start) {
+              const diffDays = Math.ceil((start.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+              timerHtml = `<div class="bg-primary/10 text-primary px-3 py-1.5 rounded-lg font-label-md flex items-center gap-1.5 mt-2"><span class="material-symbols-outlined" style="font-size:16px">timer</span>Boshlanishiga ${diffDays} kun qoldi</div>`;
+            } else if (now >= start && now <= end) {
+              const diffDays = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+              timerHtml = `<div class="bg-error/10 text-error px-3 py-1.5 rounded-lg font-label-md flex items-center gap-1.5 mt-2"><span class="material-symbols-outlined" style="font-size:16px">hourglass_bottom</span>Tugashiga ${diffDays} kun qoldi</div>`;
+            } else {
+              timerHtml = `<div class="bg-surface-variant text-on-surface-variant px-3 py-1.5 rounded-lg font-label-md flex items-center gap-1.5 mt-2"><span class="material-symbols-outlined" style="font-size:16px">done_all</span>Yakunlangan</div>`;
+            }
+
+            const isDental = l.doctor.specialty === 'Stomatolog';
+            const badgeClass = isDental ? 'bg-primary-container text-on-primary-container' : 'bg-secondary-container text-on-secondary-container';
+            const specName = l.doctor.specialty || 'Shifokor';
+
+            return `
+            <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-[20px] p-6 shadow-sm hover:shadow-md transition-all relative group flex flex-col">
+              <button onclick="deleteLeave('${l.id}')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-error/10 text-error opacity-0 group-hover:opacity-100 transition-opacity hover:bg-error hover:text-on-error" title="Bekor qilish">
+                <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+              </button>
+              
+              <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant font-bold text-lg">
+                  ${l.doctor.firstName.charAt(0)}${l.doctor.lastName.charAt(0)}
+                </div>
+                <div>
+                  <h4 class="font-headline-sm text-on-surface leading-tight">${l.doctor.firstName} ${l.doctor.lastName}</h4>
+                  <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase ${badgeClass}">
+                    <span class="material-symbols-outlined" style="font-size: 12px;">${isDental ? 'dentistry' : 'hearing'}</span>
+                    ${specName}
+                  </span>
+                </div>
+              </div>
+              
+              ${timerHtml}
+              
+              <div class="mt-5 grid grid-cols-2 gap-4">
+                <div class="bg-surface-container-low p-3 rounded-xl border border-outline-variant/20">
+                  <div class="text-[10px] uppercase tracking-wider text-on-surface-variant mb-1 font-bold">Boshlanish</div>
+                  <div class="font-medium text-on-surface flex items-center gap-1.5"><span class="material-symbols-outlined text-primary/70" style="font-size:16px">flight_takeoff</span>${start.toLocaleDateString('ru-RU')}</div>
+                </div>
+                <div class="bg-surface-container-low p-3 rounded-xl border border-outline-variant/20">
+                  <div class="text-[10px] uppercase tracking-wider text-on-surface-variant mb-1 font-bold">Tugash</div>
+                  <div class="font-medium text-on-surface flex items-center gap-1.5"><span class="material-symbols-outlined text-error/70" style="font-size:16px">flight_land</span>${end.toLocaleDateString('ru-RU')}</div>
+                </div>
+              </div>
+              
+              <div class="mt-4 pt-4 border-t border-outline-variant/30 flex-1">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-1">Sabab</div>
+                <p class="text-body-md text-on-surface line-clamp-2">${l.reason || '<span class="text-outline italic">Kiritilmagan</span>'}</p>
+              </div>
+            </div>
+            `;
+          }).join('');
         }
       } catch(e) {}
     }

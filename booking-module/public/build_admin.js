@@ -580,20 +580,8 @@ const htmlTemplate = `<!DOCTYPE html>
                         <span class="material-symbols-outlined">event_busy</span> Dam Olish Kiritish
                     </button>
                 </div>
-                <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-sm overflow-hidden">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase border-b border-outline-variant/50">
-                                <th class="py-4 px-6 border-r border-outline-variant/50">Shifokor</th>
-                                <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Boshlanish</th>
-                                <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Tugash</th>
-                                <th class="py-4 px-6 border-r border-outline-variant/50">Sabab</th>
-                                <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Kiritildi</th>
-                                <th class="py-4 px-6 text-center">Amal</th>
-                            </tr>
-                        </thead>
-                        <tbody id="leave-tbody" class="divide-y divide-outline-variant/20 text-body-sm text-on-surface"></tbody>
-                    </table>
+                <div id="leave-tbody" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <!-- Cards injected via JS -->
                 </div>
             </div>
 
