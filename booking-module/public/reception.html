@@ -2070,8 +2070,17 @@ tailwind.config = {
     const inProgressContainer = document.getElementById('in-progress-container');
     
     if (activeVisits.length === 0) {
-      if(section) section.style.display = 'none';
-      if(inProgressContainer) inProgressContainer.innerHTML = '<div class="empty-state py-4 text-sm">Hozirda muolajada bemorlar yo\'q</div>';
+      if(section) section.style.display = 'block';
+      
+      const emptyStateHtml = `
+        <div class="col-span-full flex flex-col items-center justify-center p-12 bg-surface border border-dashed border-outline-variant rounded-xl text-on-surface-variant">
+            <span class="material-symbols-outlined text-[48px] mb-4 opacity-50">chair</span>
+            <p class="font-headline-sm">Hozirda muolajada bemorlar yo'q</p>
+        </div>
+      `;
+      if(container) container.innerHTML = emptyStateHtml;
+      
+      if(inProgressContainer) inProgressContainer.innerHTML = '<div class="py-6 text-center text-on-surface-variant text-sm flex flex-col items-center gap-2"><span class="material-symbols-outlined text-[24px] opacity-50">chair</span> Hozirda muolajada bemorlar yo\'q</div>';
       return;
     }
 
