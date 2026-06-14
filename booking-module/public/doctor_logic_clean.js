@@ -344,7 +344,7 @@
       if (prevVal) copySelect.value = prevVal;
     }
 
-    header.innerHTML = '<div class="weekly-header-cell" style="width:70px"></div>' + 
+    header.innerHTML = '<div class="weekly-header-cell flex-shrink-0" style="width:70px"></div>' + 
       days.map(d => {
         const isToday = d.iso === getTashkentISO(new Date());
         const showPaste = (copiedSchedule !== null) && d.iso !== (copySelect ? copySelect.value : '') && userRole === 'ADMIN';
@@ -353,7 +353,7 @@
         ` : '';
 
         return `
-          <div class="weekly-header-cell ${isToday ? 'today' : ''}">
+          <div class="weekly-header-cell flex-1 ${isToday ? 'today' : ''}">
             <span class="day-name">${d.label}</span>
             <span class="day-date">${d.dateNum}</span>
             ${pasteBtn}
