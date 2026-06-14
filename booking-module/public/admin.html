@@ -1696,17 +1696,17 @@
                   <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${colorClass}">${rName}</span>
                 </td>
                 <td class="py-4 px-6 border-r border-outline-variant/50 text-center text-sm font-medium text-on-surface-variant">
-                  ${doctorAssigned !== '-' ? \`<span class="flex items-center justify-center gap-1 text-primary"><span class="material-symbols-outlined" style="font-size:16px;">stethoscope</span> ${doctorAssigned}</span>\` : '<span class="opacity-50">-</span>'}
+                  ${doctorAssigned !== '-' ? `<span class="flex items-center justify-center gap-1 text-primary"><span class="material-symbols-outlined" style="font-size:16px;">stethoscope</span> ${doctorAssigned}</span>` : '<span class="opacity-50">-</span>'}
                 </td>
                 <td class="py-4 px-6 border-r border-outline-variant/50 text-center text-xs text-on-surface-variant">
                   ${new Date(u.createdAt).toLocaleString('uz-UZ', { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' })}
                 </td>
                 <td class="py-4 px-6 text-center">
                   <div class="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onclick="assignDoctor('${u.id}')" class="w-8 h-8 rounded-full flex items-center justify-center text-teal-600 hover:bg-teal-50 transition-colors" title="Shifokorga bog\'lash">
+                    <button onclick="assignDoctor('${u.id}')" class="w-8 h-8 rounded-full flex items-center justify-center text-teal-600 hover:bg-teal-50 transition-colors" title="Shifokorga bog'lash">
                       <span class="material-symbols-outlined" style="font-size: 18px;">link</span>
                     </button>
-                    <button onclick="deleteUser('${u.id}')" class="w-8 h-8 rounded-full flex items-center justify-center text-error hover:bg-error-container transition-colors" title="O\'chirish">
+                    <button onclick="deleteUser('${u.id}')" class="w-8 h-8 rounded-full flex items-center justify-center text-error hover:bg-error-container transition-colors" title="O'chirish">
                       <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
                     </button>
                   </div>
