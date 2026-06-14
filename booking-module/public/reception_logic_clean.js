@@ -287,11 +287,106 @@ const API = '';
     document.querySelector(`.tab-btn[onclick*="${tabId}"]`).classList.add('active');
     document.getElementById(tabId).classList.add('active');
     
+    if (tabId === 'tab-monitor') loadMonitorData();
     if (tabId === 'tab-qabullar') loadAppointments();
     if (tabId === 'tab-active') loadActiveVisits();
     if (tabId === 'tab-history') loadVisits();
     if (tabId === 'tab-patients') loadPatientsTab();
     if (tabId === 'tab-issues') loadIssues();
+  }
+
+  // 🕒🕒 Monitor Tab Logic 🕒🕒
+  function updateMonitorClock() {
+    const clockEl = document.getElementById('monitor-clock');
+    const dateEl = document.getElementById('monitor-date');
+    if (!clockEl || !dateEl) return;
+    
+    const now = new Date();
+    clockEl.textContent = now.toLocaleTimeString('uz-UZ', { hour12: false });
+    
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    dateEl.textContent = now.toLocaleDateString('uz-UZ', options);
+  }
+  setInterval(updateMonitorClock, 1000);
+
+  async function loadMonitorData() {
+    updateMonitorClock();
+    try {
+      // Fetch both appointments and active visits
+      const [apptsRes, visitsRes] = await Promise.all([
+        fetch('/api/admin/appointments', { headers: { 'Authorization': `Bearer ${adminToken}` } }),
+        fetch('/api/admin/visits/active', { headers: { 'Authorization': `Bearer ${adminToken}` } })
+      ]);
+      const apptsData = await apptsRes.json();
+      const visitsData = await visitsRes.json();
+
+      let waitingCount = 0;
+      let activeCount = 0;
+
+      // Waiting list
+      const waitingContainer = document.getElementById('monitor-waiting-list');
+      if (apptsData.success) {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        
+        const waiting = apptsData.appointments.filter(a => {
+          if (a.status !== 'SCHEDULED') return false;
+          const d = new Date(a.slot.startTime);
+          return d >= today && d.getDate() === today.getDate(); // Only today's scheduled
+        });
+        
+        waitingCount = waiting.length;
+        document.getElementById('monitor-stat-waiting').textContent = waitingCount;
+
+        if (waitingCount === 0) {
+          waitingContainer.innerHTML = '<div class="empty-state text-lg">Hech kim kutmayapti</div>';
+        } else {
+          waitingContainer.innerHTML = waiting.map(a => {
+            const timeStr = new Date(a.slot.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            return `
+              <div class="active-card flex justify-between items-center bg-surface-container-lowest">
+                <div>
+                  <div class="patient text-lg">🙎‍♂️ ${a.patient.firstName} ${a.patient.lastName}</div>
+                  <div class="doctor mt-1">👨‍⚕️ ${a.slot.doctor.firstName} ${a.slot.doctor.lastName} • 🕒 ${timeStr}</div>
+                </div>
+                <button class="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-md hover:bg-primary-container shadow-sm" onclick="startAppointment('${a.id}', this)">Boshlash</button>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // Active list
+      const activeContainer = document.getElementById('monitor-active-list');
+      if (visitsData.success) {
+        const active = visitsData.visits.filter(v => v.status === 'IN_PROGRESS');
+        activeCount = active.length;
+        document.getElementById('monitor-stat-active').textContent = activeCount;
+
+        if (activeCount === 0) {
+          activeContainer.innerHTML = '<div class="empty-state text-lg">Muolajada hech kim yo\\'q</div>';
+        } else {
+          activeContainer.innerHTML = active.map(v => {
+            const timeStart = new Date(v.startTime);
+            const duration = Math.floor((new Date() - timeStart) / 60000);
+            return `
+              <div class="active-card flex justify-between items-center bg-surface-container-lowest" style="border-left-color: var(--color-primary)">
+                <div>
+                  <div class="patient text-lg flex items-center gap-2">
+                    <span class="status-dot"></span>
+                    🙎‍♂️ ${v.patient.firstName} ${v.patient.lastName}
+                  </div>
+                  <div class="doctor mt-1">👨‍⚕️ ${v.doctor.firstName} ${v.doctor.lastName} • ⏱️ ${duration} daqiqa</div>
+                </div>
+                <button class="bg-surface-container border border-primary text-primary px-4 py-2 rounded-lg font-label-md hover:bg-primary-fixed" onclick="finishVisit('${v.id}')">Tugatish</button>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   // ── Load Appointments ─────────────────────────────────────────
@@ -1964,26 +2059,6 @@ const API = '';
         const nameMatch = `${p.firstName} ${p.lastName}`.toLowerCase().replace(/\s+/g, '').includes(query);
         const phoneMatch = p.phone.replace(/\D/g, '').includes(query) || (p.telegramPhone && p.telegramPhone.replace(/\D/g, '').includes(query));
         return nameMatch || phoneMatch;
-      });
-    }
-
-    if (currentPatientFilter === 'upcoming') {
-      filtered = filtered.filter(p => {
-        return p.appointments && p.appointments.some(a => a.status === 'SCHEDULED' && new Date(a.slot.startTime) >= today);
-      });
-    } else if (currentPatientFilter === 'completed') {
-      filtered = filtered.filter(p => {
-        const hasCompletedAppt = p.appointments && p.appointments.some(a => a.status === 'COMPLETED');
-        const hasCompletedVisit = p.visits && p.visits.some(v => v.status === 'COMPLETED');
-        return hasCompletedAppt || hasCompletedVisit;
-      });
-    } else if (currentPatientFilter === 'noshow') {
-      filtered = filtered.filter(p => {
-        return p.appointments && p.appointments.some(a => a.status === 'CANCELLED' && (a.cancelledBy === 'NOSHOW' || a.cancelledBy === 'NOSHOW_UNREACHABLE'));
-      });
-    } else if (currentPatientFilter === 'unreachable') {
-      filtered = filtered.filter(p => {
-        return p.appointments && p.appointments.some(a => a.status === 'CANCELLED' && a.cancelledBy === 'NOSHOW_UNREACHABLE');
       });
     }
 

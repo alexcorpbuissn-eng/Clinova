@@ -182,7 +182,13 @@ const htmlTemplate = `<!DOCTYPE html>
       
       <ul class="flex flex-col gap-2 px-4 flex-1">
         <li>
-          <button onclick="switchMainTab('tab-qabullar')" class="tab-btn active w-full flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-high transition-all font-label-md text-on-surface [&.active]:bg-secondary-container [&.active]:text-on-secondary-container">
+          <button onclick="switchMainTab('tab-monitor')" class="tab-btn active w-full flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-high transition-all font-label-md text-on-surface [&.active]:bg-secondary-container [&.active]:text-on-secondary-container">
+            <span class="material-symbols-outlined text-[20px]">monitor_heart</span>
+            Kutish Zali
+          </button>
+        </li>
+        <li>
+          <button onclick="switchMainTab('tab-qabullar')" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-high transition-all font-label-md text-on-surface-variant [&.active]:bg-secondary-container [&.active]:text-on-secondary-container">
             <span class="material-symbols-outlined text-[20px]">calendar_today</span>
             Dashboard
           </button>
@@ -240,8 +246,60 @@ const htmlTemplate = `<!DOCTYPE html>
       </header>
 
       <div class="w-full">
+        <!-- Tab 0: Monitor (Kutish Zali) -->
+        <div id="tab-monitor" class="tab-pane active">
+          <div class="flex flex-col gap-6">
+            
+            <!-- Big Clock and Stats Header -->
+            <div class="bg-surface-container-lowest rounded-xl p-8 soft-shadow border border-surface-variant flex flex-col md:flex-row items-center justify-between gap-6">
+              <div class="text-center md:text-left">
+                <h2 id="monitor-clock" class="text-5xl md:text-7xl font-headline-xl font-bold text-primary tracking-tighter tabular-nums">00:00:00</h2>
+                <p id="monitor-date" class="text-lg text-on-surface-variant mt-2 font-body-md uppercase tracking-widest">Loading...</p>
+              </div>
+              
+              <div class="flex gap-4 w-full md:w-auto">
+                <div class="flex-1 md:flex-none bg-surface-container py-4 px-8 rounded-xl text-center border-b-4 border-error">
+                  <div class="text-sm font-label-md text-on-surface-variant mb-1 uppercase">Kutilmoqda</div>
+                  <div id="monitor-stat-waiting" class="text-4xl font-headline-lg font-bold text-error">0</div>
+                </div>
+                <div class="flex-1 md:flex-none bg-surface-container py-4 px-8 rounded-xl text-center border-b-4 border-primary">
+                  <div class="text-sm font-label-md text-on-surface-variant mb-1 uppercase">Jarayonda</div>
+                  <div id="monitor-stat-active" class="text-4xl font-headline-lg font-bold text-primary">0</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Two large columns for cards -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              
+              <!-- Waiting Column -->
+              <div class="bg-surface-container-low rounded-xl p-6 soft-shadow border border-surface-variant">
+                <h3 class="font-headline-lg text-2xl mb-6 text-on-surface flex items-center gap-3">
+                  <span class="material-symbols-outlined text-error text-[28px]">hourglass_empty</span>
+                  Kutilmoqda
+                </h3>
+                <div id="monitor-waiting-list" class="flex flex-col gap-4">
+                  <div class="empty-state text-lg">Hech kim kutmayapti</div>
+                </div>
+              </div>
+
+              <!-- Active Column -->
+              <div class="bg-surface-container-low rounded-xl p-6 soft-shadow border border-surface-variant">
+                <h3 class="font-headline-lg text-2xl mb-6 text-on-surface flex items-center gap-3">
+                  <span class="material-symbols-outlined text-primary text-[28px]">healing</span>
+                  Xonalarda
+                </h3>
+                <div id="monitor-active-list" class="flex flex-col gap-4">
+                  <div class="empty-state text-lg">Muolajada hech kim yo'q</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
         <!-- Tab 1: Dashboard -->
-        <div id="tab-qabullar" class="tab-pane active">
+        <div id="tab-qabullar" class="tab-pane">
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
             <!-- Left Column: Quick Form -->
@@ -434,14 +492,6 @@ const htmlTemplate = `<!DOCTYPE html>
                 <div class="relative w-full md:w-64">
                   <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
                   <input type="text" id="reception-patient-search" placeholder="Ism, familiya yoki raqam..." oninput="filterPatientsTab()" class="w-full bg-surface border border-outline-variant rounded-full pl-10 pr-4 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none">
-                </div>
-                
-                <div class="flex bg-surface-container-high p-1 rounded-lg overflow-x-auto">
-                  <button id="f-pat-all" class="filter-btn active px-4 py-1.5 font-label-sm rounded-md transition-colors text-on-surface-variant whitespace-nowrap [&.active]:bg-surface-container-lowest [&.active]:text-primary [&.active]:shadow-sm" onclick="setPatientFilter('all')">Barchasi</button>
-                  <button id="f-pat-upcoming" class="filter-btn px-4 py-1.5 font-label-sm rounded-md transition-colors text-on-surface-variant whitespace-nowrap [&.active]:bg-surface-container-lowest [&.active]:text-primary [&.active]:shadow-sm" onclick="setPatientFilter('upcoming')">Kutilayotganlar</button>
-                  <button id="f-pat-completed" class="filter-btn px-4 py-1.5 font-label-sm rounded-md transition-colors text-on-surface-variant whitespace-nowrap [&.active]:bg-surface-container-lowest [&.active]:text-primary [&.active]:shadow-sm" onclick="setPatientFilter('completed')">Tashrif buyurganlar</button>
-                  <button id="f-pat-noshow" class="filter-btn px-4 py-1.5 font-label-sm rounded-md transition-colors text-on-surface-variant whitespace-nowrap [&.active]:bg-surface-container-lowest [&.active]:text-error [&.active]:shadow-sm" onclick="setPatientFilter('noshow')">Kelmadi</button>
-                  <button id="f-pat-unreachable" class="filter-btn px-4 py-1.5 font-label-sm rounded-md transition-colors text-on-surface-variant whitespace-nowrap [&.active]:bg-surface-container-lowest [&.active]:text-error [&.active]:shadow-sm" onclick="setPatientFilter('unreachable')">Bog'lanib bo'lmadi</button>
                 </div>
               </div>
             </div>
