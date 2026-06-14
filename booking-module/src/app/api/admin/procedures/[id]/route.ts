@@ -33,12 +33,17 @@ export async function PATCH(
       return NextResponse.json({ error: 'Procedure not found' }, { status: 404 });
     }
 
+    const dataToUpdate: any = { price: body.price };
+    if (typeof body.durationMinutes === 'number') {
+      dataToUpdate.durationMinutes = body.durationMinutes;
+    }
+
     await prisma.procedure.updateMany({
       where: {
         name: target.name,
         doctor: { specialty: target.doctor.specialty }
       },
-      data: { price: body.price },
+      data: dataToUpdate,
     });
 
     return NextResponse.json({ success: true, message: 'All specialty procedures updated' });

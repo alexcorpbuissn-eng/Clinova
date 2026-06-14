@@ -143,10 +143,13 @@
                   </span>
                 </td>
                 <td class="py-4 px-6 border-r border-outline-variant/50 font-medium text-on-surface">${g.name}</td>
-                <td class="py-4 px-6 border-r border-outline-variant/50 text-center text-on-surface-variant">
-                  <div class="flex items-center justify-center gap-1 text-sm">
-                    <span class="material-symbols-outlined opacity-70" style="font-size: 16px;">schedule</span>
-                    ${g.durationMinutes} min
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <div class="relative">
+                      <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined opacity-50" style="font-size: 16px;">schedule</span>
+                      <input type="number" id="duration-group-${idx}" value="${g.durationMinutes}" class="w-24 bg-surface-container-lowest border border-outline-variant/50 rounded-lg py-2 pl-9 pr-8 text-on-surface font-mono text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all group-hover:border-primary/50" />
+                      <span class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant font-label-sm opacity-50">min</span>
+                    </div>
                   </div>
                 </td>
                 <td class="py-4 px-6 border-r border-outline-variant/50 text-center">
@@ -158,7 +161,7 @@
                   </div>
                 </td>
                 <td class="py-4 px-6 text-center">
-                  <button onclick="saveGroupedProcedurePrice('${g.id}', ${idx})" class="inline-flex items-center justify-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-full font-label-sm hover:bg-primary-container transition-colors shadow-sm hover:shadow-md active:scale-95">
+                  <button onclick="saveGroupedProcedure('${g.id}', ${idx})" class="inline-flex items-center justify-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-full font-label-sm hover:bg-primary-container transition-colors shadow-sm hover:shadow-md active:scale-95">
                     <span class="material-symbols-outlined" style="font-size: 16px;">save</span> Saqlash
                   </button>
                 </td>
@@ -171,27 +174,38 @@
       }
     }
 
-    async function saveGroupedProcedurePrice(id, idx) {
+    async function saveGroupedProcedure(id, idx) {
       const priceStr = document.getElementById(`price-group-${idx}`).value;
       const price = parseInt(priceStr, 10);
+      
+      const durationStr = document.getElementById(`duration-group-${idx}`).value;
+      const durationMinutes = parseInt(durationStr, 10);
+
       if (isNaN(price) || price < 0) {
         alert("Noto'g'ri narx kiritildi!");
         return;
       }
+      
+      if (isNaN(durationMinutes) || durationMinutes < 1) {
+        alert("Noto'g'ri davomiylik kiritildi!");
+        return;
+      }
+
       try {
         const res = await fetch(`/api/admin/procedures/${id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
-          body: JSON.stringify({ price })
+          body: JSON.stringify({ price, durationMinutes })
         });
         if (res.ok) {
-          alert("Narx barcha shifokorlar uchun saqlandi!");
+          alert("O'zgarishlar barcha shifokorlar uchun saqlandi!");
           loadProcedures();
         } else {
-          alert("Saqlashda xatolik!");
+          const d = await res.json();
+          alert(d.error || 'Xatolik yuz berdi');
         }
-      } catch (e) {
-        alert("Tarmoq xatosi!");
+      } catch (err) {
+        alert('Server xatosi');
       }
     }
 
