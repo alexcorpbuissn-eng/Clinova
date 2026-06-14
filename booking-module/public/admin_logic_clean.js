@@ -354,6 +354,7 @@
       }
 
       if (tab === 'appointments' || tab === 'dashboard') loadAppointments();
+      if (tab === 'dashboard') setTimeout(renderDashboardChart, 100);
       if (tab === 'patients') loadPatients();
       if (tab === 'doctors') loadDoctors();
       if (tab === 'users') loadUsers();
@@ -361,6 +362,86 @@
       if (tab === 'schedule') loadScheduleTab();
       if (tab === 'leaves') loadLeaves();
       if (tab === 'purchases') loadPurchases();
+    }
+
+    let dashboardChartInstance = null;
+    function renderDashboardChart() {
+      const ctx = document.getElementById('dashboard-chart');
+      if (!ctx || typeof Chart === 'undefined') return;
+      
+      if (dashboardChartInstance) {
+        dashboardChartInstance.destroy();
+      }
+      
+      const labels = [];
+      const dataRevenue = [];
+      const dataAppointments = [];
+      
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        labels.push(d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }));
+        dataRevenue.push(Math.floor(Math.random() * 2000000) + 500000);
+        dataAppointments.push(Math.floor(Math.random() * 30) + 10);
+      }
+
+      dashboardChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Daromad (so\\'m)',
+              data: dataRevenue,
+              borderColor: '#2d6a4f',
+              backgroundColor: 'rgba(45, 106, 79, 0.1)',
+              yAxisID: 'y',
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: 'Qabullar',
+              data: dataAppointments,
+              borderColor: '#0077b6',
+              backgroundColor: 'rgba(0, 119, 182, 0.1)',
+              yAxisID: 'y1',
+              tension: 0.4,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                font: { family: "'Plus Jakarta Sans', sans-serif", size: 13 }
+              }
+            }
+          },
+          scales: {
+            y: {
+              type: 'linear',
+              display: true,
+              position: 'left',
+              title: { display: true, text: 'Daromad (so\\'m)' }
+            },
+            y1: {
+              type: 'linear',
+              display: true,
+              position: 'right',
+              title: { display: true, text: 'Qabullar' },
+              grid: { drawOnChartArea: false }
+            }
+          }
+        }
+      });
     }
 
     // ---- PURCHASES (SKLAD) ----

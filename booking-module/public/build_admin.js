@@ -132,6 +132,7 @@ const htmlTemplate = `<!DOCTYPE html>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/uz.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     ${tailwindConfig}
     ${globalStyles}
     <style>
@@ -375,6 +376,19 @@ const htmlTemplate = `<!DOCTYPE html>
                                 <span class="font-label-sm text-primary flex items-center"><span class="material-symbols-outlined text-[16px]">arrow_upward</span> 24%</span>
                             </div>
                         </div>
+                    </div>
+                </div>
+                
+                <!-- Chart Area -->
+                <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-[0_4px_16px_rgba(45,106,79,0.08)] mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="font-headline-md text-on-surface">Daromad va Qabullar Statistikasi</h3>
+                            <p class="text-body-sm text-on-surface-variant mt-1">So'nggi 7 kunlik ko'rsatkichlar</p>
+                        </div>
+                    </div>
+                    <div class="w-full h-[300px] relative">
+                        <canvas id="dashboard-chart"></canvas>
                     </div>
                 </div>
             </div>
