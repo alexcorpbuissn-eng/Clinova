@@ -559,13 +559,13 @@ const htmlTemplate = `<!DOCTYPE html>
                 <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-sm overflow-hidden">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase">
-                                <th class="py-3 px-6">Sana</th>
-                                <th class="py-3 px-6">Nomi</th>
-                                <th class="py-3 px-6">Sotuvchi</th>
-                                <th class="py-3 px-6">Summa</th>
-                                <th class="py-3 px-6">Kiritdi</th>
-                                <th class="py-3 px-6">Amal</th>
+                            <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase border-b border-outline-variant/50">
+                                <th class="py-4 px-6 border-r border-outline-variant/50">Sana</th>
+                                <th class="py-4 px-6 border-r border-outline-variant/50">Nomi</th>
+                                <th class="py-4 px-6 border-r border-outline-variant/50">Sotuvchi</th>
+                                <th class="py-4 px-6 border-r border-outline-variant/50 text-right">Summa</th>
+                                <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Kiritdi</th>
+                                <th class="py-4 px-6 text-center">Amal</th>
                             </tr>
                         </thead>
                         <tbody id="purchases-tbody" class="divide-y divide-outline-variant/20 text-body-sm text-on-surface"></tbody>

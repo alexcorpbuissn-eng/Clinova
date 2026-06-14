@@ -356,28 +356,31 @@
       tbody.innerHTML = adminLoaderHTML(6, 'Xarajatlar yuklanmoqda...');
       try {
         const data = await apiGet('/api/inventory/purchases');
-        if (data.success) {
-          if (data.purchases.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Hech qanday xarajat kiritilmagan</td></tr>';
+        if (data.success) {          if (data.purchases.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-outline font-medium bg-surface-container-lowest"><div class="flex flex-col items-center gap-2"><span class="material-symbols-outlined text-[2rem] text-outline-variant">inventory_2</span>Hech qanday xarajat kiritilmagan</div></td></tr>';
             return;
           }
           tbody.innerHTML = data.purchases.map(p => `
-            <tr>
-              <td>${new Date(p.createdAt).toLocaleString('ru-RU')}</td>
-              <td><div style="font-weight:600; color:var(--navy);">${p.itemName}</div></td>
-              <td>${p.sellerName}</td>
-              <td><span style="font-weight:700; color:var(--teal);">${p.price.toLocaleString('ru-RU')} so'm</span></td>
-              <td><span style="font-size:0.8rem; color:var(--text-muted);">${p.recordedBy || 'Noma\'lum'}</span></td>
-              <td>
-                <button class="btn" style="background:var(--red-bg); color:var(--red); padding:6px 12px; font-size:0.8rem; width:auto;" onclick="deletePurchase('${p.id}')">
-                  <i class="fas fa-trash"></i> O'chirish
+            <tr class="hover:bg-surface-container-lowest transition-colors group">
+              <td class="py-4 px-6 border-r border-outline-variant/50">${new Date(p.createdAt).toLocaleString('ru-RU')}</td>
+              <td class="py-4 px-6 border-r border-outline-variant/50">
+                <div class="font-semibold text-on-surface">${p.itemName}</div>
+              </td>
+              <td class="py-4 px-6 border-r border-outline-variant/50">${p.sellerName}</td>
+              <td class="py-4 px-6 border-r border-outline-variant/50 text-right">
+                <span class="font-bold text-primary">${p.price.toLocaleString('ru-RU')} so'm</span>
+              </td>
+              <td class="py-4 px-6 border-r border-outline-variant/50 text-center text-outline text-sm">${p.recordedBy || 'Noma\\'lum'}</td>
+              <td class="py-4 px-6 text-center">
+                <button class="bg-error/10 text-error hover:bg-error hover:text-on-error px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm active:scale-95 inline-flex items-center gap-1" onclick="deletePurchase('${p.id}')">
+                  <span class="material-symbols-outlined text-[1.1rem]">delete</span> O'chirish
                 </button>
               </td>
             </tr>
           `).join('');
         }
       } catch (e) {
-        tbody.innerHTML = '<tr><td colspan="6" style="color:var(--red); text-align:center;">Xato yuz berdi</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-error font-medium bg-surface-container-lowest">Xato yuz berdi</td></tr>';
       }
     }
 
