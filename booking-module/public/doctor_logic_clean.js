@@ -73,9 +73,9 @@
       const displayDate = new Date(`${iso}T12:00:00+05:00`);
       days.push({
         iso,
-        label: displayDate.toLocaleDateString('uz-UZ', { weekday: 'short', timeZone: 'Asia/Tashkent' }),
+        label: ['Yak', 'Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan'][displayDate.getDay()],
         dateNum: d.getUTCDate(),
-        monthLabel: displayDate.toLocaleDateString('uz-UZ', { month: 'short', timeZone: 'Asia/Tashkent' })
+        monthLabel: ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun', 'Iyul', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'][displayDate.getMonth()]
       });
     }
     return days;
@@ -636,7 +636,7 @@
           return sStart === targetStart && s.isAvailable;
         });
 
-        const dayName = nextDay.toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'short' });
+        const dayName = `${['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'][nextDay.getDay()]}, ${nextDay.getDate()} ${['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun', 'Iyul', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'][nextDay.getMonth()]}`;
         html += `
           <label class="checklist-item" style="${!slotExists ? 'opacity:0.4; cursor:not-allowed;' : ''}">
             <input type="checkbox" name="multi-day-chk" value="${nextIso}" ${!slotExists ? 'disabled' : ''} />
@@ -844,7 +844,7 @@
         const a = slotWithAppt.appointment;
         const st = new Date(slotWithAppt.startTime);
         const timeStr = st.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent' });
-        const dateStr = st.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'long', year: 'numeric' });
+        const dateStr = `${st.getDate()} ${['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'][st.getMonth()]} ${st.getFullYear()}`;
         
         const isBreak = a.patientPhone === '+998000000000' || a.patientFirst === 'Tanaffus';
 
@@ -1091,7 +1091,7 @@
     // Update Home Tab
     const homeDateEl = document.getElementById('home-date');
     if(homeDateEl) {
-        homeDateEl.textContent = new Date().toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Asia/Tashkent' });
+        homeDateEl.textContent = (() => { const d = new Date(); return `${['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'][d.getDay()]}, ${d.getDate()} ${['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'][d.getMonth()]}`; })();
     }
     
     const homeGreeting = document.getElementById('home-greeting');

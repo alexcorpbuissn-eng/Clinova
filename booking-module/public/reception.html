@@ -2347,14 +2347,14 @@ tailwind.config = {
       listEl.innerHTML = sortedDays.map(dayIso => {
         let dayTitle = '';
         const dObj = new Date(dayIso);
-        const formattedDate = dObj.toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' });
+        const formattedDate = `${dObj.getDate()} ${['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun', 'Iyul', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'][dObj.getMonth()]}`;
         
         if (dayIso === tashkentToday) {
           dayTitle = `Bugun (${formattedDate})`;
         } else if (dayIso === tashkentTomorrow) {
           dayTitle = `Ertaga (${formattedDate})`;
         } else {
-          const weekday = dObj.toLocaleDateString('uz-UZ', { weekday: 'long' });
+          const weekday = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'][dObj.getDay()];
           dayTitle = `${weekday.charAt(0).toUpperCase() + weekday.slice(1)} (${formattedDate})`;
         }
 

@@ -2002,7 +2002,7 @@
         
         const doctors = docsData.doctors;
         const slots = slotsData.slots;
-        const nowMonthName = new Date().toLocaleDateString('uz-UZ', { month: 'long', year: 'numeric' });
+        const nowMonthName = `${['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'][new Date().getMonth()]} ${new Date().getFullYear()}`;
         
         if (doctors.length === 0) {
           dashboard.innerHTML = '<div class="text-center p-10 text-on-surface-variant bg-surface-container-low rounded-2xl border border-outline-variant/30 font-medium">Shifokorlar topilmadi</div>';
@@ -2191,9 +2191,9 @@
           days.filter(d => d.getUTCDay() !== 0).map(d => {
             const iso = getLocalISO(d);
             const displayDate = new Date(`${iso}T12:00:00+05:00`);
-            const name = displayDate.toLocaleDateString('uz-UZ', { weekday: 'long', timeZone: 'Asia/Tashkent' });
+            const name = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'][displayDate.getDay()];
             const dateStr = d.getUTCDate();
-            const monthStr = displayDate.toLocaleDateString('uz-UZ', { month: 'short', timeZone: 'Asia/Tashkent' });
+            const monthStr = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun', 'Iyul', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'][displayDate.getMonth()];
             return `<option value="${iso}">${name} (${dateStr} ${monthStr})</option>`;
           }).join('');
         if (prevVal) copySelect.value = prevVal;
@@ -2214,7 +2214,7 @@
 
           return `
             <div class="weekly-header-cell ${isToday ? 'today' : ''} ${isSunday ? 'sunday-header' : ''}" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:80px; ${isSunday ? 'background:#f8fafc;' : ''}">
-              <span class="day-name" style="${isSunday ? 'color:#94a3b8;' : ''}">${displayDate.toLocaleDateString('uz-UZ', { weekday: 'short', timeZone: 'Asia/Tashkent' })}</span>
+              <span class="day-name" style="${isSunday ? 'color:#94a3b8;' : ''}">${['Yak', 'Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan'][displayDate.getDay()]}</span>
               <span class="day-date" style="font-size:1.1rem; font-weight:700; margin-top:2px; ${isSunday ? 'color:#94a3b8;' : ''}">${d.getUTCDate()}</span>
               ${pasteBtn}
             </div>
