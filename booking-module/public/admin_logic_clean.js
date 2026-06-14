@@ -1253,11 +1253,21 @@
       if (!dashboard) return;
       
       dashboard.innerHTML = `
-        <div style="background:#fff; border-radius:20px; border:1.5px solid var(--border); overflow:hidden;">
+        <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 overflow-hidden">
           ${adminLoaderDiv('Umumiy jadval statistikasi yuklanmoqda...')}
-          <div class="admin-skeleton" style="padding: 12px 24px 24px;">
-            <div class="admin-skeleton-row"><div class="admin-skeleton-bar" style="width:100%; height:60px; border-radius:12px;"></div></div>
-            <div class="admin-skeleton-row" style="gap:12px;"><div class="admin-skeleton-bar" style="width:33%; height:50px; border-radius:10px;"></div><div class="admin-skeleton-bar" style="width:33%; height:50px; border-radius:10px;"></div><div class="admin-skeleton-bar" style="width:33%; height:50px; border-radius:10px;"></div></div>
+          <div class="p-6">
+            <div class="animate-pulse flex space-x-4">
+              <div class="flex-1 space-y-6 py-1">
+                <div class="h-12 bg-surface-container rounded-xl w-full"></div>
+                <div class="space-y-3">
+                  <div class="grid grid-cols-3 gap-4">
+                    <div class="h-10 bg-surface-container rounded-lg col-span-1"></div>
+                    <div class="h-10 bg-surface-container rounded-lg col-span-1"></div>
+                    <div class="h-10 bg-surface-container rounded-lg col-span-1"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       `;
@@ -1276,7 +1286,7 @@
         ]);
         
         if (!docsData.success || !slotsData.success) {
-          dashboard.innerHTML = '<div style="text-align:center; padding:40px; color:var(--red); background:#fff; border-radius:20px; border:1.5px solid var(--border);">Statistikani yuklab bo\'lmadi</div>';
+          dashboard.innerHTML = '<div class="text-center p-10 text-error bg-error-container rounded-2xl border border-error/20 font-medium">Statistikani yuklab bo\'lmadi</div>';
           return;
         }
         
@@ -1285,19 +1295,23 @@
         const nowMonthName = new Date().toLocaleDateString('uz-UZ', { month: 'long', year: 'numeric' });
         
         if (doctors.length === 0) {
-          dashboard.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted); background:#fff; border-radius:20px; border:1.5px solid var(--border);">Shifokorlar topilmadi</div>';
+          dashboard.innerHTML = '<div class="text-center p-10 text-on-surface-variant bg-surface-container-low rounded-2xl border border-outline-variant/30 font-medium">Shifokorlar topilmadi</div>';
           return;
         }
         
         let html = `
-          <div style="margin-bottom: 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+          <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h2 style="font-size: 1.4rem; color: var(--navy); margin-bottom: 6px;">📊 Shifokorlar ish yuklamasi</h2>
-              <p style="color: var(--text-muted); font-size: 0.9rem;">${nowMonthName} oyi uchun shifokorlar jadvali va bandlik darajasi bo'yicha umumiy ko'rinish.</p>
+              <h2 class="font-headline-md text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined text-[28px]">monitoring</span> Shifokorlar ish yuklamasi
+              </h2>
+              <p class="font-body-sm text-on-surface-variant mt-1">${nowMonthName} oyi uchun shifokorlar jadvali va bandlik darajasi bo'yicha umumiy ko'rinish.</p>
             </div>
-            <button onclick="loadAdminScheduleDashboard()" class="btn" style="width:auto; background:none; border:1.5px solid var(--border); color:var(--navy); padding:8px 16px; border-radius:10px; font-weight:600; display:flex; align-items:center; gap:8px;">🔄 Yangilash</button>
+            <button onclick="loadAdminScheduleDashboard()" class="flex items-center gap-2 border border-outline-variant text-on-surface-variant bg-surface-container-lowest px-4 py-2 rounded-full font-label-md hover:bg-surface-container hover:text-primary transition-colors">
+              <span class="material-symbols-outlined text-[18px]">refresh</span> Yangilash
+            </button>
           </div>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         `;
         
         for (const doc of doctors) {
@@ -1307,76 +1321,84 @@
           const free = total - booked;
           const pct = total > 0 ? Math.round((booked / total) * 100) : 0;
           
-          let pctColor = 'var(--teal)';
-          let badgeBg = 'var(--teal-light)';
-          let badgeText = 'var(--teal-dark)';
+          let pctColorClass = 'text-primary';
+          let badgeBgClass = 'bg-primary-container';
+          let badgeTextClass = 'text-on-primary-container';
+          
           if (pct > 60) {
-            pctColor = '#3b82f6';
-            badgeBg = '#eff6ff';
-            badgeText = '#1d4ed8';
+            pctColorClass = 'text-[var(--color-secondary)]';
+            badgeBgClass = 'bg-secondary-container';
+            badgeTextClass = 'text-on-secondary-container';
           }
           if (pct > 85) {
-            pctColor = '#8b5cf6';
-            badgeBg = '#f5f3ff';
-            badgeText = '#6d28d9';
+            pctColorClass = 'text-[var(--color-error)]';
+            badgeBgClass = 'bg-error-container';
+            badgeTextClass = 'text-on-error-container';
           }
           
-          const progressBg = total > 0 ? `linear-gradient(to right, ${pctColor} ${pct}%, #f1f5f9 ${pct}%)` : '#f1f5f9';
+          const isDental = doc.specialty === 'Stomatolog';
+          const specName = isDental ? 'Stomatologiya' : doc.specialty;
+          const icon = isDental ? 'dentistry' : 'hearing';
           
           html += `
-            <div style="background: #fff; border: 1.5px solid var(--border); border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; min-height: 260px;" onmouseover="this.style.borderColor='var(--teal)'; this.style.boxShadow='0 10px 30px rgba(13,148,136,0.06)';" onmouseout="this.style.borderColor='var(--border)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.02)';">
-              <div>
+            <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between relative overflow-hidden min-h-[280px] group">
+              <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+              
+              <div class="relative z-10">
                 <!-- Header -->
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                <div class="flex justify-between items-start mb-4">
                   <div>
-                    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--navy); margin-bottom: 6px;">Dr. ${doc.firstName} ${doc.lastName}</h3>
-                    <span style="font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; background: ${badgeBg}; color: ${badgeText}; display: inline-block;">
-                      ${doc.specialty === 'Stomatolog' ? 'Stomatologiya' : doc.specialty}
+                    <h3 class="font-headline-sm text-on-surface mb-1 text-lg">Dr. ${doc.firstName} ${doc.lastName}</h3>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase ${badgeBgClass} ${badgeTextClass}">
+                      <span class="material-symbols-outlined text-[14px]">${icon}</span> ${specName}
                     </span>
                   </div>
                   ${total > 0 ? `
-                    <div style="text-align: right;">
-                      <span style="font-size: 1.3rem; font-weight: 700; color: ${pctColor};">${pct}%</span>
-                      <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Bandlik</div>
+                    <div class="text-right">
+                      <span class="font-headline-sm ${pctColorClass}">${pct}%</span>
+                      <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">Bandlik</div>
                     </div>
                   ` : ''}
                 </div>
                 
                 <!-- Progress bar -->
-                <div style="margin-bottom: 24px;">
+                <div class="mb-6">
                   ${total > 0 ? `
-                    <div style="width: 100%; height: 8px; border-radius: 4px; background: ${progressBg}; margin-bottom: 8px;"></div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">
+                    <div class="w-full h-2 rounded-full bg-surface-container-high mb-2 overflow-hidden">
+                      <div class="h-full bg-primary rounded-full" style="width: ${pct}%;"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-on-surface-variant font-medium">
                       <span>Qabul bandligi</span>
                       <span>${booked} / ${total} slot band</span>
                     </div>
                   ` : `
-                    <div style="background: #f8fafc; border: 1px dashed var(--border); border-radius: 12px; padding: 16px; text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">
-                      📭 Ushbu oy uchun jadval belgilanmagan
+                    <div class="bg-surface-container border border-dashed border-outline-variant rounded-xl p-4 text-center text-on-surface-variant flex flex-col items-center gap-2 mt-4">
+                      <span class="material-symbols-outlined text-3xl opacity-50">event_busy</span>
+                      <span class="font-body-sm">Ushbu oy uchun jadval belgilanmagan</span>
                     </div>
                   `}
                 </div>
               </div>
               
               <!-- Stats Row & Action Button -->
-              <div>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; background: #f8fafc; padding: 12px; border-radius: 12px; text-align: center;">
+              <div class="relative z-10 mt-auto">
+                <div class="grid grid-cols-3 gap-3 mb-5 bg-surface-container-low p-3 rounded-xl text-center">
                   <div>
-                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--navy);">${total}</div>
-                    <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600;">Jami slot</div>
+                    <div class="font-headline-sm text-on-surface text-lg leading-none mb-1">${total}</div>
+                    <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">Jami slot</div>
                   </div>
                   <div>
-                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--teal-dark);">${free}</div>
-                    <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600;">Bo'sh slot</div>
+                    <div class="font-headline-sm text-primary text-lg leading-none mb-1">${free}</div>
+                    <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">Bo'sh slot</div>
                   </div>
                   <div>
-                    <div style="font-size: 1.1rem; font-weight: 700; color: ${booked > 0 ? 'var(--navy)' : 'var(--text-muted)'};">${booked}</div>
-                    <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600;">Band slot</div>
+                    <div class="font-headline-sm ${booked > 0 ? 'text-on-surface' : 'text-on-surface-variant opacity-50'} text-lg leading-none mb-1">${booked}</div>
+                    <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">Band slot</div>
                   </div>
                 </div>
                 
-                <button onclick="selectDoctorFromDashboard('${doc.id}')" class="btn" style="background: var(--navy); color: #fff; border: none; border-radius: 12px; padding: 12px; font-size: 0.85rem; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.background='var(--teal)'" onmouseout="this.style.background='var(--navy)'">
-                  🗓️ Jadvalni boshqarish
+                <button onclick="selectDoctorFromDashboard('${doc.id}')" class="w-full flex items-center justify-center gap-2 bg-primary text-on-primary px-4 py-3 rounded-full font-label-md hover:bg-primary-container transition-colors shadow-sm hover:shadow-md active:scale-95">
+                  <span class="material-symbols-outlined text-[18px]">edit_calendar</span> Jadvalni boshqarish
                 </button>
               </div>
             </div>
@@ -1386,7 +1408,7 @@
         html += `</div>`;
         dashboard.innerHTML = html;
       } catch (err) {
-        dashboard.innerHTML = '<div style="text-align:center; padding:40px; color:var(--red); background:#fff; border-radius:20px; border:1.5px solid var(--border);">Xatolik yuz berdi. Iltimos qayta urunib ko\'ring.</div>';
+        dashboard.innerHTML = '<div class="text-center p-10 text-error bg-error-container rounded-2xl border border-error/20 font-medium">Tarmoq xatosi. Iltimos, sahifani yangilang.</div>';
       }
     }
 
