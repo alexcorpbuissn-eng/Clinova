@@ -222,7 +222,7 @@ const htmlTemplate = `<!DOCTYPE html>
 
     <!-- Main Content Area -->
     <main class="flex-1 h-screen overflow-y-auto bg-surface p-8">
-      <header class="flex justify-between items-end mb-8 max-w-[1280px] mx-auto">
+      <header class="flex justify-between items-end mb-8 w-full">
         <div>
           <h2 class="font-headline-lg text-primary tracking-tight">Daily Operations</h2>
           <p id="top-date" class="font-body-md text-on-surface-variant mt-1">Loading date...</p>
@@ -239,7 +239,7 @@ const htmlTemplate = `<!DOCTYPE html>
         </div>
       </header>
 
-      <div class="max-w-[1280px] mx-auto">
+      <div class="w-full">
         <!-- Tab 1: Dashboard -->
         <div id="tab-qabullar" class="tab-pane active">
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">

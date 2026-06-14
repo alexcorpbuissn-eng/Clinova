@@ -214,7 +214,7 @@ tailwind.config = {
 
     <!-- Main Content Area -->
     <main class="flex-1 h-screen overflow-y-auto bg-surface p-8">
-      <header class="flex justify-between items-end mb-8 max-w-[1280px] mx-auto">
+      <header class="flex justify-between items-end mb-8 w-full">
         <div>
           <h2 class="font-headline-lg text-primary tracking-tight">Daily Operations</h2>
           <p id="top-date" class="font-body-md text-on-surface-variant mt-1">Loading date...</p>
@@ -231,7 +231,7 @@ tailwind.config = {
         </div>
       </header>
 
-      <div class="max-w-[1280px] mx-auto">
+      <div class="w-full">
         <!-- Tab 1: Dashboard -->
         <div id="tab-qabullar" class="tab-pane active">
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -685,6 +685,23 @@ tailwind.config = {
       plugins: ['remove_button'],
       sortField: { field: "text", direction: "asc" },
       placeholder: "Xizmatlarni tanlang..."
+    });
+  }
+
+  let doctorSelectInstance = null;
+  function initDoctorSelect() {
+    if (doctorSelectInstance) doctorSelectInstance.destroy();
+    doctorSelectInstance = new TomSelect('#f-doctor', {
+      create: false,
+      sortField: { field: "text", direction: "asc" },
+      placeholder: "Shifokor tanlang..."
+    });
+    
+    // Bind change event to TomSelect instance to ensure it triggers correctly
+    doctorSelectInstance.on('change', function() {
+      selectedSlotId = null;
+      loadProceduresForDoctor(this.getValue());
+      loadAvailableSlots();
     });
   }
 
@@ -1682,6 +1699,13 @@ tailwind.config = {
       if (data.success) {
         doctorsList = data.doctors;
         const sel = document.getElementById('f-doctor');
+        
+        // Destroy existing TomSelect instance before modifying innerHTML
+        if (doctorSelectInstance) {
+          doctorSelectInstance.destroy();
+          doctorSelectInstance = null;
+        }
+
         sel.innerHTML = '<option value="" disabled selected hidden>Shifokor tanlang...</option>';
         data.doctors.forEach(d => {
           const opt = document.createElement('option');
@@ -1690,11 +1714,8 @@ tailwind.config = {
           opt.dataset.docId = d.id;
           sel.appendChild(opt);
         });
-        sel.addEventListener('change', () => {
-          selectedSlotId = null;
-          loadProceduresForDoctor(sel.value);
-          loadAvailableSlots();
-        });
+
+        initDoctorSelect();
       }
     } catch {}
   }

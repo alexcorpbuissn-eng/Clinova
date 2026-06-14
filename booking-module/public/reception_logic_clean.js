@@ -58,6 +58,23 @@ const API = '';
     });
   }
 
+  let doctorSelectInstance = null;
+  function initDoctorSelect() {
+    if (doctorSelectInstance) doctorSelectInstance.destroy();
+    doctorSelectInstance = new TomSelect('#f-doctor', {
+      create: false,
+      sortField: { field: "text", direction: "asc" },
+      placeholder: "Shifokor tanlang..."
+    });
+    
+    // Bind change event to TomSelect instance to ensure it triggers correctly
+    doctorSelectInstance.on('change', function() {
+      selectedSlotId = null;
+      loadProceduresForDoctor(this.getValue());
+      loadAvailableSlots();
+    });
+  }
+
   let startPicker, endPicker, reschedulePicker;
   function initDatePicker() {
     startPicker = flatpickr("#f-start-date", {
@@ -1052,6 +1069,13 @@ const API = '';
       if (data.success) {
         doctorsList = data.doctors;
         const sel = document.getElementById('f-doctor');
+        
+        // Destroy existing TomSelect instance before modifying innerHTML
+        if (doctorSelectInstance) {
+          doctorSelectInstance.destroy();
+          doctorSelectInstance = null;
+        }
+
         sel.innerHTML = '<option value="" disabled selected hidden>Shifokor tanlang...</option>';
         data.doctors.forEach(d => {
           const opt = document.createElement('option');
@@ -1060,11 +1084,8 @@ const API = '';
           opt.dataset.docId = d.id;
           sel.appendChild(opt);
         });
-        sel.addEventListener('change', () => {
-          selectedSlotId = null;
-          loadProceduresForDoctor(sel.value);
-          loadAvailableSlots();
-        });
+
+        initDoctorSelect();
       }
     } catch {}
   }
