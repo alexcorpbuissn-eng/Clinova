@@ -117,6 +117,16 @@ const globalStyles = `
     .badge-cancelled-admin { background-color: var(--color-error-container); color: var(--color-on-error-container); }
     .badge-cancelled-patient { background-color: var(--color-error-container); color: var(--color-on-error-container); }
     .badge-noshow { background-color: var(--color-error-container); color: var(--color-on-error-container); }
+    /* SCHEDULE GRID CSS */
+    .grid-cell { height: 60px; border-bottom: 1px solid var(--color-surface-variant); padding: 2px; position: relative; }
+    .time-cell { height: 60px; display: flex; align-items: flex-start; justify-content: center; font-size: 11px; font-weight: 500; color: var(--color-on-surface-variant); padding-top: 4px; border-bottom: 1px solid var(--color-surface-variant); }
+    .slot-btn { width: 100%; height: 100%; border-radius: 6px; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; transition: all 0.2s; border: 1px dashed var(--color-outline-variant); background: transparent; color: var(--color-on-surface-variant); }
+    .slot-btn:hover:not(.disabled) { background: var(--color-surface-variant); border-style: solid; }
+    .slot-btn.active { background: var(--color-primary-fixed); border: 1px solid var(--color-primary-fixed-dim); color: var(--color-on-primary-fixed); }
+    .slot-btn.booked { background: var(--color-error-container); border: 1px solid var(--color-error); color: var(--color-on-error-container); cursor: not-allowed; }
+    .slot-btn.pending { background: var(--color-tertiary-container); border: 2px dashed var(--color-primary); color: var(--color-on-tertiary-container); }
+    .slot-btn.disabled { opacity: 0.5; cursor: not-allowed; background: var(--color-surface-container-high); border: 1px solid var(--color-outline-variant); }
+    .day-col { border-right: 1px solid var(--color-outline-variant); }
 </style>
 `;
 
@@ -457,7 +467,7 @@ const htmlTemplate = `<!DOCTYPE html>
                     <!-- Month Calendar Header -->
                     <div id="admin-month-calendar-wrap" class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/30 shadow-sm mb-6" style="display:none;">
                         <div class="flex items-center justify-between mb-6">
-                            <h4 class="font-headline-sm text-on-surface" id="admin-calendar-month-year">...</h4>
+                            <h4 class="font-headline-sm text-on-surface" id="admin-cal-month-label">...</h4>
                             <div class="flex items-center gap-2">
                                 <button onclick="adminCalendarPrevMonth()" class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
                                     <span class="material-symbols-outlined">chevron_left</span>
@@ -470,7 +480,7 @@ const htmlTemplate = `<!DOCTYPE html>
                         <div class="grid grid-cols-7 gap-2 mb-2 text-center font-label-sm text-on-surface-variant uppercase">
                             <div>Du</div><div>Se</div><div>Ch</div><div>Pa</div><div>Ju</div><div>Sh</div><div>Ya</div>
                         </div>
-                        <div id="admin-calendar-grid" class="grid grid-cols-7 gap-2 text-center text-body-sm">
+                        <div id="admin-cal-days-grid" class="grid grid-cols-7 gap-2 text-center text-body-sm">
                             <!-- JS fills days -->
                         </div>
                     </div>
