@@ -391,7 +391,7 @@
           labels: labels,
           datasets: [
             {
-              label: 'Daromad (so\\'m)',
+              label: "Daromad (so'm)",
               data: dataRevenue,
               borderColor: '#2d6a4f',
               backgroundColor: 'rgba(45, 106, 79, 0.1)',
@@ -430,7 +430,7 @@
               type: 'linear',
               display: true,
               position: 'left',
-              title: { display: true, text: 'Daromad (so\\'m)' }
+              title: { display: true, text: "Daromad (so'm)" }
             },
             y1: {
               type: 'linear',
