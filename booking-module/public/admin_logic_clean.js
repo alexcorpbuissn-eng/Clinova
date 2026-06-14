@@ -400,18 +400,23 @@
         const data = await apiGet('/api/admin/leaves');
         if (data.success) {
           if (data.leaves.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Hech qanday dam olish kiritilmagan</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-outline font-medium bg-surface-container-lowest"><div class="flex flex-col items-center gap-2"><span class="material-symbols-outlined text-[2rem] text-outline-variant">event_available</span>Hech qanday dam olish kiritilmagan</div></td></tr>';
             return;
           }
           tbody.innerHTML = data.leaves.map(l => `
-            <tr>
-              <td><div style="font-weight:600; color:var(--navy);">${l.doctor.firstName} ${l.doctor.lastName}</div></td>
-              <td>${new Date(l.startTime).toLocaleString('ru-RU')}</td>
-              <td>${new Date(l.endTime).toLocaleString('ru-RU')}</td>
-              <td>${l.reason || '-'}</td>
-              <td><span style="font-size:0.8rem; color:var(--text-muted);">${new Date(l.createdAt).toLocaleDateString('ru-RU')}</span></td>
-              <td>
-                <button class="btn" style="background:var(--red-bg); color:var(--red); padding:6px 12px; font-size:0.8rem; width:auto;" onclick="deleteLeave('${l.id}')">Bekor qilish</button>
+            <tr class="hover:bg-surface-container-lowest transition-colors group">
+              <td class="py-4 px-6 border-r border-outline-variant/50">
+                <div style="font-weight:600; color:var(--on-surface);">${l.doctor.firstName} ${l.doctor.lastName}</div>
+                <div style="font-size:0.8rem; color:var(--on-surface-variant);">${l.doctor.specialty}</div>
+              </td>
+              <td class="py-4 px-6 border-r border-outline-variant/50 text-center font-medium">${new Date(l.startTime).toLocaleDateString('ru-RU')}</td>
+              <td class="py-4 px-6 border-r border-outline-variant/50 text-center font-medium">${new Date(l.endTime).toLocaleDateString('ru-RU')}</td>
+              <td class="py-4 px-6 border-r border-outline-variant/50 text-on-surface-variant">${l.reason || '<span class="text-outline italic">Kiritilmagan</span>'}</td>
+              <td class="py-4 px-6 border-r border-outline-variant/50 text-center text-outline">${new Date(l.createdAt).toLocaleDateString('ru-RU')}</td>
+              <td class="py-4 px-6 text-center">
+                <button class="bg-error/10 text-error hover:bg-error hover:text-on-error px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm active:scale-95 inline-flex items-center gap-1" onclick="deleteLeave('${l.id}')">
+                  <span class="material-symbols-outlined text-[1.1rem]">delete</span> Bekor qilish
+                </button>
               </td>
             </tr>
           `).join('');

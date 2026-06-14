@@ -522,13 +522,13 @@ const htmlTemplate = `<!DOCTYPE html>
                 <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-sm overflow-hidden">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase">
-                                <th class="py-3 px-6">Shifokor</th>
-                                <th class="py-3 px-6">Boshlanish</th>
-                                <th class="py-3 px-6">Tugash</th>
-                                <th class="py-3 px-6">Sabab</th>
-                                <th class="py-3 px-6">Kiritildi</th>
-                                <th class="py-3 px-6">Amal</th>
+                            <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase border-b border-outline-variant/50">
+                                <th class="py-4 px-6 border-r border-outline-variant/50">Shifokor</th>
+                                <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Boshlanish</th>
+                                <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Tugash</th>
+                                <th class="py-4 px-6 border-r border-outline-variant/50">Sabab</th>
+                                <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Kiritildi</th>
+                                <th class="py-4 px-6 text-center">Amal</th>
                             </tr>
                         </thead>
                         <tbody id="leave-tbody" class="divide-y divide-outline-variant/20 text-body-sm text-on-surface"></tbody>
@@ -660,29 +660,52 @@ const htmlTemplate = `<!DOCTYPE html>
 
     <!-- Leave Modal -->
     <div id="leave-modal" class="fixed inset-0 bg-black/50 z-[2000] hidden items-center justify-center">
-        <div class="bg-surface-container-lowest p-8 rounded-2xl max-w-md w-full relative shadow-xl">
-            <button onclick="closeLeaveModal()" class="absolute top-4 right-4 text-outline hover:text-on-surface"><span class="material-symbols-outlined">close</span></button>
-            <h3 class="font-headline-md text-primary mb-6">Dam Olish Kiritish</h3>
-            <div class="space-y-4">
-                <div>
-                    <label class="block font-label-md text-on-surface-variant mb-1">Shifokor</label>
-                    <select id="leave-doc-select" class="w-full px-4 py-2 rounded-lg border border-outline-variant focus:ring-primary"></select>
+        <div class="bg-surface-container-lowest p-6 sm:p-8 rounded-[24px] max-w-md w-full relative shadow-2xl border border-outline-variant/30 transform transition-all">
+            <button onclick="closeLeaveModal()" class="absolute top-4 right-4 p-2 rounded-full text-outline hover:text-on-surface hover:bg-surface-container transition-colors"><span class="material-symbols-outlined">close</span></button>
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined">event_busy</span>
                 </div>
+                <h3 class="font-headline-md text-on-surface m-0">Dam Olish Kiritish</h3>
+            </div>
+            
+            <div class="space-y-5">
+                <div>
+                    <label class="block font-label-md text-on-surface-variant mb-2">Shifokorni tanlang</label>
+                    <div class="relative">
+                        <select id="leave-doc-select" class="w-full appearance-none px-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-body-lg pr-10 hover:border-outline cursor-pointer"></select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-outline">
+                            <span class="material-symbols-outlined">expand_more</span>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-label-md text-on-surface-variant mb-1">Boshlanish</label>
-                        <input type="date" id="leave-start" class="w-full px-4 py-2 rounded-lg border border-outline-variant focus:ring-primary">
+                        <label class="block font-label-md text-on-surface-variant mb-2">Boshlanish</label>
+                        <div class="relative">
+                            <input type="date" id="leave-start" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-body-lg hover:border-outline">
+                        </div>
                     </div>
                     <div>
-                        <label class="block font-label-md text-on-surface-variant mb-1">Tugash</label>
-                        <input type="date" id="leave-end" class="w-full px-4 py-2 rounded-lg border border-outline-variant focus:ring-primary">
+                        <label class="block font-label-md text-on-surface-variant mb-2">Tugash</label>
+                        <div class="relative">
+                            <input type="date" id="leave-end" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-body-lg hover:border-outline">
+                        </div>
                     </div>
                 </div>
+                
                 <div>
-                    <label class="block font-label-md text-on-surface-variant mb-1">Sabab (ixtiyoriy)</label>
-                    <input type="text" id="leave-reason" class="w-full px-4 py-2 rounded-lg border border-outline-variant focus:ring-primary">
+                    <label class="block font-label-md text-on-surface-variant mb-2">Sabab <span class="text-outline text-sm font-normal">(ixtiyoriy)</span></label>
+                    <input type="text" id="leave-reason" placeholder="Masalan: Kasallik ta'tili" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-body-lg hover:border-outline placeholder:text-outline-variant">
                 </div>
-                <button onclick="submitLeave()" class="w-full bg-primary text-on-primary py-3 rounded-full font-label-md hover:bg-primary-container">Saqlash</button>
+                
+                <div class="pt-2">
+                    <button onclick="submitLeave()" class="w-full bg-primary text-on-primary py-3.5 rounded-full font-label-lg hover:bg-primary/90 transition-all shadow-md shadow-primary/20 active:scale-[0.98] flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-[1.2rem]">check_circle</span>
+                        Saqlash
+                    </button>
+                </div>
             </div>
         </div>
     </div>
