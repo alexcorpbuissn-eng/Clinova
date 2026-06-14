@@ -353,6 +353,7 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
             <div id="tab-appointments" class="tab-content hidden">
                 <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-[0_4px_16px_rgba(45,106,79,0.08)] overflow-hidden">
@@ -362,13 +363,13 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase">
-                                    <th class="py-3 px-6">Bemor</th>
-                                    <th class="py-3 px-6">Telefon</th>
-                                    <th class="py-3 px-6">Shifokor & Xizmat</th>
-                                    <th class="py-3 px-6">Vaqt</th>
-                                    <th class="py-3 px-6">Status</th>
-                                    <th class="py-3 px-6 text-right">Amallar</th>
+                                <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase border-b border-outline-variant/50">
+                                    <th class="py-4 px-6 border-r border-outline-variant/50">Bemor</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Telefon</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Shifokor & Xizmat</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Vaqt</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Status</th>
+                                    <th class="py-4 px-6 text-center">Amallar</th>
                                 </tr>
                             </thead>
                             <tbody id="appt-tbody" class="divide-y divide-outline-variant/20 text-body-sm text-on-surface">
@@ -429,12 +430,12 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase border-b border-outline-variant/30">
-                                    <th class="py-4 px-6 border-r border-outline-variant/30">F.I.O</th>
-                                    <th class="py-4 px-6 border-r border-outline-variant/30 text-center">Telefon</th>
-                                    <th class="py-4 px-6 border-r border-outline-variant/30 text-center">Telegram</th>
-                                    <th class="py-4 px-6 border-r border-outline-variant/30 text-center">Bekor qilingan</th>
-                                    <th class="py-4 px-6 border-r border-outline-variant/30 text-center">Qabullar</th>
+                                <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase border-b border-outline-variant/50">
+                                    <th class="py-4 px-6 border-r border-outline-variant/50">F.I.O</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Telefon</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Telegram</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Bekor qilingan</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Qabullar</th>
                                     <th class="py-4 px-6 text-center">Lavozim</th>
                                 </tr>
                             </thead>
@@ -1294,13 +1295,13 @@
             }
 
             return `
-              <tr class="${rowClass}">
-                <td><strong>${pName}</strong></td>
-                <td>${pPhone}</td>
-                <td><div style="font-size:0.85rem">Dr. ${a.doctor.lastName}<br><span style="color:var(--text-muted)">${a.procedure?.name || 'Birlamchi ko\'rik'}</span></div></td>
-                <td><div style="font-size:0.85rem"><strong>${date}</strong><br>${time}</div></td>
-                <td>${statusCell}</td>
-                <td>${actions}</td>
+              <tr class="${rowClass} hover:bg-surface-container/30 transition-colors even:bg-surface-container-lowest odd:bg-surface-container-low/30">
+                <td class="py-4 px-6 border-r border-outline-variant/50 font-medium"><strong>${pName}</strong></td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center font-mono text-xs">${pPhone}</td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center"><div style="font-size:0.85rem">Dr. ${a.doctor.lastName}<br><span class="text-on-surface-variant opacity-80">${a.procedure?.name || 'Birlamchi ko\'rik'}</span></div></td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center"><div style="font-size:0.85rem"><strong>${date}</strong><br>${time}</div></td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center">${statusCell}</td>
+                <td class="py-4 px-6 text-center">${actions}</td>
               </tr>
             `;
           }).join('');
@@ -1355,12 +1356,12 @@
           tbody.innerHTML = data.patients.map(p => {
             const escapedName = `${p.firstName.replace(/'/g, "\\'")} ${p.lastName.replace(/'/g, "\\'")}`;
             return `
-              <tr class="hover:bg-surface-container/30 transition-colors">
-                <td class="py-4 px-6 border-r border-outline-variant/30 font-medium"><strong>${p.firstName} ${p.lastName}</strong></td>
-                <td class="py-4 px-6 border-r border-outline-variant/30 text-center font-mono text-xs">${p.phone}</td>
-                <td class="py-4 px-6 border-r border-outline-variant/30 text-center text-primary">${p.telegramUsername ? '@' + p.telegramUsername : (p.telegramChatId || '<span class="text-on-surface-variant opacity-50">Yo\'q</span>')}</td>
-                <td class="py-4 px-6 border-r border-outline-variant/30 text-center">${p.cancellationsToday > 0 ? `<span class="bg-error-container text-on-error-container px-2 py-1 rounded-full text-xs font-bold">${p.cancellationsToday}</span>` : '<span class="text-outline-variant">-</span>'}</td>
-                <td class="py-4 px-6 border-r border-outline-variant/30 text-center font-bold">${p._count.appointments}</td>
+              <tr class="hover:bg-surface-container/30 transition-colors even:bg-surface-container-lowest odd:bg-surface-container-low/30">
+                <td class="py-4 px-6 border-r border-outline-variant/50 font-medium"><strong>${p.firstName} ${p.lastName}</strong></td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center font-mono text-xs">${p.phone}</td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center text-primary">${p.telegramUsername ? '@' + p.telegramUsername : (p.telegramChatId || '<span class="text-on-surface-variant opacity-50">Yo\'q</span>')}</td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center">${p.cancellationsToday > 0 ? `<span class="bg-error-container text-on-error-container px-2 py-1 rounded-full text-xs font-bold">${p.cancellationsToday}</span>` : '<span class="text-outline-variant">-</span>'}</td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center font-bold">${p._count.appointments}</td>
                 <td class="py-4 px-6 text-center">
                   <button class="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-label-sm hover:bg-primary hover:text-on-primary transition-colors flex items-center gap-2 mx-auto" 
                           onclick="promotePatient('${p.telegramPhone}', '${escapedName}')">

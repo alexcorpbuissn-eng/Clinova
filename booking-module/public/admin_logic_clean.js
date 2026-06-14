@@ -559,13 +559,13 @@
             }
 
             return `
-              <tr class="${rowClass}">
-                <td><strong>${pName}</strong></td>
-                <td>${pPhone}</td>
-                <td><div style="font-size:0.85rem">Dr. ${a.doctor.lastName}<br><span style="color:var(--text-muted)">${a.procedure?.name || 'Birlamchi ko\'rik'}</span></div></td>
-                <td><div style="font-size:0.85rem"><strong>${date}</strong><br>${time}</div></td>
-                <td>${statusCell}</td>
-                <td>${actions}</td>
+              <tr class="${rowClass} hover:bg-surface-container/30 transition-colors even:bg-surface-container-lowest odd:bg-surface-container-low/30">
+                <td class="py-4 px-6 border-r border-outline-variant/50 font-medium"><strong>${pName}</strong></td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center font-mono text-xs">${pPhone}</td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center"><div style="font-size:0.85rem">Dr. ${a.doctor.lastName}<br><span class="text-on-surface-variant opacity-80">${a.procedure?.name || 'Birlamchi ko\'rik'}</span></div></td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center"><div style="font-size:0.85rem"><strong>${date}</strong><br>${time}</div></td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center">${statusCell}</td>
+                <td class="py-4 px-6 text-center">${actions}</td>
               </tr>
             `;
           }).join('');
@@ -620,12 +620,12 @@
           tbody.innerHTML = data.patients.map(p => {
             const escapedName = `${p.firstName.replace(/'/g, "\\'")} ${p.lastName.replace(/'/g, "\\'")}`;
             return `
-              <tr class="hover:bg-surface-container/30 transition-colors">
-                <td class="py-4 px-6 border-r border-outline-variant/30 font-medium"><strong>${p.firstName} ${p.lastName}</strong></td>
-                <td class="py-4 px-6 border-r border-outline-variant/30 text-center font-mono text-xs">${p.phone}</td>
-                <td class="py-4 px-6 border-r border-outline-variant/30 text-center text-primary">${p.telegramUsername ? '@' + p.telegramUsername : (p.telegramChatId || '<span class="text-on-surface-variant opacity-50">Yo\'q</span>')}</td>
-                <td class="py-4 px-6 border-r border-outline-variant/30 text-center">${p.cancellationsToday > 0 ? `<span class="bg-error-container text-on-error-container px-2 py-1 rounded-full text-xs font-bold">${p.cancellationsToday}</span>` : '<span class="text-outline-variant">-</span>'}</td>
-                <td class="py-4 px-6 border-r border-outline-variant/30 text-center font-bold">${p._count.appointments}</td>
+              <tr class="hover:bg-surface-container/30 transition-colors even:bg-surface-container-lowest odd:bg-surface-container-low/30">
+                <td class="py-4 px-6 border-r border-outline-variant/50 font-medium"><strong>${p.firstName} ${p.lastName}</strong></td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center font-mono text-xs">${p.phone}</td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center text-primary">${p.telegramUsername ? '@' + p.telegramUsername : (p.telegramChatId || '<span class="text-on-surface-variant opacity-50">Yo\'q</span>')}</td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center">${p.cancellationsToday > 0 ? `<span class="bg-error-container text-on-error-container px-2 py-1 rounded-full text-xs font-bold">${p.cancellationsToday}</span>` : '<span class="text-outline-variant">-</span>'}</td>
+                <td class="py-4 px-6 border-r border-outline-variant/50 text-center font-bold">${p._count.appointments}</td>
                 <td class="py-4 px-6 text-center">
                   <button class="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-label-sm hover:bg-primary hover:text-on-primary transition-colors flex items-center gap-2 mx-auto" 
                           onclick="promotePatient('${p.telegramPhone}', '${escapedName}')">

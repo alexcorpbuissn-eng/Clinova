@@ -361,6 +361,7 @@ const htmlTemplate = `<!DOCTYPE html>
                         </div>
                     </div>
                 </div>
+            </div>
 
             <div id="tab-appointments" class="tab-content hidden">
                 <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-[0_4px_16px_rgba(45,106,79,0.08)] overflow-hidden">
@@ -370,13 +371,13 @@ const htmlTemplate = `<!DOCTYPE html>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase">
-                                    <th class="py-3 px-6">Bemor</th>
-                                    <th class="py-3 px-6">Telefon</th>
-                                    <th class="py-3 px-6">Shifokor & Xizmat</th>
-                                    <th class="py-3 px-6">Vaqt</th>
-                                    <th class="py-3 px-6">Status</th>
-                                    <th class="py-3 px-6 text-right">Amallar</th>
+                                <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase border-b border-outline-variant/50">
+                                    <th class="py-4 px-6 border-r border-outline-variant/50">Bemor</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Telefon</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Shifokor & Xizmat</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Vaqt</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Status</th>
+                                    <th class="py-4 px-6 text-center">Amallar</th>
                                 </tr>
                             </thead>
                             <tbody id="appt-tbody" class="divide-y divide-outline-variant/20 text-body-sm text-on-surface">
@@ -437,12 +438,12 @@ const htmlTemplate = `<!DOCTYPE html>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase border-b border-outline-variant/30">
-                                    <th class="py-4 px-6 border-r border-outline-variant/30">F.I.O</th>
-                                    <th class="py-4 px-6 border-r border-outline-variant/30 text-center">Telefon</th>
-                                    <th class="py-4 px-6 border-r border-outline-variant/30 text-center">Telegram</th>
-                                    <th class="py-4 px-6 border-r border-outline-variant/30 text-center">Bekor qilingan</th>
-                                    <th class="py-4 px-6 border-r border-outline-variant/30 text-center">Qabullar</th>
+                                <tr class="bg-surface-container-low text-on-surface-variant font-label-md uppercase border-b border-outline-variant/50">
+                                    <th class="py-4 px-6 border-r border-outline-variant/50">F.I.O</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Telefon</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Telegram</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Bekor qilingan</th>
+                                    <th class="py-4 px-6 border-r border-outline-variant/50 text-center">Qabullar</th>
                                     <th class="py-4 px-6 text-center">Lavozim</th>
                                 </tr>
                             </thead>
