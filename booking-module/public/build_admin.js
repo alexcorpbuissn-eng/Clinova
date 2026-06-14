@@ -672,10 +672,14 @@ const htmlTemplate = `<!DOCTYPE html>
             <div class="space-y-5">
                 <div>
                     <label class="block font-label-md text-on-surface-variant mb-2">Shifokorni tanlang</label>
-                    <div class="relative">
-                        <select id="leave-doc-select" class="w-full appearance-none px-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-body-lg pr-10 hover:border-outline cursor-pointer"></select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-outline">
-                            <span class="material-symbols-outlined">expand_more</span>
+                    <div class="relative" id="leave-custom-select-container">
+                        <input type="hidden" id="leave-doc-select" value="">
+                        <div id="leave-custom-select-btn" onclick="toggleLeaveDocSelect(event)" class="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface hover:border-outline cursor-pointer transition-all">
+                            <span id="leave-custom-select-text">Shifokor...</span>
+                            <span class="material-symbols-outlined text-outline transition-transform duration-200" id="leave-custom-select-arrow">expand_more</span>
+                        </div>
+                        <div id="leave-custom-select-dropdown" class="absolute z-50 mt-1 w-full rounded-xl bg-surface-container-lowest border border-outline-variant shadow-xl max-h-60 overflow-y-auto hidden divide-y divide-outline-variant/10">
+                            <!-- options injected via JS -->
                         </div>
                     </div>
                 </div>
@@ -693,6 +697,12 @@ const htmlTemplate = `<!DOCTYPE html>
                             <input type="date" id="leave-end" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-body-lg hover:border-outline">
                         </div>
                     </div>
+                </div>
+                
+                <div class="flex gap-2 -mt-2">
+                    <button type="button" onclick="setLeaveQuickRange(7)" class="flex-1 py-2 text-sm font-medium rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface hover:border-outline transition-all">1 hafta</button>
+                    <button type="button" onclick="setLeaveQuickRange(14)" class="flex-1 py-2 text-sm font-medium rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface hover:border-outline transition-all">2 hafta</button>
+                    <button type="button" onclick="setLeaveQuickRange(30)" class="flex-1 py-2 text-sm font-medium rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface hover:border-outline transition-all">1 oy</button>
                 </div>
                 
                 <div>

@@ -664,10 +664,14 @@
             <div class="space-y-5">
                 <div>
                     <label class="block font-label-md text-on-surface-variant mb-2">Shifokorni tanlang</label>
-                    <div class="relative">
-                        <select id="leave-doc-select" class="w-full appearance-none px-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-body-lg pr-10 hover:border-outline cursor-pointer"></select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-outline">
-                            <span class="material-symbols-outlined">expand_more</span>
+                    <div class="relative" id="leave-custom-select-container">
+                        <input type="hidden" id="leave-doc-select" value="">
+                        <div id="leave-custom-select-btn" onclick="toggleLeaveDocSelect(event)" class="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface hover:border-outline cursor-pointer transition-all">
+                            <span id="leave-custom-select-text">Shifokor...</span>
+                            <span class="material-symbols-outlined text-outline transition-transform duration-200" id="leave-custom-select-arrow">expand_more</span>
+                        </div>
+                        <div id="leave-custom-select-dropdown" class="absolute z-50 mt-1 w-full rounded-xl bg-surface-container-lowest border border-outline-variant shadow-xl max-h-60 overflow-y-auto hidden divide-y divide-outline-variant/10">
+                            <!-- options injected via JS -->
                         </div>
                     </div>
                 </div>
@@ -685,6 +689,12 @@
                             <input type="date" id="leave-end" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-body-lg hover:border-outline">
                         </div>
                     </div>
+                </div>
+                
+                <div class="flex gap-2 -mt-2">
+                    <button type="button" onclick="setLeaveQuickRange(7)" class="flex-1 py-2 text-sm font-medium rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface hover:border-outline transition-all">1 hafta</button>
+                    <button type="button" onclick="setLeaveQuickRange(14)" class="flex-1 py-2 text-sm font-medium rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface hover:border-outline transition-all">2 hafta</button>
+                    <button type="button" onclick="setLeaveQuickRange(30)" class="flex-1 py-2 text-sm font-medium rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface hover:border-outline transition-all">1 oy</button>
                 </div>
                 
                 <div>
@@ -1162,21 +1172,87 @@
       document.getElementById('leave-end').value = '';
       document.getElementById('leave-reason').value = '';
       
-      const select = document.getElementById('leave-doc-select');
-      select.innerHTML = '<option value="">Yuklanmoqda...</option>';
+      const hiddenInput = document.getElementById('leave-doc-select');
+      const textSpan = document.getElementById('leave-custom-select-text');
+      const dropdown = document.getElementById('leave-custom-select-dropdown');
+      
+      hiddenInput.value = '';
+      textSpan.textContent = 'Yuklanmoqda...';
+      dropdown.innerHTML = '<div class="px-4 py-3 text-on-surface-variant text-center">Yuklanmoqda...</div>';
+      
       document.getElementById('leave-modal').style.display = 'flex';
       
       try {
         const data = await apiGet('/api/admin/doctors');
         if (data.success) {
-          select.innerHTML = '<option value="">Shifokor...</option>' + 
-            data.doctors.map(d => `<option value="${d.id}">${d.firstName} ${d.lastName} (${d.specialty})</option>`).join('');
+          textSpan.textContent = 'Shifokorni tanlang...';
+          dropdown.innerHTML = data.doctors.map(d => `
+            <div onclick="selectLeaveDoc('${d.id}', '${d.firstName} ${d.lastName} (${d.specialty})')" class="px-4 py-3 hover:bg-surface-container cursor-pointer text-on-surface transition-colors flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm">${d.firstName[0]}${d.lastName[0]}</div>
+              <div>
+                <div class="font-medium">${d.firstName} ${d.lastName}</div>
+                <div class="text-xs text-on-surface-variant">${d.specialty}</div>
+              </div>
+            </div>
+          `).join('');
         }
       } catch(e) {}
     }
 
+    function toggleLeaveDocSelect(e) {
+      if (e) e.stopPropagation();
+      const dropdown = document.getElementById('leave-custom-select-dropdown');
+      const arrow = document.getElementById('leave-custom-select-arrow');
+      if (dropdown.classList.contains('hidden')) {
+        dropdown.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        dropdown.classList.add('hidden');
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    function selectLeaveDoc(id, name) {
+      document.getElementById('leave-doc-select').value = id;
+      document.getElementById('leave-custom-select-text').textContent = name;
+      toggleLeaveDocSelect();
+    }
+
+    // Close custom dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+      const container = document.getElementById('leave-custom-select-container');
+      if (container && !container.contains(e.target)) {
+        const dropdown = document.getElementById('leave-custom-select-dropdown');
+        const arrow = document.getElementById('leave-custom-select-arrow');
+        if (dropdown && !dropdown.classList.contains('hidden')) {
+          dropdown.classList.add('hidden');
+          if(arrow) arrow.style.transform = 'rotate(0deg)';
+        }
+      }
+    });
+
+    function setLeaveQuickRange(days) {
+      const startInput = document.getElementById('leave-start');
+      const endInput = document.getElementById('leave-end');
+      
+      let start = startInput.value ? new Date(startInput.value) : new Date();
+      if (isNaN(start.getTime())) start = new Date(); // fallback if invalid
+      
+      // format start date to yyyy-mm-dd
+      startInput.value = start.toISOString().split('T')[0];
+      
+      // calculate end date
+      const end = new Date(start);
+      end.setDate(end.getDate() + days);
+      endInput.value = end.toISOString().split('T')[0];
+    }
+
     function closeLeaveModal() {
       document.getElementById('leave-modal').style.display = 'none';
+      const dropdown = document.getElementById('leave-custom-select-dropdown');
+      const arrow = document.getElementById('leave-custom-select-arrow');
+      if (dropdown) dropdown.classList.add('hidden');
+      if (arrow) arrow.style.transform = 'rotate(0deg)';
     }
 
     async function submitLeave() {

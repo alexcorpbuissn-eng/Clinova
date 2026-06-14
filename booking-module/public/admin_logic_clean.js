@@ -429,21 +429,87 @@
       document.getElementById('leave-end').value = '';
       document.getElementById('leave-reason').value = '';
       
-      const select = document.getElementById('leave-doc-select');
-      select.innerHTML = '<option value="">Yuklanmoqda...</option>';
+      const hiddenInput = document.getElementById('leave-doc-select');
+      const textSpan = document.getElementById('leave-custom-select-text');
+      const dropdown = document.getElementById('leave-custom-select-dropdown');
+      
+      hiddenInput.value = '';
+      textSpan.textContent = 'Yuklanmoqda...';
+      dropdown.innerHTML = '<div class="px-4 py-3 text-on-surface-variant text-center">Yuklanmoqda...</div>';
+      
       document.getElementById('leave-modal').style.display = 'flex';
       
       try {
         const data = await apiGet('/api/admin/doctors');
         if (data.success) {
-          select.innerHTML = '<option value="">Shifokor...</option>' + 
-            data.doctors.map(d => `<option value="${d.id}">${d.firstName} ${d.lastName} (${d.specialty})</option>`).join('');
+          textSpan.textContent = 'Shifokorni tanlang...';
+          dropdown.innerHTML = data.doctors.map(d => `
+            <div onclick="selectLeaveDoc('${d.id}', '${d.firstName} ${d.lastName} (${d.specialty})')" class="px-4 py-3 hover:bg-surface-container cursor-pointer text-on-surface transition-colors flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm">${d.firstName[0]}${d.lastName[0]}</div>
+              <div>
+                <div class="font-medium">${d.firstName} ${d.lastName}</div>
+                <div class="text-xs text-on-surface-variant">${d.specialty}</div>
+              </div>
+            </div>
+          `).join('');
         }
       } catch(e) {}
     }
 
+    function toggleLeaveDocSelect(e) {
+      if (e) e.stopPropagation();
+      const dropdown = document.getElementById('leave-custom-select-dropdown');
+      const arrow = document.getElementById('leave-custom-select-arrow');
+      if (dropdown.classList.contains('hidden')) {
+        dropdown.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        dropdown.classList.add('hidden');
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    function selectLeaveDoc(id, name) {
+      document.getElementById('leave-doc-select').value = id;
+      document.getElementById('leave-custom-select-text').textContent = name;
+      toggleLeaveDocSelect();
+    }
+
+    // Close custom dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+      const container = document.getElementById('leave-custom-select-container');
+      if (container && !container.contains(e.target)) {
+        const dropdown = document.getElementById('leave-custom-select-dropdown');
+        const arrow = document.getElementById('leave-custom-select-arrow');
+        if (dropdown && !dropdown.classList.contains('hidden')) {
+          dropdown.classList.add('hidden');
+          if(arrow) arrow.style.transform = 'rotate(0deg)';
+        }
+      }
+    });
+
+    function setLeaveQuickRange(days) {
+      const startInput = document.getElementById('leave-start');
+      const endInput = document.getElementById('leave-end');
+      
+      let start = startInput.value ? new Date(startInput.value) : new Date();
+      if (isNaN(start.getTime())) start = new Date(); // fallback if invalid
+      
+      // format start date to yyyy-mm-dd
+      startInput.value = start.toISOString().split('T')[0];
+      
+      // calculate end date
+      const end = new Date(start);
+      end.setDate(end.getDate() + days);
+      endInput.value = end.toISOString().split('T')[0];
+    }
+
     function closeLeaveModal() {
       document.getElementById('leave-modal').style.display = 'none';
+      const dropdown = document.getElementById('leave-custom-select-dropdown');
+      const arrow = document.getElementById('leave-custom-select-arrow');
+      if (dropdown) dropdown.classList.add('hidden');
+      if (arrow) arrow.style.transform = 'rotate(0deg)';
     }
 
     async function submitLeave() {
