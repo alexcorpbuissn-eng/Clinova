@@ -424,10 +424,31 @@
       } catch(e) {}
     }
 
+    let leaveStartPicker = null;
+    let leaveEndPicker = null;
+
     async function openLeaveModal() {
       document.getElementById('leave-start').value = '';
       document.getElementById('leave-end').value = '';
       document.getElementById('leave-reason').value = '';
+      
+      if (!leaveStartPicker) {
+        leaveStartPicker = flatpickr('#leave-start', {
+          locale: 'uz',
+          dateFormat: 'Y-m-d',
+        });
+      } else {
+        leaveStartPicker.clear();
+      }
+      
+      if (!leaveEndPicker) {
+        leaveEndPicker = flatpickr('#leave-end', {
+          locale: 'uz',
+          dateFormat: 'Y-m-d',
+        });
+      } else {
+        leaveEndPicker.clear();
+      }
       
       const hiddenInput = document.getElementById('leave-doc-select');
       const textSpan = document.getElementById('leave-custom-select-text');
@@ -489,19 +510,16 @@
     });
 
     function setLeaveQuickRange(days) {
-      const startInput = document.getElementById('leave-start');
-      const endInput = document.getElementById('leave-end');
+      let start = new Date();
+      if (leaveStartPicker && leaveStartPicker.selectedDates.length > 0) {
+        start = leaveStartPicker.selectedDates[0];
+      } else {
+        if (leaveStartPicker) leaveStartPicker.setDate(start);
+      }
       
-      let start = startInput.value ? new Date(startInput.value) : new Date();
-      if (isNaN(start.getTime())) start = new Date(); // fallback if invalid
-      
-      // format start date to yyyy-mm-dd
-      startInput.value = start.toISOString().split('T')[0];
-      
-      // calculate end date
       const end = new Date(start);
       end.setDate(end.getDate() + days);
-      endInput.value = end.toISOString().split('T')[0];
+      if (leaveEndPicker) leaveEndPicker.setDate(end);
     }
 
     function closeLeaveModal() {

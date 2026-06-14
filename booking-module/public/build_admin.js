@@ -129,8 +129,24 @@ const htmlTemplate = `<!DOCTYPE html>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Atkinson+Hyperlegible+Next:wght@400;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/uz.js"></script>
     ${tailwindConfig}
     ${globalStyles}
+    <style>
+        .flatpickr-calendar {
+            font-family: inherit !important;
+            border-radius: 16px !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+            border: 1px solid #e7e9e5 !important;
+            padding: 10px !important;
+        }
+        .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected.inRange, .flatpickr-day.startRange.inRange, .flatpickr-day.endRange.inRange, .flatpickr-day.selected:focus, .flatpickr-day.startRange:focus, .flatpickr-day.endRange:focus, .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover, .flatpickr-day.selected.prevMonthDay, .flatpickr-day.startRange.prevMonthDay, .flatpickr-day.endRange.prevMonthDay, .flatpickr-day.selected.nextMonthDay, .flatpickr-day.startRange.nextMonthDay, .flatpickr-day.endRange.nextMonthDay {
+            background: #2c694e !important;
+            border-color: #2c694e !important;
+        }
+    </style>
 </head>
 <body class="bg-background text-on-background font-body-md text-body-md flex antialiased selection:bg-primary-container selection:text-on-primary-container">
 
@@ -688,13 +704,13 @@ const htmlTemplate = `<!DOCTYPE html>
                     <div>
                         <label class="block font-label-md text-on-surface-variant mb-2">Boshlanish</label>
                         <div class="relative">
-                            <input type="date" id="leave-start" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-body-lg hover:border-outline">
+                            <input type="text" id="leave-start" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-body-lg hover:border-outline cursor-pointer" placeholder="Sanani tanlang">
                         </div>
                     </div>
                     <div>
                         <label class="block font-label-md text-on-surface-variant mb-2">Tugash</label>
                         <div class="relative">
-                            <input type="date" id="leave-end" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-body-lg hover:border-outline">
+                            <input type="text" id="leave-end" class="w-full px-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none font-body-lg hover:border-outline cursor-pointer" placeholder="Sanani tanlang">
                         </div>
                     </div>
                 </div>
