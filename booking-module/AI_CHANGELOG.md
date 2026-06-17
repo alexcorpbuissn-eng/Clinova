@@ -8,6 +8,43 @@
 
 ---
 
+## 2026-06-17 - Этап 1: SaaS Foundation — Модель Clinic + Multi-Tenant основа
+**Автор:** Claude (Anthropic)
+
+### Что сделано:
+- **`seed-clinic.ts` переименован** → `seed-clinic.DANGEROUS-DO-NOT-USE.ts` (файл удалял все данные)
+- **`prisma/schema.prisma` обновлён:**
+  - Добавлена модель `Clinic` (id, name, slug, logoUrl, address, phone, telegramBotToken, telegramBotUsername, timezone, isActive, plan, planExpiresAt)
+  - Добавлен enum `ClinicPlan` (TRIAL, BASIC, PRO, ENTERPRISE)
+  - Добавлен `SUPER_ADMIN` в enum `Role`
+  - `clinicId String?` добавлен в: Doctor, User, Leave, Procedure, Slot, Appointment, Visit, Complaint, SavedDraft, Purchase
+  - `Patient` и `Otp` — **без clinicId** (глобальные; изоляция через Appointment.clinicId)
+- **`prisma.config.ts` упрощён** (убрана Prisma-managed `env()`, используется `process.env` с fallback)
+- **`vercel.json` обновлён:** добавлена `buildCommand: "npx prisma db push && next build"` — схема пушится автоматически при деплое
+- **`prisma/seed-saas-stage1.ts` создан** — non-destructive seed: создаёт Clinic + backfill clinicId для всех записей
+- **`src/app/api/superadmin/seed-stage1/route.ts` создан** — защищённый HTTP-эндпоинт для запуска seed через Vercel (X-Seed-Secret header)
+- **`src/lib/auth.ts` обновлён:** добавлен `clinicId?: string` и `doctorId?: string` в `JWTPayload`
+- **`src/lib/clinic-guard.ts` создан** — middleware-утилита `requireClinicAccess()` и `requireRole()` для Этапа 2
+- **`src/app/api/doctor/login/route.ts` обновлён:** JWT теперь включает `clinicId` из User записи; SUPER_ADMIN и INVENTORY добавлены в список разрешённых ролей
+
+### Статус Stage 1:
+- ✅ Шаг 1.1: Clinic модель в схеме (String? nullable)
+- ✅ Шаг 1.2: clinicId добавлен ко всем нужным моделям
+- ✅ Шаг 1.3: SUPER_ADMIN роль добавлена
+- 🔄 Шаг 1.4: db push (nullable) → **происходит автоматически при деплое Vercel**
+- ⏳ Шаг 1.4b: Запустить seed (POST /api/superadmin/seed-stage1 с X-Seed-Secret)
+- ⏳ Шаг 1.4c: Изменить String? → String → второй db push
+- ✅ Шаг 1.5: auth.ts + clinic-guard.ts + login обновлены
+
+### Что нужно сделать после деплоя:
+1. В Vercel добавить env var: `SEED_RUN_SECRET=<случайная строка>`
+2. Вызвать: `POST https://clinova-woad.vercel.app/api/superadmin/seed-stage1` с заголовком `X-Seed-Secret: <значение>`
+3. Убедиться что все счётчики > 0 в ответе
+4. Изменить `String?` → `String` в schema.prisma (для всех моделей кроме User)
+5. Сделать второй коммит → второй деплой → schema becomes NOT NULL
+6. Удалить `/api/superadmin/seed-stage1/route.ts`
+
+
 ## 2026-06-14 - Admin Jadvallar UI Fix
 **Author:** Antigravity
 - Fixed a bug where clicking "Jadvalni boshqarish" (Manage Schedule) on the Jadvallar tab did nothing. Restored the missing schedule grid HTML layout (`admin-schedule-container`) inside `build_admin.js` which was causing the script to crash.
