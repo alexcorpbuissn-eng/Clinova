@@ -1,538 +1,553 @@
-# 🚀 ПЛАН ТРАНСФОРМАЦИИ В SaaS-ПРОДУКТ
-### Мастер-документ для ИИ-агентов | Версия 1.0 | Дата: 2026-06-15
+# 🚀 ПЛАН ТРАНСФОРМАЦИИ В SaaS — ФИНАЛЬНАЯ ВЕРСИЯ v2.0
+### Мастер-документ для ИИ-агентов | Обновлено: 2026-06-17
 
 ---
 
-## 📌 ОБЯЗАТЕЛЬНО ПРОЧИТАТЬ ПЕРВЫМ
-
-Этот файл — **главный стратегический документ** проекта. Если ты — ИИ-агент, работающий с этим репозиторием, этот файл объясняет не только *что* нужно сделать, но и *почему* и *как именно* это должно быть реализовано. Не начинай кодить, не прочитав его целиком.
+## ⚠️ ЧИТАЙ ЭТОТ ФАЙЛ ПЕРВЫМ. НЕ НАЧИНАЙ КОДИТЬ, ПОКА НЕ ПРОЧИТАЛ ДО КОНЦА.
 
 ---
 
-## 🏥 КОНТЕКСТ: ЧТО СУЩЕСТВУЕТ СЕЙЧАС
+## 📌 ЖЕЛЕЗНЫЕ ПРАВИЛА (нарушение = остановить работу и сообщить владельцу)
 
-### Текущее приложение: Клиника «Habibullo-Hilola»
-Это **монолитное веб-приложение** — полноценная система управления медицинской клиникой (стоматология и ЛОР отделения в Ташкенте, Узбекистан). Оно включает:
+1. **НИКОГДА не используй `prisma migrate dev`** — только `npx prisma db push`. Это продакшн база на Neon.tech. `migrate dev` создаёт файлы миграций которые сломают деплой на Vercel.
+2. **НИКОГДА не редактируй `.html` файлы напрямую** — редактируй только `*_logic_clean.js`, затем запускай `node public/build_*.js`.
+3. **После КАЖДОГО изменения `schema.prisma`** — немедленно `npx prisma db push`.
+4. **После каждой завершённой задачи** — `git add -A && git commit -m "..." && git push origin main`.
+5. **Не меняй `.env`** без явного разрешения владельца.
+6. **Тайм-зона везде** — `Asia/Tashkent` (UTC+5).
+7. **Перед стартом любой задачи** — прочитай AI_HANDOFF.md и верхние 50 строк AI_CHANGELOG.md.
 
-- **Публичный сайт клиники** (`/public/index.html`, `about.html`, `services.html`) — маркетинговые страницы
-- **Система онлайн-бронирования** (`/public/booking.html`) — пациенты записываются к врачам
-- **Верификация через Telegram** — OTP-код приходит от Telegram-бота
-- **Панель администратора** (`/public/admin.html`) — управление врачами, расписанием, финансами
-- **Портал врача** (`/public/doctor.html`) — врач видит своё расписание и записи
-- **Стойка регистратуры** (`/public/reception.html`) — оператор управляет визитами пациентов в реальном времени
-- **Склад/Инвентаризация** (`/public/inventory.html`) — учет закупок и расходов клиники
+---
 
-### Технологический стек (НЕИЗМЕНЕН, не меняй без разрешения владельца!)
+## 🏥 ЧТО СУЩЕСТВУЕТ СЕЙЧАС
+
+Монолитное приложение клиники **Habibullo-Hilola** (стоматология + ЛОР, Ташкент). Один Vercel проект, одна база Neon PostgreSQL, один Telegram-бот.
+
+### Текущий стек (НЕ МЕНЯТЬ без разрешения)
 ```
-Framework:     Next.js 15 (App Router ТОЛЬКО для API!)
-Database:      PostgreSQL на Neon.tech, ORM: Prisma
-Frontend:      Чистый HTML/Vanilla JS/CSS в папке /public/
-               НЕТ React компонентов в UI! 
-Hosting:       Vercel (для API и статики)
-Notifications: Telegram Bot API (node-telegram-bot-api)
-Timezone:      Asia/Tashkent (UTC+5)
-Auth:          JWT токены, хранятся в localStorage
+Framework:  Next.js (App Router ТОЛЬКО для API)
+Database:   PostgreSQL на Neon.tech, ORM: Prisma
+Frontend:   Чистый HTML/Vanilla JS в /public/ — НЕТ React в UI
+Hosting:    Vercel (один проект на всё)
+Auth:       JWT (jose), хранятся в localStorage
+Notify:     Telegram Bot API
+Timezone:   Asia/Tashkent (UTC+5)
 ```
 
-### Файловая архитектура
+### Файловая структура (ключевые файлы)
 ```
 /booking-module
-├── prisma/schema.prisma         ← Схема БД (ЕДИНСТВЕННЫЙ источник правды для структуры данных)
-├── src/
-│   ├── app/api/                 ← ВСЕ Backend API (Next.js App Router)
-│   │   ├── admin/               ← Защищенные эндпоинты для роли ADMIN
-│   │   │   ├── appointments/    ← CRUD для приемов
-│   │   │   ├── doctors/         ← CRUD для врачей
-│   │   │   ├── leaves/          ← Управление отгулами врачей
-│   │   │   ├── patients/        ← Управление пациентами
-│   │   │   ├── procedures/      ← Управление процедурами
-│   │   │   ├── purchases/       ← Учет закупок
-│   │   │   ├── slots/           ← Управление слотами расписания
-│   │   │   ├── stats/           ← Статистика и доходы по врачам
-│   │   │   ├── uploads/         ← Загрузка фото врачей
-│   │   │   ├── users/           ← Управление пользователями (роли)
-│   │   │   └── visits/          ← Журнал визитов
-│   │   ├── cron/                ← Задания по расписанию (Vercel Cron)
-│   │   │   └── generate-slots/  ← Автогенерация слотов на 30 дней вперед
-│   │   ├── doctor/              ← Защищенные эндпоинты для роли DOCTOR
-│   │   ├── inventory/           ← Защищенные эндпоинты для роли INVENTORY
-│   │   ├── public/              ← Открытые эндпоинты (для booking.html без авторизации)
-│   │   ├── reception/           ← Защищенные эндпоинты для роли RECEPTION
-│   │   └── telegram/            ← Webhook для Telegram бота
-│   └── lib/
-│       ├── prisma.ts            ← Singleton клиент Prisma
-│       ├── auth.ts              ← JWT верификация (verifyToken, signToken)
-│       ├── telegram.ts          ← Singleton экземпляр Telegram бота
-│       └── slot-generator.ts   ← Утилита генерации слотов для врача
-├── public/                      ← Весь Frontend (HTML/JS/CSS)
-│   ├── build_admin.js           ← СКРИПТ: генерирует admin.html из admin_logic_clean.js
-│   ├── build_reception.js       ← СКРИПТ: генерирует reception.html
-│   ├── build_doctor.js          ← СКРИПТ: генерирует doctor.html
-│   ├── build_booking.js         ← СКРИПТ: генерирует booking.html
-│   ├── build_secondary.js       ← СКРИПТ: генерирует about.html, services.html
-│   ├── admin_logic_clean.js     ← Исходник логики (JS) для admin.html
-│   ├── reception_logic_clean.js ← Исходник логики (JS) для reception.html
-│   ├── doctor_logic_clean.js    ← Исходник логики (JS) для doctor.html
-│   ├── booking_logic_clean.js   ← Исходник логики (JS) для booking.html
-│   ├── style.css                ← Глобальные стили
-│   └── ... (остальные HTML и медиафайлы)
-├── AI_HANDOFF.md                ← Инструкции для нового агента (читать первым)
-├── AI_CHANGELOG.md              ← Журнал изменений (читай верхние 50 строк)
-└── SAAS_TRANSFORMATION_PLAN.md  ← ЭТОТ ФАЙЛ (стратегический план)
+├── prisma/schema.prisma          ← Единственный источник правды для БД
+├── src/app/api/                  ← Весь backend (Next.js App Router)
+│   ├── admin/                    ← Защищённые эндпоинты (роль ADMIN)
+│   ├── doctor/                   ← Защищённые эндпоинты (роль DOCTOR)
+│   ├── reception/                ← Защищённые эндпоинты (роль RECEPTION)
+│   ├── inventory/                ← Защищённые эндпоинты (роль INVENTORY)
+│   ├── public/                   ← Открытые эндпоинты (бронирование)
+│   └── cron/                     ← Vercel Cron Jobs
+├── src/lib/
+│   ├── prisma.ts                 ← Singleton Prisma клиент
+│   ├── auth.ts                   ← JWT (verifyToken, signToken)
+│   ├── telegram.ts               ← Singleton Telegram бот
+│   └── slot-generator.ts         ← Генерация слотов
+├── public/
+│   ├── build_admin.js            ← ГЕНЕРАТОР: создаёт admin.html
+│   ├── build_reception.js        ← ГЕНЕРАТОР: создаёт reception.html
+│   ├── build_doctor.js           ← ГЕНЕРАТОР: создаёт doctor.html
+│   ├── build_booking.js          ← ГЕНЕРАТОР: создаёт booking.html
+│   ├── build_secondary.js        ← ГЕНЕРАТОР: about.html, services.html
+│   ├── admin_logic_clean.js      ← ИСХОДНИК логики для admin (редактировать здесь)
+│   ├── reception_logic_clean.js  ← ИСХОДНИК логики для reception
+│   ├── doctor_logic_clean.js     ← ИСХОДНИК логики для doctor
+│   └── booking_logic_clean.js    ← ИСХОДНИК логики для booking
+├── AI_HANDOFF.md                 ← Читать первым при старте
+├── AI_CHANGELOG.md               ← Журнал изменений (только верхние 50 строк)
+└── SAAS_TRANSFORMATION_PLAN.md   ← ЭТОТ ФАЙЛ
 ```
 
 ---
 
 ## 💡 СТРАТЕГИЧЕСКАЯ ЦЕЛЬ
 
-**Превратить монолит «одна клиника — один сервер» в многопользовательский SaaS-продукт (Multi-Tenant), где одна система управляет сотнями независимых клиник.**
+Превратить монолит одной клиники в **мультиарендный (Multi-Tenant) SaaS-продукт**, где одна кодовая база и одна база данных обслуживают сотни независимых клиник. Каждая клиника видит **только свои данные**.
 
-### Видение продукта
-- Назвать продукт, например, **ShifoCRM** или **ClinoPlatform** (название уточнить у владельца)
-- Веб-сайт продукта (`landing.shifocrm.uz`) — рекламирует систему потенциальным клиникам
-- Приложение (`app.shifocrm.uz`) — работает для ВСЕХ клиник через единую кодовую базу
-- Каждая клиника входит со своим логином и видит ТОЛЬКО СВОИ данные
-- Онлайн-запись для пациентов каждой клиники доступна по уникальной ссылке: `app.shifocrm.uz/book/clinic-slug`
-- Владелец продукта (ты) управляет всеми клиниками через SuperAdmin панель
+### Как выглядит готовый продукт
+- **Платформа:** `app.clinova.uz` — единый домен для ВСЕХ клиник (API + панели персонала + бронирование)
+- **Бронирование пациента:** `app.clinova.uz/book/habibullo-hilola` — уникальная ссылка для каждой клиники по slug
+- **Сайты клиник:** остаются на их собственном хостинге. Кнопка "Записаться" на сайте клиники — редирект на `app.clinova.uz/book/[slug]`. Страница бронирования автоматически подгружает логотип, название и цвета клиники — пациент видит брендированную страницу, а не безликую платформу.
+- **SuperAdmin панель:** `app.clinova.uz/superadmin` — управление всеми клиниками (только для владельца платформы)
+- **Сайт клиники НЕ переезжает на нашу платформу** — только бронирование. `index.html`, `about.html`, `services.html` остаются как есть для клиники Habibullo-Hilola.
 
----
-
-## 🔑 КЛЮЧЕВАЯ КОНЦЕПЦИЯ: Multi-Tenancy (Принцип изоляции)
-
-### Что это значит на практике?
-Каждая запись в базе данных (врач, пациент, приём, слот) должна быть **жёстко привязана к `clinicId`**. Без этого поля данные будут «общими» для всех.
-
-### Как работает авторизация в Multi-Tenant системе?
-1. Пользователь (реципшн/врач/admin клиники) вводит логин + пароль.
-2. Система проверяет: «К какой клинике относится этот пользователь?»
-3. JWT-токен, который система выдаёт, содержит `clinicId` этого пользователя.
-4. **КАЖДЫЙ** API-запрос фильтрует данные через `where: { clinicId: token.clinicId }`.
-
-### Правило «нулевой утечки данных»
-> ⛔ **КРИТИЧЕСКИ ВАЖНО:** Ни один API-запрос в Multi-Tenant системе не должен возвращать данные без фильтра `clinicId`. Нарушение этого правила — критическая уязвимость безопасности.
+### Деплой-модель (критически важно понимать)
+Один `git push` в ветку `main` → Vercel перебилдит проект → **ВСЕ клиники получают обновление одновременно**. Это преимущество (фиксишь баг — все сразу исправлено) и риск (сломанный деплой роняет всех). Поэтому обязательна ветка `staging` — см. Шаг 1.8.
 
 ---
 
-## 📋 ПЛАН РЕАЛИЗАЦИИ (Пошаговый, по приоритетам)
+## 🔑 КЛЮЧЕВОЙ ПРИНЦИП: Multi-Tenancy
+
+**Каждая запись в БД, кроме `Patient` и `Otp`, жёстко привязана к `clinicId`.**
+
+### Почему `Patient` — глобальный (без `clinicId`)
+Пациент — это человек с телефоном, а не "пациент клиники А". Один человек может записаться в несколько клиник. Глобальный пациент означает: один раз верифицировался через Telegram → может записываться в любую клинику на платформе без повторной верификации. Клиники видят только **Appointment** (записи) своих пациентов через `Appointment.clinicId` — изоляция гарантирована без `clinicId` на самом пациенте.
+
+### Правило нулевой утечки данных
+> ⛔ **КРИТИЧНО:** Ни один API-запрос не должен возвращать данные без фильтра `where: { clinicId: session.clinicId }`. Нарушение = критическая уязвимость безопасности.
+>
+> Исключения: публичные эндпоинты бронирования (clinicId берётся из slug URL), SuperAdmin эндпоинты (видят всё намеренно).
+
+---
+
+## 📋 ПЛАН РЕАЛИЗАЦИИ
+
+---
 
 ### ═══════════════════════════════════════════
-### ЭТАП 1: Фундамент (Foundation) 
+### ЭТАП 1: ФУНДАМЕНТ
+### Статус: 🔴 НЕ НАЧАТ
 ### ═══════════════════════════════════════════
-> **Цель:** Добавить концепцию «Клиника» в базу данных и логику авторизации. Ничего не сломать в текущей работе клиники «Habibullo-Hilola».
 
-#### Шаг 1.1: Создать модель `Clinic` в Prisma схеме
-**Файл:** `prisma/schema.prisma`
+**Цель:** Добавить концепцию "клиника" в БД и авторизацию. Существующие данные сохранить. Текущий функционал не сломать.
 
-Добавить в САМЫЙ ВЕРХ схемы (до модели `Doctor`):
+---
+
+#### Шаг 1.1 — Переименовать опасный файл
+
+```bash
+mv prisma/seed-clinic.ts prisma/seed-clinic.DANGEROUS-DO-NOT-USE.ts
+```
+
+Существующий `seed-clinic.ts` УДАЛЯЕТ ВСЕ ДАННЫЕ. Переименовать немедленно чтобы никто случайно не запустил.
+
+---
+
+#### Шаг 1.2 — Добавить модель `Clinic` в `prisma/schema.prisma`
+
+Добавить В САМЫЙ ВЕРХ схемы (перед моделью `Doctor`):
+
 ```prisma
 model Clinic {
-  id          String    @id @default(uuid())
-  name        String                          // Название клиники: "Habibullo-Hilola"
-  slug        String    @unique               // URL-slug: "habibullo-hilola" 
-  logoUrl     String?                         // URL логотипа клиники
-  address     String?                         // Адрес клиники
-  phone       String?                         // Контактный телефон клиники
-  telegramBotToken  String?                   // Свой Telegram Bot Token (опционально)
-  telegramBotUsername String?                 // @username бота (для виджета)
-  timezone    String    @default("Asia/Tashkent") // Часовой пояс
-  isActive    Boolean   @default(true)
-  plan        ClinicPlan @default(TRIAL)      // Тарифный план
-  planExpiresAt DateTime?                     // Дата окончания плана
-  
-  // Связи
+  id                   String     @id @default(uuid())
+  name                 String
+  slug                 String     @unique
+  logoUrl              String?
+  address              String?
+  phone                String?
+  telegramBotToken     String?
+  telegramBotUsername  String?
+  timezone             String     @default("Asia/Tashkent")
+  isActive             Boolean    @default(true)
+  plan                 ClinicPlan @default(TRIAL)
+  planExpiresAt        DateTime?
+
   doctors       Doctor[]
-  patients      Patient[]
+  users         User[]
   appointments  Appointment[]
   visits        Visit[]
   purchases     Purchase[]
-  users         User[]
   procedures    Procedure[]
   leaves        Leave[]
   slots         Slot[]
   complaints    Complaint[]
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  savedDrafts   SavedDraft[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum ClinicPlan {
-  TRIAL       // Пробный период (14 дней)
-  BASIC       // Базовый тариф
-  PRO         // Профессиональный
-  ENTERPRISE  // Корпоративный
+  TRIAL
+  BASIC
+  PRO
+  ENTERPRISE
 }
 ```
 
-#### Шаг 1.2: Добавить `clinicId` ко ВСЕМ существующим моделям
-Добавить в каждую модель (`Doctor`, `Patient`, `Appointment`, `Visit`, `Purchase`, `Procedure`, `Leave`, `Slot`, `Complaint`, `User`, `Otp`):
-```prisma
-clinicId    String
-clinic      Clinic    @relation(fields: [clinicId], references: [id])
-
-@@index([clinicId])  // Индекс для быстрой фильтрации
-```
-
-**ВАЖНО для `Otp`:** OTP не привязывается к `clinicId` — он глобальный (один пациент может записаться в разные клиники через один номер телефона).
-
-#### Шаг 1.3: Добавить роль SuperAdmin
-**Файл:** `prisma/schema.prisma` — в enum `Role` добавить:
+В `enum Role` добавить `SUPER_ADMIN` первым:
 ```prisma
 enum Role {
-  SUPER_ADMIN  // Владелец платформы — видит ВСЕ клиники
-  ADMIN        // Администратор ОДНОЙ клиники
+  SUPER_ADMIN
+  ADMIN
   DOCTOR
   RECEPTION
   INVENTORY
 }
 ```
 
-#### Шаг 1.4: Создать первую клинику (seed-скрипт)
-**Файл:** `prisma/seed-clinic.ts` (уже существует, обновить его!)
+---
 
-Скрипт должен:
-1. Создать запись `Clinic` с name="Habibullo-Hilola", slug="habibullo-hilola"
-2. Всем существующим записям в базе (`Doctor`, `Patient`, `Appointment`, `Visit` и т.д.) присвоить этот `clinicId`
-3. После выполнения — все существующие данные автоматически «принадлежат» первой клинике
+#### Шаг 1.3 — Добавить `clinicId` ко ВСЕМ нужным моделям
 
-**Команда после изменения схемы:**
-```bash
-npx prisma db push
-npx ts-node prisma/seed-clinic.ts
+Добавить в каждую из этих моделей: `Doctor`, `User`, `Appointment`, `Visit`, `Purchase`, `Procedure`, `Leave`, `Slot`, `Complaint`, `SavedDraft`.
+
+**НЕ добавлять в:** `Patient`, `Otp` — они глобальные.
+
+Паттерн для каждой модели:
+```prisma
+clinicId  String?
+clinic    Clinic?   @relation(fields: [clinicId], references: [id])
+
+@@index([clinicId])
 ```
 
-#### Шаг 1.5: Обновить JWT-токен и middleware авторизации
-**Файл:** `src/lib/auth.ts`
+`String?` (nullable) — это временно для безопасной миграции. Станет `String` после seed-скрипта (Шаг 1.5).
 
-Добавить `clinicId` в payload JWT-токена:
+---
+
+#### Шаг 1.4 — Применить изменения к БД
+
+```bash
+npx prisma db push
+```
+
+Проверить: команда завершилась без ошибок. Если есть ошибки — остановиться и сообщить.
+
+---
+
+#### Шаг 1.5 — Создать и запустить `prisma/seed-saas-stage1.ts`
+
+Создать НОВЫЙ файл (не трогать переименованный dangerous файл).
+
+Скрипт должен выполнять следующее:
+
 ```typescript
-// В функции signToken:
-interface TokenPayload {
-  userId: string;
-  role: Role;
-  clinicId: string;       // ← ДОБАВИТЬ
+// 1. Проверить, существует ли клиника с slug "habibullo-hilola"
+//    Если да — использовать её id, не создавать снова
+// 2. Если нет — создать:
+//    name: "Habibullo-Hilola", slug: "habibullo-hilola", plan: "BASIC"
+// 3. Обновить ВСЕ записи в каждой таблице — проставить clinicId:
+//    Doctor, User, Appointment, Visit, Purchase, Procedure, Leave, Slot, Complaint, SavedDraft
+//    Использовать updateMany({ where: { clinicId: null }, data: { clinicId: clinic.id } })
+// 4. Вывести в консоль количество обновлённых записей по каждой таблице
+// 5. НЕ трогать Patient, Otp
+```
+
+Запустить:
+```bash
+npx ts-node prisma/seed-saas-stage1.ts
+```
+
+Убедиться что вывод показывает ненулевые числа обновлённых записей. Если какая-то таблица показала 0 — разобраться почему.
+
+---
+
+#### Шаг 1.6 — Сделать `clinicId` обязательным (NOT NULL)
+
+Только после успешного seed-скрипта. Изменить во всех моделях:
+```prisma
+// БЫЛО:
+clinicId  String?
+clinic    Clinic?  @relation(...)
+
+// СТАЛО:
+clinicId  String
+clinic    Clinic   @relation(...)
+```
+
+```bash
+npx prisma db push
+```
+
+Если `db push` выдаёт ошибку о null-значениях — значит seed-скрипт не заполнил все записи. Вернуться к Шагу 1.5.
+
+---
+
+#### Шаг 1.7 — Обновить `src/lib/auth.ts`
+
+```typescript
+export interface JWTPayload {
+  userId:    string;
+  role:      string;
+  clinicId?: string;   // undefined только для SUPER_ADMIN
   doctorId?: string;
 }
 ```
 
-**Файл:** `src/lib/clinic-guard.ts` (СОЗДАТЬ НОВЫЙ)
+Обновить `signToken` — принимает и включает `clinicId`.
+Обновить все маршруты логина — при создании токена включать `user.clinicId` из БД.
+
+---
+
+#### Шаг 1.8 — Создать `src/lib/clinic-guard.ts`
+
 ```typescript
-// Middleware-утилита, которую будут использовать ВСЕ API-маршруты
-export async function requireClinicAccess(request: NextRequest) {
-  // 1. Верифицировать JWT
-  // 2. Вернуть { userId, role, clinicId }
-  // 3. Если нет clinicId — вернуть 403
+import { verifyToken } from './auth';
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function requireClinicAccess(
+  request: NextRequest,
+  allowedRoles: string[]
+): Promise<{ session: any } | { error: NextResponse }> {
+  const token = request.headers.get('Authorization')?.replace('Bearer ', '');
+  if (!token) return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
+
+  const payload = await verifyToken(token);
+  if (!payload) return { error: NextResponse.json({ error: 'Invalid token' }, { status: 401 }) };
+
+  if (!allowedRoles.includes(payload.role)) {
+    return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) };
+  }
+
+  if (payload.role !== 'SUPER_ADMIN' && !payload.clinicId) {
+    return { error: NextResponse.json({ error: 'No clinic context' }, { status: 403 }) };
+  }
+
+  return { session: payload };
 }
 ```
+
+Этот файл пока не применяется к существующим маршрутам — это делается в Этапе 2.
+
+---
+
+#### Шаг 1.9 — Создать ветку `staging`
+
+```bash
+git checkout -b staging
+git push origin staging
+```
+
+Подключить ветку `staging` к отдельному Vercel проекту с отдельной Neon БД (для тестов). Сообщить владельцу — это делает он в Vercel Dashboard, не агент.
+
+---
+
+#### ✅ Чеклист завершения Этапа 1
+
+- [ ] `seed-clinic.ts` переименован в `.DANGEROUS-DO-NOT-USE.ts`
+- [ ] Модель `Clinic` и enum `ClinicPlan` добавлены в схему
+- [ ] `SUPER_ADMIN` добавлен в enum `Role`
+- [ ] `clinicId` добавлен во все нужные модели (10 штук: Doctor, User, Appointment, Visit, Purchase, Procedure, Leave, Slot, Complaint, SavedDraft)
+- [ ] `npx prisma db push` выполнен после Шага 1.3
+- [ ] `seed-saas-stage1.ts` создан и выполнен успешно
+- [ ] `clinicId` переведён в NOT NULL и `db push` повторён
+- [ ] `src/lib/auth.ts` обновлён (clinicId в JWT)
+- [ ] `src/lib/clinic-guard.ts` создан
+- [ ] Ветка `staging` создана
+- [ ] Существующий функционал работает (войти в admin, reception, doctor — проверить)
+- [ ] Запись в AI_CHANGELOG.md добавлена
 
 ---
 
 ### ═══════════════════════════════════════════
-### ЭТАП 2: Изоляция API (API Isolation)
+### ЭТАП 2: ИЗОЛЯЦИЯ API
+### Статус: 🔴 НЕ НАЧАТ (зависит от Этапа 1)
 ### ═══════════════════════════════════════════
-> **Цель:** Обновить ВСЕ существующие API-маршруты так, чтобы они фильтровали данные по `clinicId`.
 
-#### Список файлов для обновления:
-Каждый из этих файлов должен использовать `clinicGuard` и добавлять `clinicId` в каждый Prisma-запрос:
+**Цель:** Обновить все API-маршруты — каждый запрос фильтрует данные по `clinicId`.
+
+#### Паттерн обновления (применять к каждому маршруту)
+
+```typescript
+// ДО:
+export async function GET(request: NextRequest) {
+  if (!await requireAdmin(request)) return NextResponse.json({}, { status: 403 });
+  const doctors = await prisma.doctor.findMany();
+}
+
+// ПОСЛЕ:
+export async function GET(request: NextRequest) {
+  const { session, error } = await requireClinicAccess(request, ['ADMIN']);
+  if (error) return error;
+
+  const doctors = await prisma.doctor.findMany({
+    where: { clinicId: session.clinicId }  // ← ОБЯЗАТЕЛЬНО в каждом запросе
+  });
+}
+```
+
+#### Полный список файлов для обновления
 
 ```
 src/app/api/admin/doctors/route.ts
 src/app/api/admin/doctors/[id]/route.ts
 src/app/api/admin/appointments/route.ts
+src/app/api/admin/appointments/[id]/route.ts
 src/app/api/admin/patients/route.ts
 src/app/api/admin/procedures/route.ts
+src/app/api/admin/procedures/[id]/route.ts
 src/app/api/admin/visits/route.ts
+src/app/api/admin/visits/[id]/route.ts
 src/app/api/admin/purchases/route.ts
+src/app/api/admin/purchases/[id]/route.ts
 src/app/api/admin/slots/route.ts
 src/app/api/admin/stats/route.ts
 src/app/api/admin/leaves/route.ts
+src/app/api/admin/leaves/[id]/route.ts
 src/app/api/admin/users/route.ts
-src/app/api/doctor/...
-src/app/api/reception/...
-src/app/api/inventory/...
-src/app/api/public/doctors/route.ts    ← Публичный! Фильтрует по clinicId из параметра URL
-src/app/api/public/slots/route.ts      ← Публичный! Аналогично
-src/lib/slot-generator.ts             ← Добавить clinicId в создаваемые слоты
+src/app/api/admin/users/[id]/route.ts
+src/app/api/admin/uploads/route.ts
+src/app/api/doctor/[...все маршруты]
+src/app/api/reception/[...все маршруты]
+src/app/api/inventory/[...все маршруты]
+src/lib/slot-generator.ts           ← принимать clinicId и добавлять в создаваемые слоты
 ```
 
-**Пример обновления маршрута (паттерн для ВСЕХ):**
+#### Публичные эндпоинты (особый случай — без авторизации)
+
 ```typescript
-// БЫЛО (текущий код):
-export async function GET(request: NextRequest) {
-  if (!await requireAdmin(request)) return NextResponse.json({...}, {status: 403});
-  const doctors = await prisma.doctor.findMany();  // ← БЕЗ ФИЛЬТРА — ОПАСНО
-  ...
-}
+// clinicId берётся из slug параметра URL, не из JWT
+const clinic = await prisma.clinic.findUnique({ where: { slug: params.clinic } });
+if (!clinic || !clinic.isActive) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-// СТАЛО (после обновления):
-export async function GET(request: NextRequest) {
-  const session = await requireClinicAccess(request); // ← новый guard
-  if (!session || session.role !== 'ADMIN') return NextResponse.json({...}, {status: 403});
-  const doctors = await prisma.doctor.findMany({
-    where: { clinicId: session.clinicId }  // ← ОБЯЗАТЕЛЬНЫЙ ФИЛЬТР
-  });
-  ...
-}
+const doctors = await prisma.doctor.findMany({
+  where: { clinicId: clinic.id, isActive: true }
+});
 ```
+
+Новый маршрут добавить:
+```
+GET /api/public/clinic/[slug]   ← информация о клинике (имя, логотип, телефон, адрес)
+```
+
+#### ✅ Чеклист завершения Этапа 2
+
+- [ ] Все маршруты в `src/app/api/admin/` обновлены
+- [ ] Все маршруты в `src/app/api/doctor/` обновлены
+- [ ] Все маршруты в `src/app/api/reception/` обновлены
+- [ ] Все маршруты в `src/app/api/inventory/` обновлены
+- [ ] `slot-generator.ts` принимает clinicId
+- [ ] `/api/public/clinic/[slug]` создан
+- [ ] Тест изоляции: войти как Admin клиники А — видны ТОЛЬКО её данные
+- [ ] Запись в AI_CHANGELOG.md добавлена
 
 ---
 
 ### ═══════════════════════════════════════════
-### ЭТАП 3: SuperAdmin Панель
+### ЭТАП 3: БЕЛЫЙ ЛЕЙБЛ ДЛЯ БРОНИРОВАНИЯ
+### Статус: 🔴 НЕ НАЧАТ (зависит от Этапа 2)
 ### ═══════════════════════════════════════════
-> **Цель:** Создать отдельный интерфейс для владельца платформы, где можно управлять всеми клиниками.
 
-#### Что нужно создать:
+**Цель:** Страница бронирования для каждой клиники выглядит как "их" страница.
 
-**Frontend файлы:**
-- `public/superadmin.html` — Главная панель SuperAdmin
-- `public/build_superadmin.js` — Скрипт-генератор
+#### Как это работает
+1. Пациент кликает "Записаться" на сайте клиники → редирект на `app.clinova.uz/book/habibullo-hilola`
+2. Страница делает `GET /api/public/clinic/habibullo-hilola` → получает имя, логотип, контакты
+3. Рендерит страницу с брендингом клиники (логотип в шапке, название)
+4. Все запросы врачей/слотов добавляют `?clinic=habibullo-hilola`
+5. При создании записи — `clinicId` берётся из данных клиники, не из URL
 
-**API маршруты:**
-- `src/app/api/superadmin/clinics/route.ts` — GET (список всех клиник), POST (создать клинику)
-- `src/app/api/superadmin/clinics/[id]/route.ts` — PATCH (изменить план, заблокировать), DELETE
-- `src/app/api/superadmin/stats/route.ts` — Общая статистика по всем клиникам
-
-**Функциональность SuperAdmin панели:**
-1. Список всех клиник с тарифными планами и статусами
-2. Создание новой клиники + автоматическое создание первого пользователя (Admin клиники)
-3. Просмотр статистики: количество врачей, пациентов, дохода по каждой клинике
-4. Управление тарифными планами и датами истечения
-5. Возможность войти «от имени» любой клиники (impersonate) для техподдержки
+#### Изменения в `public/booking_logic_clean.js`
+- Считывать `slug` из URL пути: `window.location.pathname.split('/book/')[1]`
+- Первым запросом загружать данные клиники и применять логотип/заголовок
+- Все запросы к API добавлять `?clinic=[slug]`
+- После редактирования: `node public/build_booking.js`
 
 ---
 
 ### ═══════════════════════════════════════════
-### ЭТАП 4: Публичная Страница Бронирования
+### ЭТАП 4: SUPERADMIN ПАНЕЛЬ
+### Статус: 🔴 НЕ НАЧАТ (зависит от Этапа 2)
 ### ═══════════════════════════════════════════
-> **Цель:** Сделать систему бронирования универсальной — каждая клиника получает свою уникальную ссылку для онлайн-записи.
 
-#### Текущая проблема:
-Сейчас `public/booking.html` жёстко настроен на одну клинику. API запросы идут без указания, для какой клиники нужны врачи и слоты.
-
-#### Решение:
-Изменить URL-структуру для публичного бронирования:
+#### Новые API маршруты
 ```
-БЫЛО:  https://site.uz/booking.html
-СТАЛО: https://app.shifocrm.uz/book/habibullo-hilola
-       или https://site.uz/book/habibullo-hilola  (если у клиники своей домен)
+src/app/api/superadmin/clinics/route.ts         ← GET список, POST создать клинику
+src/app/api/superadmin/clinics/[id]/route.ts    ← PATCH (план, isActive), DELETE
+src/app/api/superadmin/stats/route.ts           ← Общая статистика по всем клиникам
 ```
 
-**Как это работает:**
-1. Пациент переходит по ссылке `app.shifocrm.uz/book/habibullo-hilola`
-2. Система по `slug="habibullo-hilola"` находит клинику в базе
-3. Загружает врачей и слоты ТОЛЬКО этой клиники
-4. При бронировании запись создаётся с `clinicId` этой клиники
+Все superadmin маршруты: проверяют `role === 'SUPER_ADMIN'` и НЕ фильтруют по `clinicId`.
 
-**API для публичного бронирования** (изменить существующие):
-```
-GET /api/public/clinic/[slug]          ← Информация о клинике
-GET /api/public/doctors?clinic=slug    ← Врачи клиники
-GET /api/public/slots?doctorId=x&clinic=slug  ← Слоты врача
-POST /api/public/book                  ← Создать запись (clinicId берётся из slug)
-```
+#### POST /api/superadmin/clinics — автоматически
+1. Создать запись `Clinic`
+2. Создать первого `User` с `role=ADMIN`, привязать к этой клинике, задать временный пароль
+3. Вернуть временный пароль в ответе (единственный раз)
+
+#### Frontend
+- `public/build_superadmin.js` → генерирует `public/superadmin.html`
+- Функции: список клиник, создание клиники, статистика, управление тарифами
 
 ---
 
 ### ═══════════════════════════════════════════
-### ЭТАП 5: Telegram Bot — Multi-Clinic
+### ЭТАП 5: TELEGRAM — МУЛЬТИКЛИНИКА
+### Статус: 🔴 НЕ НАЧАТ (зависит от Этапа 4)
 ### ═══════════════════════════════════════════
-> **Цель:** Сделать Telegram-верификацию и уведомления рабочими для всех клиник.
 
-#### Текущая ситуация:
-Один Telegram-бот (`telegram.ts`) — один токен. Все уведомления и OTP идут от одного бота.
+**Выбор: единый бот платформы (для старта)**
 
-#### Два варианта реализации (обсудить с владельцем):
+Один бот обслуживает все клиники. В каждом сообщении пациенту указывается название клиники: «Ваша запись в *Habibullo-Hilola* подтверждена».
 
-**Вариант A: Единый бот (ПРОЩЕ, рекомендуется для начала)**
-- Один бот `@ShifoCRM_bot` обслуживает все клиники
-- При отправке уведомления пациенту, в тексте всегда указывается название клиники: «Ваша запись в *Habibullo-Hilola* подтверждена»
-- OTP-коды также приходят от единого бота
-
-**Вариант B: Собственный бот для каждой клиники (СЛОЖНЕЕ, но премиально)**
-- В настройках клиники (`Clinic.telegramBotToken`) хранится токен её собственного бота
-- `src/lib/telegram.ts` нужно переписать так, чтобы принимать `clinicId` и динамически использовать нужный токен
-- Для этого вместо глобального singleton `bot`, использовать `Map<clinicId, TelegramBot>`
+Индивидуальные боты для клиник — только по запросу клиента на PRO/ENTERPRISE плане. Поле `Clinic.telegramBotToken` уже в схеме. Реализация: `telegram.ts` переписать на `Map<clinicId, TelegramBot>`.
 
 ---
 
-### ═══════════════════════════════════════════
-### ЭТАП 6: Landing Page Продукта
-### ═══════════════════════════════════════════
-> **Цель:** Создать отдельный маркетинговый сайт, отделённый от операционной системы.
-
-#### ВАЖНО: Сайт клиники «Habibullo-Hilola» остаётся
-Текущие файлы `public/index.html`, `about.html`, `services.html` — это сайт КОНКРЕТНОЙ клиники, не продукта. Их НЕ ТРОГАЕМ.
-
-#### Что нужно создать:
-Отдельный репозиторий или поддомен (`landing.shifocrm.uz`) с маркетинговым сайтом, который:
-- Описывает возможности платформы ShifoCRM
-- Имеет страницу с ценами (тарифными планами)
-- Содержит форму заявки «Подключить мою клинику»
-- При клике «Войти» — редирект на `app.shifocrm.uz/login`
-
----
-
-## 🗂️ СХЕМА ДАННЫХ ПОСЛЕ ТРАНСФОРМАЦИИ
+## 🗃️ ФИНАЛЬНАЯ СХЕМА ДАННЫХ
 
 ```
 Clinic (1)
-  ├── Users (N)        ← role: ADMIN, DOCTOR, RECEPTION, INVENTORY
-  ├── Doctors (N)      ← clinicId обязателен
+  ├── Users (N)         role: ADMIN | DOCTOR | RECEPTION | INVENTORY
+  ├── Doctors (N)
   │     ├── Procedures (N)
   │     ├── Slots (N)
   │     ├── Leaves (N)
-  │     └── Appointments (N)
-  ├── Patients (N)     ← пациент может быть в нескольких клиниках!
-  │     └── Appointments (N)
+  │     └── SavedDrafts (N)
+  ├── Appointments (N)
   ├── Visits (N)
   ├── Purchases (N)
   └── Complaints (N)
 
-SuperAdmin (роль без clinicId) ← видит ВСЕ данные без фильтрации
-```
+Patient (глобальный, БЕЗ clinicId)
+  └── Appointments (N)  ← изоляция через Appointment.clinicId
 
-**Важный нюанс с Patient:**
-Один человек (по номеру телефона/Telegram) может записаться в РАЗНЫЕ клиники. Вариантов два:
-1. **Глобальный пациент** — `Patient` не имеет `clinicId`. Одна запись пациента на всю платформу. Разные клиники видят разные `Appointment` этого пациента, но не друг друга.
-2. **Локальный пациент** — `Patient` имеет `clinicId`. Один человек создаёт разные профили в разных клиниках.
+SuperAdmin (role=SUPER_ADMIN, clinicId=null)
+  └── видит ВСЕ без фильтрации
 
-**Рекомендация:** Использовать **Глобального пациента** (без `clinicId` в `Patient`). Это удобнее для пациента — один раз верифицировался через Telegram и можно записываться куда угодно.
-
----
-
-## ⚙️ ТЕХНИЧЕСКИЕ ТРЕБОВАНИЯ К КОДУ
-
-### Правила, которые ОБЯЗАНЫ соблюдать все агенты:
-
-1. **Никаких изменений в `schema.prisma` без `npx prisma db push`** — обязательно после каждого изменения схемы
-2. **Все изменения frontend** — редактировать `*_logic_clean.js` файлы, а затем запускать соответствующий `build_*.js` скрипт для генерации `.html`. Никогда не редактировать `.html` напрямую.
-3. **Порядок работы с frontend:**
-   ```bash
-   # Изменить admin_logic_clean.js, затем:
-   node public/build_admin.js
-   # Аналогично для reception, doctor, booking
-   ```
-4. **Git workflow:** После каждого завершенного шага — коммит + push в `main`
-5. **Переменные окружения** (`.env`) — не менять без явного согласования с владельцем
-6. **Тайм-зона** — везде использовать `Asia/Tashkent` (UTC+5). Никогда не полагаться на UTC-время напрямую в отображении
-
-### Структура нового environment переменных (`.env.example` нужно обновить):
-```
-# Database
-DATABASE_URL=...
-
-# Auth
-JWT_SECRET=...
-
-# Telegram — основной бот платформы
-TELEGRAM_BOT_TOKEN=...
-
-# SuperAdmin credentials
-SUPER_ADMIN_PHONE=+998...
-SUPER_ADMIN_PASSWORD_HASH=...
-
-# Cron protection
-CRON_SECRET=...
-
-# Environment
-NODE_ENV=production
+Otp (глобальный, БЕЗ clinicId)
 ```
 
 ---
 
-## 🧪 ТЕСТИРОВАНИЕ
+## 🧪 ТЕСТЫ ПЕРЕД КАЖДЫМ ДЕПЛОЕМ В MAIN
 
-### Перед каждым деплоем проверять:
-1. Врач Клиники А НЕ виден при входе под Клиникой Б
-2. Бронирование через публичную ссылку `/book/clinic-slug` создаёт запись с правильным `clinicId`
-3. Telegram-бот отправляет уведомление с правильным названием клиники
-4. SuperAdmin видит все клиники, обычный Admin — только свою
-5. Существующие данные клиники «Habibullo-Hilola» не потеряны после миграции
-
----
-
-## 📊 ПРИОРИТЕТЫ (В КАКОМ ПОРЯДКЕ РАБОТАТЬ)
-
-| Приоритет | Этап | Описание | Трудоёмкость |
-|-----------|------|----------|--------------|
-| 🔴 P0 | Этап 1 | Добавить `Clinic` модель + `clinicId` ко всем таблицам | ~4 часа |
-| 🔴 P0 | Этап 1 | Seed-скрипт: привязать все данные к Clinic №1 | ~1 час |
-| 🔴 P0 | Этап 2 | Обновить middleware авторизации (clinic-guard) | ~2 часа |
-| 🟠 P1 | Этап 2 | Обновить все API-маршруты (clinicId фильтры) | ~6 часов |
-| 🟠 P1 | Этап 3 | SuperAdmin панель (basic) | ~4 часа |
-| 🟡 P2 | Этап 4 | Публичное бронирование по slug | ~3 часа |
-| 🟡 P2 | Этап 5 | Multi-Clinic Telegram бот | ~2 часа |
-| 🟢 P3 | Этап 6 | Landing page продукта | ~6 часов |
+1. Войти как Admin Клиники А → врачи/записи Клиники Б НЕ видны
+2. Войти как Admin Клиники Б → врачи/записи Клиники А НЕ видны
+3. Открыть `/book/habibullo-hilola` → видны только врачи этой клиники
+4. Создать тестовую запись → `clinicId` корректен в БД
+5. Войти как SUPER_ADMIN → видны все клиники
+6. Все панели Habibullo-Hilola работают как раньше
+7. Telegram-уведомление → правильное название клиники в тексте
 
 ---
 
-## ⚠️ КРИТИЧЕСКИЕ РИСКИ И КАК ИХ ИЗБЕЖАТЬ
+## 📊 ПРИОРИТЕТЫ
 
-### Риск 1: Потеря данных при миграции
-**Проблема:** При добавлении `clinicId NOT NULL` к существующим записям — база выдаст ошибку, потому что у старых записей нет этого значения.
-**Решение:** 
-1. Сначала добавить поле как `clinicId String?` (nullable)
-2. Запустить seed-скрипт, который заполнит `clinicId` для всех существующих записей
-3. Затем сделать поле обязательным `clinicId String` (NOT NULL)
-
-### Риск 2: Слом текущего функционала
-**Проблема:** Пока обновляем API, существующая клиника «Habibullo-Hilola» может перестать работать.
-**Решение:** Работать по принципу «backward-compatible» — добавлять `clinicId` в фильтры, но сделать так, чтобы старые токены без `clinicId` всё ещё работали (с fallback на ID клиники №1) в течение переходного периода.
-
-### Риск 3: Утечка данных
-**Проблема:** Один забытый API без фильтра `clinicId` — и все клиники видят данные друг друга.
-**Решение:** Создать тест (TypeScript скрипт или ручная проверка) который проходит по всем API-маршрутам и проверяет наличие `clinicId` фильтра.
+| # | Этап | Описание | Оценка |
+|---|------|----------|--------|
+| 🔴 P0 | 1.1–1.4 | Clinic модель + clinicId nullable + db push | ~1 ч |
+| 🔴 P0 | 1.5–1.6 | Seed скрипт + NOT NULL + db push | ~1 ч |
+| 🔴 P0 | 1.7–1.9 | JWT + clinic-guard + staging ветка | ~1 ч |
+| 🟠 P1 | 2 | Изоляция всех API маршрутов | ~5 ч |
+| 🟠 P1 | 3 | Белый лейбл бронирования | ~2 ч |
+| 🟡 P2 | 4 | SuperAdmin панель | ~4 ч |
+| 🟡 P2 | 5 | Telegram мультиклиника | ~2 ч |
 
 ---
 
-## 📝 ПРОМПТ ДЛЯ ИИ-АГЕНТА
+## ⚠️ КРИТИЧЕСКИЕ РИСКИ И РЕШЕНИЯ
 
-Ниже находится точный промпт, который нужно передать новому ИИ-агенту, который начнёт реализацию этого плана:
+**Риск: потеря данных при миграции**
+Решение: Шаги 1.3 → 1.5 → 1.6 строго по порядку. `clinicId` nullable → seed → NOT NULL. Никогда не пропускать seed перед переходом к NOT NULL.
 
----
+**Риск: один баг роняет все клиники**
+Решение: обязательная ветка `staging` (Шаг 1.9). Все изменения тестируются там перед `main`.
 
-```
-Ты — опытный full-stack разработчик, работающий над превращением монолитного веб-приложения клиники в масштабируемый SaaS-продукт.
+**Риск: утечка данных между клиниками**
+Решение: после Этапа 2 вручную пройти по каждому API, убедиться в наличии `clinicId` фильтра. Запустить тесты из раздела выше (пункты 1–4).
 
-ПРОЕКТ: booking-module (Next.js 15 + Prisma + PostgreSQL Neon + Vanilla HTML/JS frontend)
-РЕПОЗИТОРИЙ: d:\AI_Workplace\Habbullo-Hilola\booking-module
-
-ОБЯЗАТЕЛЬНЫЙ ПОРЯДОК ЧТЕНИЯ ДОКУМЕНТОВ (сделай это ПРЕЖДЕ всего):
-1. Прочитай AI_HANDOFF.md — базовые правила проекта
-2. Прочитай первые 50 строк AI_CHANGELOG.md — что делали последние агенты  
-3. Прочитай SAAS_TRANSFORMATION_PLAN.md (ЭТОТ ФАЙЛ) — стратегия полностью
-4. Просмотри prisma/schema.prisma — текущая схема данных
-5. Просмотри src/lib/auth.ts — текущая авторизация
-
-ТВОЯ ТЕКУЩАЯ ЗАДАЧА: [УКАЖИ КОНКРЕТНЫЙ ЭТАП, например: "Выполни Этап 1 из SAAS_TRANSFORMATION_PLAN.md"]
-
-ТЕХНИЧЕСКИЕ ПРАВИЛА (нарушать нельзя):
-- Frontend: редактируй только *_logic_clean.js файлы, затем запускай node public/build_*.js 
-- БД: после каждого изменения schema.prisma — запускай npx prisma db push
-- Не используй cat/grep в bash — используй инструменты view_file и grep_search
-- После каждой задачи — git add -A && git commit -m "..." && git push origin main
-- Тайм-зона: Asia/Tashkent (UTC+5)
-- При каждой работе с API — добавляй clinicId фильтр во все Prisma запросы
-
-ГЛАВНЫЙ ПРИНЦИП: Не ломай то, что уже работает для клиники "Habibullo-Hilola". Всегда работай backward-compatible.
-
-После завершения работы добавь запись в верх файла AI_CHANGELOG.md в формате:
-## [ДАТА] - [краткое описание]
-- пункт 1
-- пункт 2
-```
+**Риск: случайный запуск опасного seed**
+Решение: Шаг 1.1 — немедленное переименование файла.
 
 ---
 
-## 🔄 КАК ОБНОВЛЯТЬ ЭТОТ ДОКУМЕНТ
+## 📝 КАК ОБНОВЛЯТЬ ЭТОТ ДОКУМЕНТ
 
-Этот файл — живой документ. При выполнении каждого этапа:
-1. Отметь завершённые шаги как `✅ ВЫПОЛНЕНО`
-2. Добавь ссылки на конкретные файлы, которые были созданы/изменены
-3. Добавь любые новые открытия или изменения в архитектуре
+При завершении каждого этапа:
+1. Изменить статус на `✅ ВЫПОЛНЕНО — [дата]`
+2. Добавить список созданных/изменённых файлов
+3. Отметить любые отклонения от плана
 
 ---
 
-*Документ создан: 2026-06-15*  
-*Автор: Antigravity (AI Agent, Google DeepMind)*  
-*Владелец продукта: [Имя владельца — уточнить]*
+*Версия 2.0 | Переработано: 2026-06-17*
+*Версия 1.0 создана: 2026-06-15 (Antigravity, Google DeepMind)*
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
