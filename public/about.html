@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html class="light" lang="uz">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Biz haqimizda | Habibullo-Hilola</title>
+  ${tailwindConfig}
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet"/>
+  ${globalStyles}
+  <style type="text/tailwindcss">
+    @layer utilities {
+      /* Add specific overrides if needed */
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md">
+  ${headerHtml.replace('href="services.html" class="h-full flex items-center text-primary font-bold border-b-2 border-primary font-label-md text-label-md hover:text-primary transition-colors"', 'href="services.html" class="h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors"').replace('href="about.html" class="h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors"', 'href="about.html" class="h-full flex items-center text-primary font-bold border-b-2 border-primary font-label-md text-label-md hover:text-primary transition-colors"').replace('href="services.html" class="font-label-md text-primary font-bold"', 'href="services.html" class="font-label-md text-on-surface-variant"').replace('href="about.html" class="font-label-md text-on-surface-variant"', 'href="about.html" class="font-label-md text-primary font-bold"')}
+
+  <!-- About Hero Section -->
+  <section class="py-16 md:py-24 px-margin-mobile md:px-margin-desktop bg-surface-container-low border-b border-outline-variant overflow-hidden">
+    <div class="max-w-container-max mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div>
+        <div class="inline-flex items-center gap-2 bg-primary-container text-on-primary-container px-4 py-2 rounded-full font-label-md mb-6">
+          <span class="material-symbols-outlined text-[18px]">verified</span>
+          Bizning Falsafamiz
+        </div>
+        <h1 class="font-headline-xl text-headline-xl text-primary font-bold mb-6">
+          Klinik Tajribani <br>
+          <span class="text-secondary">Qayta Yaratish</span>
+        </h1>
+        <p class="font-body-lg text-body-lg text-on-surface-variant mb-8">
+          Habibullo-Hilola markazida biz sog'liqni saqlash stressli zarurat emas, balki xotirjam va yo'naltirilgan sayohat bo'lishi kerak deb hisoblaymiz. Bizning vazifamiz yuqori darajadagi tibbiy professionallik va iliq, salomatlikka qaratilgan mehmondo'stlikni uyg'unlashtirish orqali bemorlarning tashvishini engillashtirishdir. Biz toza havodan nafas olishni his qiladigan muhitda tiniqlik, qulaylik va zamonaviy yordamni birinchi o'ringa qo'yamiz.
+        </p>
+        <a href="booking.html" class="bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-label-md text-label-md px-8 py-3.5 rounded-full transition-all shadow-md inline-flex items-center gap-2">
+          Biz bilan bog'lanish <span class="material-symbols-outlined">arrow_forward</span>
+        </a>
+      </div>
+      <div class="relative">
+        <div class="absolute inset-0 bg-primary/10 rounded-3xl -rotate-6 scale-105 origin-center hidden lg:block"></div>
+        <img src="about_hero.webp" alt="Klinika interyeri" class="rounded-3xl shadow-xl relative z-10 w-full h-[500px] object-cover" onerror="this.src='https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=1000'"/>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Section -->
+  <section class="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+    <div class="text-center mb-16">
+      <h2 class="font-headline-lg text-headline-lg text-primary font-bold">Bizning Jamoa</h2>
+      <p class="font-body-lg text-on-surface-variant mt-4 max-w-2xl mx-auto">Sog'lig'ingiz va qulayligingizga sodiq mutaxassislar guruhi.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Team Member 1 -->
+      <div class="bg-surface-container-lowest rounded-3xl overflow-hidden soft-shadow border border-outline-variant hover:-translate-y-1 transition-transform group">
+        <div class="h-72 overflow-hidden relative">
+          <div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity z-10"></div>
+          <img src="https://images.unsplash.com/photo-1559839734-2b71ce417274?auto=format&fit=crop&q=80&w=600&h=600" alt="Dr. Malika Rahmonova" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"/>
+        </div>
+        <div class="p-6">
+          <h3 class="font-headline-md text-xl font-bold text-on-surface">Dr. Malika Rahmonova</h3>
+          <p class="font-label-md text-primary font-bold mt-1 mb-4">Bosh Stomatolog</p>
+          <p class="font-body-md text-on-surface-variant">Restavratsion stomatologiya va bemorlar tashvishini boshqarish bo'yicha mutaxassis, salomatlik va og'iz bo'shlig'i salomatligi o'rtasidagi tafovutni bartaraf etish uchun markazga asos solgan.</p>
+        </div>
+      </div>
+
+      <!-- Team Member 2 -->
+      <div class="bg-surface-container-lowest rounded-3xl overflow-hidden soft-shadow border border-outline-variant hover:-translate-y-1 transition-transform group">
+        <div class="h-72 overflow-hidden relative">
+          <div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity z-10"></div>
+          <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=600&h=600" alt="Dr. Jasur Karimov" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"/>
+        </div>
+        <div class="p-6">
+          <h3 class="font-headline-md text-xl font-bold text-on-surface">Dr. Jasur Karimov</h3>
+          <p class="font-label-md text-primary font-bold mt-1 mb-4">Ortodont</p>
+          <p class="font-body-md text-on-surface-variant">Bemorlarni kompleks parvarishlashga e'tibor qaratgan holda, ilg'or diagnostika texnologiyasini davolashni rejalashtirishda tinchlantiruvchi, empatik yondashuv bilan birlashtiradi.</p>
+        </div>
+      </div>
+
+      <!-- Team Member 3 -->
+      <div class="bg-surface-container-lowest rounded-3xl overflow-hidden soft-shadow border border-outline-variant hover:-translate-y-1 transition-transform group">
+        <div class="h-72 overflow-hidden relative">
+          <div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity z-10"></div>
+          <img src="https://images.unsplash.com/photo-1594824436951-7f12620464d4?auto=format&fit=crop&q=80&w=600&h=600" alt="Dilnoza Aliyeva" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"/>
+        </div>
+        <div class="p-6">
+          <h3 class="font-headline-md text-xl font-bold text-on-surface">Dilnoza Aliyeva</h3>
+          <p class="font-label-md text-primary font-bold mt-1 mb-4">Bosh Gigenist</p>
+          <p class="font-body-md text-on-surface-variant">O'n yildan ortiq tajribaga ega bo'lib, har bir profilaktik tibbiy yordam ko'rsatish qulay va individual bemorning ehtiyojlariga mos kelishini ta'minlaydi.</p>
+        </div>
+      </div>
+
+      <!-- Team Member 4 -->
+      <div class="bg-surface-container-lowest rounded-3xl overflow-hidden soft-shadow border border-outline-variant hover:-translate-y-1 transition-transform group">
+        <div class="h-72 overflow-hidden relative">
+          <div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity z-10"></div>
+          <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=600&h=600" alt="Dr. Sardor Ikromov" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"/>
+        </div>
+        <div class="p-6">
+          <h3 class="font-headline-md text-xl font-bold text-on-surface">Dr. Sardor Ikromov</h3>
+          <p class="font-label-md text-primary font-bold mt-1 mb-4">Jarroh-Stomatolog</p>
+          <p class="font-body-md text-on-surface-variant">Implantologiya va murakkab jarrohlik amaliyotlari bo'yicha mutaxassis. Eng qiyin holatlarda ham aniq va ishonchli natijalarni ta'minlaydi.</p>
+        </div>
+      </div>
+
+      <!-- Team Member 5 -->
+      <div class="bg-surface-container-lowest rounded-3xl overflow-hidden soft-shadow border border-outline-variant hover:-translate-y-1 transition-transform group">
+        <div class="h-72 overflow-hidden relative">
+          <div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity z-10"></div>
+          <img src="https://images.unsplash.com/photo-1594824436960-7ea0361a659a?auto=format&fit=crop&q=80&w=600&h=600" alt="Dr. Nigora Yusupova" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"/>
+        </div>
+        <div class="p-6">
+          <h3 class="font-headline-md text-xl font-bold text-on-surface">Dr. Nigora Yusupova</h3>
+          <p class="font-label-md text-primary font-bold mt-1 mb-4">Bolalar Stomatologi</p>
+          <p class="font-body-md text-on-surface-variant">Kichik yoshdagi bemorlar bilan ishlashda katta tajribaga ega. Bolajonlar uchun stomatolog tashrifini quvnoq va qo'rquvsiz o'yin kabi o'tkazadi.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  ${footerHtml}
+</body>
+</html>
