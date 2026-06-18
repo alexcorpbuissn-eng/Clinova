@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     token = await signToken({
       userId: user.id,
       role: user.role,
-      doctorId: user.doctorId
+      doctorId: user.doctorId ?? undefined
     });
   }
 
