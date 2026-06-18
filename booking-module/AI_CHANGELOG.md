@@ -8,6 +8,30 @@
 
 ---
 
+## 2026-06-18 - Stage 1 Complete: clinicId String? → String NOT NULL (9 models)
+**Author:** Claude (Anthropic)
+
+### What changed:
+- `clinicId String?` → `clinicId String` (NOT NULL) in: Doctor, Leave, Procedure, Slot, Complaint, Appointment, SavedDraft, Visit, Purchase
+- `clinic Clinic?` → `clinic Clinic` (required relation) in same 9 models
+- `User.clinicId` stays `String?` permanently — SUPER_ADMIN has no clinic
+- Both `prisma/schema.prisma` (root) and `booking-module/prisma/schema.prisma` updated in sync
+- DB will enforce NOT NULL on next Vercel deploy (`npx prisma db push` in buildCommand)
+
+### Stage 1 Status: ✅ COMPLETE
+- ✅ 1.1: Clinic model added
+- ✅ 1.2: clinicId on all models (String? pass 1)
+- ✅ 1.3: SUPER_ADMIN role
+- ✅ 1.4: db push (nullable) via Vercel deploy
+- ✅ 1.4b: Seed ran — clinic "Habibullo-Hilola" created
+- ✅ 1.4c: clinicId → NOT NULL (this commit)
+- ✅ 1.5: auth.ts + clinic-guard.ts + login updated
+
+### Next: Stage 2 — API Isolation
+Add `clinicId` filters to all ~40 API routes using `clinic-guard.ts`
+
+---
+
 ## 2026-06-17 - Этап 1: SaaS Foundation — Модель Clinic + Multi-Tenant основа
 **Автор:** Claude (Anthropic)
 
