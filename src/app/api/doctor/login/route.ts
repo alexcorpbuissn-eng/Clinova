@@ -30,11 +30,11 @@ export async function POST(request: NextRequest) {
 
   await prisma.otp.update({ where: { id: otp.id }, data: { used: true } });
 
-  // Find the user
+  // Find the user (all roles allowed — SUPER_ADMIN may log in too)
   const user = await prisma.user.findFirst({
-    where: { 
-      telegramPhone, 
-      role: { in: ['DOCTOR', 'ADMIN', 'RECEPTION'] }
+    where: {
+      telegramPhone,
+      role: { in: ['SUPER_ADMIN', 'ADMIN', 'DOCTOR', 'RECEPTION', 'INVENTORY'] },
     },
   });
 
@@ -42,8 +42,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Sizda kirish huquqi yo\'q' }, { status: 403 });
   }
 
-  // If role is DOCTOR or RECEPTION, they MUST have a doctorId
-  if (user.role !== 'ADMIN' && !user.doctorId) {
+  // DOCTOR role must have doctorId linked
+  if (user.role === 'DOCTOR' && !user.doctorId) {
     return NextResponse.json({ error: 'Sizda shifokor huquqi yo\'q' }, { status: 403 });
   }
 
@@ -59,7 +59,8 @@ export async function POST(request: NextRequest) {
   const token = await signToken({
     userId: user.id,
     role: user.role,
-    doctorId: user.doctorId || 'ADMIN_GLOBAL', // Special flag for admins
+    clinicId: user.clinicId ?? undefined,        // undefined для SUPER_ADMIN
+    doctorId: user.doctorId ?? undefined,
   });
 
   return NextResponse.json({ success: true, token, doctor, role: user.role });

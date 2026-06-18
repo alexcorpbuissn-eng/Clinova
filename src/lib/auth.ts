@@ -10,6 +10,8 @@ const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 export interface JWTPayload {
   userId: string;
   role: string;
+  clinicId?: string;   // null/undefined for SUPER_ADMIN (no clinic)
+  doctorId?: string;
   [key: string]: any;
 }
 
