@@ -2,19 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 
-async function requireAdmin(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const payload = await verifyToken(authHeader.split(' ')[1]);
-  return payload?.role === 'ADMIN' ? payload : null;
-}
+import { requireClinicAccess } from '@/lib/clinic-guard';
 
 // DELETE /api/admin/purchases/[id]
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!await requireAdmin(request)) {
+  const session = await requireClinicAccess(request);
+  if (!session || session.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -22,6 +18,14 @@ export async function DELETE(
     const { id } = await params;
     if (!id) {
       return NextResponse.json({ error: 'ID topilmadi' }, { status: 400 });
+    }
+
+    const purchase = await prisma.purchase.findUnique({ where: { id } });
+    if (!purchase) {
+      return NextResponse.json({ error: 'Topilmadi' }, { status: 404 });
+    }
+    if (purchase.clinicId !== session.clinicId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     await prisma.purchase.delete({

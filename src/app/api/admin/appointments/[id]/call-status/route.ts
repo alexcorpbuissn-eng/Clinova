@@ -1,20 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { requireClinicAccess } from '@/lib/clinic-guard';
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const token = authHeader.split(' ')[1];
-  const payload = await verifyToken(token);
-
-  if (!payload || (payload.role !== 'ADMIN' && payload.role !== 'RECEPTION' && payload.role !== 'DOCTOR')) {
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION' && session.role !== 'DOCTOR')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -33,6 +27,10 @@ export async function PATCH(
 
     if (!appointment) {
       return NextResponse.json({ error: 'Qabul topilmadi' }, { status: 404 });
+    }
+
+    if (appointment.clinicId !== session.clinicId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     let updatedAppointment;

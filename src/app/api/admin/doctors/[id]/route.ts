@@ -2,20 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { generateSlotsForDoctor } from '@/lib/slot-generator';
-
-async function requireAdmin(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const payload = await verifyToken(authHeader.split(' ')[1]);
-  return payload?.role === 'ADMIN' ? payload : null;
-}
+import { requireClinicAccess } from '@/lib/clinic-guard';
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  if (!await requireAdmin(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  const session = await requireClinicAccess(request);
+  if (!session || session.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+  const doctorToUpdate = await prisma.doctor.findUnique({ where: { id } });
+  if (!doctorToUpdate) return NextResponse.json({ error: 'Topilmadi' }, { status: 404 });
+  if (doctorToUpdate.clinicId !== session.clinicId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   try {
     const data = await request.json();
@@ -59,7 +58,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  if (!await requireAdmin(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  const session = await requireClinicAccess(request);
+  if (!session || session.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+  const doctorToDelete = await prisma.doctor.findUnique({ where: { id } });
+  if (!doctorToDelete || doctorToDelete.clinicId !== session.clinicId) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   await prisma.doctor.delete({ where: { id } });
   return NextResponse.json({ success: true });
