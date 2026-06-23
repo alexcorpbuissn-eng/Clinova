@@ -3,25 +3,18 @@ import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { requireClinicAccess } from '@/lib/clinic-guard';
 
-async function requireInventoryOrAdmin(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const payload = await verifyToken(authHeader.split(' ')[1]);
-  if (payload?.role === 'ADMIN' || payload?.role === 'INVENTORY') {
-    return payload;
-  }
-  return null;
-}
+
 
 // GET /api/inventory/purchases
 export async function GET(request: NextRequest) {
-  const user = await requireInventoryOrAdmin(request);
-  if (!user) {
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'INVENTORY')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   try {
     const purchases = await prisma.purchase.findMany({
+      where: { clinicId: session.clinicId },
       orderBy: { createdAt: 'desc' }
     });
     return NextResponse.json({ success: true, purchases });

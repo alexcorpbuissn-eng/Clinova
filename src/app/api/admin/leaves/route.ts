@@ -13,11 +13,14 @@ async function requireAdmin(request: NextRequest) {
 
 // GET /api/admin/leaves
 export async function GET(request: NextRequest) {
-  const payload = await requireAdmin(request);
-  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   try {
     const leaves = await prisma.leave.findMany({
+      where: { clinicId: session.clinicId },
       include: {
         doctor: { select: { firstName: true, lastName: true } }
       },

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { requireClinicAccess } from '@/lib/clinic-guard';
 
 // ── Auth helper ──────────────────────────────────────────────────────────────
 async function requireAdmin(request: NextRequest) {
@@ -14,8 +15,10 @@ async function requireAdmin(request: NextRequest) {
 // ── GET /api/admin/slots?doctorId=xxx&from=ISO&to=ISO ────────────────────────
 // Returns all slots for a doctor in a date range (defaults to next 60 days)
 export async function GET(request: NextRequest) {
-  const payload = await requireAdmin(request);
-  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   const { searchParams } = new URL(request.url);
   const doctorId = searchParams.get('doctorId');
@@ -29,6 +32,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const whereClause: any = {
+      clinicId: session.clinicId,
       startTime: { gte: from, lte: to },
     };
     if (doctorId) {

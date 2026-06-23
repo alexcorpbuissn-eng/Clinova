@@ -4,27 +4,16 @@ import { verifyToken } from '@/lib/auth';
 import { requireClinicAccess } from '@/lib/clinic-guard';
 import { v4 as uuidv4 } from 'uuid';
 
-async function requireStaff(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
-  const token = authHeader.split(' ')[1];
-  const payload = await verifyToken(token);
-  if (payload && (payload.role === 'ADMIN' || payload.role === 'RECEPTION')) {
-    return payload;
-  }
-  return null;
-}
-
-// GET /api/admin/appointments — All appointments across all doctors
 export async function GET(request: NextRequest) {
-  if (!await requireStaff(request)) {
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const { searchParams } = new URL(request.url);
   const since = searchParams.get('since');
 
-  const whereClause: any = {};
+  const whereClause: any = { clinicId: session.clinicId };
   if (since) {
     whereClause.createdAt = { gt: new Date(since) };
   }

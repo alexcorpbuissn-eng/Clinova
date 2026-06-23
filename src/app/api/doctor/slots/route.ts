@@ -14,11 +14,13 @@ async function requireDoctorOrAdmin(request: NextRequest) {
 
 // GET /api/doctor/slots — Fetch doctor's own upcoming slots
 export async function GET(request: NextRequest) {
-  const payload = await requireDoctorOrAdmin(request);
-  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'DOCTOR' && session.role !== 'ADMIN')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
-  let doctorId = payload.doctorId as string;
-  if (payload.role === 'ADMIN') {
+  let doctorId = session.doctorId as string;
+  if (session.role === 'ADMIN') {
     const qDocId = request.nextUrl.searchParams.get('doctorId');
     if (qDocId) doctorId = qDocId;
   }
@@ -34,7 +36,7 @@ export async function GET(request: NextRequest) {
   todayStart.setUTCHours(todayStart.getUTCHours() - 5);
 
   const slots = await prisma.slot.findMany({
-    where: { doctorId, startTime: { gte: todayStart } },
+    where: { clinicId: session.clinicId, doctorId, startTime: { gte: todayStart } },
     include: {
       appointment: {
         select: {

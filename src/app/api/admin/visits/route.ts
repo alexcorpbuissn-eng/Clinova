@@ -3,17 +3,10 @@ import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { requireClinicAccess } from '@/lib/clinic-guard';
 
-async function requireStaff(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const payload = await verifyToken(authHeader.split(' ')[1]);
-  if (payload?.role === 'ADMIN' || payload?.role === 'RECEPTION') return payload;
-  return null;
-}
-
 // GET /api/admin/visits — list visits (optional ?doctorId=&limit=)
 export async function GET(request: NextRequest) {
-  if (!await requireStaff(request)) {
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -22,7 +15,10 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(searchParams.get('limit') || '50');
 
   const visits = await prisma.visit.findMany({
-    where: doctorId ? { doctorId } : undefined,
+    where: {
+      clinicId: session.clinicId,
+      ...(doctorId ? { doctorId } : {})
+    },
     include: { doctor: { select: { firstName: true, lastName: true, specialty: true } } },
     orderBy: { startTime: 'desc' },
     take: limit,
