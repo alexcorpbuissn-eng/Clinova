@@ -114,9 +114,17 @@ export async function POST(req: NextRequest) {
       return appointment;
     });
 
-    // Send notifications outside transaction
+    const clinic = await prisma.clinic.findUnique({ where: { id: result.clinicId }, select: { name: true } });
+
+    // Send notifications (fire and forget)
     try {
-      await sendGroupNotification(result);
+      if (body.notifyGroup !== false) {
+        sendGroupNotification({
+          ...result,
+          clinicId: result.clinicId,
+          clinicName: clinic?.name || 'Klinika',
+        }).catch(console.error);
+      }
       if (result.patient.telegramChatId) {
         await sendPatientConfirmation(result);
       }

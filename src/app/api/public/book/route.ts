@@ -176,6 +176,8 @@ export async function POST(req: NextRequest) {
       return appointment;
     });
 
+    const clinic = await prisma.clinic.findUnique({ where: { id: result.clinicId }, select: { name: true } });
+
     // Notify clinic group — fire and forget
     sendGroupNotification({
       patientFirst: firstName,
@@ -186,6 +188,8 @@ export async function POST(req: NextRequest) {
       appointmentTime: result.slot.startTime,
       description: result.description,
       telegramChatId: patient.telegramChatId,
+      clinicId: result.clinicId,
+      clinicName: clinic?.name || 'Klinika',
     }).catch(console.error);
 
     // Notify patient — fire and forget
@@ -195,6 +199,8 @@ export async function POST(req: NextRequest) {
         doctorName: `${result.doctor.firstName} ${result.doctor.lastName}`,
         procedureName: result.procedure.name,
         appointmentTime: result.slot.startTime,
+        clinicId: result.clinicId,
+        clinicName: clinic?.name || 'Klinika',
       }).catch(console.error);
     }
 

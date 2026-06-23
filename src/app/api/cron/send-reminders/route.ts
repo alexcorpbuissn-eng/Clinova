@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
       slot: true,
       doctor: { select: { firstName: true, lastName: true } },
       patient: { select: { telegramChatId: true } },
+      clinic: { select: { name: true } },
     },
   });
 
@@ -55,6 +56,8 @@ export async function POST(req: NextRequest) {
         chatId,
         doctorName: `${appt.doctor.firstName} ${appt.doctor.lastName}`,
         appointmentTime: appt.slot.startTime,
+        clinicId: appt.clinicId,
+        clinicName: appt.clinic?.name || 'Klinika',
       });
 
       if (sent) {
@@ -77,6 +80,7 @@ export async function POST(req: NextRequest) {
       slot: true,
       doctor: { select: { firstName: true, lastName: true } },
       patient: { select: { telegramChatId: true } },
+      clinic: { select: { name: true } },
     },
   });
 
@@ -89,6 +93,8 @@ export async function POST(req: NextRequest) {
         chatId,
         doctorName: `${appt.doctor.firstName} ${appt.doctor.lastName}`,
         appointmentTime: appt.slot.startTime,
+        clinicId: appt.clinicId,
+        clinicName: appt.clinic?.name || 'Klinika',
       });
 
       if (sent) {
@@ -118,12 +124,12 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    const { getBot } = await import('@/lib/telegram');
-    const bot = getBot();
+    const { getClinicBot } = await import('@/lib/telegram');
 
     for (const leave of endingLeaves) {
       if (leave.doctor?.telegramChatId) {
         try {
+          const bot = await getClinicBot(leave.clinicId);
           await bot.sendMessage(
             leave.doctor.telegramChatId, 
             `Eslatma: Dam olish (otpuska) vaqtingiz tugashiga 1 kun qoldi! Ertadan ishga chiqishingiz kerak bo'ladi.`,

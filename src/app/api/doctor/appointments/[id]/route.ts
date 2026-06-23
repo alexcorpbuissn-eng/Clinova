@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { sendGroupNotification, toTashkentDate, toTashkentTime } from '@/lib/telegram';
-import TelegramBot from 'node-telegram-bot-api';
-
-function getBot() {
-  return new TelegramBot(process.env.TELEGRAM_BOT_TOKEN!, { polling: false });
-}
+import { sendGroupNotification, toTashkentDate, toTashkentTime, getClinicBot } from '@/lib/telegram';
 
 // PATCH /api/doctor/appointments/:id — Mark COMPLETED or CANCELLED
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -55,7 +50,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const doctorName = `${appointment.doctor.firstName} ${appointment.doctor.lastName}`;
 
     if (chatId) {
-      const bot = getBot();
+      const bot = await getClinicBot(appointment.clinicId);
       const text =
         `❌ *Qabul bekor qilindi*\n\n` +
         `Hurmatli *${appointment.patientFirst}*,\n` +
@@ -70,6 +65,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     // Also notify the clinic group
     try {
+      const clinic = await prisma.clinic.findUnique({ where: { id: appointment.clinicId }, select: { name: true } });
       await sendGroupNotification({
         patientFirst: appointment.patientFirst ?? '',
         patientLast: appointment.patientLast ?? '',
@@ -78,6 +74,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         procedureName: 'Bekor qilindi',
         appointmentTime: appointment.slot.startTime,
         description: `❌ Shifokor tomonidan bekor qilindi`,
+        clinicId: appointment.clinicId,
+        clinicName: clinic?.name || 'Klinika',
       });
     } catch(e) {
       console.error(e);

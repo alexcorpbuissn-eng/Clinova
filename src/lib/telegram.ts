@@ -1,104 +1,83 @@
 /**
- * src/lib/telegram.ts
- *
- * All Telegram bot operations — single source of truth.
+ * src/lib/telegram.ts — Multi-tenant Telegram bot support.
  *
  * Architecture:
- *  - The bot runs in polling=false (safe for serverless / Vercel).
- *  - INBOUND messages (e.g. /start) are received via a registered
- *    Telegram webhook → POST /api/telegram/webhook
- *  - OUTBOUND messages (OTP, reminders, group notifications) are
- *    sent from API route handlers using the helpers below.
- *
- * OTP flow:
- *  1. Website shows patient: https://t.me/<BOT>?start=<phone>
- *  2. Patient taps START → Telegram sends POST to our webhook
- *  3. Webhook handler calls processStartCommand(phone, chatId)
- *     → generates OTP, stores in DB, sends DM to patient
- *  4. Patient types code on website → POST /api/public/verify-otp
+ * - Platform bot (TELEGRAM_BOT_TOKEN env var) handles OTP — clinic-agnostic.
+ * - Per-clinic bot: if Clinic.telegramBotToken is set, uses that bot.
+ *   Otherwise falls back to the platform bot.
+ * - Clinic names and group chat IDs come from the DB, not env vars.
  */
 
 import TelegramBot from 'node-telegram-bot-api';
 import { prisma } from './prisma';
 
-// ─── Singleton (send-only, no polling) ───────────────────────────────────────
-let _bot: TelegramBot | null = null;
+// ─── Bot cache (per token) ────────────────────────────────────────────────────
+const _botCache = new Map<string, TelegramBot>();
 
-export function getBot(): TelegramBot {
-  if (!_bot) {
-    const token = process.env.TELEGRAM_BOT_TOKEN;
-    if (!token) throw new Error('TELEGRAM_BOT_TOKEN is not set.');
-    _bot = new TelegramBot(token, { polling: false });
+function getBotByToken(token: string): TelegramBot {
+  if (!_botCache.has(token)) {
+    _botCache.set(token, new TelegramBot(token, { polling: false }));
   }
-  return _bot;
+  return _botCache.get(token)!;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// UTILITIES
-// ─────────────────────────────────────────────────────────────────────────────
+/** Platform bot — used for OTP (clinic-agnostic) */
+export function getBot(): TelegramBot {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) throw new Error('TELEGRAM_BOT_TOKEN is not set.');
+  return getBotByToken(token);
+}
 
-/** Normalise phone to E.164 without spaces, e.g. "+998901234567" */
+/** Per-clinic bot — falls back to platform bot if clinic has no token */
+export async function getClinicBot(clinicId: string): Promise<TelegramBot> {
+  const clinic = await prisma.clinic.findUnique({
+    where: { id: clinicId },
+    select: { telegramBotToken: true }
+  });
+  const token = clinic?.telegramBotToken || process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) throw new Error('No Telegram bot token available.');
+  return getBotByToken(token);
+}
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+
 export function normalisePhone(raw: string): string {
   const digits = raw.replace(/\s|-/g, '');
   return digits.startsWith('+') ? digits : `+${digits}`;
 }
 
-/** Format a UTC Date to HH:MM in Tashkent timezone (UTC+5) */
 export function toTashkentTime(utcDate: Date): string {
   return utcDate.toLocaleTimeString('uz-UZ', {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'Asia/Tashkent',
+    hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tashkent',
   });
 }
 
-/** Format a UTC Date to full date string in Uzbek */
 export function toTashkentDate(utcDate: Date): string {
   return utcDate.toLocaleDateString('uz-UZ', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'Asia/Tashkent',
+    day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Tashkent',
   });
 }
 
-/** Build the deep-link shown on the booking page Step 3 */
 export function getBotDeepLink(telegramPhone: string): string {
   const username = process.env.TELEGRAM_BOT_USERNAME;
   if (!username) throw new Error('TELEGRAM_BOT_USERNAME is not set.');
-  // Telegram start parameter only allows A-Z, a-z, 0-9, _, -. We strip '+' to comply.
   const param = normalisePhone(telegramPhone).replace('+', '');
   return `https://t.me/${username}?start=${param}`;
 }
 
-/** Generate a cryptographically-adequate 6-digit OTP string */
 function generateOtpCode(): string {
   return String(Math.floor(100000 + Math.random() * 900000));
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// INBOUND HANDLER — called from POST /api/telegram/webhook
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Inbound: OTP flow (platform bot — no clinicId needed) ───────────────────
 
-/**
- * processStartCommand
- *
- * Called when the webhook receives a /start <phone> message.
- *
- * Steps:
- *  1. Upsert a Patient record with telegramChatId (unverified)
- *  2. Create a fresh OTP row (invalidates any previous pending code)
- *  3. Send the OTP code via DM
- */
 export async function processStartCommand(
   rawPhone: string,
   chatId: string,
   username?: string
 ): Promise<void> {
   const telegramPhone = normalisePhone(rawPhone);
-  const bot = getBot();
 
-  // 1 — persist chatId against this phone (isVerified stays false until code check)
   await prisma.patient.upsert({
     where: { telegramPhone },
     update: { telegramChatId: chatId, telegramUsername: username || null },
@@ -106,7 +85,7 @@ export async function processStartCommand(
       telegramPhone,
       telegramChatId: chatId,
       telegramUsername: username || null,
-      firstName: '',   // filled during Step 3 form submission
+      firstName: '',
       lastName: '',
       phone: telegramPhone,
       isVerified: false,
@@ -116,28 +95,21 @@ export async function processStartCommand(
   await generateAndSendOtp(telegramPhone, chatId);
 }
 
-/**
- * generateAndSendOtp
- *
- * Generates an OTP, invalidates old ones, and sends it directly via Telegram DM.
- * Used by both processStartCommand (new users) and send-otp route (returning users).
- */
 export async function generateAndSendOtp(telegramPhone: string, chatId: string): Promise<void> {
   const bot = getBot();
 
-  // invalidate old unused OTPs for this phone
   await prisma.otp.updateMany({
     where: { telegramPhone, used: false },
     data: { used: true },
   });
 
   const code = generateOtpCode();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
   await prisma.otp.create({ data: { telegramPhone, code, expiresAt } });
 
   const text =
-    `🔐 *Habibullo-Hilola tasdiqlash kodi*\n\n` +
+    `🔐 *Clinova tasdiqlash kodi*\n\n` +
     `Sizning bir martalik kodingiz:\n\n` +
     `*${code}*\n\n` +
     `⏱ Kod *10 daqiqa* davomida amal qiladi.\n` +
@@ -146,24 +118,24 @@ export async function generateAndSendOtp(telegramPhone: string, chatId: string):
   await bot.sendMessage(chatId, text, { parse_mode: 'Markdown' });
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// JOB 2 — PATIENT REMINDERS
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Reminders ────────────────────────────────────────────────────────────────
 
 export interface ReminderPayload {
   chatId: string;
   doctorName: string;
-  appointmentTime: Date; // UTC
+  appointmentTime: Date;
+  clinicId: string;
+  clinicName: string;
 }
 
 export async function sendReminder24h(payload: ReminderPayload): Promise<boolean> {
-  const bot = getBot();
+  const bot = await getClinicBot(payload.clinicId);
   const time = toTashkentTime(payload.appointmentTime);
 
   const text =
     `📅 *Eslatma:* Ertaga *${time}* da ` +
     `Dr. *${payload.doctorName}* bilan uchrashuvingiz bor.\n` +
-    `🏥 Klinika: *Habibullo-Hilola*`;
+    `🏥 Klinika: *${payload.clinicName}*`;
 
   try {
     await bot.sendMessage(payload.chatId, text, { parse_mode: 'Markdown' });
@@ -175,13 +147,13 @@ export async function sendReminder24h(payload: ReminderPayload): Promise<boolean
 }
 
 export async function sendReminder2h(payload: ReminderPayload): Promise<boolean> {
-  const bot = getBot();
+  const bot = await getClinicBot(payload.clinicId);
   const time = toTashkentTime(payload.appointmentTime);
 
   const text =
     `⏰ *Eslatma:* *${time}* da uchrashuvingiz *2 soatdan keyin.*\n` +
-    `👨‍⚕️ Dr. *${payload.doctorName}*\n` +
-    `🏥 Klinika: *Habibullo-Hilola*`;
+    `👨⚕️ Dr. *${payload.doctorName}*\n` +
+    `🏥 Klinika: *${payload.clinicName}*`;
 
   try {
     await bot.sendMessage(payload.chatId, text, { parse_mode: 'Markdown' });
@@ -192,9 +164,7 @@ export async function sendReminder2h(payload: ReminderPayload): Promise<boolean>
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// JOB 3 — CLINIC OWNER GROUP NOTIFICATION
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Group notification ───────────────────────────────────────────────────────
 
 export interface GroupNotificationPayload {
   patientFirst: string;
@@ -202,27 +172,37 @@ export interface GroupNotificationPayload {
   phone: string;
   doctorName: string;
   procedureName: string;
-  appointmentTime: Date; // UTC
+  appointmentTime: Date;
   description?: string | null;
   telegramChatId?: string | null;
+  clinicId: string;
+  clinicName: string;
 }
 
 export async function sendGroupNotification(
   payload: GroupNotificationPayload
 ): Promise<boolean> {
-  const groupChatId = process.env.TELEGRAM_GROUP_CHAT_ID;
+  // Look up group chat ID from DB
+  const clinic = await prisma.clinic.findUnique({
+    where: { id: payload.clinicId },
+    select: { telegramGroupChatId: true, telegramBotToken: true }
+  });
+
+  const groupChatId = clinic?.telegramGroupChatId || process.env.TELEGRAM_GROUP_CHAT_ID;
   if (!groupChatId) {
-    console.warn('[Telegram] TELEGRAM_GROUP_CHAT_ID not set — skipping group notification.');
+    console.warn('[Telegram] No group chat ID for clinic:', payload.clinicId);
     return false;
   }
 
-  const bot = getBot();
+  const token = clinic?.telegramBotToken || process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) return false;
+  const bot = getBotByToken(token);
+
   const date = toTashkentDate(payload.appointmentTime);
   const time = toTashkentTime(payload.appointmentTime);
   const description = payload.description?.trim() || "Ko'rsatilmagan";
-
   const patientName = `${payload.patientFirst} ${payload.patientLast}`;
-  const patientLink = payload.telegramChatId 
+  const patientLink = payload.telegramChatId
     ? `[${patientName}](tg://user?id=${payload.telegramChatId})`
     : `*${patientName}*`;
 
@@ -230,11 +210,12 @@ export async function sendGroupNotification(
     `🆕 *Yangi yozuv!*\n\n` +
     `👤 Bemor: ${patientLink}\n` +
     `📞 Telefon: \`${payload.phone}\`\n` +
-    `👨‍⚕️ Shifokor: *Dr. ${payload.doctorName}*\n` +
+    `👨⚕️ Shifokor: *Dr. ${payload.doctorName}*\n` +
     `🦷 Protsedura: *${payload.procedureName}*\n` +
     `📅 Sana: *${date}*\n` +
     `🕐 Vaqt: *${time}*\n` +
-    `📝 Muammo: ${description}`;
+    `📝 Muammo: ${description}\n` +
+    `🏥 Klinika: *${payload.clinicName}*`;
 
   try {
     await bot.sendMessage(groupChatId, text, { parse_mode: 'Markdown' });
@@ -245,29 +226,29 @@ export async function sendGroupNotification(
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// JOB 4 — PATIENT CONFIRMATION
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Patient confirmation ─────────────────────────────────────────────────────
 
 export interface ConfirmationPayload {
   chatId: string;
   doctorName: string;
   procedureName: string;
-  appointmentTime: Date; // UTC
+  appointmentTime: Date;
+  clinicId: string;
+  clinicName: string;
 }
 
 export async function sendPatientConfirmation(payload: ConfirmationPayload): Promise<boolean> {
-  const bot = getBot();
+  const bot = await getClinicBot(payload.clinicId);
   const date = toTashkentDate(payload.appointmentTime);
   const time = toTashkentTime(payload.appointmentTime);
 
   const text =
     `✅ *Qabulingiz muvaffaqiyatli band qilindi!*\n\n` +
-    `👨‍⚕️ Shifokor: *Dr. ${payload.doctorName}*\n` +
+    `👨⚕️ Shifokor: *Dr. ${payload.doctorName}*\n` +
     `🦷 Protsedura: *${payload.procedureName}*\n` +
     `📅 Sana: *${date}*\n` +
     `🕐 Vaqt: *${time}*\n\n` +
-    `🏥 Klinika: *Habibullo-Hilola*\n` +
+    `🏥 Klinika: *${payload.clinicName}*\n` +
     `Iltimos, belgilangan vaqtdan 10 daqiqa oldin kelishni unutmang.`;
 
   try {
