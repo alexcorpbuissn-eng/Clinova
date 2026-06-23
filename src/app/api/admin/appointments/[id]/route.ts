@@ -147,9 +147,9 @@ export async function PATCH(
       }),
       prisma.visit.create({
         data: {
-          clinic:       { connect: { id: appointment.clinicId } },
-          doctor:       { connect: { id: appointment.doctorId } },
-          appointment:  { connect: { id } },
+          clinicId:    appointment.clinicId,
+          doctorId:    appointment.doctorId,
+          appointmentId: id,
           patientName:  patientName.trim(),
           serviceName:  appointment.procedure?.name || 'Birlamchi ko\'rik',
           price:        0,
