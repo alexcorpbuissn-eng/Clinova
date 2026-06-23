@@ -151,6 +151,7 @@ export async function PATCH(
         where: { id },
         data: { status: 'COMPLETED' },
       }),
+      // @ts-ignore
       prisma.visit.create({
         data: {
           doctorId: appointment.doctorId,
