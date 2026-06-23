@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
@@ -151,18 +150,18 @@ export async function PATCH(
         where: { id },
         data: { status: 'COMPLETED' },
       }),
-      // @ts-ignore
       prisma.visit.create({
         data: {
-          doctorId: appointment.doctorId,
-          patientName: patientName.trim(),
-          serviceName: appointment.procedure?.name || 'Birlamchi ko\'rik',
-          price: 0, // Admin can update this in the reception page later if needed
-          source: 'BOOKED',
-          startTime: new Date(),
-          note: 'Qabuldan (Admin panel)',
-          clinicId: appointment.clinicId,
-        } as any,
+          clinic:       { connect: { id: appointment.clinicId } },
+          doctor:       { connect: { id: appointment.doctorId } },
+          appointment:  { connect: { id } },
+          patientName:  patientName.trim(),
+          serviceName:  appointment.procedure?.name || 'Birlamchi ko\'rik',
+          price:        0,
+          source:       'BOOKED',
+          startTime:    new Date(),
+          note:         'Qabuldan (Admin panel)',
+        },
       }),
     ]);
 
