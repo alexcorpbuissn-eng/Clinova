@@ -18,6 +18,7 @@ model Clinic {
   phone               String?
   telegramBotToken    String?
   telegramBotUsername String?
+  telegramGroupChatId String?
   timezone            String     @default("Asia/Tashkent")
   isActive            Boolean    @default(true)
   plan                ClinicPlan @default(TRIAL)
