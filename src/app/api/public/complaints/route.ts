@@ -2,14 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // POST /api/public/complaints
-// Accepts { patientId, message }
+// Accepts { patientId, clinicSlug, message }
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { patientId, message } = body;
+    const { patientId, clinicSlug, message } = body;
 
     if (!patientId) {
       return NextResponse.json({ success: false, error: 'Unauthorized. Please login.' }, { status: 401 });
+    }
+
+    if (!clinicSlug) {
+      return NextResponse.json({ success: false, error: 'clinicSlug is required' }, { status: 400 });
     }
 
     if (!message || message.trim() === '') {
@@ -18,6 +22,15 @@ export async function POST(req: NextRequest) {
 
     if (message.trim().length > 2000) {
       return NextResponse.json({ success: false, error: 'Xabar 2000 belgidan oshmasligi kerak' }, { status: 400 });
+    }
+
+    // Resolve clinic from slug
+    const clinic = await prisma.clinic.findFirst({
+      where: { slug: clinicSlug, isActive: true }
+    });
+
+    if (!clinic) {
+      return NextResponse.json({ success: false, error: 'Klinika topilmadi' }, { status: 404 });
     }
 
     // Verify patient exists
@@ -33,7 +46,8 @@ export async function POST(req: NextRequest) {
       data: {
         patientId: patient.id,
         message: message.trim(),
-        status: 'PENDING'
+        status: 'PENDING',
+        clinicId: clinic.id,
       }
     });
 
@@ -60,21 +74,4 @@ export async function GET(req: NextRequest) {
 
     const complaints = await prisma.complaint.findMany({
       orderBy: { createdAt: 'desc' },
-      include: {
-        patient: {
-          select: {
-            firstName: true,
-            lastName: true,
-            phone: true,
-            telegramPhone: true
-          }
-        }
-      }
-    });
-
-    return NextResponse.json({ success: true, complaints });
-  } catch (error: any) {
-    console.error('[GET complaints error]', error);
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
-  }
-}
+     

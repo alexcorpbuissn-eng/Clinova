@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { requireClinicAccess } from '@/lib/clinic-guard';
 
 async function requireAdmin(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
@@ -32,8 +33,8 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/leaves
 export async function POST(request: NextRequest) {
-  const payload = await requireAdmin(request);
-  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const session = await requireClinicAccess(request);
+  if (!session || session.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
     const body = await request.json();
@@ -56,7 +57,8 @@ export async function POST(request: NextRequest) {
         doctorId,
         startTime: start,
         endTime: end,
-        reason: reason || 'Dam olish / Otgul'
+        reason: reason || 'Dam olish / Otgul',
+        clinicId: session.clinicId as string,
       }
     });
 
@@ -116,8 +118,4 @@ export async function DELETE(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error('[DELETE leaves error]', err);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
-  }
-}
+  } cat

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { requireClinicAccess } from '@/lib/clinic-guard';
 
 async function requireInventoryOrAdmin(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
@@ -32,8 +33,8 @@ export async function GET(request: NextRequest) {
 
 // POST /api/inventory/purchases
 export async function POST(request: NextRequest) {
-  const user = await requireInventoryOrAdmin(request);
-  if (!user) {
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'INVENTORY')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -50,13 +51,9 @@ export async function POST(request: NextRequest) {
         itemName,
         price: Number(price),
         sellerName,
-        recordedBy: user.phone || null
+        recordedBy: null,
+        clinicId: session.clinicId as string,
       }
     });
 
     return NextResponse.json({ success: true, purchase });
-  } catch (error) {
-    console.error('Error creating purchase:', error);
-    return NextResponse.json({ error: 'Server xatosi' }, { status: 500 });
-  }
-}

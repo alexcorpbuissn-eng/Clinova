@@ -44,7 +44,7 @@ export async function PATCH(
     
     // Auto-generate slots based on new schedule
     if (updateData.workStartTime || updateData.workEndTime || updateData.breakStartTime || updateData.breakEndTime || updateData.workingDays || updateData.isActive) {
-      await generateSlotsForDoctor(doctor.id);
+      await generateSlotsForDoctor(doctor.id, doctor.clinicId);
     }
 
     return NextResponse.json({ success: true, doctor, chatFound: !!updateData.telegramChatId });
@@ -62,5 +62,4 @@ export async function DELETE(
   if (!await requireAdmin(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   await prisma.doctor.delete({ where: { id } });
-  return NextResponse.json({ success: true });
-}
+  return NextResponse.json({ suc

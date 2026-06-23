@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
     const existingSet = new Set(existing.map((s) => s.startTime.toISOString()));
 
     // Generate candidate slots
-    const toCreate: { doctorId: string; startTime: Date; duration: number }[] = [];
+    const toCreate: { doctorId: string; clinicId: string; startTime: Date; duration: number }[] = [];
     const cursor = new Date(from);
     cursor.setUTCHours(0, 0, 0, 0);
 
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
           if (slotEndHour > endHour || (slotEndHour === endHour && slotEndMin > 0)) break;
 
           if (!existingSet.has(slotStart.toISOString())) {
-            toCreate.push({ doctorId, startTime: slotStart, duration: interval });
+            toCreate.push({ doctorId, clinicId: doctor.clinicId, startTime: slotStart, duration: interval });
             existingSet.add(slotStart.toISOString()); // prevent self-duplication in same batch
           }
 
@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const slot = await prisma.slot.create({
-      data: { doctorId, startTime: start, duration },
+      data: { doctorId, clinicId: doctor.clinicId, startTime: start, duration },
     });
     return NextResponse.json({ success: true, slot });
   } catch (err: any) {
@@ -205,6 +205,4 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Bu vaqtda slot allaqachon mavjud' }, { status: 409 });
     }
     console.error('POST /api/admin/slots', err);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
-  }
-}
+    retu

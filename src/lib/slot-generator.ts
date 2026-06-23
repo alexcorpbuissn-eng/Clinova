@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 
-export async function generateSlotsForDoctor(doctorId: string, horizonDays: number = 30) {
+export async function generateSlotsForDoctor(doctorId: string, clinicId: string, horizonDays: number = 30) {
   const doctor = await prisma.doctor.findUnique({
     where: { id: doctorId },
     include: { leaves: true }
@@ -76,6 +76,7 @@ export async function generateSlotsForDoctor(doctorId: string, horizonDays: numb
       if (!existingSet.has(slotStart.toISOString())) {
         toCreate.push({
           doctorId: doctor.id,
+          clinicId,
           startTime: slotStart,
           duration: 30
         });
@@ -89,8 +90,4 @@ export async function generateSlotsForDoctor(doctorId: string, horizonDays: numb
       data: toCreate,
       skipDuplicates: true
     });
-    totalCreated += result.count;
-  }
-
-  return totalCreated;
-}
+    totalCreated += result

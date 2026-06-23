@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     let totalCreated = 0;
 
     for (const doctor of doctors) {
-      totalCreated += await generateSlotsForDoctor(doctor.id, 30);
+      totalCreated += await generateSlotsForDoctor(doctor.id, doctor.clinicId, 30);
     }
 
 
@@ -55,6 +55,4 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('[cron/generate-slots]', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
-  }
-}
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 

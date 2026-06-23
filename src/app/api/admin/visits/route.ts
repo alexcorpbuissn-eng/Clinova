@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { requireClinicAccess } from '@/lib/clinic-guard';
 
 async function requireStaff(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
@@ -32,7 +33,8 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/visits — log a new visit
 export async function POST(request: NextRequest) {
-  if (!await requireStaff(request)) {
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -61,9 +63,4 @@ export async function POST(request: NextRequest) {
       paidAmount: status === 'IN_PROGRESS' ? 0 : parseInt(price),
       paymentMethod: status === 'IN_PROGRESS' ? null : (paymentMethod || 'CASH'),
       note: note ? String(note).trim() : null,
-    },
-    include: { doctor: { select: { firstName: true, lastName: true } } },
-  });
-
-  return NextResponse.json({ success: true, visit }, { status: 201 });
-}
+      c

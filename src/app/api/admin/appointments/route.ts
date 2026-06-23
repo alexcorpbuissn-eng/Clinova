@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { v4 as uuidv4 } from 'uuid';
+import { requireClinicAccess } from '@/lib/clinic-guard';
 
 async function requireStaff(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
@@ -45,7 +46,8 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/appointments — Book/Schedule a new appointment
 export async function POST(request: NextRequest) {
-  if (!await requireStaff(request)) {
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -182,6 +184,7 @@ export async function POST(request: NextRequest) {
           patientPhone: cleanPhone,
           description: note?.trim() || null,
           cancelToken: uuidv4(),
+          clinicId: session.clinicId as string,
         },
         include: { slot: true, procedure: true, doctor: true, patient: true },
       });
@@ -193,9 +196,4 @@ export async function POST(request: NextRequest) {
   } catch (err: any) {
     const msg: Record<string, string> = {
       SLOT_UNAVAILABLE: 'Bu vaqt allaqachon band qilingan.',
-      DUPLICATE_BOOKING: 'Bemor ushbu kunda boshqa qabulga yozilgan.',
-      PROCEDURE_NOT_FOUND: 'Tanlangan xizmat topilmadi.',
-    };
-    return NextResponse.json({ error: msg[err.message] || err.message || 'Xatolik yuz berdi' }, { status: 400 });
-  }
-}
+      DUPLICATE_BOOKING: 'Bemor ushbu kunda boshqa qab

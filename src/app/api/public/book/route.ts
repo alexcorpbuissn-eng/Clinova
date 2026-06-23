@@ -161,6 +161,7 @@ export async function POST(req: NextRequest) {
           patientPhone: phone,
           description: description?.trim().slice(0, 500) || null,
           cancelToken: uuidv4(),
+          clinicId: slot.clinicId,
         },
         include: { slot: true, procedure: true, doctor: true, patient: true },
       });
@@ -222,6 +223,4 @@ export async function POST(req: NextRequest) {
     }
 
     console.error('[book] Unexpected error:', err);
-    return NextResponse.json({ error: 'Ichki xatolik yuz berdi.' }, { status: 500 });
-  }
-}
+    return NextResponse.json({ error: 'Ichki xatolik yuz 

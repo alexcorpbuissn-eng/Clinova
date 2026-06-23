@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { requireClinicAccess } from '@/lib/clinic-guard';
 
 async function requireStaff(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
@@ -12,7 +13,8 @@ async function requireStaff(request: NextRequest) {
 
 // POST /api/reception/drafts
 export async function POST(request: NextRequest) {
-  if (!await requireStaff(request)) {
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -33,7 +35,8 @@ export async function POST(request: NextRequest) {
         patientId,
         procedureId,
         customDuration: customDuration ? parseInt(customDuration, 10) : null,
-        status: 'PENDING'
+        status: 'PENDING',
+        clinicId: session.clinicId as string,
       },
       include: {
         doctor: { select: { firstName: true, lastName: true, specialty: true } },
@@ -42,9 +45,4 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({ success: true, draft }, { status: 201 });
-  } catch (error: any) {
-    console.error('[create draft]', error);
-    return NextResponse.json({ error: 'Ichki xatolik yuz berdi' }, { status: 500 });
-  }
-}
+    return NextResponse.json({ s
