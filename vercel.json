@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npx prisma db push && next build",
+  "buildCommand": "rm -rf .next && npx prisma db push && next build",
   "crons": [
     {
       "path": "/api/cron/send-reminders",
