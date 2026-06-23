@@ -223,4 +223,6 @@ export async function POST(req: NextRequest) {
     }
 
     console.error('[book] Unexpected error:', err);
-    return NextResponse.json({ error: 'Ichki xatolik yuz 
+    return NextResponse.json({ error: 'Ichki xatolik yuz berdi.' }, { status: 500 });
+  }
+}

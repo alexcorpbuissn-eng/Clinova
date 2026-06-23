@@ -118,4 +118,8 @@ export async function DELETE(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } cat
+  } catch (err) {
+    console.error('[DELETE leaves error]', err);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}

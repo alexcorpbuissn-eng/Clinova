@@ -63,4 +63,10 @@ export async function POST(request: NextRequest) {
       paidAmount: status === 'IN_PROGRESS' ? 0 : parseInt(price),
       paymentMethod: status === 'IN_PROGRESS' ? null : (paymentMethod || 'CASH'),
       note: note ? String(note).trim() : null,
-      c
+      clinicId: session.clinicId as string,
+    },
+    include: { doctor: { select: { firstName: true, lastName: true } } },
+  });
+
+  return NextResponse.json({ success: true, visit }, { status: 201 });
+}

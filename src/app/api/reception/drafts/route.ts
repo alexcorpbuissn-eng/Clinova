@@ -45,4 +45,9 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({ s
+    return NextResponse.json({ success: true, draft }, { status: 201 });
+  } catch (error: any) {
+    console.error('[create draft]', error);
+    return NextResponse.json({ error: 'Ichki xatolik yuz berdi' }, { status: 500 });
+  }
+}

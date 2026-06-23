@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // POST /api/public/complaints
-// Accepts { patientId, clinicSlug, message }
+// Accepts { patientId, message }
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -74,4 +74,21 @@ export async function GET(req: NextRequest) {
 
     const complaints = await prisma.complaint.findMany({
       orderBy: { createdAt: 'desc' },
-     
+      include: {
+        patient: {
+          select: {
+            firstName: true,
+            lastName: true,
+            phone: true,
+            telegramPhone: true
+          }
+        }
+      }
+    });
+
+    return NextResponse.json({ success: true, complaints });
+  } catch (error: any) {
+    console.error('[GET complaints error]', error);
+    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+  }
+}

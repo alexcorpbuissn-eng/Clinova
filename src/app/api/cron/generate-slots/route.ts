@@ -55,4 +55,6 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('[cron/generate-slots]', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}

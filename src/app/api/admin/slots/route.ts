@@ -205,4 +205,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Bu vaqtda slot allaqachon mavjud' }, { status: 409 });
     }
     console.error('POST /api/admin/slots', err);
-    retu
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}

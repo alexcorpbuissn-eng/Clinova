@@ -90,4 +90,8 @@ export async function generateSlotsForDoctor(doctorId: string, clinicId: string,
       data: toCreate,
       skipDuplicates: true
     });
-    totalCreated += result
+    totalCreated += result.count;
+  }
+
+  return totalCreated;
+}

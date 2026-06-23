@@ -1,8 +1,8 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
-import { v4 as uuidv4 } from 'uuid';
 import { requireClinicAccess } from '@/lib/clinic-guard';
+import { v4 as uuidv4 } from 'uuid';
 
 async function requireStaff(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
@@ -196,4 +196,9 @@ export async function POST(request: NextRequest) {
   } catch (err: any) {
     const msg: Record<string, string> = {
       SLOT_UNAVAILABLE: 'Bu vaqt allaqachon band qilingan.',
-      DUPLICATE_BOOKING: 'Bemor ushbu kunda boshqa qab
+      DUPLICATE_BOOKING: 'Bemor ushbu kunda boshqa qabulga yozilgan.',
+      PROCEDURE_NOT_FOUND: 'Tanlangan xizmat topilmadi.',
+    };
+    return NextResponse.json({ error: msg[err.message] || err.message || 'Xatolik yuz berdi' }, { status: 400 });
+  }
+}

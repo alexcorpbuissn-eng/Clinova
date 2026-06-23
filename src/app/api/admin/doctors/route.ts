@@ -1,8 +1,8 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
-import { generateSlotsForDoctor } from '@/lib/slot-generator';
 import { requireClinicAccess } from '@/lib/clinic-guard';
+import { generateSlotsForDoctor } from '@/lib/slot-generator';
 
 async function requireAdmin(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
@@ -52,11 +52,11 @@ export async function POST(request: NextRequest) {
     }
 
     const doctor = await prisma.doctor.create({
-      data: {
-        firstName,
-        lastName,
-        specialty,
-        bio,
+      data: { 
+        firstName, 
+        lastName, 
+        specialty, 
+        bio, 
         photoUrl,
         telegramUsername: cleanUsername,
         telegramChatId,
@@ -72,4 +72,9 @@ export async function POST(request: NextRequest) {
     // Auto-generate initial slots for the new doctor
     await generateSlotsForDoctor(doctor.id, doctor.clinicId);
 
-    return NextResponse.json({ success: true, doctor, chatFound: !!telegramChatId }, { status:
+    return NextResponse.json({ success: true, doctor, chatFound: !!telegramChatId }, { status: 201 });
+  } catch (error: any) {
+    console.error('Doctor POST Error:', error);
+    return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 });
+  }
+}

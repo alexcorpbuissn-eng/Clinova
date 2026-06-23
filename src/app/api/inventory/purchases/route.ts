@@ -57,3 +57,8 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, purchase });
+  } catch (error) {
+    console.error('Error creating purchase:', error);
+    return NextResponse.json({ error: 'Server xatosi' }, { status: 500 });
+  }
+}

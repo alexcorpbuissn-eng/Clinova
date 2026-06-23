@@ -159,7 +159,7 @@ export async function PATCH(
           source: 'BOOKED',
           startTime: new Date(),
           note: 'Qabuldan (Admin panel)',
-          clinicId: appointment.clinicId,
+          clinicId: appointment.clinicId as string,
         },
       }),
     ]);
@@ -167,4 +167,6 @@ export async function PATCH(
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('Attend error:', err);
-    return NextResponse.json({ error: 'Saql
+    return NextResponse.json({ error: 'Saqlashda xatolik' }, { status: 500 });
+  }
+}

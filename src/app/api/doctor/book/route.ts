@@ -1,27 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
-import { sendGroupNotification, sendPatientConfirmation } from '@/lib/telegram';
 import { requireClinicAccess } from '@/lib/clinic-guard';
+import { sendGroupNotification, sendPatientConfirmation } from '@/lib/telegram';
 
 async function requireDoctorOrAdmin(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) return null;
   const payload = await verifyToken(authHeader.split(' ')[1]);
   if (!payload) return null;
-  if (payload.role === 'DOCTOR' || payload.role === 'ADMIN') return payload;
+  if (session.role === 'DOCTOR' || session.role === 'ADMIN') return payload;
   return null;
 }
 
 // POST /api/doctor/book
 // Books an active, available slot for an existing patient.
 export async function POST(req: NextRequest) {
-  const session = await requireClinicAccess(req);
-  if (!session || (session.role !== 'DOCTOR' && session.role !== 'ADMIN')) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const payload = await requireDoctorOrAdmin(req);
+  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  let doctorId = session.doctorId as string;
+  let doctorId = payload.doctorId as string;
   const body = await req.json();
   const { slotId, procedureId, patientId, description } = body;
 
@@ -136,4 +134,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Ushbu xizmat davomiyligi belgilangan vaqtdan uzunroq' }, { status: 400 });
     }
     if (error.message === 'FORBIDDEN_SLOT') {
-      return NextResponse.json({ er
+      return NextResponse.json({ error: 'Ushbu shifokor vaqtini band qila olmaysiz' }, { status: 403 });
+    }
+    return NextResponse.json({ error: error.message || 'Server xatosi' }, { status: 500 });
+  }
+}

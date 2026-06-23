@@ -62,4 +62,5 @@ export async function DELETE(
   if (!await requireAdmin(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   await prisma.doctor.delete({ where: { id } });
-  return NextResponse.json({ suc
+  return NextResponse.json({ success: true });
+}
