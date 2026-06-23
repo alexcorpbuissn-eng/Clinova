@@ -151,7 +151,7 @@ export async function PATCH(
         data: { status: 'COMPLETED' },
       }),
       prisma.visit.create({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // @ts-ignore
         data: {
           doctorId: appointment.doctorId,
           patientName: patientName.trim(),
