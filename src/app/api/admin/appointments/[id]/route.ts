@@ -151,6 +151,7 @@ export async function PATCH(
         data: { status: 'COMPLETED' },
       }),
       prisma.visit.create({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         data: {
           doctorId: appointment.doctorId,
           patientName: patientName.trim(),
@@ -159,8 +160,8 @@ export async function PATCH(
           source: 'BOOKED',
           startTime: new Date(),
           note: 'Qabuldan (Admin panel)',
-          clinicId: appointment.clinicId as string,
-        },
+          clinicId: appointment.clinicId,
+        } as any,
       }),
     ]);
 
