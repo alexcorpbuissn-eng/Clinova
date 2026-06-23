@@ -294,6 +294,7 @@ model User {
   clinic   Clinic? @relation(fields: [clinicId], references: [id])
 
   telegramPhone String   @unique
+  password      String?
   role          Role
   doctorId      String?
 

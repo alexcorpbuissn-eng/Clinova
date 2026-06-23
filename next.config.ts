@@ -19,6 +19,7 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return [
+      { source: '/superadmin', destination: '/superadmin.html' },
       { source: '/', destination: '/index.html' },
       { source: '/booking', destination: '/booking.html' },
       { source: '/about', destination: '/about.html' },
