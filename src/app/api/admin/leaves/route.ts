@@ -1,15 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
 import { requireClinicAccess } from '@/lib/clinic-guard';
-
-async function requireAdmin(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const payload = await verifyToken(authHeader.split(' ')[1]);
-  if (payload?.role !== 'ADMIN') return null;
-  return payload;
-}
 
 // GET /api/admin/leaves
 export async function GET(request: NextRequest) {
@@ -105,21 +96,23 @@ export async function POST(request: NextRequest) {
 
 // DELETE /api/admin/leaves?id=...
 export async function DELETE(request: NextRequest) {
-  const payload = await requireAdmin(request);
-  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const session = await requireClinicAccess(request);
+  if (!session || session.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
 
-    if (!id) {
-      return NextResponse.json({ error: 'id required' }, { status: 400 });
+    const leave = await prisma.leave.findUnique({ where: { id } });
+    if (!leave) return NextResponse.json({ error: 'Topilmadi' }, { status: 404 });
+    if (leave.clinicId !== session.clinicId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    await prisma.leave.delete({
-      where: { id }
-    });
-
+    await prisma.leave.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('[DELETE leaves error]', err);

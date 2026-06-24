@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
+
 import { requireClinicAccess } from '@/lib/clinic-guard';
 import { generateSlotsForDoctor } from '@/lib/slot-generator';
 import { checkDoctorLimit } from '@/lib/plan-limits';

@@ -1,26 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
 import { requireClinicAccess } from '@/lib/clinic-guard';
 import { sendGroupNotification, sendPatientConfirmation } from '@/lib/telegram';
 import { checkAppointmentLimit } from '@/lib/plan-limits';
 
-async function requireDoctorOrAdmin(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const payload = await verifyToken(authHeader.split(' ')[1]);
-  if (!payload) return null;
-  if (session.role === 'DOCTOR' || session.role === 'ADMIN') return payload;
-  return null;
-}
-
 // POST /api/doctor/book
 // Books an active, available slot for an existing patient.
 export async function POST(req: NextRequest) {
-  const payload = await requireDoctorOrAdmin(req);
-  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  let doctorId = payload.doctorId as string;
+  const session = await requireClinicAccess(req);
+  if (!session || (session.role !== 'DOCTOR' && session.role !== 'ADMIN')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  let doctorId = session.doctorId as string;
   const body = await req.json();
   const { slotId, procedureId, patientId, description } = body;
 
@@ -132,7 +123,14 @@ export async function POST(req: NextRequest) {
         }).catch(console.error);
       }
       if (result.patient.telegramChatId) {
-        await sendPatientConfirmation(result);
+        await sendPatientConfirmation({
+          chatId: result.patient.telegramChatId,
+          doctorName: `${result.doctor.firstName} ${result.doctor.lastName}`,
+          procedureName: result.procedure.name,
+          appointmentTime: result.slot.startTime,
+          clinicId: result.clinicId,
+          clinicName: clinic?.name || 'Klinika',
+        });
       }
     } catch (err) {
       console.error('Error sending doctor booking notifications:', err);

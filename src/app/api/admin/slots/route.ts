@@ -1,16 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
 import { requireClinicAccess } from '@/lib/clinic-guard';
-
-// ── Auth helper ──────────────────────────────────────────────────────────────
-async function requireAdmin(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const payload = await verifyToken(authHeader.split(' ')[1]);
-  if (payload?.role !== 'ADMIN') return null;
-  return payload;
-}
 
 // ── GET /api/admin/slots?doctorId=xxx&from=ISO&to=ISO ────────────────────────
 // Returns all slots for a doctor in a date range (defaults to next 60 days)
@@ -63,8 +53,8 @@ export async function GET(request: NextRequest) {
 // Single slot: { doctorId, startTime, duration }
 // Bulk slots:  { doctorId, days:[0-6], startHour, endHour, interval, fromDate, toDate }
 export async function POST(request: NextRequest) {
-  const payload = await requireAdmin(request);
-  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const session = await requireClinicAccess(request);
+  if (!session || session.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   let body: any;
   try { body = await request.json(); }
@@ -76,6 +66,9 @@ export async function POST(request: NextRequest) {
   // ── Verify doctor exists ──
   const doctor = await prisma.doctor.findUnique({ where: { id: doctorId } });
   if (!doctor) return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
+  if (doctor.clinicId !== session.clinicId) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   // ── BULK MODE ──────────────────────────────────────────────────────────────
   if (body.bulk === true) {

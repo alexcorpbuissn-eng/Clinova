@@ -39,9 +39,10 @@ export async function GET(request: NextRequest) {
               tashkentNow.getDate() === tashkentEnd.getDate()) {
               
               try {
-                const { getBot } = await import('@/lib/telegram');
-                const bot = getBot();
-                const text = `⏰ *Eslatma:*\n\nDam olish kuningiz tugamoqda. Ertaga ishga chiqishingiz kerak!\n\n🏥 Klinika: *Habibullo-Hilola*`;
+                const { getClinicBot } = await import('@/lib/telegram');
+                const bot = await getClinicBot(doctor.clinicId);
+                const clinic = await prisma.clinic.findUnique({ where: { id: doctor.clinicId }, select: { name: true } });
+                const text = `⏰ *Eslatma:*\n\nDam olish kuningiz tugamoqda. Ertaga ishga chiqishingiz kerak!\n\n🏥 Klinika: *${clinic?.name || 'Klinika'}*`;
                 await bot.sendMessage(doctor.telegramChatId, text, { parse_mode: 'Markdown' });
               } catch(e) {
                 console.error('[Cron Leave Reminder Error]', e);

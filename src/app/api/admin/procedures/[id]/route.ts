@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
+
 import { requireClinicAccess } from '@/lib/clinic-guard';
 
 export async function PATCH(
@@ -39,6 +39,7 @@ export async function PATCH(
 
     await prisma.procedure.updateMany({
       where: {
+        clinicId: session.clinicId,
         name: target.name,
         doctor: { specialty: target.doctor.specialty }
       },

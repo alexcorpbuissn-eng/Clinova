@@ -164,6 +164,11 @@ const htmlTemplate = `<!DOCTYPE html>
                         <span class="material-symbols-outlined">local_hospital</span> Klinikalar
                     </button>
                 </li>
+                <li>
+                    <button id="nav-billing" onclick="switchTab('billing')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
+                        <span class="material-symbols-outlined">payments</span> Billing
+                    </button>
+                </li>
             </ul>
             <div class="mt-auto px-2 pt-4 border-t border-outline-variant">
                 <button onclick="logout()" class="w-full text-left text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
@@ -252,6 +257,12 @@ const htmlTemplate = `<!DOCTYPE html>
                             </tbody>
                         </table>
                     </div>
+                </div>
+            <div id="tab-billing" class="tab-content hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-headline-md text-on-surface">Billing & Limits</h3>
+                </div>
+                <div id="billing-container" class="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 </div>
             </div>
         </main>

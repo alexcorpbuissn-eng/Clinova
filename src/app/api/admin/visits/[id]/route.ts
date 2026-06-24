@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
+
 import { requireClinicAccess } from '@/lib/clinic-guard';
 
 // PATCH /api/admin/visits/[id] — update visit (finish treatment, record payment)
