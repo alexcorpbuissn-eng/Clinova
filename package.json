@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate && node -e \"try{require('fs').rmSync('.next/cache',{recursive:true,force:true})}catch(e){}\""
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
