@@ -13,6 +13,7 @@
 
 import { NextRequest } from 'next/server';
 import { verifyToken, JWTPayload } from '@/lib/auth';
+import { prisma } from './prisma';
 
 export interface ClinicSession {
   userId: string;
@@ -33,12 +34,33 @@ export async function requireClinicAccess(request: NextRequest): Promise<ClinicS
   const payload: JWTPayload | null = await verifyToken(token);
   if (!payload) return null;
 
-  return {
+  const session = {
     userId: payload.userId,
     role: payload.role,
     clinicId: payload.clinicId,
     doctorId: payload.doctorId,
   };
+
+  if (session.clinicId && session.role !== 'SUPER_ADMIN') {
+    const clinic = await prisma.clinic.findUnique({
+      where: { id: session.clinicId },
+      select: { isActive: true, planExpiresAt: true }
+    });
+
+    if (!clinic || !clinic.isActive) {
+      return null; // Will result in 401 Unauthorized
+    }
+
+    // Grace period: 7 days after planExpiresAt
+    if (clinic.planExpiresAt) {
+      const graceEnd = new Date(clinic.planExpiresAt.getTime() + 7 * 24 * 60 * 60 * 1000);
+      if (new Date() > graceEnd) {
+        return null;
+      }
+    }
+  }
+
+  return session;
 }
 
 /**

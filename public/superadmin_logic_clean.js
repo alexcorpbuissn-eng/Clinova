@@ -35,6 +35,7 @@ function switchTab(tabId) {
 
     if (tabId === 'dashboard') loadStats();
     if (tabId === 'clinics') loadClinics();
+    if (tabId === 'billing') loadBilling();
 }
 
 async function handleLogin(e) {
@@ -129,6 +130,117 @@ async function updateClinic(id, field, value) {
     } catch (err) {
         alert('Failed to update: ' + err.message);
         loadClinics();
+    }
+}
+
+async function loadBilling() {
+    const container = document.getElementById('billing-container');
+    container.innerHTML = '<div class="col-span-full text-center py-4">Loading billing data...</div>';
+    try {
+        const { clinics } = await apiCall('/api/superadmin/billing');
+        container.innerHTML = clinics.map(c => {
+            const badgeClass = c.plan === 'TRIAL' ? 'bg-surface-variant text-on-surface-variant' :
+                               c.plan === 'BASIC' ? 'bg-primary-container text-on-primary-container' :
+                               c.plan === 'PRO' ? 'bg-tertiary-container text-on-tertiary-container' :
+                               'bg-[#FFD700] text-black'; 
+            
+            const docStr = c.usage.doctors.max === '∞' ? `${c.usage.doctors.used} / ∞` : `${c.usage.doctors.used} / ${c.usage.doctors.max}`;
+            const apptStr = c.usage.appointments.max === '∞' ? `${c.usage.appointments.used} / ∞` : `${c.usage.appointments.used} / ${c.usage.appointments.max}`;
+            
+            const expDate = c.usage.planExpiresAt ? new Date(c.usage.planExpiresAt) : null;
+            const daysLeft = expDate ? Math.ceil((expDate - new Date()) / (1000 * 60 * 60 * 24)) : Infinity;
+            const dateStr = expDate ? expDate.toLocaleDateString() : 'No expiry';
+            const dateColor = daysLeft <= 7 ? 'text-error font-bold' : 'text-on-surface';
+
+            return `
+            <div class="bg-surface rounded-2xl p-6 border border-outline-variant shadow-sm flex flex-col gap-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-lg font-bold">`+c.name+`</h3>
+                        <div class="text-xs text-on-surface-variant font-mono mt-1">`+c.slug+`</div>
+                    </div>
+                    <span class="px-2 py-1 text-xs font-bold rounded `+badgeClass+`">`+c.usage.planLabel+`</span>
+                </div>
+
+                <div class="flex flex-col gap-2 mt-2">
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-on-surface-variant">Doctors</span>
+                            <span class="font-medium">`+docStr+`</span>
+                        </div>
+                        <div class="h-2 w-full bg-surface-variant rounded-full overflow-hidden">
+                            <div class="h-full bg-primary" style="width: `+c.usage.doctors.pct+`%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-on-surface-variant">Appointments (This month)</span>
+                            <span class="font-medium">`+apptStr+`</span>
+                        </div>
+                        <div class="h-2 w-full bg-surface-variant rounded-full overflow-hidden">
+                            <div class="h-full bg-primary" style="width: `+c.usage.appointments.pct+`%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center mt-2 border-t border-outline-variant/30 pt-4">
+                    <div class="text-sm">
+                        <span class="text-on-surface-variant">Expires:</span> 
+                        <span class="`+dateColor+`">`+dateStr+` `+(daysLeft <= 7 && daysLeft >= 0 ? '('+daysLeft+' days)' : '')+`</span>
+                    </div>
+                    
+                    <div class="flex items-center gap-2">
+                        <select onchange="updateClinicPlan('`+c.id+`', this.value)" class="text-sm rounded border border-outline-variant px-2 py-2 bg-surface outline-none focus:border-primary">
+                            <option value="">Upgrade...</option>
+                            <option value="BASIC">To BASIC</option>
+                            <option value="PRO">To PRO</option>
+                            <option value="ENTERPRISE">To ENTERPRISE</option>
+                        </select>
+                        <button onclick="extendPlan('`+c.id+`', '`+(c.usage.planExpiresAt || '')+`')" class="bg-secondary text-on-secondary px-4 py-2 rounded-full text-sm font-medium hover:bg-secondary/90 transition-colors">
+                            Extend 30 Days
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    } catch (err) {
+        container.innerHTML = '<div class="col-span-full text-center py-4 text-error">'+err.message+'</div>';
+    }
+}
+
+async function updateClinicPlan(id, newPlan) {
+    if (!newPlan) return;
+    if (!confirm('Are you sure you want to change the plan to '+newPlan+'?')) return;
+    try {
+        await apiCall('/api/superadmin/clinics/' + id, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ plan: newPlan })
+        });
+        loadBilling();
+    } catch (err) {
+        alert('Failed to update plan: ' + err.message);
+    }
+}
+
+async function extendPlan(id, currentExpiry) {
+    let baseDate = currentExpiry ? new Date(currentExpiry) : new Date();
+    if (baseDate < new Date()) baseDate = new Date();
+    
+    const newDate = new Date(baseDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+    
+    if (!confirm('Extend plan by 30 days? New expiry: ' + newDate.toLocaleDateString())) return;
+    
+    try {
+        await apiCall('/api/superadmin/clinics/' + id, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ planExpiresAt: newDate.toISOString() })
+        });
+        loadBilling();
+    } catch (err) {
+        alert('Failed to extend plan: ' + err.message);
     }
 }
 

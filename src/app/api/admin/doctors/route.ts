@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { requireClinicAccess } from '@/lib/clinic-guard';
 import { generateSlotsForDoctor } from '@/lib/slot-generator';
+import { checkDoctorLimit } from '@/lib/plan-limits';
 
 
 
@@ -25,6 +26,11 @@ export async function POST(request: NextRequest) {
   const session = await requireClinicAccess(request);
   if (!session || session.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  const doctorLimitError = await checkDoctorLimit(session.clinicId as string);
+  if (doctorLimitError) {
+    return NextResponse.json({ error: doctorLimitError }, { status: 403 });
   }
 
   try {

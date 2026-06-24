@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { requireClinicAccess } from '@/lib/clinic-guard';
 import { sendGroupNotification, sendPatientConfirmation } from '@/lib/telegram';
+import { checkAppointmentLimit } from '@/lib/plan-limits';
 
 async function requireDoctorOrAdmin(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
@@ -25,6 +26,11 @@ export async function POST(req: NextRequest) {
 
   if (!slotId || !procedureId || !patientId) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+  }
+
+  const apptLimitError = await checkAppointmentLimit(session.clinicId as string);
+  if (apptLimitError) {
+    return NextResponse.json({ error: apptLimitError }, { status: 403 });
   }
 
   try {

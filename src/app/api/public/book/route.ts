@@ -22,6 +22,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { v4 as uuidv4 } from 'uuid';
 import { sendGroupNotification, sendPatientConfirmation } from '@/lib/telegram';
+import { checkAppointmentLimit } from '@/lib/plan-limits';
 
 export async function POST(req: NextRequest) {
   let body: any;
@@ -85,6 +86,11 @@ export async function POST(req: NextRequest) {
       }
 
       const slot = slots[0];
+
+      const apptLimitError = await checkAppointmentLimit(slot.clinicId);
+      if (apptLimitError) {
+        throw new Error('PLAN_LIMIT_REACHED');
+      }
 
       // Fetch procedure to check duration fits in slot
       const procedure = await tx.procedure.findUnique({
@@ -221,6 +227,7 @@ export async function POST(req: NextRequest) {
       DUPLICATE_BOOKING: 'Siz ushbu sanaga allaqachon qabulga yozilgansiz. Bir kunda faqat bitta qabulga yozilish mumkin.',
       PROCEDURE_TOO_LONG: 'Tanlangan protsedura uchun bu vaqt yetarli emas.',
       PROCEDURE_NOT_FOUND: 'Protsedura topilmadi.',
+      PLAN_LIMIT_REACHED: 'Klinika oylik qabul limitiga yetgan. Iltimos, klinika bilan bog\'laning.',
     };
 
     const known = msg[err.message];

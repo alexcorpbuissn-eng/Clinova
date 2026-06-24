@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { requireClinicAccess } from '@/lib/clinic-guard';
+import { checkAppointmentLimit } from '@/lib/plan-limits';
 import { v4 as uuidv4 } from 'uuid';
 
 export async function GET(request: NextRequest) {
@@ -51,6 +52,11 @@ export async function POST(request: NextRequest) {
 
   if (!slotId || !procedureId || !patientPhone || (!patientName && !reqFirstName)) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+  }
+
+  const apptLimitError = await checkAppointmentLimit(session.clinicId as string);
+  if (apptLimitError) {
+    return NextResponse.json({ error: apptLimitError }, { status: 403 });
   }
 
   // 1. Create or Find Patient
