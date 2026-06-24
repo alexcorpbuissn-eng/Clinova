@@ -263,7 +263,9 @@
         const data = await res.json();
         if (res.ok && (data.success || data.action)) {
           if (data.action === 'deep_link') {
-            errEl.innerHTML = `Avval bot orqali ro'yxatdan o'ting: <br><a href="${data.deepLink}" target="_blank" style="color:var(--teal); text-decoration:underline; margin-top:5px; display:inline-block">Botga o'tish</a>`;
+            errEl.innerHTML = `Bot orqali kodni oling: <a href="${data.deepLink}" target="_blank" style="color:var(--teal); text-decoration:underline; margin-top:5px; display:inline-block">Botga o'tish</a> — so'ng kodni quyida kiriting.`;
+            document.getElementById('phone-form').style.display = 'none';
+            document.getElementById('otp-form').style.display = 'block';
           } else {
             document.getElementById('phone-form').style.display = 'none';
             document.getElementById('otp-form').style.display = 'block';
