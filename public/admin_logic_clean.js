@@ -215,7 +215,7 @@
     async function verifyAuthOnLoad() {
       try {
         const token = localStorage.getItem('admin_token');
-        if (!token) return; // no token, stay on login screen
+        if (!token) { showLogin(); return; }
         const res = await fetch('/api/admin/appointments', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -223,6 +223,7 @@
           showDashboard();
         } else {
           localStorage.removeItem('admin_token');
+          showLogin();
         }
       } catch (err) {
         console.error('Auth verification failed', err);
