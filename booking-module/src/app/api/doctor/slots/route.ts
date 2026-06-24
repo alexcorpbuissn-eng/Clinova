@@ -1,23 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
-
-async function requireDoctorOrAdmin(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const payload = await verifyToken(authHeader.split(' ')[1]);
-  if (!payload) return null;
-  if (payload.role === 'DOCTOR' || payload.role === 'ADMIN') return payload;
-  return null;
-}
+import { requireClinicAccess } from '@/lib/clinic-guard';
 
 // GET /api/doctor/slots — Fetch doctor's own upcoming slots
 export async function GET(request: NextRequest) {
-  const payload = await requireDoctorOrAdmin(request);
-  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'DOCTOR' && session.role !== 'ADMIN')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
-  let doctorId = payload.doctorId as string;
-  if (payload.role === 'ADMIN') {
+  let doctorId = session.doctorId as string;
+  if (session.role === 'ADMIN') {
     const qDocId = request.nextUrl.searchParams.get('doctorId');
     if (qDocId) doctorId = qDocId;
   }
@@ -33,7 +26,7 @@ export async function GET(request: NextRequest) {
   todayStart.setUTCHours(todayStart.getUTCHours() - 5);
 
   const slots = await prisma.slot.findMany({
-    where: { doctorId, startTime: { gte: todayStart } },
+    where: { clinicId: session.clinicId, doctorId, startTime: { gte: todayStart } },
     include: {
       appointment: {
         select: {
@@ -56,16 +49,15 @@ export async function GET(request: NextRequest) {
 
 // POST /api/doctor/slots — Create one or multiple availability slots
 export async function POST(request: NextRequest) {
-  const payload = await requireDoctorOrAdmin(request);
-  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  if (payload.role !== 'ADMIN') {
+  const session = await requireClinicAccess(request);
+  if (!session || session.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Faqatgina administrator jadvalni o\'zgartirishi mumkin' }, { status: 403 });
   }
 
   const body = await request.json();
   
-  let doctorId = payload.doctorId as string;
-  if (payload.role === 'ADMIN') {
+  let doctorId = session.doctorId as string;
+  if (session.role === 'ADMIN') {
     if (body.doctorId) doctorId = body.doctorId;
   }
 
@@ -86,7 +78,7 @@ export async function POST(request: NextRequest) {
   for (const s of slotsToCreate) {
     try {
       const slot = await prisma.slot.create({
-        data: { doctorId, startTime: new Date(s.startTime), duration: Number(s.duration) },
+        data: { doctorId, clinicId: session.clinicId as string, startTime: new Date(s.startTime), duration: Number(s.duration) },
       });
       created.push(slot);
     } catch (e: any) {
@@ -103,24 +95,24 @@ export async function POST(request: NextRequest) {
 
 // DELETE /api/doctor/slots — Delete a free (unbooked) slot
 export async function DELETE(request: NextRequest) {
-  const payload = await requireDoctorOrAdmin(request);
-  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  if (payload.role !== 'ADMIN') {
+  const session = await requireClinicAccess(request);
+  if (!session || session.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Faqatgina administrator jadvalni o\'zgartirishi mumkin' }, { status: 403 });
   }
 
   const body = await request.json();
   const { slotId } = body;
   
-  let doctorId = payload.doctorId as string;
-  if (payload.role === 'ADMIN') {
+  let doctorId = session.doctorId as string;
+  if (session.role === 'ADMIN') {
     if (body.doctorId) doctorId = body.doctorId;
   }
 
   const slot = await prisma.slot.findUnique({ where: { id: slotId } });
 
-  if (!slot || (payload.role !== 'ADMIN' && slot.doctorId !== doctorId)) {
-    return NextResponse.json({ error: 'Topilmadi' }, { status: 404 });
+  if (!slot) return NextResponse.json({ error: 'Topilmadi' }, { status: 404 });
+  if (slot.clinicId !== session.clinicId) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   if (!slot.isAvailable) {

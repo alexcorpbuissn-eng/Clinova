@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
 
-async function requireStaff(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const payload = await verifyToken(authHeader.split(' ')[1]);
-  if (payload?.role === 'ADMIN' || payload?.role === 'RECEPTION') return payload;
-  return null;
-}
+import { requireClinicAccess } from '@/lib/clinic-guard';
 
 // GET /api/admin/visits — list visits (optional ?doctorId=&limit=)
 export async function GET(request: NextRequest) {
-  if (!await requireStaff(request)) {
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -21,7 +15,10 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(searchParams.get('limit') || '50');
 
   const visits = await prisma.visit.findMany({
-    where: doctorId ? { doctorId } : undefined,
+    where: {
+      clinicId: session.clinicId,
+      ...(doctorId ? { doctorId } : {})
+    },
     include: { doctor: { select: { firstName: true, lastName: true, specialty: true } } },
     orderBy: { startTime: 'desc' },
     take: limit,
@@ -32,7 +29,8 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/visits — log a new visit
 export async function POST(request: NextRequest) {
-  if (!await requireStaff(request)) {
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -61,6 +59,7 @@ export async function POST(request: NextRequest) {
       paidAmount: status === 'IN_PROGRESS' ? 0 : parseInt(price),
       paymentMethod: status === 'IN_PROGRESS' ? null : (paymentMethod || 'CASH'),
       note: note ? String(note).trim() : null,
+      clinicId: session.clinicId as string,
     },
     include: { doctor: { select: { firstName: true, lastName: true } } },
   });

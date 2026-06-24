@@ -1,21 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
-
-// ── Auth helper ──────────────────────────────────────────────────────────────
-async function requireAdmin(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const payload = await verifyToken(authHeader.split(' ')[1]);
-  if (payload?.role !== 'ADMIN') return null;
-  return payload;
-}
+import { requireClinicAccess } from '@/lib/clinic-guard';
 
 // ── GET /api/admin/slots?doctorId=xxx&from=ISO&to=ISO ────────────────────────
 // Returns all slots for a doctor in a date range (defaults to next 60 days)
 export async function GET(request: NextRequest) {
-  const payload = await requireAdmin(request);
-  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   const { searchParams } = new URL(request.url);
   const doctorId = searchParams.get('doctorId');
@@ -29,6 +22,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const whereClause: any = {
+      clinicId: session.clinicId,
       startTime: { gte: from, lte: to },
     };
     if (doctorId) {
@@ -59,8 +53,8 @@ export async function GET(request: NextRequest) {
 // Single slot: { doctorId, startTime, duration }
 // Bulk slots:  { doctorId, days:[0-6], startHour, endHour, interval, fromDate, toDate }
 export async function POST(request: NextRequest) {
-  const payload = await requireAdmin(request);
-  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const session = await requireClinicAccess(request);
+  if (!session || session.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   let body: any;
   try { body = await request.json(); }
@@ -72,6 +66,9 @@ export async function POST(request: NextRequest) {
   // ── Verify doctor exists ──
   const doctor = await prisma.doctor.findUnique({ where: { id: doctorId } });
   if (!doctor) return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
+  if (doctor.clinicId !== session.clinicId) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   // ── BULK MODE ──────────────────────────────────────────────────────────────
   if (body.bulk === true) {
@@ -117,7 +114,7 @@ export async function POST(request: NextRequest) {
     const existingSet = new Set(existing.map((s) => s.startTime.toISOString()));
 
     // Generate candidate slots
-    const toCreate: { doctorId: string; startTime: Date; duration: number }[] = [];
+    const toCreate: { doctorId: string; clinicId: string; startTime: Date; duration: number }[] = [];
     const cursor = new Date(from);
     cursor.setUTCHours(0, 0, 0, 0);
 
@@ -156,7 +153,7 @@ export async function POST(request: NextRequest) {
           if (slotEndHour > endHour || (slotEndHour === endHour && slotEndMin > 0)) break;
 
           if (!existingSet.has(slotStart.toISOString())) {
-            toCreate.push({ doctorId, startTime: slotStart, duration: interval });
+            toCreate.push({ doctorId, clinicId: doctor.clinicId, startTime: slotStart, duration: interval });
             existingSet.add(slotStart.toISOString()); // prevent self-duplication in same batch
           }
 
@@ -197,7 +194,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const slot = await prisma.slot.create({
-      data: { doctorId, startTime: start, duration },
+      data: { doctorId, clinicId: doctor.clinicId, startTime: start, duration },
     });
     return NextResponse.json({ success: true, slot });
   } catch (err: any) {

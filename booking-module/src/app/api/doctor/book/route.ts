@@ -1,29 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
+import { requireClinicAccess } from '@/lib/clinic-guard';
 import { sendGroupNotification, sendPatientConfirmation } from '@/lib/telegram';
-
-async function requireDoctorOrAdmin(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const payload = await verifyToken(authHeader.split(' ')[1]);
-  if (!payload) return null;
-  if (payload.role === 'DOCTOR' || payload.role === 'ADMIN') return payload;
-  return null;
-}
+import { checkAppointmentLimit } from '@/lib/plan-limits';
 
 // POST /api/doctor/book
 // Books an active, available slot for an existing patient.
 export async function POST(req: NextRequest) {
-  const payload = await requireDoctorOrAdmin(req);
-  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  let doctorId = payload.doctorId as string;
+  const session = await requireClinicAccess(req);
+  if (!session || (session.role !== 'DOCTOR' && session.role !== 'ADMIN')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  let doctorId = session.doctorId as string;
   const body = await req.json();
   const { slotId, procedureId, patientId, description } = body;
 
   if (!slotId || !procedureId || !patientId) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+  }
+
+  const apptLimitError = await checkAppointmentLimit(session.clinicId as string);
+  if (apptLimitError) {
+    return NextResponse.json({ error: apptLimitError }, { status: 403 });
   }
 
   try {
@@ -42,7 +40,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Check slot ownership if logged in as doctor
-      if (payload.role !== 'ADMIN' && slot.doctorId !== doctorId) {
+      if (session.role !== 'ADMIN' && slot.doctorId !== doctorId) {
         throw new Error('FORBIDDEN_SLOT');
       }
 
@@ -100,6 +98,7 @@ export async function POST(req: NextRequest) {
           patientLast: patient.lastName,
           patientPhone: patient.phone,
           description: description ? String(description).trim() : null,
+          clinicId: session.clinicId as string,
         },
         include: {
           slot: true,
@@ -112,11 +111,26 @@ export async function POST(req: NextRequest) {
       return appointment;
     });
 
-    // Send notifications outside transaction
+    const clinic = await prisma.clinic.findUnique({ where: { id: result.clinicId }, select: { name: true } });
+
+    // Send notifications (fire and forget)
     try {
-      await sendGroupNotification(result);
+      if (body.notifyGroup !== false) {
+        sendGroupNotification({
+          ...result,
+          clinicId: result.clinicId,
+          clinicName: clinic?.name || 'Klinika',
+        }).catch(console.error);
+      }
       if (result.patient.telegramChatId) {
-        await sendPatientConfirmation(result);
+        await sendPatientConfirmation({
+          chatId: result.patient.telegramChatId,
+          doctorName: `${result.doctor.firstName} ${result.doctor.lastName}`,
+          procedureName: result.procedure.name,
+          appointmentTime: result.slot.startTime,
+          clinicId: result.clinicId,
+          clinicName: clinic?.name || 'Klinika',
+        });
       }
     } catch (err) {
       console.error('Error sending doctor booking notifications:', err);

@@ -1,28 +1,36 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
-import { generateSlotsForDoctor } from '@/lib/slot-generator';
 
-async function requireAdmin(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const payload = await verifyToken(authHeader.split(' ')[1]);
-  return payload?.role === 'ADMIN' ? payload : null;
-}
+import { requireClinicAccess } from '@/lib/clinic-guard';
+import { generateSlotsForDoctor } from '@/lib/slot-generator';
+import { checkDoctorLimit } from '@/lib/plan-limits';
+
+
 
 // GET /api/admin/doctors — List all doctors including inactive
 export async function GET(request: NextRequest) {
-  if (!await requireAdmin(request)) {
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
-  const doctors = await prisma.doctor.findMany({ orderBy: { createdAt: 'desc' } });
+
+  const doctors = await prisma.doctor.findMany({
+    where: { clinicId: session.clinicId },
+    orderBy: { createdAt: 'desc' },
+  });
   return NextResponse.json({ success: true, doctors });
 }
 
 // POST /api/admin/doctors — Add a new doctor
 export async function POST(request: NextRequest) {
-  if (!await requireAdmin(request)) {
+  const session = await requireClinicAccess(request);
+  if (!session || session.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  const doctorLimitError = await checkDoctorLimit(session.clinicId as string);
+  if (doctorLimitError) {
+    return NextResponse.json({ error: doctorLimitError }, { status: 403 });
   }
 
   try {
@@ -62,12 +70,13 @@ export async function POST(request: NextRequest) {
         workEndTime: workEndTime || "18:00",
         breakStartTime: breakStartTime || "13:00",
         breakEndTime: breakEndTime || "14:00",
-        workingDays: workingDays || [1, 2, 3, 4, 5, 6]
+        workingDays: workingDays || [1, 2, 3, 4, 5, 6],
+        clinicId: session.clinicId as string,
       },
     });
 
     // Auto-generate initial slots for the new doctor
-    await generateSlotsForDoctor(doctor.id);
+    await generateSlotsForDoctor(doctor.id, doctor.clinicId);
 
     return NextResponse.json({ success: true, doctor, chatFound: !!telegramChatId }, { status: 201 });
   } catch (error: any) {

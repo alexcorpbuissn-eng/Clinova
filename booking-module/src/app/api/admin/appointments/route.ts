@@ -1,29 +1,20 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
+
+import { requireClinicAccess } from '@/lib/clinic-guard';
+import { checkAppointmentLimit } from '@/lib/plan-limits';
 import { v4 as uuidv4 } from 'uuid';
 
-async function requireStaff(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
-  const token = authHeader.split(' ')[1];
-  const payload = await verifyToken(token);
-  if (payload && (payload.role === 'ADMIN' || payload.role === 'RECEPTION')) {
-    return payload;
-  }
-  return null;
-}
-
-// GET /api/admin/appointments — All appointments across all doctors
 export async function GET(request: NextRequest) {
-  if (!await requireStaff(request)) {
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const { searchParams } = new URL(request.url);
   const since = searchParams.get('since');
 
-  const whereClause: any = {};
+  const whereClause: any = { clinicId: session.clinicId };
   if (since) {
     whereClause.createdAt = { gt: new Date(since) };
   }
@@ -45,7 +36,8 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/appointments — Book/Schedule a new appointment
 export async function POST(request: NextRequest) {
-  if (!await requireStaff(request)) {
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -60,6 +52,11 @@ export async function POST(request: NextRequest) {
 
   if (!slotId || !procedureId || !patientPhone || (!patientName && !reqFirstName)) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+  }
+
+  const apptLimitError = await checkAppointmentLimit(session.clinicId as string);
+  if (apptLimitError) {
+    return NextResponse.json({ error: apptLimitError }, { status: 403 });
   }
 
   // 1. Create or Find Patient
@@ -182,6 +179,7 @@ export async function POST(request: NextRequest) {
           patientPhone: cleanPhone,
           description: note?.trim() || null,
           cancelToken: uuidv4(),
+          clinicId: session.clinicId as string,
         },
         include: { slot: true, procedure: true, doctor: true, patient: true },
       });

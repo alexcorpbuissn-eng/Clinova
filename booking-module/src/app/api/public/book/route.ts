@@ -22,6 +22,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { v4 as uuidv4 } from 'uuid';
 import { sendGroupNotification, sendPatientConfirmation } from '@/lib/telegram';
+import { checkAppointmentLimit } from '@/lib/plan-limits';
 
 export async function POST(req: NextRequest) {
   let body: any;
@@ -85,6 +86,11 @@ export async function POST(req: NextRequest) {
       }
 
       const slot = slots[0];
+
+      const apptLimitError = await checkAppointmentLimit(slot.clinicId);
+      if (apptLimitError) {
+        throw new Error('PLAN_LIMIT_REACHED');
+      }
 
       // Fetch procedure to check duration fits in slot
       const procedure = await tx.procedure.findUnique({
@@ -161,6 +167,7 @@ export async function POST(req: NextRequest) {
           patientPhone: phone,
           description: description?.trim().slice(0, 500) || null,
           cancelToken: uuidv4(),
+          clinicId: slot.clinicId,
         },
         include: { slot: true, procedure: true, doctor: true, patient: true },
       });
@@ -175,6 +182,8 @@ export async function POST(req: NextRequest) {
       return appointment;
     });
 
+    const clinic = await prisma.clinic.findUnique({ where: { id: result.clinicId }, select: { name: true } });
+
     // Notify clinic group — fire and forget
     sendGroupNotification({
       patientFirst: firstName,
@@ -185,6 +194,8 @@ export async function POST(req: NextRequest) {
       appointmentTime: result.slot.startTime,
       description: result.description,
       telegramChatId: patient.telegramChatId,
+      clinicId: result.clinicId,
+      clinicName: clinic?.name || 'Klinika',
     }).catch(console.error);
 
     // Notify patient — fire and forget
@@ -194,6 +205,8 @@ export async function POST(req: NextRequest) {
         doctorName: `${result.doctor.firstName} ${result.doctor.lastName}`,
         procedureName: result.procedure.name,
         appointmentTime: result.slot.startTime,
+        clinicId: result.clinicId,
+        clinicName: clinic?.name || 'Klinika',
       }).catch(console.error);
     }
 
@@ -214,6 +227,7 @@ export async function POST(req: NextRequest) {
       DUPLICATE_BOOKING: 'Siz ushbu sanaga allaqachon qabulga yozilgansiz. Bir kunda faqat bitta qabulga yozilish mumkin.',
       PROCEDURE_TOO_LONG: 'Tanlangan protsedura uchun bu vaqt yetarli emas.',
       PROCEDURE_NOT_FOUND: 'Protsedura topilmadi.',
+      PLAN_LIMIT_REACHED: 'Klinika oylik qabul limitiga yetgan. Iltimos, klinika bilan bog\'laning.',
     };
 
     const known = msg[err.message];

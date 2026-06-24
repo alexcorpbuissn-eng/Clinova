@@ -1,17 +1,17 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { requireClinicAccess } from '@/lib/clinic-guard';
 import { prisma } from '@/lib/prisma';
-import { sendGroupNotification, toTashkentDate, toTashkentTime } from '@/lib/telegram';
-import TelegramBot from 'node-telegram-bot-api';
-
-function getBot() {
-  return new TelegramBot(process.env.TELEGRAM_BOT_TOKEN!, { polling: false });
-}
+import { sendGroupNotification, toTashkentDate, toTashkentTime, getClinicBot } from '@/lib/telegram';
 
 // PATCH /api/doctor/appointments/:id — Mark COMPLETED or CANCELLED
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const doctorId = request.headers.get('x-doctor-id') ?? '';
-  if (!doctorId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  
+  const session = await requireClinicAccess(request as any);
+  if (!session || session.role !== 'DOCTOR') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const doctorId = session.doctorId as string;
 
   const { status } = await request.json();
   if (!['COMPLETED', 'CANCELLED'].includes(status)) {
@@ -19,7 +19,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 
   const appointment = await prisma.appointment.findFirst({
-    where: { id, doctorId },
+    where: { id, doctorId, clinicId: session.clinicId },
     include: { slot: true, doctor: true, patient: true, procedure: true },
   });
 
@@ -55,7 +55,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const doctorName = `${appointment.doctor.firstName} ${appointment.doctor.lastName}`;
 
     if (chatId) {
-      const bot = getBot();
+      const bot = await getClinicBot(appointment.clinicId);
       const text =
         `❌ *Qabul bekor qilindi*\n\n` +
         `Hurmatli *${appointment.patientFirst}*,\n` +
@@ -70,6 +70,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     // Also notify the clinic group
     try {
+      const clinic = await prisma.clinic.findUnique({ where: { id: appointment.clinicId }, select: { name: true } });
       await sendGroupNotification({
         patientFirst: appointment.patientFirst ?? '',
         patientLast: appointment.patientLast ?? '',
@@ -78,6 +79,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         procedureName: 'Bekor qilindi',
         appointmentTime: appointment.slot.startTime,
         description: `❌ Shifokor tomonidan bekor qilindi`,
+        clinicId: appointment.clinicId,
+        clinicName: clinic?.name || 'Klinika',
       });
     } catch(e) {
       console.error(e);
