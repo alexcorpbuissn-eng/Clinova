@@ -215,7 +215,10 @@
     async function verifyAuthOnLoad() {
       try {
         const token = localStorage.getItem('admin_token');
-        if (!token) { showLogin(); return; }
+        if (!token) {
+          document.getElementById('login-screen').style.display = 'flex';
+          return;
+        }
         const res = await fetch('/api/admin/appointments', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -223,7 +226,7 @@
           showDashboard();
         } else {
           localStorage.removeItem('admin_token');
-          showLogin();
+          document.getElementById('login-screen').style.display = 'flex';
         }
       } catch (err) {
         console.error('Auth verification failed', err);
