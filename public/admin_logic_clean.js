@@ -301,6 +301,20 @@
         const data = await res.json();
         if (res.ok && data.success) {
           if (data.token) {
+            if (data.role === 'SUPER_ADMIN') {
+              localStorage.setItem('superadmin_token', data.token);
+              window.location.href = '/superadmin.html';
+              return;
+            } else if (data.role === 'DOCTOR') {
+              localStorage.setItem('doctor_token', data.token);
+              window.location.href = '/doctor.html';
+              return;
+            } else if (data.role === 'RECEPTION') {
+              localStorage.setItem('reception_token', data.token);
+              window.location.href = '/reception.html';
+              return;
+            }
+            // ADMIN role
             localStorage.setItem('admin_token', data.token);
             showDashboard();
           } else {
