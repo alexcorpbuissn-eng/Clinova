@@ -698,6 +698,19 @@ input:checked + .slider:before { transform: translateX(20px); }
       });
       const data = await res.json();
       if (res.ok && data.success) {
+        if (data.role === 'SUPER_ADMIN') {
+          localStorage.setItem('superadmin_token', data.token);
+          window.location.href = '/superadmin.html';
+          return;
+        } else if (data.role === 'ADMIN') {
+          localStorage.setItem('admin_token', data.token);
+          window.location.href = '/admin.html';
+          return;
+        } else if (data.role === 'RECEPTION') {
+          localStorage.setItem('reception_token', data.token);
+          window.location.href = '/reception.html';
+          return;
+        }
         doctorToken = data.token;
         doctorInfo = data.doctor;
         userRole = data.role;
