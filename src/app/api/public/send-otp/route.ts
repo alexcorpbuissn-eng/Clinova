@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     select: { id: true, isVerified: true, telegramChatId: true },
   });
 
-  if (existing?.isVerified && existing.telegramChatId) {
+  if (existing?.telegramChatId) {
     // Returning user! We already have their chatId, so we can send the OTP directly!
     // Wait, generating OTP and sending it. We need a helper from telegram.ts.
     // I will dynamically import it to avoid top-level issues if bot token is missing.

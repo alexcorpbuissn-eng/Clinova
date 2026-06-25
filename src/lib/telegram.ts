@@ -78,6 +78,12 @@ export async function processStartCommand(
 ): Promise<void> {
   const telegramPhone = normalisePhone(rawPhone);
 
+  // Clear chatId from any other patient record to prevent unique constraint violation
+  await prisma.patient.updateMany({
+    where: { telegramChatId: chatId, telegramPhone: { not: telegramPhone } },
+    data: { telegramChatId: null },
+  });
+
   await prisma.patient.upsert({
     where: { telegramPhone },
     update: { telegramChatId: chatId, telegramUsername: username || null },
