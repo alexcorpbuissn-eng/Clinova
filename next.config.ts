@@ -27,7 +27,8 @@ const nextConfig: NextConfig = {
       { source: '/login', destination: '/login.html' },
       { source: '/profile', destination: '/profile.html' },
       { source: '/my-appointments', destination: '/my-appointments.html' },
-      { source: '/', destination: '/index.html' },
+      { source: '/', destination: '/clinova.html' },
+      { source: '/habibullo-hilola', destination: '/habibullo-hilola.html' },
       { source: '/booking', destination: '/booking.html' },
       { source: '/about', destination: '/about.html' },
       { source: '/services', destination: '/services.html' }
