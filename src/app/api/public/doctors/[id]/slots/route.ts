@@ -1,13 +1,3 @@
-/**
- * GET /api/public/doctors/:id/slots
- *
- * Returns available future slots for a doctor.
- * If procedureId is passed as a query param, filters out slots
- * where the slot duration is shorter than the procedure duration.
- *
- * Example: GET /api/public/doctors/abc/slots?procedureId=xyz
- */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -16,8 +6,23 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const slug = req.nextUrl.searchParams.get('clinic');
   const procedureId = req.nextUrl.searchParams.get('procedureId');
   const customDuration = req.nextUrl.searchParams.get('duration');
+
+  if (!slug) {
+    return NextResponse.json({ success: false, error: 'Missing clinic parameter' }, { status: 400 });
+  }
+
+  // Validate doctor belongs to this clinic
+  const doctor = await prisma.doctor.findUnique({
+    where: { id },
+    include: { clinic: { select: { slug: true } } }
+  });
+  if (!doctor || doctor.clinic.slug !== slug) {
+    return NextResponse.json({ success: false, error: 'Doctor not found in this clinic' }, { status: 403 });
+  }
+
 
   let procedureDuration: number | null = null;
 

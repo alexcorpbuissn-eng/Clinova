@@ -307,6 +307,19 @@
         
 const API = ''; // Relative path for same domain
 
+// ─── Clinic Slug (multi-tenant) ───────────────────────────────────────────────
+const _clinicSlug = new URLSearchParams(window.location.search).get('clinic');
+if (!_clinicSlug) {
+  document.body.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;padding:24px;text-align:center;">
+      <div>
+        <div style="font-size:3rem;margin-bottom:16px;">🏥</div>
+        <h2 style="color:#0f5238;margin-bottom:8px;">Invalid booking link</h2>
+        <p style="color:#555;">Please use the booking link provided by your clinic.</p>
+      </div>
+    </div>`;
+}
+
 // State
 let selDoctor = null, selProc = null, selSlot = null, patientId = null, selDateKey = null, currentSlots = [];
 
@@ -373,7 +386,7 @@ function showToast(msg) {
 let originalVerifiedPhone = '';
 
 if (!localStorage.getItem('patientId')) {
-  window.location.href = 'login.html?return=booking.html';
+  window.location.href = `login.html?return=${encodeURIComponent('booking.html?clinic=' + (_clinicSlug||''))}`;
 } else {
   patientId = localStorage.getItem('patientId');
   if (localStorage.getItem('fFirst')) document.getElementById('fFirst').value = localStorage.getItem('fFirst');
@@ -389,7 +402,15 @@ if (!localStorage.getItem('patientId')) {
 async function loadDoctors() {
   const c = document.getElementById('doc-container');
   try {
-    const {doctors} = await fetch(`${API}/api/public/doctors`).then(r=>r.json());
+    const data = await fetch(`${API}/api/public/doctors?clinic=${_clinicSlug}`).then(r=>r.json());
+    if (!data.success) { c.innerHTML=`<div class="state-msg">${data.error || 'Klinika topilmadi.'}</div>`; return; }
+    const { doctors, clinic: clinicInfo } = data;
+    // Show clinic name in page title and header
+    if (clinicInfo?.name) {
+      document.title = `${clinicInfo.name} - Qabulga yozilish`;
+      const headerEl = document.querySelector('.clinic-name-header');
+      if (headerEl) headerEl.textContent = clinicInfo.name;
+    }
     if (!doctors?.length) { c.innerHTML='<div class="state-msg">Shifokorlar topilmadi.</div>'; return; }
     const g = document.createElement('div'); g.className='doctor-grid';
     
@@ -515,7 +536,7 @@ async function loadProcedures(doctorId, autoSelectProcedureId = null) {
   const ph = document.getElementById('slot-placeholder');
   if (ph) ph.style.display='';
   try {
-    const {procedures} = await fetch(`${API}/api/public/doctors/${doctorId}/procedures`).then(r=>r.json());
+    const {procedures} = await fetch(`${API}/api/public/doctors/${doctorId}/procedures?clinic=${_clinicSlug}`).then(r=>r.json());
     if (!procedures?.length) { c.innerHTML=`<div class="state-msg">Bu shifokor uchun protseduralar yo'q.</div>`; return; }
     const list = document.createElement('div'); list.className='proc-list';
     procedures.forEach(p => {
@@ -569,7 +590,7 @@ async function loadSlots(doctorId, procedureId) {
   if (ph) ph.style.display='none';
   sc.innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
   try {
-    const {slots} = await fetch(`${API}/api/public/doctors/${doctorId}/slots?procedureId=${procedureId}&duration=${selProc.durationMinutes}`).then(r=>r.json());
+    const {slots} = await fetch(`${API}/api/public/doctors/${doctorId}/slots?clinic=${_clinicSlug}&procedureId=${procedureId}&duration=${selProc.durationMinutes}`).then(r=>r.json());
     currentSlots = slots || [];
     renderSlotsForSelectedDay();
   } catch(e) { sc.innerHTML='<div class="state-msg">❌ Xatolik.</div>'; }
