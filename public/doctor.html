@@ -622,9 +622,9 @@ input:checked + .slider:before { transform: translateX(20px); }
 
     try {
       const info = localStorage.getItem('doctor_info');
-      if (info && role) {
+      if (role === 'ADMIN' || (info && role === 'DOCTOR')) {
         doctorToken = t;
-        doctorInfo = JSON.parse(info);
+        if (info) doctorInfo = JSON.parse(info);
         userRole = role;
         currentDoctorId = doctorInfo ? doctorInfo.id : null;
         showApp();
