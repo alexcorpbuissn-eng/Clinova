@@ -92,23 +92,23 @@ const globalStyles = `
 const headerHtml = `
 <header class="sticky top-0 z-50 bg-surface shadow-sm relative">
   <div class="flex justify-between items-center px-margin-mobile md:px-margin-desktop w-full max-w-container-max mx-auto h-16">
-    <a href="index.html" class="font-headline-md text-headline-md font-bold text-primary flex items-center gap-2">
+    <a href="/habibullo-hilola" class="font-headline-md text-headline-md font-bold text-primary flex items-center gap-2">
       <span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">medical_services</span>
       Habibullo-Hilola
     </a>
     
     <nav class="hidden md:flex items-center gap-8 h-full">
-      <a class="h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors" href="index.html">Asosiy</a>
-      <a class="h-full flex items-center text-primary font-bold border-b-2 border-primary font-label-md text-label-md hover:text-primary transition-colors" href="services.html">Xizmatlar</a>
-      <a class="h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors" href="about.html">Biz haqimizda</a>
-      <a class="h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors" href="index.html#faq">FAQ</a>
+      <a class="h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors" href="/habibullo-hilola">Asosiy</a>
+      <a class="h-full flex items-center text-primary font-bold border-b-2 border-primary font-label-md text-label-md hover:text-primary transition-colors" href="/habibullo-hilola/services">Xizmatlar</a>
+      <a class="h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors" href="/habibullo-hilola/about">Biz haqimizda</a>
+      <a class="h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors" href="/habibullo-hilola#faq">FAQ</a>
     </nav>
     
     <div class="hidden md:flex gap-3">
       <a href="profile.html" class="bg-surface-container hover:bg-surface-container-high text-primary font-label-md text-label-md px-6 py-2.5 rounded-full transition-all hover:scale-95 border border-outline-variant inline-block text-center flex items-center gap-2">
         <span class="material-symbols-outlined text-[20px]">person</span> Kabinet
       </a>
-      <a href="booking.html" class="bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-label-md text-label-md px-6 py-2.5 rounded-full transition-all hover:scale-95 shadow-[0_4px_14px_rgba(45,106,79,0.2)] inline-block text-center flex items-center">
+      <a href="/booking?clinic=habibullo-hilola" class="bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-label-md text-label-md px-6 py-2.5 rounded-full transition-all hover:scale-95 shadow-[0_4px_14px_rgba(45,106,79,0.2)] inline-block text-center flex items-center">
         Yozilish
       </a>
     </div>
@@ -121,15 +121,15 @@ const headerHtml = `
 
   <!-- Mobile Dropdown Menu -->
   <div id="mobile-menu" class="absolute top-full left-0 w-full bg-surface border-t border-outline-variant/30 shadow-md flex flex-col p-4 gap-4 z-40" style="display:none;">
-    <a href="index.html" class="font-label-md text-on-surface-variant">Asosiy</a>
-    <a href="services.html" class="font-label-md text-primary font-bold">Xizmatlar</a>
-    <a href="about.html" class="font-label-md text-on-surface-variant">Biz haqimizda</a>
-    <a href="index.html#faq" class="font-label-md text-on-surface-variant">FAQ</a>
+    <a href="/habibullo-hilola" class="font-label-md text-on-surface-variant">Asosiy</a>
+    <a href="/habibullo-hilola/services" class="font-label-md text-primary font-bold">Xizmatlar</a>
+    <a href="/habibullo-hilola/about" class="font-label-md text-on-surface-variant">Biz haqimizda</a>
+    <a href="/habibullo-hilola#faq" class="font-label-md text-on-surface-variant">FAQ</a>
     <div class="flex flex-col gap-2 mt-2">
       <a href="profile.html" class="bg-surface-container text-primary border border-outline-variant font-label-md text-center py-3 rounded-full flex items-center justify-center gap-2">
         <span class="material-symbols-outlined text-[20px]">person</span> Shaxsiy kabinet
       </a>
-      <a href="booking.html" class="bg-primary text-on-primary font-label-md text-center py-3 rounded-full shadow-[0_4px_14px_rgba(45,106,79,0.2)]">Yozilish</a>
+      <a href="/booking?clinic=habibullo-hilola" class="bg-primary text-on-primary font-label-md text-center py-3 rounded-full shadow-[0_4px_14px_rgba(45,106,79,0.2)]">Yozilish</a>
     </div>
   </div>
 </header>
@@ -140,7 +140,7 @@ const footerHtml = `
   <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
     <!-- Brand -->
     <div class="col-span-1">
-      <a href="index.html" class="font-headline-md text-headline-md font-bold text-primary flex items-center gap-2 mb-4">
+      <a href="/habibullo-hilola" class="font-headline-md text-headline-md font-bold text-primary flex items-center gap-2 mb-4">
         <span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">medical_services</span>
         Habibullo-Hilola
       </a>
@@ -151,10 +151,10 @@ const footerHtml = `
     <div class="col-span-1">
       <h4 class="font-headline-lg-mobile font-bold text-on-surface mb-4">Xizmatlar</h4>
       <ul class="flex flex-col gap-3">
-        <li><a href="services.html" class="font-body-md text-on-surface-variant hover:text-primary transition-colors">Terapevtik stomatologiya</a></li>
-        <li><a href="services.html" class="font-body-md text-on-surface-variant hover:text-primary transition-colors">Estetik stomatologiya</a></li>
-        <li><a href="services.html" class="font-body-md text-on-surface-variant hover:text-primary transition-colors">Ortopediya va Implantologiya</a></li>
-        <li><a href="services.html" class="font-body-md text-on-surface-variant hover:text-primary transition-colors">Ortodontiya</a></li>
+        <li><a href="/habibullo-hilola/services" class="font-body-md text-on-surface-variant hover:text-primary transition-colors">Terapevtik stomatologiya</a></li>
+        <li><a href="/habibullo-hilola/services" class="font-body-md text-on-surface-variant hover:text-primary transition-colors">Estetik stomatologiya</a></li>
+        <li><a href="/habibullo-hilola/services" class="font-body-md text-on-surface-variant hover:text-primary transition-colors">Ortopediya va Implantologiya</a></li>
+        <li><a href="/habibullo-hilola/services" class="font-body-md text-on-surface-variant hover:text-primary transition-colors">Ortodontiya</a></li>
       </ul>
     </div>
 
@@ -162,9 +162,9 @@ const footerHtml = `
     <div class="col-span-1">
       <h4 class="font-headline-lg-mobile font-bold text-on-surface mb-4">Kompaniya</h4>
       <ul class="flex flex-col gap-3">
-        <li><a href="about.html" class="font-body-md text-on-surface-variant hover:text-primary transition-colors">Biz haqimizda</a></li>
-        <li><a href="index.html#testimonials" class="font-body-md text-on-surface-variant hover:text-primary transition-colors">Sharhlar</a></li>
-        <li><a href="booking.html" class="font-body-md text-on-surface-variant hover:text-primary transition-colors">Qabulga yozilish</a></li>
+        <li><a href="/habibullo-hilola/about" class="font-body-md text-on-surface-variant hover:text-primary transition-colors">Biz haqimizda</a></li>
+        <li><a href="/habibullo-hilola#testimonials" class="font-body-md text-on-surface-variant hover:text-primary transition-colors">Sharhlar</a></li>
+        <li><a href="/booking?clinic=habibullo-hilola" class="font-body-md text-on-surface-variant hover:text-primary transition-colors">Qabulga yozilish</a></li>
       </ul>
     </div>
 
@@ -238,7 +238,7 @@ const servicesTemplate = `<!DOCTYPE html>
         </div>
         <h3 class="font-headline-md text-xl font-bold text-on-surface mb-3">Tishlarni Tozalash</h3>
         <p class="font-body-md text-on-surface-variant mb-6">Plastinka va toshlarni olib tashlash, sog'lom asosni ta'minlash uchun ilg'or ultratovush texnologiyasidan foydalangan holda yumshoq va puxta profilaktika.</p>
-        <a href="booking.html" class="inline-flex items-center gap-2 text-primary font-label-md font-bold hover:text-primary-container transition-colors">Batafsil <span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
+        <a href="/booking?clinic=habibullo-hilola" class="inline-flex items-center gap-2 text-primary font-label-md font-bold hover:text-primary-container transition-colors">Batafsil <span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
       </div>
 
       <!-- Card 2 -->
@@ -248,7 +248,7 @@ const servicesTemplate = `<!DOCTYPE html>
         </div>
         <h3 class="font-headline-md text-xl font-bold text-on-surface mb-3">Professional Oqartirish</h3>
         <p class="font-body-md text-on-surface-variant mb-6">Xavfsiz, yuqori samarali muolajalar tabassumingizni bir necha ohang oqartiradi. Sezuvchanlikni kamaytirish va natijani maksimal darajaga ko'tarish uchun moslashtirilgan.</p>
-        <a href="booking.html" class="inline-flex items-center gap-2 text-primary font-label-md font-bold hover:text-primary-container transition-colors">Batafsil <span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
+        <a href="/booking?clinic=habibullo-hilola" class="inline-flex items-center gap-2 text-primary font-label-md font-bold hover:text-primary-container transition-colors">Batafsil <span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
       </div>
 
       <!-- Card 3 -->
@@ -258,7 +258,7 @@ const servicesTemplate = `<!DOCTYPE html>
         </div>
         <h3 class="font-headline-md text-xl font-bold text-on-surface mb-3">Ko'rinmas Breketlar</h3>
         <p class="font-body-md text-on-surface-variant mb-6">Shaffof, moslashtirilgan elaynerlardan foydalangan holda sezilmas tekislash yechimlari. Ideal tabassumingizga qulaylik va ishonch bilan erishing.</p>
-        <a href="booking.html" class="inline-flex items-center gap-2 text-primary font-label-md font-bold hover:text-primary-container transition-colors">Batafsil <span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
+        <a href="/booking?clinic=habibullo-hilola" class="inline-flex items-center gap-2 text-primary font-label-md font-bold hover:text-primary-container transition-colors">Batafsil <span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
       </div>
 
       <!-- Card 4 -->
@@ -266,9 +266,7 @@ const servicesTemplate = `<!DOCTYPE html>
         <div class="bg-primary-container text-on-primary-container w-14 h-14 rounded-2xl flex items-center justify-center mb-6">
           <span class="material-symbols-outlined text-[32px]">implants</span>
         </div>
-        <h3 class="font-headline-md text-xl font-bold text-on-surface mb-3">Tish Implantlari</h3>
-        <p class="font-body-md text-on-surface-variant mb-6">Doimiy, tabiiy ko'rinishga ega bo'lgan tiklashlar. Biz sizni rejalashtirishdan tortib yakuniy go'zal joylashtirishgacha bo'lgan butun jarayon davomida yo'naltiramiz.</p>
-        <a href="booking.html" class="inline-flex items-center gap-2 text-primary font-label-md font-bold hover:text-primary-container transition-colors">Batafsil <span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
+        <a href="/booking?clinic=habibullo-hilola" class="inline-flex items-center gap-2 text-primary font-label-md font-bold hover:text-primary-container transition-colors">Batafsil <span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
       </div>
     </div>
   </section>
@@ -333,7 +331,7 @@ const aboutTemplate = `<!DOCTYPE html>
   </style>
 </head>
 <body class="bg-surface text-on-surface font-body-md">
-  \${headerHtml.replace('href="services.html" class="h-full flex items-center text-primary font-bold border-b-2 border-primary font-label-md text-label-md hover:text-primary transition-colors"', 'href="services.html" class="h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors"').replace('href="about.html" class="h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors"', 'href="about.html" class="h-full flex items-center text-primary font-bold border-b-2 border-primary font-label-md text-label-md hover:text-primary transition-colors"').replace('href="services.html" class="font-label-md text-primary font-bold"', 'href="services.html" class="font-label-md text-on-surface-variant"').replace('href="about.html" class="font-label-md text-on-surface-variant"', 'href="about.html" class="font-label-md text-primary font-bold"')}
+  \${headerHtml.replace('href="/habibullo-hilola/services" class="h-full flex items-center text-primary font-bold border-b-2 border-primary font-label-md text-label-md hover:text-primary transition-colors"', 'href="/habibullo-hilola/services" class="h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors"').replace('href="/habibullo-hilola/about" class="h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors"', 'href="/habibullo-hilola/about" class="h-full flex items-center text-primary font-bold border-b-2 border-primary font-label-md text-label-md hover:text-primary transition-colors"').replace('href="/habibullo-hilola/services" class="font-label-md text-primary font-bold"', 'href="/habibullo-hilola/services" class="font-label-md text-on-surface-variant"').replace('href="/habibullo-hilola/about" class="font-label-md text-on-surface-variant"', 'href="/habibullo-hilola/about" class="font-label-md text-primary font-bold"')}
 
   <!-- About Hero Section -->
   <section class="py-16 md:py-24 px-margin-mobile md:px-margin-desktop bg-surface-container-low border-b border-outline-variant overflow-hidden">
@@ -350,7 +348,7 @@ const aboutTemplate = `<!DOCTYPE html>
         <p class="font-body-lg text-body-lg text-on-surface-variant mb-8">
           Habibullo-Hilola markazida biz sog'liqni saqlash stressli zarurat emas, balki xotirjam va yo'naltirilgan sayohat bo'lishi kerak deb hisoblaymiz. Bizning vazifamiz yuqori darajadagi tibbiy professionallik va iliq, salomatlikka qaratilgan mehmondo'stlikni uyg'unlashtirish orqali bemorlarning tashvishini engillashtirishdir. Biz toza havodan nafas olishni his qiladigan muhitda tiniqlik, qulaylik va zamonaviy yordamni birinchi o'ringa qo'yamiz.
         </p>
-        <a href="booking.html" class="bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-label-md text-label-md px-8 py-3.5 rounded-full transition-all shadow-md inline-flex items-center gap-2">
+        <a href="/booking?clinic=habibullo-hilola" class="bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-label-md text-label-md px-8 py-3.5 rounded-full transition-all shadow-md inline-flex items-center gap-2">
           Biz bilan bog'lanish <span class="material-symbols-outlined">arrow_forward</span>
         </a>
       </div>
@@ -440,6 +438,6 @@ const aboutTemplate = `<!DOCTYPE html>
 </body>
 </html>`;
 
-fs.writeFileSync('D:/AI_Workplace/Habbullo-Hilola/booking-module/public/services.html', servicesTemplate);
-fs.writeFileSync('D:/AI_Workplace/Habbullo-Hilola/booking-module/public/about.html', aboutTemplate);
-console.log('Successfully generated services.html and about.html');
+fs.writeFileSync(__dirname + '/habibullo-hilola-services.html', servicesTemplate);
+fs.writeFileSync(__dirname + '/habibullo-hilola-about.html', aboutTemplate);
+console.log('Successfully generated habibullo-hilola-services.html and habibullo-hilola-about.html');

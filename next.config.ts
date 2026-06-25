@@ -30,8 +30,8 @@ const nextConfig: NextConfig = {
       { source: '/', destination: '/clinova.html' },
       { source: '/habibullo-hilola', destination: '/habibullo-hilola.html' },
       { source: '/booking', destination: '/booking.html' },
-      { source: '/about', destination: '/about.html' },
-      { source: '/services', destination: '/services.html' }
+      { source: '/habibullo-hilola/about', destination: '/habibullo-hilola-about.html' },
+      { source: '/habibullo-hilola/services', destination: '/habibullo-hilola-services.html' }
     ];
   }
 };
