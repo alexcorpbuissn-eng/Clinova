@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>CLINOVA Xodimlar Portali</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Atkinson+Hyperlegible+Next:wght@400;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                "colors": {
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#2d6a4f",
+                    "outline": "#707973",
+                    "on-primary-fixed-variant": "#0e5138",
+                    "surface": "#f9faf6",
+                    "error": "#ba1a1a",
+                    "on-surface-variant": "#404943",
+                    "on-surface": "#1a1c1a",
+                    "on-primary": "#ffffff",
+                    "primary": "#0f5238",
+                    "secondary": "#0e6c4a",
+                    "background": "#f9faf6",
+                },
+                "fontFamily": {
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "body-sm": ["Atkinson Hyperlegible Next"],
+                    "body-md": ["Atkinson Hyperlegible Next"],
+                    "label-md": ["Plus Jakarta Sans"]
+                }
+            }
+        }
+    }
+</script>
+<style>
+    body { font-family: 'Atkinson Hyperlegible Next', sans-serif; background-color: var(--background); }
+    h1, h2, h3, h4, h5, h6, .font-headline-md, .font-label-md { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+</style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex items-center justify-center">
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="w-full flex items-center justify-center p-4">
+        <div class="bg-surface-container-lowest rounded-2xl shadow-[0_8px_32px_rgba(45,106,79,0.08)] p-8 w-full max-w-md border border-outline-variant/30">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
+                    <span class="material-symbols-outlined text-3xl">medical_services</span>
+                </div>
+                <h1 class="font-headline-md text-headline-md font-bold text-primary mb-2">CLINOVA Xodimlar</h1>
+                <p class="text-body-md text-on-surface-variant">Tizimga kirish uchun raqamingizni kiriting</p>
+                <p id="login-err" class="text-error mt-2 font-body-sm h-5"></p>
+            </div>
+
+            <form id="phone-form" class="space-y-4">
+                <div>
+                    <label class="block font-label-md text-on-surface-variant mb-1">Telegram Raqam</label>
+                    <input type="text" id="telegram-phone" placeholder="+998" value="+998" class="w-full px-4 py-3 rounded-lg border border-outline/30 focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-surface-container-lowest text-on-surface" required>
+                </div>
+                <button type="submit" id="btn-phone" class="w-full bg-primary text-on-primary py-3 rounded-full font-label-md hover:bg-primary-container transition-colors shadow-md hover:shadow-lg">Kodni Olish</button>
+            </form>
+
+            <form id="otp-form" class="space-y-4" style="display: none;">
+                <div>
+                    <label class="block font-label-md text-on-surface-variant mb-1">Tasdiqlash Kodi (Telegramdan)</label>
+                    <input type="text" id="otp-code" placeholder="123456" class="w-full px-4 py-3 rounded-lg border border-outline/30 focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-surface-container-lowest text-on-surface" required>
+                </div>
+                <button type="submit" id="btn-otp" class="w-full bg-primary text-on-primary py-3 rounded-full font-label-md hover:bg-primary-container transition-colors shadow-md hover:shadow-lg">Kirish</button>
+                <button type="button" onclick="document.getElementById('otp-form').style.display='none'; document.getElementById('phone-form').style.display='block'; document.getElementById('login-err').textContent='';" style="width:100%; margin-top:8px; background:transparent; color:#0f5238; border:none; cursor:pointer; font-size:14px;">← Qayta urinish</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PORTAL (HUB) SCREEN -->
+    <div id="portal-screen" class="w-full max-w-5xl mx-auto p-6 hidden flex-col">
+        <header class="flex justify-between items-center mb-10 w-full">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined text-3xl">domain</span>
+                </div>
+                <div>
+                    <h2 class="font-headline-md text-on-surface font-bold">Xodimlar Portali</h2>
+                    <p class="font-body-sm text-on-surface-variant" id="user-role-display">Roli: ...</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="flex items-center gap-2 px-4 py-2 bg-error/10 text-error rounded-full hover:bg-error/20 transition-colors font-label-md">
+                <span class="material-symbols-outlined text-[20px]">logout</span> Chiqish
+            </button>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- ADMIN CARD -->
+            <div onclick="goToPanel('ADMIN')" class="bg-surface-container-lowest rounded-2xl p-6 border border-outline/20 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group">
+                <div class="w-14 h-14 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined text-3xl">admin_panel_settings</span>
+                </div>
+                <h3 class="font-headline-md text-on-surface mb-2">Klinika Admini</h3>
+                <p class="font-body-sm text-on-surface-variant mb-6">Klinikani, xodimlarni va moliyani to'liq boshqarish.</p>
+                <div class="flex items-center text-primary font-label-md">Kirish <span class="material-symbols-outlined text-[18px] ml-1">arrow_forward</span></div>
+            </div>
+
+            <!-- RECEPTION CARD -->
+            <div onclick="goToPanel('RECEPTION')" class="bg-surface-container-lowest rounded-2xl p-6 border border-outline/20 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group">
+                <div class="w-14 h-14 bg-secondary/10 text-secondary rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined text-3xl">desk</span>
+                </div>
+                <h3 class="font-headline-md text-on-surface mb-2">Qabulxona (Reception)</h3>
+                <p class="font-body-sm text-on-surface-variant mb-6">Bemorlarni ro'yxatga olish, to'lovlar va navbatlarni boshqarish.</p>
+                <div class="flex items-center text-secondary font-label-md">Kirish <span class="material-symbols-outlined text-[18px] ml-1">arrow_forward</span></div>
+            </div>
+
+            <!-- DOCTOR CARD -->
+            <div onclick="goToPanel('DOCTOR')" class="bg-surface-container-lowest rounded-2xl p-6 border border-outline/20 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group">
+                <div class="w-14 h-14 bg-[#0284c7]/10 text-[#0284c7] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined text-3xl">stethoscope</span>
+                </div>
+                <h3 class="font-headline-md text-on-surface mb-2">Shifokor Paneli</h3>
+                <p class="font-body-sm text-on-surface-variant mb-6">Bemorlarni qabul qilish, tashxis qo'yish va davolash.</p>
+                <div class="flex items-center text-[#0284c7] font-label-md">Kirish <span class="material-symbols-outlined text-[18px] ml-1">arrow_forward</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION ALERT -->
+    <div id="alert-toast" class="fixed top-4 right-4 bg-error text-on-error px-6 py-4 rounded-xl shadow-lg transform translate-x-full transition-transform duration-300 z-50 flex items-center gap-3">
+        <span class="material-symbols-outlined">warning</span>
+        <span id="alert-msg" class="font-label-md"></span>
+    </div>
+
+    <script>
+      function showAlert(msg) {
+        const toast = document.getElementById('alert-toast');
+        document.getElementById('alert-msg').textContent = msg;
+        toast.style.transform = 'translateX(0)';
+        setTimeout(() => {
+          toast.style.transform = 'translateX(100%)';
+        }, 3000);
+      }
+
+      function showPortal() {
+          document.getElementById('login-screen').style.display = 'none';
+          document.getElementById('portal-screen').style.display = 'flex';
+          const role = localStorage.getItem('user_role');
+          document.getElementById('user-role-display').textContent = `Roli: ${role || 'Noma\'lum'}`;
+      }
+
+      function logout() {
+          localStorage.removeItem('staff_token');
+          localStorage.removeItem('user_role');
+          document.getElementById('portal-screen').style.display = 'none';
+          document.getElementById('login-screen').style.display = 'flex';
+      }
+
+      function goToPanel(targetRole) {
+          const userRole = localStorage.getItem('user_role');
+          
+          if (!userRole) {
+              logout();
+              return;
+          }
+
+          // ADMIN can access anything
+          if (userRole === 'ADMIN') {
+              if (targetRole === 'ADMIN') window.location.href = '/admin.html';
+              if (targetRole === 'RECEPTION') window.location.href = '/reception.html';
+              if (targetRole === 'DOCTOR') window.location.href = '/doctor.html';
+              return;
+          }
+
+          // RECEPTION can only access RECEPTION
+          if (userRole === 'RECEPTION') {
+              if (targetRole === 'RECEPTION') {
+                  window.location.href = '/reception.html';
+              } else {
+                  showAlert("Sizda bu bo'limga kirish huquqi yo'q (Faqat Qabulxona).");
+              }
+              return;
+          }
+
+          // DOCTOR can only access DOCTOR
+          if (userRole === 'DOCTOR') {
+              if (targetRole === 'DOCTOR') {
+                  window.location.href = '/doctor.html';
+              } else {
+                  showAlert("Sizda bu bo'limga kirish huquqi yo'q (Faqat Shifokor).");
+              }
+              return;
+          }
+      }
+
+      // Check on load
+      const token = localStorage.getItem('staff_token');
+      if (token) {
+          showPortal();
+      }
+
+      // Login Logic
+      document.getElementById('phone-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        let phone = document.getElementById('telegram-phone').value;
+        const errEl = document.getElementById('login-err');
+        const btn = document.getElementById('btn-phone');
+
+        let digits = phone.replace(/\D/g, '');
+        if (digits.startsWith('998') && digits.length === 12) {
+          phone = '+' + digits;
+          document.getElementById('telegram-phone').value = phone;
+        } else {
+          errEl.textContent = "Iltimos, to'g'ri telefon raqamini kiriting.";
+          return;
+        }
+
+        errEl.textContent = '';
+        btn.textContent = 'Yuborilmoqda...'; btn.disabled = true;
+
+        try {
+          const res = await fetch('/api/public/send-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ telegramPhone: phone })
+          });
+          const data = await res.json();
+          if (res.ok && (data.success || data.action)) {
+            if (data.action === 'deep_link') {
+              errEl.innerHTML = `Bot orqali kodni oling: <a href="${data.deepLink}" target="_blank" style="color:var(--primary); text-decoration:underline;">Botga o'tish</a> - so'ng kodni kiriting.`;
+            }
+            document.getElementById('phone-form').style.display = 'none';
+            document.getElementById('otp-form').style.display = 'block';
+          } else {
+            errEl.textContent = data.error || "Xatolik yuz berdi";
+          }
+        } catch { errEl.textContent = "Tarmoq xatosi"; }
+        
+        btn.textContent = 'Kodni Olish'; btn.disabled = false;
+      });
+
+      document.getElementById('otp-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const phone = document.getElementById('telegram-phone').value;
+        const code = document.getElementById('otp-code').value;
+        const errEl = document.getElementById('login-err');
+        const btn = document.getElementById('btn-otp');
+
+        errEl.textContent = '';
+        btn.textContent = 'Tekshirilmoqda...'; btn.disabled = true;
+
+        try {
+          const res = await fetch('/api/public/verify-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ telegramPhone: phone, code })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            if (data.token) {
+              if (data.role === 'SUPER_ADMIN') {
+                  window.location.href = '/superadmin.html';
+                  return;
+              }
+              localStorage.setItem('staff_token', data.token);
+              localStorage.setItem('user_role', data.role || 'UNKNOWN');
+              if (data.doctor) {
+                  localStorage.setItem('doctor_info', JSON.stringify(data.doctor));
+              }
+              showPortal();
+            } else {
+              errEl.textContent = "Sizda xodimlik huquqi yo'q!";
+            }
+          } else { errEl.textContent = data.error || "Xatolik"; }
+        } catch { errEl.textContent = "Tarmoq xatosi"; }
+        
+        btn.textContent = 'Kirish'; btn.disabled = false;
+      });
+    </script>
+</body>
+</html>

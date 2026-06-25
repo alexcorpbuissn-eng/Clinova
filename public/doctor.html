@@ -150,33 +150,6 @@ input:checked + .slider:before { transform: translateX(20px); }
 
 </head>
 <body class="bg-background text-on-background font-body-md antialiased min-h-screen flex selection:bg-primary-container selection:text-on-primary-container">
-    
-    <!-- LOGIN SCREEN -->
-    <div id="login-screen" class="w-full min-h-screen flex flex-col items-center justify-center bg-surface-container-low px-4">
-        <div class="bg-surface-container-lowest p-8 rounded-3xl shadow-lg border border-outline-variant w-full max-w-md">
-            <div class="text-center mb-8">
-                <h1 class="font-headline-xl text-primary font-bold mb-2">CLINOVA</h1>
-                <p class="font-body-md text-on-surface-variant">Shifokor tizimiga kirish</p>
-            </div>
-            <div id="login-err" class="text-error text-center mb-4 font-label-md min-h-[20px]"></div>
-            
-            <form id="phone-form" class="space-y-4">
-                <div>
-                    <label class="block font-label-md text-on-surface-variant mb-2">Telegram raqamingiz</label>
-                    <input type="tel" id="telegram-phone" placeholder="+998 90 000 00 00" required class="w-full px-4 py-3 rounded-xl border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright">
-                </div>
-                <button type="submit" id="btn-phone" class="w-full bg-primary text-on-primary py-3 rounded-xl font-label-md hover:bg-on-primary-fixed-variant transition-colors shadow-sm">Kodni olish</button>
-            </form>
-            
-            <form id="otp-form" class="space-y-4" style="display:none;">
-                <div>
-                    <label class="block font-label-md text-on-surface-variant mb-2">SMS kod</label>
-                    <input type="text" id="otp-code" placeholder="12345" required class="w-full px-4 py-3 rounded-xl border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-center text-2xl tracking-widest">
-                </div>
-                <button type="submit" id="btn-otp" class="w-full bg-primary text-on-primary py-3 rounded-xl font-label-md hover:bg-on-primary-fixed-variant transition-colors shadow-sm">Tasdiqlash</button>
-            </form>
-        </div>
-    </div>
 
     <!-- MAIN APP APP -->
     <div id="app" class="w-full hidden md:flex md:flex-row">
@@ -637,100 +610,35 @@ input:checked + .slider:before { transform: translateX(20px); }
 
   // ---- Authentication & Initialisation ----
   window.addEventListener('DOMContentLoaded', async () => {
-    applyPhoneFormatter(document.getElementById('telegram-phone'));
     applyPhoneFormatter(document.getElementById('patient-phone-input'));
     
-    const t = localStorage.getItem('doctor_token');
-    if (t) {
-      try {
-        const info = localStorage.getItem('doctor_info');
-        const role = localStorage.getItem('user_role');
-        if (info && role) {
-          doctorToken = t;
-          doctorInfo = JSON.parse(info);
-          userRole = role;
-          currentDoctorId = doctorInfo ? doctorInfo.id : null;
-          showApp();
-        } else { logout(); }
-      } catch { logout(); }
-    }
-  });
-
-  document.getElementById('phone-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    let phone = document.getElementById('telegram-phone').value;
-    const errEl = document.getElementById('login-err');
-    const btn = document.getElementById('btn-phone');
-    let digits = phone.replace(/\D/g, '');
-    if (digits.startsWith('998') && digits.length === 12) {
-      phone = '+' + digits;
-      document.getElementById('telegram-phone').value = phone;
-    } else {
-      errEl.textContent = "Iltimos, to'g'ri raqam kiriting.";
+    const t = localStorage.getItem('staff_token');
+    const role = localStorage.getItem('user_role');
+    
+    if (!t || (role !== 'DOCTOR' && role !== 'ADMIN')) {
+      window.location.href = '/staff.html';
       return;
     }
-    errEl.textContent = ''; btn.disabled = true;
-    try {
-      const res = await fetch('/api/public/send-otp', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ telegramPhone: phone })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        document.getElementById('phone-form').style.display = 'none';
-        document.getElementById('otp-form').style.display = 'block';
-      } else { errEl.textContent = data.error || 'Xatolik'; }
-    } catch { errEl.textContent = 'Tarmoq xatosi'; }
-    btn.disabled = false;
-  });
 
-  document.getElementById('otp-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const phone = document.getElementById('telegram-phone').value;
-    const code = document.getElementById('otp-code').value;
-    const errEl = document.getElementById('login-err');
-    const btn = document.getElementById('btn-otp');
-    errEl.textContent = ''; btn.disabled = true;
     try {
-      const res = await fetch('/api/doctor/login', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ telegramPhone: phone, code })
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        if (data.role === 'SUPER_ADMIN') {
-          localStorage.setItem('superadmin_token', data.token);
-          window.location.href = '/superadmin.html';
-          return;
-        } else if (data.role === 'ADMIN') {
-          localStorage.setItem('admin_token', data.token);
-          window.location.href = '/admin.html';
-          return;
-        } else if (data.role === 'RECEPTION') {
-          localStorage.setItem('reception_token', data.token);
-          window.location.href = '/reception.html';
-          return;
-        }
-        doctorToken = data.token;
-        doctorInfo = data.doctor;
-        userRole = data.role;
-        currentDoctorId = data.doctor ? data.doctor.id : null;
-        localStorage.setItem('doctor_token', data.token);
-        localStorage.setItem('doctor_info', JSON.stringify(data.doctor));
-        localStorage.setItem('user_role', data.role);
+      const info = localStorage.getItem('doctor_info');
+      if (info && role) {
+        doctorToken = t;
+        doctorInfo = JSON.parse(info);
+        userRole = role;
+        currentDoctorId = doctorInfo ? doctorInfo.id : null;
         showApp();
-      } else { errEl.textContent = data.error || 'Kod noto\'g\'ri'; }
-    } catch { errEl.textContent = 'Tarmoq xatosi'; }
-    btn.disabled = false;
+      } else { logout(); }
+    } catch { logout(); }
   });
 
   function logout() {
-    localStorage.clear();
-    location.reload();
+    localStorage.removeItem('staff_token');
+    localStorage.removeItem('user_role');
+    window.location.href = '/staff.html';
   }
 
   async function showApp() {
-    document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
     
     if (userRole === 'ADMIN') {

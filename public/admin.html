@@ -153,34 +153,6 @@
 </head>
 <body class="bg-background text-on-background font-body-md text-body-md flex antialiased selection:bg-primary-container selection:text-on-primary-container">
 
-    <!-- LOGIN SCREEN -->
-    <div id="login-screen" class="min-h-screen w-full flex items-center justify-center bg-surface-container-lowest" style="display: none;">
-        <div class="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/30 shadow-[0_8px_24px_rgba(45,106,79,0.04)] w-full max-w-md">
-            <h2 class="font-headline-lg text-headline-lg text-primary text-center mb-6">Clinova Staff</h2>
-            <div id="login-err" class="text-error font-body-sm text-center mb-4 min-h-[20px]"></div>
-            
-            <form id="phone-form" class="space-y-4">
-                <div>
-                    <label class="block font-label-md text-on-surface-variant mb-1">Telegram Telefon Raqam</label>
-                    <input type="tel" id="telegram-phone" placeholder="+998901234567" class="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-surface-container-lowest text-on-surface" required>
-                </div>
-                <button type="submit" id="btn-phone" class="w-full bg-primary text-on-primary py-3 rounded-full font-label-md hover:bg-primary-container transition-colors">Kodni Olish</button>
-                <div class="text-center mt-4">
-                    <a href="/" class="text-primary hover:underline font-label-md">Asosiy sahifaga qaytish</a>
-                </div>
-            </form>
-
-            <form id="otp-form" class="space-y-4" style="display: none;">
-                <div>
-                    <label class="block font-label-md text-on-surface-variant mb-1">Tasdiqlash Kodi (Telegramdan)</label>
-                    <input type="text" id="otp-code" placeholder="123456" class="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-surface-container-lowest text-on-surface" required>
-                </div>
-                <button type="submit" id="btn-otp" class="w-full bg-primary text-on-primary py-3 rounded-full font-label-md hover:bg-primary-container transition-colors">Kirish</button>
-                <button type="button" onclick="document.getElementById('otp-form').style.display='none'; document.getElementById('phone-form').style.display='block'; document.getElementById('login-err').textContent='';" style="width:100%; margin-top:8px; background:transparent; color:#0f5238; border:none; cursor:pointer; font-size:14px;">← Qayta urinish</button>
-            </form>
-        </div>
-    </div>
-
     <!-- DASHBOARD -->
     <div id="dashboard" class="w-full flex min-h-screen hidden">
         <!-- Sidebar -->
@@ -1016,7 +988,7 @@
       try {
         const res = await fetch(`/api/admin/procedures/${id}`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('staff_token')}` },
           body: JSON.stringify({ price, durationMinutes })
         });
         if (res.ok) {
@@ -1032,137 +1004,40 @@
     }
 
     const API = '';
-    
-    // Auth Check on load — verify token with server, don't just trust localStorage
-    async function verifyAuthOnLoad() {
-      try {
-        const token = localStorage.getItem('admin_token');
-        if (!token) {
-          document.getElementById('login-screen').style.display = 'flex';
-          return;
-        }
-        const res = await fetch('/api/admin/appointments', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-          showDashboard();
-        } else {
-          localStorage.removeItem('admin_token');
-          document.getElementById('login-screen').style.display = 'flex';
-        }
-      } catch (err) {
-        console.error('Auth verification failed', err);
-      }
-    }
-    verifyAuthOnLoad();
-
-    // Phone Submit
-    document.getElementById('phone-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      let phone = document.getElementById('telegram-phone').value;
-      const errEl = document.getElementById('login-err');
-      const btn = document.getElementById('btn-phone');
-
-      let digits = phone.replace(/\D/g, '');
-      if (digits.startsWith('998') && digits.length === 12) {
-        phone = '+' + digits;
-        document.getElementById('telegram-phone').value = phone;
-      } else {
-        errEl.textContent = "Iltimos, to'g'ri O'zbekiston telefon raqamini kiriting (+998 XX XXX XX XX).";
-        return;
-      }
-
-      errEl.textContent = '';
-      btn.textContent = 'Yuborilmoqda...';
-      btn.disabled = true;
-
-      try {
-        const res = await fetch(`${API}/api/public/send-otp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ telegramPhone: phone })
-        });
-        const data = await res.json();
-        if (res.ok && (data.success || data.action)) {
-          if (data.action === 'deep_link') {
-            errEl.innerHTML = `Bot orqali kodni oling: <a href="${data.deepLink}" target="_blank" style="color:var(--teal); text-decoration:underline; margin-top:5px; display:inline-block">Botga o'tish</a> — so'ng kodni quyida kiriting.`;
-            document.getElementById('phone-form').style.display = 'none';
-            document.getElementById('otp-form').style.display = 'block';
-          } else {
-            document.getElementById('phone-form').style.display = 'none';
-            document.getElementById('otp-form').style.display = 'block';
+          // Auth Check on load
+      async function verifyAuthOnLoad() {
+        try {
+          const token = localStorage.getItem('staff_token');
+          const role = localStorage.getItem('user_role');
+          if (!token || role !== 'ADMIN') {
+            window.location.href = '/staff.html';
+            return;
           }
-        } else {
-          errEl.textContent = data.error || "Xatolik yuz berdi";
-        }
-      } catch {
-        errEl.textContent = "Tarmoq xatosi";
-      }
-      btn.textContent = 'Kodni Olish';
-      btn.disabled = false;
-    });
-
-    // OTP Submit
-    document.getElementById('otp-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const phone = document.getElementById('telegram-phone').value;
-      const code = document.getElementById('otp-code').value;
-      const errEl = document.getElementById('login-err');
-      const btn = document.getElementById('btn-otp');
-
-      errEl.textContent = '';
-      btn.textContent = 'Tekshirilmoqda...';
-      btn.disabled = true;
-
-      try {
-        const res = await fetch(`${API}/api/public/verify-otp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ telegramPhone: phone, code })
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
-          if (data.token) {
-            if (data.role === 'SUPER_ADMIN') {
-              localStorage.setItem('superadmin_token', data.token);
-              window.location.href = '/superadmin.html';
-              return;
-            } else if (data.role === 'DOCTOR') {
-              localStorage.setItem('doctor_token', data.token);
-              window.location.href = '/doctor.html';
-              return;
-            } else if (data.role === 'RECEPTION') {
-              localStorage.setItem('reception_token', data.token);
-              window.location.href = '/reception.html';
-              return;
-            }
-            // ADMIN role
-            localStorage.setItem('admin_token', data.token);
+          const res = await fetch('/api/admin/appointments', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
             showDashboard();
           } else {
-            errEl.textContent = "Sizda admin huquqi yo'q!";
+            localStorage.removeItem('staff_token');
+            window.location.href = '/staff.html';
           }
-        } else {
-          errEl.textContent = data.error || "Xatolik yuz berdi";
+        } catch (err) {
+          console.error('Auth verification failed', err);
         }
-      } catch {
-        errEl.textContent = "Tarmoq xatosi";
       }
-      btn.textContent = 'Kirish';
-      btn.disabled = false;
-    });
+      verifyAuthOnLoad();
+  
+      function showDashboard() {
+        document.getElementById('dashboard').style.display = 'flex';
+        loadAppointments();
+      }
 
-    function logout() {
-      localStorage.removeItem('admin_token');
-      document.getElementById('dashboard').style.display = 'none';
-      document.getElementById('login-screen').style.display = 'flex';
-    }
-
-    function showDashboard() {
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('dashboard').style.display = 'flex';
-      loadAppointments();
-    }
+      function logout() {
+        localStorage.removeItem('staff_token');
+        localStorage.removeItem('user_role');
+        window.location.href = '/staff.html';
+      }
 
     function toggleSidebar() {
       document.getElementById('admin-sidebar').classList.toggle('open');
@@ -1553,21 +1428,21 @@
     }
 
     async function apiGet(endpoint) {
-      const t = localStorage.getItem('admin_token');
+      const t = localStorage.getItem('staff_token');
       const res = await fetch(API + endpoint, { headers: { 'Authorization': `Bearer ${t}` } });
       if (res.status === 401 || res.status === 403) { logout(); throw new Error('Unauthorized'); }
       return res.json();
     }
 
     async function apiDelete(endpoint) {
-      const t = localStorage.getItem('admin_token');
+      const t = localStorage.getItem('staff_token');
       const res = await fetch(API + endpoint, { method: 'DELETE', headers: { 'Authorization': `Bearer ${t}` } });
       if (res.status === 401 || res.status === 403) { logout(); throw new Error('Unauthorized'); }
       return res.json();
     }
 
     async function apiPatch(endpoint, body) {
-      const t = localStorage.getItem('admin_token');
+      const t = localStorage.getItem('staff_token');
       const res = await fetch(API + endpoint, { 
         method: 'PATCH', 
         headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
@@ -1578,7 +1453,7 @@
     }
 
     async function apiPost(endpoint, body) {
-      const t = localStorage.getItem('admin_token');
+      const t = localStorage.getItem('staff_token');
       const res = await fetch(API + endpoint, { 
         method: 'POST', 
         headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
@@ -1899,7 +1774,7 @@
         if (id) {
           res = await fetch(`/api/admin/doctors/${id}`, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('staff_token')}` },
             body: JSON.stringify({ firstName, lastName, specialty, bio, photoUrl, telegramUsername, workStartTime, workEndTime, breakStartTime, breakEndTime })
           }).then(r => r.json());
         } else {
@@ -1921,7 +1796,7 @@
       try {
         const res = await fetch(`/api/admin/doctors/${id}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('staff_token')}` },
           body: JSON.stringify({ isActive })
         }).then(r => r.json());
         if(res.success) {
@@ -1932,7 +1807,7 @@
     }
 
     async function loadDoctors() {
-      if (!localStorage.getItem('admin_token')) return;
+      if (!localStorage.getItem('staff_token')) return;
       const tbodyStom = document.getElementById('doc-stomatolog-tbody');
       const tbodyLor = document.getElementById('doc-lor-tbody');
       const loadingCol = '<div class="col-span-full text-center py-8 text-on-surface-variant text-body-lg">Shifokorlar yuklanmoqda...</div>';
@@ -2038,7 +1913,7 @@
     }
 
     async function loadUsers() {
-      if (!localStorage.getItem('admin_token')) return;
+      if (!localStorage.getItem('staff_token')) return;
       try {
         const data = await apiGet('/api/admin/users');
         const tbody = document.getElementById('users-tbody');
@@ -2139,7 +2014,7 @@
       try {
         const res = await fetch('/api/admin/users', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('staff_token')}` },
           body: JSON.stringify({ telegramPhone: phone, role, doctorId: role === 'DOCTOR' ? doctorId : null })
         });
         const data = await res.json();
@@ -2220,7 +2095,7 @@
       try {
         const res = await fetch(`/api/admin/users/${id}`, {
           method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('staff_token')}` }
         });
         const data = await res.json();
         if (res.ok && data.success) {
@@ -2675,7 +2550,7 @@
       btn.disabled = true; btn.textContent = 'Saqlanmoqda...';
 
       try {
-        const t = localStorage.getItem('admin_token');
+        const t = localStorage.getItem('staff_token');
         for (const id of toDelete) {
           await fetch('/api/doctor/slots', {
             method: 'DELETE', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${t}` },
@@ -2850,7 +2725,7 @@
       const fromDateStr = `${fromBase.getUTCFullYear()}-${String(fromBase.getUTCMonth()+1).padStart(2,'0')}-${String(fromBase.getUTCDate()).padStart(2,'0')}`;
       const toDateStr = `${endOf.getUTCFullYear()}-${String(endOf.getUTCMonth()+1).padStart(2,'0')}-${String(endOf.getUTCDate()).padStart(2,'0')}`;
       
-      const adminTokenVal = localStorage.getItem('admin_token');
+      const adminTokenVal = localStorage.getItem('staff_token');
       
       try {
         showToast("Jadval yaratilmoqda, iltimos kuting...", "info");

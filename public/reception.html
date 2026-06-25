@@ -133,38 +133,7 @@ tailwind.config = {
 </head>
 <body class="bg-surface text-on-surface font-body-md h-screen overflow-hidden flex">
 
-  <!-- Login Screen -->
-  <div id="login-screen" class="absolute inset-0 z-50 bg-surface flex flex-col items-center justify-center">
-    <div class="bg-surface-container-lowest p-10 rounded-2xl soft-shadow border border-surface-variant w-full max-w-md">
-      <div class="text-center mb-8">
-        <h1 class="font-headline-lg text-primary font-bold">CLINOVA</h1>
-        <p class="text-on-surface-variant mt-2 font-body-md">Reception & Admin Portal</p>
-      </div>
-      <div id="login-err" class="text-error bg-error-container p-3 rounded-lg text-sm mb-4 empty:hidden"></div>
-      
-      <form id="phone-form" class="space-y-4">
-        <div>
-          <label class="block font-label-md text-on-surface-variant mb-2">Telegram Raqam (+998)</label>
-          <input type="tel" id="telegram-phone" class="w-full bg-surface border-outline-variant rounded-lg px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="+998 90 123 45 67" required>
-        </div>
-        <button type="submit" id="btn-phone" class="w-full bg-primary text-on-primary font-label-md py-3 rounded-lg hover:bg-primary-container transition-colors">
-          Kodni Olish
-        </button>
-      </form>
-
-      <form id="otp-form" class="space-y-4" style="display:none;">
-        <div>
-          <label class="block font-label-md text-on-surface-variant mb-2">Tasdiqlash KODI (Telegramdan kelgan)</label>
-          <input type="text" id="otp-code" class="w-full bg-surface border-outline-variant rounded-lg px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-center tracking-widest text-lg font-bold" required>
-        </div>
-        <button type="submit" id="btn-otp" class="w-full bg-primary text-on-primary font-label-md py-3 rounded-lg hover:bg-primary-container transition-colors">
-          Kirish
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <div id="app" class="flex w-full h-full" style="display:none;">
+  <div id="app" class="flex w-full h-full" style="display:flex;">
     <!-- SideNavBar -->
     <nav class="flex-shrink-0 w-[260px] h-screen flex flex-col py-8 border-r border-outline-variant bg-surface-container-low z-20 overflow-y-auto custom-scrollbar">
       <div class="px-6 mb-8">
@@ -790,104 +759,33 @@ tailwind.config = {
     });
   }
 
-  // ── Auth ─────────────────────────────────────────────────────────
+  // 🔒 Auth 🔒
   async function verifyAuthOnLoad() {
-    const t = localStorage.getItem('reception_token');
-    if (!t) return;
+    const t = localStorage.getItem('staff_token');
+    const role = localStorage.getItem('user_role');
+    if (!t || (role !== 'RECEPTION' && role !== 'ADMIN')) {
+      window.location.href = '/staff.html';
+      return;
+    }
     try {
       const res = await fetch('/api/admin/visits', { headers: { 'Authorization': `Bearer ${t}` } });
       if (res.ok) { adminToken = t; showApp(); }
-      else localStorage.removeItem('reception_token');
-    } catch {}
+      else {
+        localStorage.removeItem('staff_token');
+        window.location.href = '/staff.html';
+      }
+    } catch {
+      window.location.href = '/staff.html';
+    }
   }
 
-  document.getElementById('phone-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    let phone = document.getElementById('telegram-phone').value;
-    const errEl = document.getElementById('login-err');
-    const btn = document.getElementById('btn-phone');
-
-    let digits = phone.replace(/\D/g, '');
-    if (digits.startsWith('998') && digits.length === 12) {
-      phone = '+' + digits;
-      document.getElementById('telegram-phone').value = phone;
-    } else {
-      errEl.textContent = "Iltimos, to'g'ri O'zbekiston telefon raqamini kiriting (+998 XX XXX XX XX).";
-      return;
-    }
-
-    errEl.textContent = '';
-    btn.textContent = 'Yuborilmoqda...'; btn.disabled = true;
-    try {
-      const res = await fetch('/api/public/send-otp', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ telegramPhone: phone })
-      });
-      const data = await res.json();
-      if (res.ok && (data.success || data.action)) {
-        if (data.action === 'deep_link') {
-          errEl.innerHTML = `Avval bot orqali ro'yxatdan o'ting: <a href="${data.deepLink}" target="_blank" style="color:var(--teal);text-decoration:underline;">Botga o'tish</a>`;
-        } else {
-          document.getElementById('phone-form').style.display = 'none';
-          document.getElementById('otp-form').style.display = 'block';
-        }
-      } else { errEl.textContent = data.error || 'Xatolik'; }
-    } catch { errEl.textContent = 'Tarmoq xatosi'; }
-    btn.textContent = 'Kodni Olish'; btn.disabled = false;
-  });
-
-  document.getElementById('otp-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const phone = document.getElementById('telegram-phone').value;
-    const code = document.getElementById('otp-code').value;
-    const errEl = document.getElementById('login-err');
-    const btn = document.getElementById('btn-otp');
-    errEl.textContent = '';
-    btn.textContent = 'Tekshirilmoqda...'; btn.disabled = true;
-    try {
-      const res = await fetch('/api/public/verify-otp', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ telegramPhone: phone, code })
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        if (data.token) {
-          if (data.role === 'SUPER_ADMIN') {
-            localStorage.setItem('superadmin_token', data.token);
-            window.location.href = '/superadmin.html';
-            return;
-          } else if (data.role === 'ADMIN') {
-            localStorage.setItem('admin_token', data.token);
-            window.location.href = '/admin.html';
-            return;
-          } else if (data.role === 'DOCTOR') {
-            localStorage.setItem('doctor_token', data.token);
-            window.location.href = '/doctor.html';
-            return;
-          }
-          localStorage.setItem('reception_token', data.token);
-          adminToken = data.token;
-          showApp();
-        } else {
-          errEl.textContent = "Sizda admin huquqi yo'q!";
-        }
-      } else { errEl.textContent = data.error || 'Xatolik'; }
-    } catch { errEl.textContent = 'Tarmoq xatosi'; }
-    btn.textContent = 'Kirish'; btn.disabled = false;
-  });
-
   function logout() {
-    localStorage.removeItem('reception_token');
-    adminToken = null;
-    document.getElementById('app').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('phone-form').style.display = '';
-    document.getElementById('otp-form').style.display = 'none';
-    document.getElementById('otp-code').value = '';
+    localStorage.removeItem('staff_token');
+    localStorage.removeItem('user_role');
+    window.location.href = '/staff.html';
   }
 
   async function showApp() {
-    document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
     initDatePicker();
     initServiceSelect();
