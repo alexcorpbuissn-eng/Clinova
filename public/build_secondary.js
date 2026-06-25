@@ -205,13 +205,13 @@ const servicesTemplate = `<!DOCTYPE html>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>Xizmatlar | Habibullo-Hilola</title>
-  \${tailwindConfig}
+  ${tailwindConfig}
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet"/>
-  \${globalStyles}
+  ${globalStyles}
 </head>
 <body class="bg-surface text-on-surface font-body-md">
-  \${headerHtml}
+  ${headerHtml}
 
   <!-- Page Header -->
   <section class="bg-surface-container-lowest py-20 px-margin-mobile md:px-margin-desktop border-b border-outline-variant text-center">
@@ -310,7 +310,7 @@ const servicesTemplate = `<!DOCTYPE html>
     </div>
   </section>
 
-  \${footerHtml}
+  ${footerHtml}
 </body>
 </html>`;
 
@@ -320,10 +320,10 @@ const aboutTemplate = `<!DOCTYPE html>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>Biz haqimizda | Habibullo-Hilola</title>
-  \${tailwindConfig}
+  ${tailwindConfig}
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet"/>
-  \${globalStyles}
+  ${globalStyles}
   <style type="text/tailwindcss">
     @layer utilities {
       /* Add specific overrides if needed */
@@ -331,7 +331,7 @@ const aboutTemplate = `<!DOCTYPE html>
   </style>
 </head>
 <body class="bg-surface text-on-surface font-body-md">
-  \${headerHtml.replace('href="/habibullo-hilola/services" class="h-full flex items-center text-primary font-bold border-b-2 border-primary font-label-md text-label-md hover:text-primary transition-colors"', 'href="/habibullo-hilola/services" class="h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors"').replace('href="/habibullo-hilola/about" class="h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors"', 'href="/habibullo-hilola/about" class="h-full flex items-center text-primary font-bold border-b-2 border-primary font-label-md text-label-md hover:text-primary transition-colors"').replace('href="/habibullo-hilola/services" class="font-label-md text-primary font-bold"', 'href="/habibullo-hilola/services" class="font-label-md text-on-surface-variant"').replace('href="/habibullo-hilola/about" class="font-label-md text-on-surface-variant"', 'href="/habibullo-hilola/about" class="font-label-md text-primary font-bold"')}
+  ${headerHtml.replace('href="/habibullo-hilola/services" class="h-full flex items-center text-primary font-bold border-b-2 border-primary font-label-md text-label-md hover:text-primary transition-colors"', 'href="/habibullo-hilola/services" class="h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors"').replace('href="/habibullo-hilola/about" class="h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors"', 'href="/habibullo-hilola/about" class="h-full flex items-center text-primary font-bold border-b-2 border-primary font-label-md text-label-md hover:text-primary transition-colors"').replace('href="/habibullo-hilola/services" class="font-label-md text-primary font-bold"', 'href="/habibullo-hilola/services" class="font-label-md text-on-surface-variant"').replace('href="/habibullo-hilola/about" class="font-label-md text-on-surface-variant"', 'href="/habibullo-hilola/about" class="font-label-md text-primary font-bold"')}
 
   <!-- About Hero Section -->
   <section class="py-16 md:py-24 px-margin-mobile md:px-margin-desktop bg-surface-container-low border-b border-outline-variant overflow-hidden">
@@ -434,7 +434,7 @@ const aboutTemplate = `<!DOCTYPE html>
     </div>
   </section>
 
-  \${footerHtml}
+  ${footerHtml}
 </body>
 </html>`;
 
