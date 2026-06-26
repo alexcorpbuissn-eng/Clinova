@@ -1,17 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
-
-async function requireAdmin(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const payload = await verifyToken(authHeader.split(' ')[1]);
-  return payload?.role === 'ADMIN' ? payload : null;
-}
+import { requireClinicAccess } from '@/lib/clinic-guard';
 
 // GET /api/admin/stats — per-doctor visit counts and earnings
 export async function GET(request: NextRequest) {
-  if (!await requireAdmin(request)) {
+  const session = await requireClinicAccess(request);
+  if (!session || session.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -33,6 +27,7 @@ export async function GET(request: NextRequest) {
   const yearStart = new Date(now.getFullYear(), 0, 1);
 
   const doctors = await prisma.doctor.findMany({
+    where: { clinicId: session.clinicId },
     select: { id: true, firstName: true, lastName: true, specialty: true, isActive: true, bio: true, photoUrl: true, telegramUsername: true, workStartTime: true, workEndTime: true, breakStartTime: true, breakEndTime: true, workingDays: true },
     orderBy: { specialty: 'asc' },
   });
