@@ -148,6 +148,22 @@ input:checked + .slider:before { transform: translateX(20px); }
 .toast.show { opacity: 1; transform: translateY(0); }
 </style>
 
+<script>
+  window.addEventListener('error', function(event) {
+    fetch('/api/logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ level: 'ERROR', message: event.message, details: event.error?.stack || (event.filename + ':' + event.lineno) })
+    }).catch(console.error);
+  });
+  window.addEventListener('unhandledrejection', function(event) {
+    fetch('/api/logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ level: 'ERROR', message: 'Unhandled Rejection: ' + (event.reason?.message || event.reason), details: event.reason?.stack || String(event.reason) })
+    }).catch(console.error);
+  });
+</script>
 </head>
 <body class="bg-background text-on-background font-body-md antialiased min-h-screen flex selection:bg-primary-container selection:text-on-primary-container">
 

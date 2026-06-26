@@ -380,3 +380,19 @@ model Purchase {
   @@index([clinicId])
   @@index([createdAt])
 }
+
+// ─────────────────────────────────────────────
+// SYSTEM LOGS — Centralized logging
+// ─────────────────────────────────────────────
+model SystemLog {
+  id        String   @id @default(uuid())
+  level     String   // e.g. "INFO", "WARN", "ERROR"
+  source    String   // e.g. "FRONTEND", "BACKEND"
+  message   String   @db.Text
+  details   String?  @db.Text // JSON string for extra context
+  createdAt DateTime @default(now())
+
+  @@index([level])
+  @@index([source])
+  @@index([createdAt])
+}
