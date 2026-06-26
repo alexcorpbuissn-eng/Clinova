@@ -302,7 +302,7 @@
         if (res.ok && data.success) {
           if (data.token) {
             if (data.role === 'SUPER_ADMIN') {
-              localStorage.setItem('superadmin_token', data.token);
+              localStorage.setItem('sa_token', data.token);
               window.location.href = '/superadmin.html';
               return;
             } else if (data.role === 'DOCTOR') {

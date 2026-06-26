@@ -94,7 +94,7 @@
             </button>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6" id="portal-cards-container">
             <!-- ADMIN CARD -->
             <div onclick="goToPanel('ADMIN')" class="bg-surface-container-lowest rounded-2xl p-6 border border-outline/20 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group">
                 <div class="w-14 h-14 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
@@ -110,7 +110,7 @@
                 <div class="w-14 h-14 bg-secondary/10 text-secondary rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                     <span class="material-symbols-outlined text-3xl">desk</span>
                 </div>
-                <h3 class="font-headline-md text-on-surface mb-2">Qabulxona (Reception)</h3>
+                <h3 class="font-headline-md text-on-surface mb-2">Qabulxona</h3>
                 <p class="font-body-sm text-on-surface-variant mb-6">Bemorlarni ro'yxatga olish, to'lovlar va navbatlarni boshqarish.</p>
                 <div class="flex items-center text-secondary font-label-md">Kirish <span class="material-symbols-outlined text-[18px] ml-1">arrow_forward</span></div>
             </div>
@@ -123,6 +123,16 @@
                 <h3 class="font-headline-md text-on-surface mb-2">Shifokor Paneli</h3>
                 <p class="font-body-sm text-on-surface-variant mb-6">Bemorlarni qabul qilish, tashxis qo'yish va davolash.</p>
                 <div class="flex items-center text-[#0284c7] font-label-md">Kirish <span class="material-symbols-outlined text-[18px] ml-1">arrow_forward</span></div>
+            </div>
+
+            <!-- SUPER ADMIN CARD (Dynamic) -->
+            <div onclick="window.location.href='/superadmin.html'" id="sa-card" class="hidden bg-surface-container-lowest rounded-2xl p-6 border border-outline/20 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group">
+                <div class="w-14 h-14 bg-error/10 text-error rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined text-3xl">shield_person</span>
+                </div>
+                <h3 class="font-headline-md text-on-surface mb-2">Super Admin</h3>
+                <p class="font-body-sm text-on-surface-variant mb-6">Barcha klinikalarni, obunalarni va sozlamalarni boshqarish.</p>
+                <div class="flex items-center text-error font-label-md">Kirish <span class="material-symbols-outlined text-[18px] ml-1">arrow_forward</span></div>
             </div>
         </div>
     </div>
@@ -148,6 +158,13 @@
           document.getElementById('portal-screen').style.display = 'flex';
           const role = localStorage.getItem('user_role');
           document.getElementById('user-role-display').textContent = `Roli: ${role || 'Noma\'lum'}`;
+          if (role === 'SUPER_ADMIN') {
+              document.getElementById('sa-card').style.display = 'block';
+              document.getElementById('portal-cards-container').classList.remove('md:grid-cols-3');
+          } else {
+              document.getElementById('sa-card').style.display = 'none';
+              document.getElementById('portal-cards-container').classList.add('md:grid-cols-3');
+          }
       }
 
       function logout() {
@@ -165,17 +182,19 @@
               return;
           }
 
-          // ADMIN can access anything
-          if (userRole === 'ADMIN') {
-              if (targetRole === 'ADMIN') window.location.href = '/admin.html';
-              if (targetRole === 'RECEPTION') window.location.href = '/reception.html';
-              if (targetRole === 'DOCTOR') window.location.href = '/doctor.html';
+          // ADMIN and SUPER_ADMIN can access anything
+          if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') {
+              const t = localStorage.getItem('staff_token');
+              if (targetRole === 'ADMIN') { localStorage.setItem('admin_token', t); window.location.href = '/admin.html'; }
+              if (targetRole === 'RECEPTION') { localStorage.setItem('reception_token', t); window.location.href = '/reception.html'; }
+              if (targetRole === 'DOCTOR') { localStorage.setItem('doctor_token', t); window.location.href = '/doctor.html'; }
               return;
           }
 
           // RECEPTION can only access RECEPTION
           if (userRole === 'RECEPTION') {
               if (targetRole === 'RECEPTION') {
+                  localStorage.setItem('reception_token', localStorage.getItem('staff_token'));
                   window.location.href = '/reception.html';
               } else {
                   showAlert("Sizda bu bo'limga kirish huquqi yo'q (Faqat Qabulxona).");
@@ -186,6 +205,7 @@
           // DOCTOR can only access DOCTOR
           if (userRole === 'DOCTOR') {
               if (targetRole === 'DOCTOR') {
+                  localStorage.setItem('doctor_token', localStorage.getItem('staff_token'));
                   window.location.href = '/doctor.html';
               } else {
                   showAlert("Sizda bu bo'limga kirish huquqi yo'q (Faqat Shifokor).");
@@ -260,8 +280,7 @@
           if (res.ok && data.success) {
             if (data.token) {
               if (data.role === 'SUPER_ADMIN') {
-                  window.location.href = '/superadmin.html';
-                  return;
+                  localStorage.setItem('sa_token', data.token);
               }
               localStorage.setItem('staff_token', data.token);
               localStorage.setItem('user_role', data.role || 'UNKNOWN');
