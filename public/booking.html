@@ -138,11 +138,11 @@
     <!-- TopNavBar -->
     <header class="bg-surface shadow-sm sticky top-0 z-50 w-full transition-colors duration-300">
         <div class="flex justify-between items-center px-margin-mobile md:px-margin-desktop w-full max-w-container-max mx-auto h-16">
-            <a href="index.html" class="flex items-center gap-4">
-                <span class="font-headline-md text-primary font-bold tracking-tight">CLINOVA</span>
+            <a href="index.html" id="nav-logo-link" class="flex items-center gap-4">
+                <span class="font-headline-md text-primary font-bold tracking-tight clinic-name-header">CLINOVA</span>
             </a>
             <nav class="hidden md:flex gap-8 items-center h-full">
-                <a class="h-full flex items-center text-on-surface-variant hover:text-primary transition-colors" href="index.html">Asosiy</a>
+                <a id="nav-asosiy-link" class="h-full flex items-center text-on-surface-variant hover:text-primary transition-colors" href="index.html">Asosiy</a>
                 <a class="h-full flex items-center text-primary font-semibold transition-colors" href="booking.html">Qabul</a>
             </nav>
         </div>
@@ -410,6 +410,12 @@ async function loadDoctors() {
       document.title = `${clinicInfo.name} - Qabulga yozilish`;
       const headerEl = document.querySelector('.clinic-name-header');
       if (headerEl) headerEl.textContent = clinicInfo.name;
+      
+      const logoLink = document.getElementById('nav-logo-link');
+      if (logoLink) logoLink.href = `/${_clinicSlug}`;
+      
+      const asosiyLink = document.getElementById('nav-asosiy-link');
+      if (asosiyLink) asosiyLink.href = `/${_clinicSlug}`;
     }
     if (!doctors?.length) { c.innerHTML='<div class="state-msg">Shifokorlar topilmadi.</div>'; return; }
     const g = document.createElement('div'); g.className='doctor-grid';
