@@ -193,7 +193,7 @@ const htmlTemplate = `<!DOCTYPE html>
         <!-- Sidebar -->
         <nav id="admin-sidebar" class="fixed left-0 top-0 h-screen flex flex-col py-margin-desktop border-r border-outline-variant bg-surface-container-low w-sidebar-width z-50">
             <div class="px-margin-desktop mb-8">
-                <h1 class="font-headline-md text-headline-md font-bold text-primary">Clinova Staff</h1>
+                <h1 id="sidebar-clinic-name" class="font-headline-md text-headline-md font-bold text-primary">Clinova Staff</h1>
                 <p class="font-body-sm text-body-sm text-on-surface-variant">Medical Portal</p>
             </div>
             
@@ -278,7 +278,7 @@ const htmlTemplate = `<!DOCTYPE html>
             <!-- TABS -->
             <div id="tab-home" class="tab-content block">
                 <div class="mb-8">
-                    <h2 class="font-headline-xl text-primary font-bold">Xayrli tong, Admin.</h2>
+                    <h2 id="welcome-admin-text" class="font-headline-xl text-primary font-bold">Xayrli tong, Admin.</h2>
                     <p class="font-body-lg text-on-surface-variant mt-2">Klinika ko'rsatkichlari va boshqaruv modullari</p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

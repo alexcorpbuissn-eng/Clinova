@@ -31,7 +31,12 @@ export async function GET(request: NextRequest) {
     orderBy: { createdAt: 'desc' },
   });
 
-  return NextResponse.json({ success: true, appointments });
+  const clinic = await prisma.clinic.findUnique({
+    where: { id: session.clinicId },
+    select: { name: true }
+  });
+
+  return NextResponse.json({ success: true, appointments, clinicName: clinic?.name || 'Klinika' });
 }
 
 // POST /api/admin/appointments — Book/Schedule a new appointment
