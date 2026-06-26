@@ -264,8 +264,10 @@ const servicesTemplate = `<!DOCTYPE html>
       <!-- Card 4 -->
       <div class="bg-surface-container-lowest rounded-2xl p-8 soft-shadow border border-outline-variant hover:-translate-y-1 transition-transform cursor-pointer">
         <div class="bg-primary-container text-on-primary-container w-14 h-14 rounded-2xl flex items-center justify-center mb-6">
-          <span class="material-symbols-outlined text-[32px]">implants</span>
+          <span class="material-symbols-outlined text-[32px]">health_and_safety</span>
         </div>
+        <h3 class="font-headline-md text-xl font-bold text-on-surface mb-3">Implantologiya</h3>
+        <p class="font-body-md text-on-surface-variant mb-6">Yo'qotilgan tishlarni tabiiy ko'rinish va funksionallikni tiklovchi yuqori sifatli implantlar bilan ishonchli va og'riqsiz almashtirish.</p>
         <a href="/booking?clinic=habibullo-hilola" class="inline-flex items-center gap-2 text-primary font-label-md font-bold hover:text-primary-container transition-colors">Batafsil <span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
       </div>
     </div>
