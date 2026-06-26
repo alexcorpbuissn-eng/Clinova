@@ -615,14 +615,14 @@ input:checked + .slider:before { transform: translateX(20px); }
     const t = localStorage.getItem('staff_token');
     const role = localStorage.getItem('user_role');
     
-    if (!t || (role !== 'DOCTOR' && role !== 'ADMIN')) {
+    if (!t || (role !== 'DOCTOR' && role !== 'ADMIN' && role !== 'SUPER_ADMIN')) {
       window.location.href = '/staff.html';
       return;
     }
 
     try {
       const info = localStorage.getItem('doctor_info');
-      if (role === 'ADMIN' || (info && role === 'DOCTOR')) {
+      if (role === 'ADMIN' || role === 'SUPER_ADMIN' || (info && role === 'DOCTOR')) {
         doctorToken = t;
         if (info) doctorInfo = JSON.parse(info);
         userRole = role;

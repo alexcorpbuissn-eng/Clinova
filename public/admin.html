@@ -1009,7 +1009,7 @@
         try {
           const token = localStorage.getItem('staff_token');
           const role = localStorage.getItem('user_role');
-          if (!token || role !== 'ADMIN') {
+          if (!token || (role !== 'ADMIN' && role !== 'SUPER_ADMIN')) {
             window.location.href = '/staff.html';
             return;
           }

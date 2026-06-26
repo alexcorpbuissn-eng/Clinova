@@ -763,7 +763,7 @@ tailwind.config = {
   async function verifyAuthOnLoad() {
     const t = localStorage.getItem('staff_token');
     const role = localStorage.getItem('user_role');
-    if (!t || (role !== 'RECEPTION' && role !== 'ADMIN')) {
+    if (!t || (role !== 'RECEPTION' && role !== 'ADMIN' && role !== 'SUPER_ADMIN')) {
       window.location.href = '/staff.html';
       return;
     }
