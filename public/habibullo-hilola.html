@@ -625,6 +625,36 @@
   fwInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') handleFwSend();
   });
+
+  // Intersection Observer for FAQ nav highlighting
+  const faqSection = document.getElementById('faq');
+  if (faqSection) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const desktopLinks = document.querySelectorAll('nav.hidden.md\\\\:flex > a');
+        const mobileLinks = document.querySelectorAll('#mobile-menu > a');
+        if (!desktopLinks[0] || !desktopLinks[3]) return;
+        
+        const activeClassDesktop = "h-full flex items-center text-primary font-bold border-b-2 border-primary font-label-md text-label-md hover:text-primary transition-colors";
+        const inactiveClassDesktop = "h-full flex items-center text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors";
+        const activeClassMobile = "font-label-md text-primary font-bold";
+        const inactiveClassMobile = "font-label-md text-on-surface-variant";
+
+        if (entry.isIntersecting) {
+          desktopLinks[0].className = inactiveClassDesktop;
+          desktopLinks[3].className = activeClassDesktop;
+          mobileLinks[0].className = inactiveClassMobile;
+          mobileLinks[3].className = activeClassMobile;
+        } else {
+          desktopLinks[0].className = activeClassDesktop;
+          desktopLinks[3].className = inactiveClassDesktop;
+          mobileLinks[0].className = activeClassMobile;
+          mobileLinks[3].className = inactiveClassMobile;
+        }
+      });
+    }, { threshold: 0.3 });
+    observer.observe(faqSection);
+  }
 </script>
 
 </body>
