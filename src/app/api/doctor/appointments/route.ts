@@ -7,7 +7,7 @@ async function requireDoctorOrAdmin(request: NextRequest) {
   if (!authHeader?.startsWith('Bearer ')) return null;
   const payload = await verifyToken(authHeader.split(' ')[1]);
   if (!payload) return null;
-  if (payload.role === 'DOCTOR' || payload.role === 'ADMIN' || payload.role === 'RECEPTION') return payload;
+  if (payload.role === 'DOCTOR' || payload.role === 'ADMIN' || payload.role === 'RECEPTION' || payload.role === 'SUPER_ADMIN') return payload;
   return null;
 }
 

@@ -10,7 +10,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await requireClinicAccess(request);
-  if (!session || session.role !== 'ADMIN') {
+  if (!session || session.role !== 'ADMIN' && session.role !== 'SUPER_ADMIN') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

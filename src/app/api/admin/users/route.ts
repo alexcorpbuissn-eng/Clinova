@@ -8,7 +8,7 @@ async function requireAdmin(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) return null;
   const payload = await verifyToken(authHeader.split(' ')[1]);
-  return payload?.role === 'ADMIN' ? payload : null;
+  return (payload?.role === 'ADMIN' || payload?.role === 'SUPER_ADMIN') ? payload : null;
 }
 
 // GET /api/admin/users

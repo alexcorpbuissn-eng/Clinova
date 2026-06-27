@@ -8,7 +8,7 @@ import { requireClinicAccess } from '@/lib/clinic-guard';
 // POST /api/reception/drafts
 export async function POST(request: NextRequest) {
   const session = await requireClinicAccess(request);
-  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION' && session.role !== 'SUPER_ADMIN')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

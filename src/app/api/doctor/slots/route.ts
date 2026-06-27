@@ -5,7 +5,7 @@ import { requireClinicAccess } from '@/lib/clinic-guard';
 // GET /api/doctor/slots — Fetch doctor's own upcoming slots
 export async function GET(request: NextRequest) {
   const session = await requireClinicAccess(request);
-  if (!session || (session.role !== 'DOCTOR' && session.role !== 'ADMIN')) {
+  if (!session || (session.role !== 'DOCTOR' && session.role !== 'ADMIN' && session.role !== 'SUPER_ADMIN')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
 // POST /api/doctor/slots — Create one or multiple availability slots
 export async function POST(request: NextRequest) {
   const session = await requireClinicAccess(request);
-  if (!session || session.role !== 'ADMIN') {
+  if (!session || session.role !== 'ADMIN' && session.role !== 'SUPER_ADMIN') {
     return NextResponse.json({ error: 'Faqatgina administrator jadvalni o\'zgartirishi mumkin' }, { status: 403 });
   }
 
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
 // DELETE /api/doctor/slots — Delete a free (unbooked) slot
 export async function DELETE(request: NextRequest) {
   const session = await requireClinicAccess(request);
-  if (!session || session.role !== 'ADMIN') {
+  if (!session || session.role !== 'ADMIN' && session.role !== 'SUPER_ADMIN') {
     return NextResponse.json({ error: 'Faqatgina administrator jadvalni o\'zgartirishi mumkin' }, { status: 403 });
   }
 

@@ -6,7 +6,7 @@ import { requireClinicAccess } from '@/lib/clinic-guard';
 // Returns all slots for a doctor in a date range (defaults to next 60 days)
 export async function GET(request: NextRequest) {
   const session = await requireClinicAccess(request);
-  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION' && session.role !== 'SUPER_ADMIN')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
 // Bulk slots:  { doctorId, days:[0-6], startHour, endHour, interval, fromDate, toDate }
 export async function POST(request: NextRequest) {
   const session = await requireClinicAccess(request);
-  if (!session || session.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!session || session.role !== 'ADMIN' && session.role !== 'SUPER_ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   let body: any;
   try { body = await request.json(); }

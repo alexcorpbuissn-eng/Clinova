@@ -8,7 +8,7 @@ import { requireClinicAccess } from '@/lib/clinic-guard';
 // GET /api/inventory/purchases
 export async function GET(request: NextRequest) {
   const session = await requireClinicAccess(request);
-  if (!session || (session.role !== 'ADMIN' && session.role !== 'INVENTORY')) {
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'INVENTORY' && session.role !== 'SUPER_ADMIN')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 // POST /api/inventory/purchases
 export async function POST(request: NextRequest) {
   const session = await requireClinicAccess(request);
-  if (!session || (session.role !== 'ADMIN' && session.role !== 'INVENTORY')) {
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'INVENTORY' && session.role !== 'SUPER_ADMIN')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

@@ -8,7 +8,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await requireClinicAccess(request);
-  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION' && session.role !== 'DOCTOR')) {
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION' && session.role !== 'DOCTOR' && session.role !== 'SUPER_ADMIN')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

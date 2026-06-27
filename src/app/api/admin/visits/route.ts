@@ -6,7 +6,7 @@ import { requireClinicAccess } from '@/lib/clinic-guard';
 // GET /api/admin/visits — list visits (optional ?doctorId=&limit=)
 export async function GET(request: NextRequest) {
   const session = await requireClinicAccess(request);
-  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION' && session.role !== 'SUPER_ADMIN')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/visits — log a new visit
 export async function POST(request: NextRequest) {
   const session = await requireClinicAccess(request);
-  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION' && session.role !== 'SUPER_ADMIN')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

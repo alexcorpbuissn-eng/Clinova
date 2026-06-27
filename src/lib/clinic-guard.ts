@@ -41,7 +41,20 @@ export async function requireClinicAccess(request: NextRequest): Promise<ClinicS
     doctorId: payload.doctorId,
   };
 
-  if (session.clinicId && session.role !== 'SUPER_ADMIN') {
+  // SUPER_ADMIN bypasses clinic checks — resolve to first active clinic if no clinicId
+  if (session.role === 'SUPER_ADMIN') {
+    if (!session.clinicId) {
+      const firstClinic = await prisma.clinic.findFirst({
+        where: { isActive: true },
+        select: { id: true },
+        orderBy: { createdAt: 'asc' },
+      });
+      session.clinicId = firstClinic?.id;
+    }
+    return session;
+  }
+
+  if (session.clinicId) {
     const clinic = await prisma.clinic.findUnique({
       where: { id: session.clinicId },
       select: { isActive: true, planExpiresAt: true }
@@ -62,6 +75,7 @@ export async function requireClinicAccess(request: NextRequest): Promise<ClinicS
 
   return session;
 }
+
 
 /**
  * Проверяет что пользователь имеет одну из указанных ролей И принадлежит клинике.

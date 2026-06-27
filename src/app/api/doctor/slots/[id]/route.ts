@@ -8,7 +8,7 @@ export async function DELETE(
 ) {
   const { id } = await params;
   const session = await requireClinicAccess(request);
-  if (!session || (session.role !== 'DOCTOR' && session.role !== 'ADMIN')) {
+  if (!session || (session.role !== 'DOCTOR' && session.role !== 'ADMIN' && session.role !== 'SUPER_ADMIN')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

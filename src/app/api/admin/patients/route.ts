@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   const token = authHeader.split(' ')[1];
   const payload = await verifyToken(token);
 
-  if (!payload || (payload.role !== 'ADMIN' && payload.role !== 'RECEPTION' && payload.role !== 'DOCTOR')) {
+  if (!payload || (payload.role !== 'ADMIN' && payload.role !== 'RECEPTION' && payload.role !== 'DOCTOR' && payload.role !== 'SUPER_ADMIN')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

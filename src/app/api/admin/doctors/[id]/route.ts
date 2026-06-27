@@ -10,7 +10,7 @@ export async function PATCH(
 ) {
   const { id } = await params;
   const session = await requireClinicAccess(request);
-  if (!session || session.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!session || session.role !== 'ADMIN' && session.role !== 'SUPER_ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const doctorToUpdate = await prisma.doctor.findUnique({ where: { id } });
   if (!doctorToUpdate) return NextResponse.json({ error: 'Topilmadi' }, { status: 404 });
@@ -59,7 +59,7 @@ export async function DELETE(
 ) {
   const { id } = await params;
   const session = await requireClinicAccess(request);
-  if (!session || session.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!session || session.role !== 'ADMIN' && session.role !== 'SUPER_ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const doctorToDelete = await prisma.doctor.findUnique({ where: { id } });
   if (!doctorToDelete || doctorToDelete.clinicId !== session.clinicId) {

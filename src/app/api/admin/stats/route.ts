@@ -5,7 +5,7 @@ import { requireClinicAccess } from '@/lib/clinic-guard';
 // GET /api/admin/stats — per-doctor visit counts and earnings
 export async function GET(request: NextRequest) {
   const session = await requireClinicAccess(request);
-  if (!session || session.role !== 'ADMIN') {
+  if (!session || session.role !== 'ADMIN' && session.role !== 'SUPER_ADMIN') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

@@ -5,7 +5,7 @@ import { requireClinicAccess } from '@/lib/clinic-guard';
 // GET /api/admin/leaves
 export async function GET(request: NextRequest) {
   const session = await requireClinicAccess(request);
-  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION' && session.role !== 'SUPER_ADMIN')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/leaves
 export async function POST(request: NextRequest) {
   const session = await requireClinicAccess(request);
-  if (!session || session.role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!session || session.role !== 'ADMIN' && session.role !== 'SUPER_ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
     const body = await request.json();
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
 // DELETE /api/admin/leaves?id=...
 export async function DELETE(request: NextRequest) {
   const session = await requireClinicAccess(request);
-  if (!session || session.role !== 'ADMIN') {
+  if (!session || session.role !== 'ADMIN' && session.role !== 'SUPER_ADMIN') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

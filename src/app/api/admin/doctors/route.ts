@@ -10,7 +10,7 @@ import { checkDoctorLimit } from '@/lib/plan-limits';
 // GET /api/admin/doctors — List all doctors including inactive
 export async function GET(request: NextRequest) {
   const session = await requireClinicAccess(request);
-  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION')) {
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'RECEPTION' && session.role !== 'SUPER_ADMIN')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/doctors — Add a new doctor
 export async function POST(request: NextRequest) {
   const session = await requireClinicAccess(request);
-  if (!session || session.role !== 'ADMIN') {
+  if (!session || session.role !== 'ADMIN' && session.role !== 'SUPER_ADMIN') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

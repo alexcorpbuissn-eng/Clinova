@@ -8,7 +8,7 @@ import { checkAppointmentLimit } from '@/lib/plan-limits';
 // Books an active, available slot for an existing patient.
 export async function POST(req: NextRequest) {
   const session = await requireClinicAccess(req);
-  if (!session || (session.role !== 'DOCTOR' && session.role !== 'ADMIN')) {
+  if (!session || (session.role !== 'DOCTOR' && session.role !== 'ADMIN' && session.role !== 'SUPER_ADMIN')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   let doctorId = session.doctorId as string;
