@@ -301,8 +301,11 @@ window.switchTab = function(tabId) {
             <!-- LOGS TAB -->
             <div id="tab-logs" class="tab-content hidden">
                 <div class="bg-surface-container-low rounded-3xl border border-outline-variant/30 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-outline-variant/30 flex justify-between items-center">
-                        <h3 class="font-title-md text-on-surface font-semibold">Tizim Jurnali (Logs)</h3>
+                    <div class="px-6 py-4 border-b border-outline-variant/30 flex justify-between items-center gap-4 flex-wrap">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <h3 id="logs-header-title" class="font-title-md text-on-surface font-semibold">Tizim Jurnali (Barcha klinikalar)</h3>
+                            <span id="logs-filter-badge"></span>
+                        </div>
                         <button onclick="loadLogs()" class="flex items-center gap-2 text-primary hover:bg-primary-container px-4 py-2 rounded-full transition-colors font-label-md">
                             <span class="material-symbols-outlined text-[20px]">refresh</span> Yangilash
                         </button>
@@ -319,7 +322,15 @@ window.switchTab = function(tabId) {
                                 </tr>
                             </thead>
                             <tbody id="logs-tbody" class="text-body-md text-on-surface divide-y divide-outline-variant/20">
-                                <tr><td colspan="5" class="px-6 py-4 text-center text-on-surface-variant">Yuklanmoqda...</td></tr>
+                                <tr>
+                                    <td colspan="5" class="px-6 py-16 text-center">
+                                        <div class="flex flex-col items-center gap-3 text-on-surface-variant">
+                                            <span class="material-symbols-outlined text-[64px] opacity-20">receipt_long</span>
+                                            <p class="font-label-md text-label-md">Hozircha hech qanday log yozuvi yo'q</p>
+                                            <p class="text-body-sm opacity-60">Tizimda biror harakat amalga oshirilgandan so'ng bu yerda ko'rinadi</p>
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
