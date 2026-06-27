@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireClinicAccess } from '@/lib/clinic-guard';
+import { logSystemEvent } from '@/lib/logger';
 
 // GET /api/superadmin/clinics
 export async function GET(request: NextRequest) {
@@ -71,6 +72,8 @@ export async function POST(request: NextRequest) {
 
       return { clinic, adminUserId: user.id };
     });
+
+    await logSystemEvent('INFO', 'BACKEND', `Yangi klinika yaratildi: ${name}`, { clinicId: result.clinic.id, slug, adminPhone });
 
     return NextResponse.json({
       success: true,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireClinicAccess } from '@/lib/clinic-guard';
+import { logSystemEvent } from '@/lib/logger';
 
 // PATCH /api/superadmin/clinics/[id] — update plan or isActive
 export async function PATCH(
@@ -29,6 +30,9 @@ export async function PATCH(
       where: { id },
       data: updateData,
     });
+
+    await logSystemEvent('INFO', 'BACKEND', `Klinika ma'lumotlari yangilandi: ${clinic.name}`, { clinicId: id, updateData });
+
     return NextResponse.json({ success: true, clinic });
   } catch (error) {
     console.error('Error updating clinic:', error);
@@ -54,6 +58,9 @@ export async function DELETE(
       where: { id },
       data: { isActive: false }
     });
+
+    await logSystemEvent('WARN', 'BACKEND', `Klinika faoliyati to'xtatildi: ${clinic.name}`, { clinicId: id });
+
     return NextResponse.json({ success: true, clinic });
   } catch (error) {
     console.error('Error deactivating clinic:', error);
