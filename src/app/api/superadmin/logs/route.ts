@@ -9,6 +9,7 @@ export async function GET(req: NextRequest) {
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
     const payload = await verifyToken(token);
+    if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     if (payload.role !== 'SUPER_ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
