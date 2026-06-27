@@ -40,8 +40,9 @@ function switchTab(tabId) {
 
 async function handleLogin(e) {
     e.preventDefault();
-    const phone = document.getElementById('sa-phone').value;
-    const password = document.getElementById('sa-password').value;
+    let phone = document.getElementById('sa-phone').value;
+    phone = phone.replace(/\s+/g, '').trim(); // Remove all spaces
+    const password = document.getElementById('sa-password').value.trim();
     const errEl = document.getElementById('login-err');
     
     try {
@@ -51,7 +52,13 @@ async function handleLogin(e) {
             body: JSON.stringify({ phone, password })
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
+        if (!res.ok) {
+            if (data.debug) {
+                console.error("Login failed. Debug info:", data.debug);
+                errEl.innerHTML = `Login failed. <br>Server saw phone: '${data.debug.receivedPhone}'<br>Password matches: ${data.debug.matches}`;
+            }
+            throw new Error(data.error);
+        }
         
         token = data.token;
         localStorage.setItem('sa_token', token);

@@ -148,22 +148,6 @@ window.switchTab = function(tabId) {
     }
 </style>
 
-<script>
-  window.addEventListener('error', function(event) {
-    fetch('/api/logs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ level: 'ERROR', message: event.message, details: event.error?.stack || (event.filename + ':' + event.lineno) })
-    }).catch(console.error);
-  });
-  window.addEventListener('unhandledrejection', function(event) {
-    fetch('/api/logs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ level: 'ERROR', message: 'Unhandled Rejection: ' + (event.reason?.message || event.reason), details: event.reason?.stack || String(event.reason) })
-    }).catch(console.error);
-  });
-</script>
 </head>
 <body class="bg-background text-on-background font-body-md text-body-md flex antialiased selection:bg-primary-container selection:text-on-primary-container">
 
@@ -441,8 +425,9 @@ function switchTab(tabId) {
 
 async function handleLogin(e) {
     e.preventDefault();
-    const phone = document.getElementById('sa-phone').value;
-    const password = document.getElementById('sa-password').value;
+    let phone = document.getElementById('sa-phone').value;
+    phone = phone.replace(/\s+/g, '').trim(); // Remove all spaces
+    const password = document.getElementById('sa-password').value.trim();
     const errEl = document.getElementById('login-err');
     
     try {
@@ -452,7 +437,13 @@ async function handleLogin(e) {
             body: JSON.stringify({ phone, password })
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
+        if (!res.ok) {
+            if (data.debug) {
+                console.error("Login failed. Debug info:", data.debug);
+                errEl.innerHTML = `Login failed. <br>Server saw phone: '${data.debug.receivedPhone}'<br>Password matches: ${data.debug.matches}`;
+            }
+            throw new Error(data.error);
+        }
         
         token = data.token;
         localStorage.setItem('sa_token', token);
