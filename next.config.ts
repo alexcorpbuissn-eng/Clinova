@@ -28,10 +28,14 @@ const nextConfig: NextConfig = {
       { source: '/profile', destination: '/profile.html' },
       { source: '/my-appointments', destination: '/my-appointments.html' },
       { source: '/', destination: '/clinova.html' },
-      { source: '/habibullo-hilola', destination: '/habibullo-hilola.html' },
       { source: '/booking', destination: '/booking.html' },
-      { source: '/habibullo-hilola/about', destination: '/habibullo-hilola-about.html' },
-      { source: '/habibullo-hilola/services', destination: '/habibullo-hilola-services.html' }
+      // ─── Clinic websites ───────────────────────────────────────────────────
+      // Each clinic lives in: public/clinics/<clinic-id>/
+      //   index.html, about.html, services.html
+      // To add a new clinic, duplicate the three lines below for the new clinic-id.
+      { source: '/habibullo-hilola', destination: '/clinics/habibullo-hilola/index.html' },
+      { source: '/habibullo-hilola/about', destination: '/clinics/habibullo-hilola/about.html' },
+      { source: '/habibullo-hilola/services', destination: '/clinics/habibullo-hilola/services.html' },
     ];
   }
 };

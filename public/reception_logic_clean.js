@@ -344,7 +344,7 @@ const API = '';
           waitingContainer.innerHTML = waiting.map(a => {
             const timeStr = new Date(a.slot.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             return `
-              <div class="active-card flex justify-between items-center bg-surface-container-lowest">
+              <div class="relative overflow-hidden bg-surface border border-outline-variant rounded-lg p-4 transition-transform hover:-translate-y-0.5 shadow-sm before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-secondary flex justify-between items-center bg-surface-container-lowest">
                 <div>
                   <div class="patient text-lg">🙎‍♂️ ${a.patient.firstName} ${a.patient.lastName}</div>
                   <div class="doctor mt-1">👨‍⚕️ ${a.slot.doctor.firstName} ${a.slot.doctor.lastName} • 🕒 ${timeStr}</div>
@@ -370,7 +370,7 @@ const API = '';
             const timeStart = new Date(v.startTime);
             const duration = Math.floor((new Date() - timeStart) / 60000);
             return `
-              <div class="active-card flex justify-between items-center bg-surface-container-lowest" style="border-left-color: var(--color-primary)">
+              <div class="relative overflow-hidden bg-surface border border-outline-variant rounded-lg p-4 transition-transform hover:-translate-y-0.5 shadow-sm before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-secondary flex justify-between items-center bg-surface-container-lowest" style="border-left-color: var(--color-primary)">
                 <div>
                   <div class="patient text-lg flex items-center gap-2">
                     <span class="status-dot"></span>
@@ -1696,8 +1696,8 @@ const API = '';
           : `<span style="color:var(--red)">⚠️ ${v.paidAmount.toLocaleString()} / ${v.price.toLocaleString()}</span>${payMethodText}`;
 
         const sourceBadge = v.source === 'BOOKED'
-          ? '<span class="source-badge booked">📱 Online</span>'
-          : '<span class="source-badge walkin">🚶 Offline</span>';
+          ? '<span class="text-[11px] font-bold px-2 py-1 rounded-full uppercase tracking-wider bg-[#dbeafe] text-[#1e40af] border border-[#bfdbfe]">📱 Online</span>'
+          : '<span class="text-[11px] font-bold px-2 py-1 rounded-full uppercase tracking-wider bg-[#f1f5f9] text-[#475569] border border-[#cbd5e1]">🚶 Offline</span>';
           
         return `<tr>
           <td>${start}</td>
@@ -2111,8 +2111,8 @@ const API = '';
             }
 
             const sourceBadge = p.source === 'ONLINE' 
-              ? '<span class="source-badge booked">📱 Telegram Bot</span>' 
-              : '<span class="source-badge walkin">🚶 Kelgan</span>';
+              ? '<span class="text-[11px] font-bold px-2 py-1 rounded-full uppercase tracking-wider bg-[#dbeafe] text-[#1e40af] border border-[#bfdbfe]">📱 Telegram Bot</span>' 
+              : '<span class="text-[11px] font-bold px-2 py-1 rounded-full uppercase tracking-wider bg-[#f1f5f9] text-[#475569] border border-[#cbd5e1]">🚶 Kelgan</span>';
 
             const tgPhone = p.telegramPhone || '-';
 

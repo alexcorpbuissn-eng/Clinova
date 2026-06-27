@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="light" lang="uz">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Habibullo-Hilola | Zamonaviy Stomatologiya Markazi</title>
-<meta name="description" content="Habibullo-Hilola – sifatli va zamonaviy stomatologiya xizmatlari. Tabassum sizni bezaydi – bizni ishonchingiz kuchaytirib turadi." />
+<meta name="description" content="Habibullo-Hilola вЂ“ sifatli va zamonaviy stomatologiya xizmatlari. Tabassum sizni bezaydi вЂ“ bizni ishonchingiz kuchaytirib turadi." />
 
 <!-- Google Fonts -->
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
@@ -215,7 +215,7 @@
       </div>
     </div>
     <div class="w-full lg:w-1/2 relative aspect-[4/3] lg:aspect-[3/4] max-h-[600px] rounded-[2rem] overflow-hidden shadow-[0_20px_40px_rgba(45,106,79,0.08)]">
-      <img src="index_hero.webp" alt="Zamonaviy stomatologiya" class="w-full h-full object-cover"/>
+      <img src="/clinics/habibullo-hilola/images/index_hero.webp" alt="Zamonaviy stomatologiya" class="w-full h-full object-cover"/>
       <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
     </div>
   </section>
@@ -235,7 +235,7 @@
             <span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">dentistry</span>
           </div>
           <h3 class="font-headline-md text-headline-md text-on-surface mb-4">Umumiy Stomatologiya</h3>
-          <p class="font-body-md text-body-md text-on-surface-variant mb-8 flex-grow">Muntazam tozalash va profilaktikadan tortib, murakkab estetik va jarrohlik amaliyotlarigacha — bizning mutaxassislarimiz tabassumingizni yorqin qiladi.</p>
+          <p class="font-body-md text-body-md text-on-surface-variant mb-8 flex-grow">Muntazam tozalash va profilaktikadan tortib, murakkab estetik va jarrohlik amaliyotlarigacha вЂ” bizning mutaxassislarimiz tabassumingizni yorqin qiladi.</p>
           <ul class="space-y-3 mb-8">
             <li class="flex items-center gap-3 font-body-sm text-body-sm text-on-surface">
               <span class="material-symbols-outlined text-primary text-[20px]">check_circle</span> Profilaktik davolash
@@ -396,12 +396,12 @@
     </div>
   </div>
   <div class="w-full max-w-container-max mx-auto border-t border-on-primary-container/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-    <p class="font-body-sm text-body-sm opacity-80">© 2026 Habibullo-Hilola Stomatologiya Markazi. Barcha huquqlar himoyalangan.</p>
+    <p class="font-body-sm text-body-sm opacity-80">В© 2026 Habibullo-Hilola Stomatologiya Markazi. Barcha huquqlar himoyalangan.</p>
   </div>
 </footer>
 
 <!-- Include Main JS (old code) -->
-<script src="main.js"></script>
+<script src="/clinics/habibullo-hilola/js/main.js"></script>
 
 <!-- Dynamic Doctors Injection Script -->
 <script>
@@ -416,8 +416,8 @@
           <div class="bg-surface rounded-2xl p-6 shadow-[0_4px_16px_rgba(45,106,79,0.05)] border border-outline-variant/30 text-center hover:-translate-y-1 transition-transform group cursor-pointer flex flex-col items-center justify-center" onclick="window.location.href='booking.html?doctorId=${d.id}'">
             <div class="w-24 h-24 rounded-full bg-surface-container-highest mb-4 overflow-hidden border-2 border-surface-container-high">
               ${d.photoUrl 
-                ? \`<img src="\${d.photoUrl}" alt="\${d.firstName}" class="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform" loading="lazy" />\` 
-                : \`<div class="w-full h-full bg-surface-container-highest rounded-full"></div>\`
+                ? "<img src='" + d.photoUrl + "' alt='" + d.firstName + "' class='w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform' loading='lazy' />" 
+                : "<div class='w-full h-full bg-surface-container-highest rounded-full'></div>"
               }
             </div>
             <h4 class="font-headline-md text-headline-md text-on-surface mb-1">\${d.firstName} \${d.lastName}</h4>
@@ -464,14 +464,14 @@
 <!-- Feedback Widget -->
 <div id="feedback-widget" class="fixed bottom-6 right-6 z-[9999] font-body-md">
   <button id="fw-btn" class="h-14 px-6 rounded-full bg-error text-on-error border-none shadow-[0_4px_16px_rgba(186,26,26,0.3)] hover:scale-105 transition-transform flex items-center justify-center gap-2 font-label-md relative" title="Shikoyat qilish">
-    <span class="text-xl">📢</span> Shikoyat
+    <span class="text-xl">рџ“ў</span> Shikoyat
     <span class="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full border-2 border-white animate-pulse"></span>
   </button>
 
   <div id="fw-window" class="absolute bottom-20 right-0 w-80 bg-surface rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] overflow-hidden hidden flex-col opacity-0 translate-y-5 transition-all">
     <div class="bg-error text-on-error p-4 flex justify-between items-center">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center text-lg">⚠️</div>
+        <div class="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center text-lg">вљ пёЏ</div>
         <div>
           <h4 class="m-0 font-label-md font-bold">Shikoyatlar bo'limi</h4>
           <p class="m-0 text-xs opacity-90">Faqat muammo va shikoyatlar uchun</p>
@@ -482,7 +482,7 @@
 
     <div id="fw-messages" class="h-72 p-4 overflow-y-auto flex flex-col gap-3 bg-surface-container-low">
       <div class="flex gap-2 max-w-[88%]">
-        <div class="w-8 h-8 bg-error text-on-error rounded-full flex items-center justify-center text-sm shrink-0">⚠️</div>
+        <div class="w-8 h-8 bg-error text-on-error rounded-full flex items-center justify-center text-sm shrink-0">вљ пёЏ</div>
         <div class="bg-surface p-3 rounded-tr-xl rounded-b-xl text-sm text-on-surface shadow-sm border border-outline-variant/30 leading-relaxed">
           Assalomu alaykum! Klinikada yoki saytda qandaydir muammoga duch keldingizmi? Bizga yozing, rahbariyat shaxsan ko'rib chiqadi!
         </div>
@@ -563,7 +563,7 @@
     const container = document.createElement('div');
     container.className = 'flex gap-2 max-w-[88%]';
     container.innerHTML = `
-      <div class="w-8 h-8 bg-error text-on-error rounded-full flex items-center justify-center text-sm shrink-0">⚠️</div>
+      <div class="w-8 h-8 bg-error text-on-error rounded-full flex items-center justify-center text-sm shrink-0">вљ пёЏ</div>
       <div class="bg-surface p-3 rounded-tr-xl rounded-b-xl text-sm text-on-surface shadow-sm border border-outline-variant/30 leading-relaxed">
         ${text}
       </div>
@@ -576,7 +576,7 @@
     const container = document.createElement('div');
     container.className = 'flex gap-2 max-w-[88%]';
     container.innerHTML = `
-      <div class="w-8 h-8 bg-error text-on-error rounded-full flex items-center justify-center text-sm shrink-0">⚠️</div>
+      <div class="w-8 h-8 bg-error text-on-error rounded-full flex items-center justify-center text-sm shrink-0">вљ пёЏ</div>
       <div class="bg-surface p-3 rounded-tr-xl rounded-b-xl text-sm text-on-surface shadow-sm border border-outline-variant/30 leading-relaxed">
         ${html}
       </div>

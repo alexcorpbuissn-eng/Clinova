@@ -668,22 +668,7 @@ const htmlTemplate = `<!DOCTYPE html>
     </div>
   </div>
 
-  <!-- Add CSS for active visit cards -->
-  <style type="text/tailwindcss">
-    @layer utilities {
-      .active-card { @apply bg-surface border border-outline-variant rounded-lg p-4 relative overflow-hidden transition-transform hover:-translate-y-0.5 shadow-sm; }
-      .active-card::before { content:''; @apply absolute top-0 left-0 w-1 h-full bg-secondary; }
-      .active-card .patient { @apply font-label-md text-on-surface mb-1; }
-      .active-card .doctor { @apply font-body-sm text-on-surface-variant text-[13px]; }
-      .active-card .timer { @apply bg-secondary-container text-on-secondary-container px-2 py-1 rounded font-label-sm text-[13px] flex items-center gap-1; }
-      .active-card .finish-btn { @apply bg-surface-container border border-primary text-primary px-3 py-1 rounded text-[13px] font-label-md hover:bg-primary-fixed transition-colors; }
-      .active-card .status-dot { @apply w-2 h-2 rounded-full bg-secondary animate-pulse; }
-      
-      .source-badge { @apply text-[11px] font-bold px-2 py-1 rounded-full uppercase tracking-wider; }
-      .source-badge.booked { @apply bg-[#dbeafe] text-[#1e40af] border border-[#bfdbfe]; }
-      .source-badge.walkin { @apply bg-[#f1f5f9] text-[#475569] border border-[#cbd5e1]; }
-    }
-  </style>
+
 
   <script>
     ${jsContent}

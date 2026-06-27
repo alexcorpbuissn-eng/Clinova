@@ -645,23 +645,6 @@ tailwind.config = {
     </div>
   </div>
 
-  <!-- Add CSS for active visit cards -->
-  <style type="text/tailwindcss">
-    @layer utilities {
-      .active-card { @apply bg-surface border border-outline-variant rounded-lg p-4 relative overflow-hidden transition-transform hover:-translate-y-0.5 shadow-sm; }
-      .active-card::before { content:''; @apply absolute top-0 left-0 w-1 h-full bg-secondary; }
-      .active-card .patient { @apply font-label-md text-on-surface mb-1; }
-      .active-card .doctor { @apply font-body-sm text-on-surface-variant text-[13px]; }
-      .active-card .timer { @apply bg-secondary-container text-on-secondary-container px-2 py-1 rounded font-label-sm text-[13px] flex items-center gap-1; }
-      .active-card .finish-btn { @apply bg-surface-container border border-primary text-primary px-3 py-1 rounded text-[13px] font-label-md hover:bg-primary-fixed transition-colors; }
-      .active-card .status-dot { @apply w-2 h-2 rounded-full bg-secondary animate-pulse; }
-      
-      .source-badge { @apply text-[11px] font-bold px-2 py-1 rounded-full uppercase tracking-wider; }
-      .source-badge.booked { @apply bg-[#dbeafe] text-[#1e40af] border border-[#bfdbfe]; }
-      .source-badge.walkin { @apply bg-[#f1f5f9] text-[#475569] border border-[#cbd5e1]; }
-    }
-  </style>
-
   <script>
     const API = '';
   let adminToken = null;
@@ -951,7 +934,7 @@ tailwind.config = {
           waitingContainer.innerHTML = waiting.map(a => {
             const timeStr = new Date(a.slot.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             return `
-              <div class="active-card flex justify-between items-center bg-surface-container-lowest">
+              <div class="relative overflow-hidden bg-surface border border-outline-variant rounded-lg p-4 transition-transform hover:-translate-y-0.5 shadow-sm before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-secondary flex justify-between items-center bg-surface-container-lowest">
                 <div>
                   <div class="patient text-lg">🙎‍♂️ ${a.patient.firstName} ${a.patient.lastName}</div>
                   <div class="doctor mt-1">👨‍⚕️ ${a.slot.doctor.firstName} ${a.slot.doctor.lastName} • 🕒 ${timeStr}</div>
@@ -977,7 +960,7 @@ tailwind.config = {
             const timeStart = new Date(v.startTime);
             const duration = Math.floor((new Date() - timeStart) / 60000);
             return `
-              <div class="active-card flex justify-between items-center bg-surface-container-lowest" style="border-left-color: var(--color-primary)">
+              <div class="relative overflow-hidden bg-surface border border-outline-variant rounded-lg p-4 transition-transform hover:-translate-y-0.5 shadow-sm before:content-[''] before:absolute before:top-0 before:left-0 before:w-1 before:h-full before:bg-secondary flex justify-between items-center bg-surface-container-lowest" style="border-left-color: var(--color-primary)">
                 <div>
                   <div class="patient text-lg flex items-center gap-2">
                     <span class="status-dot"></span>
@@ -2303,8 +2286,8 @@ tailwind.config = {
           : `<span style="color:var(--red)">⚠️ ${v.paidAmount.toLocaleString()} / ${v.price.toLocaleString()}</span>${payMethodText}`;
 
         const sourceBadge = v.source === 'BOOKED'
-          ? '<span class="source-badge booked">📱 Online</span>'
-          : '<span class="source-badge walkin">🚶 Offline</span>';
+          ? '<span class="text-[11px] font-bold px-2 py-1 rounded-full uppercase tracking-wider bg-[#dbeafe] text-[#1e40af] border border-[#bfdbfe]">📱 Online</span>'
+          : '<span class="text-[11px] font-bold px-2 py-1 rounded-full uppercase tracking-wider bg-[#f1f5f9] text-[#475569] border border-[#cbd5e1]">🚶 Offline</span>';
           
         return `<tr>
           <td>${start}</td>
@@ -2718,8 +2701,8 @@ tailwind.config = {
             }
 
             const sourceBadge = p.source === 'ONLINE' 
-              ? '<span class="source-badge booked">📱 Telegram Bot</span>' 
-              : '<span class="source-badge walkin">🚶 Kelgan</span>';
+              ? '<span class="text-[11px] font-bold px-2 py-1 rounded-full uppercase tracking-wider bg-[#dbeafe] text-[#1e40af] border border-[#bfdbfe]">📱 Telegram Bot</span>' 
+              : '<span class="text-[11px] font-bold px-2 py-1 rounded-full uppercase tracking-wider bg-[#f1f5f9] text-[#475569] border border-[#cbd5e1]">🚶 Kelgan</span>';
 
             const tgPhone = p.telegramPhone || '-';
 
