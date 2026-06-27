@@ -21,6 +21,7 @@ const nextConfig: NextConfig = {
     return [
       { source: '/superadmin', destination: '/superadmin.html' },
       { source: '/admin', destination: '/admin.html' },
+      { source: '/staff', destination: '/staff.html' },
       { source: '/doctor', destination: '/doctor.html' },
       { source: '/reception', destination: '/reception.html' },
       { source: '/inventory', destination: '/inventory.html' },
