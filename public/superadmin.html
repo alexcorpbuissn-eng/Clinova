@@ -7,42 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Atkinson+Hyperlegible+Next:wght@400;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries">
-async function loadLogs() {
-    const tbody = document.getElementById('logs-tbody');
-    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-on-surface-variant">Yuklanmoqda...</td></tr>';
-    try {
-        const res = await fetch('/api/superadmin/logs');
-        const data = await res.json();
-        if (data.logs) {
-            tbody.innerHTML = data.logs.map(log => {
-                const color = log.level === 'ERROR' ? 'text-error' : (log.level === 'WARN' ? 'text-[orange]' : 'text-[green]');
-                return `
-                    <tr class="hover:bg-surface-container-lowest transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap">${new Date(log.createdAt).toLocaleString()}</td>
-                        <td class="px-6 py-4 whitespace-nowrap font-bold ${color}">${log.level}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${log.source}</td>
-                        <td class="px-6 py-4 max-w-xs truncate" title="${log.message.replace(/"/g, '&quot;')}">${log.message}</td>
-                        <td class="px-6 py-4 max-w-sm truncate" title="${(log.details || '').replace(/"/g, '&quot;')}">${log.details || '-'}</td>
-                    </tr>
-                `;
-            }).join('');
-        }
-    } catch (err) {
-        tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-error">Xatolik yuz berdi</td></tr>';
-    }
-}
-
-// Ensure loadLogs is called when tab is switched
-const originalSwitchTab = switchTab;
-window.switchTab = function(tabId) {
-    originalSwitchTab(tabId);
-    if (tabId === 'logs') {
-        loadLogs();
-    }
-};
-
-</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script id="tailwind-config">
     tailwind.config = {
         darkMode: "class",
