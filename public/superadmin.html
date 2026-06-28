@@ -667,7 +667,7 @@ async function addAdminToClinic() {
     }
     
     try {
-        await apiCall(\`/api/superadmin/clinics/\${clinicId}/admin\`, {
+        await apiCall(`/api/superadmin/clinics/${clinicId}/admin`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ telegramPhone: phone })
