@@ -468,6 +468,28 @@
 </div>
 </div>
 
+<!-- IMPERSONATE MODAL -->
+<div id="impersonate-modal" class="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm" style="display: none;">
+<div class="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-sm border border-outline-variant/30 shadow-lg flex flex-col">
+<div class="flex justify-between items-center mb-6">
+    <h3 id="impersonate-modal-title" class="font-headline-md text-headline-md text-on-surface">Klinikaga Kirish</h3>
+    <button type="button" onclick="closeImpersonateModal()" class="text-on-surface-variant hover:text-error transition-colors">
+        <span class="material-symbols-outlined">close</span>
+    </button>
+</div>
+
+<p class="text-sm text-on-surface-variant mb-4">Qaysi bo'limga kirmoqchisiz?</p>
+<input type="hidden" id="impersonate-clinic-id" value="">
+<div id="impersonate-err" class="text-error text-xs mb-4"></div>
+
+<div class="flex flex-col gap-3">
+    <button onclick="doImpersonate('ADMIN')" class="w-full bg-primary text-on-primary py-3 rounded-lg font-bold hover:bg-primary-container transition shadow">Admin Panel</button>
+    <button onclick="doImpersonate('RECEPTION')" class="w-full bg-secondary text-on-secondary py-3 rounded-lg font-bold hover:bg-secondary-container transition shadow">Qabulxona (Reception)</button>
+    <button onclick="doImpersonate('DOCTOR')" class="w-full bg-tertiary text-on-tertiary py-3 rounded-lg font-bold hover:bg-tertiary-container transition shadow">Shifokor (Doctor)</button>
+</div>
+</div>
+</div>
+
 <script>
     let token = localStorage.getItem('sa_token') || '';
     let globalClinics = []; // Store clinics globally to access staff data
@@ -596,11 +618,14 @@ async function loadClinics() {
                 </td>
                 <td class="py-3 px-6 text-center">
                     <div class="flex items-center justify-center gap-1">
+                        <button onclick="showImpersonateModal('${c.id}', '${c.name}')" class="text-primary hover:bg-primary-container p-2 rounded transition" title="Klinikaga kirish">
+                            <span class="material-symbols-outlined text-[18px]">login</span>
+                        </button>
                         <button onclick="viewClinicLogs('${c.id}', '${c.name}')" class="text-primary hover:bg-primary-container p-2 rounded transition" title="Klinika loglarini ko'rish">
                             <span class="material-symbols-outlined text-[18px]">receipt_long</span>
                         </button>
-                        <button onclick="deleteClinic('${c.id}')" class="text-error hover:bg-error-container p-2 rounded transition" title="Deactivate">
-                            <span class="material-symbols-outlined text-[18px]">block</span>
+                        <button onclick="deleteClinic('${c.id}')" class="text-error hover:bg-error-container p-2 rounded transition" title="O'chirish">
+                            <span class="material-symbols-outlined text-[18px]">delete</span>
                         </button>
                     </div>
                 </td>
@@ -1021,6 +1046,53 @@ async function handleCreateClinic(e) {
     } finally {
         btn.disabled = false;
         btn.innerText = 'Yaratish';
+    }
+}
+
+function showImpersonateModal(clinicId, clinicName) {
+    document.getElementById('impersonate-clinic-id').value = clinicId;
+    document.getElementById('impersonate-modal-title').innerText = `${clinicName} ga kirish`;
+    document.getElementById('impersonate-err').innerText = '';
+    document.getElementById('impersonate-modal').style.display = 'flex';
+}
+
+function closeImpersonateModal() {
+    document.getElementById('impersonate-modal').style.display = 'none';
+}
+
+async function doImpersonate(role) {
+    const clinicId = document.getElementById('impersonate-clinic-id').value;
+    const errDiv = document.getElementById('impersonate-err');
+    errDiv.className = 'text-primary text-xs mb-4';
+    errDiv.innerText = 'Kirish amalga oshirilmoqda...';
+    
+    try {
+        const res = await apiCall('/api/superadmin/impersonate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ clinicId, role })
+        });
+        
+        errDiv.innerText = 'Muvaffaqiyatli! Oynaga o\'tilmoqda...';
+        
+        if (role === 'ADMIN') {
+            localStorage.setItem('admin_token', res.token);
+            localStorage.setItem('staff_token', res.token);
+            window.open('/admin.html', '_blank');
+        } else if (role === 'RECEPTION') {
+            localStorage.setItem('reception_token', res.token);
+            localStorage.setItem('staff_token', res.token);
+            window.open('/reception.html', '_blank');
+        } else if (role === 'DOCTOR') {
+            localStorage.setItem('doctor_token', res.token);
+            localStorage.setItem('staff_token', res.token);
+            window.open('/doctor.html', '_blank');
+        }
+        
+        setTimeout(() => closeImpersonateModal(), 500);
+    } catch (err) {
+        errDiv.className = 'text-error text-xs mb-4';
+        errDiv.innerText = err.message;
     }
 }
 
