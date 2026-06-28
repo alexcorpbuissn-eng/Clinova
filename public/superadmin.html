@@ -166,6 +166,11 @@
                         <span class="material-symbols-outlined">receipt_long</span> Tizim Jurnali
                     </button>
                 </li>
+                <li>
+                    <button id="nav-admins" onclick="switchTab('admins')" class="w-full text-left nav-item text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
+                        <span class="material-symbols-outlined">admin_panel_settings</span> Super Adminlar
+                    </button>
+                </li>
             </ul>
             <div class="mt-auto px-2 pt-4 border-t border-outline-variant">
                 <button onclick="logout()" class="w-full text-left text-on-surface-variant flex items-center gap-3 px-4 py-3 font-label-md hover:bg-surface-container-high transition-all rounded-full">
@@ -266,6 +271,32 @@
             </div>
         
             <!-- LOGS TAB -->
+            <div id="tab-admins" class="tab-content hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Super Adminlar</h3>
+                    <button onclick="showAdminModal()" class="bg-primary text-on-primary px-6 py-2.5 rounded-full font-label-md hover:bg-primary-container transition-colors flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg">add</span>
+                        Yangi qo'shish
+                    </button>
+                </div>
+                
+                <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 overflow-hidden shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-surface-container-low border-b border-outline-variant/50">
+                                <th class="p-4 font-label-md text-on-surface-variant uppercase">Telefon</th>
+                                <th class="p-4 font-label-md text-on-surface-variant uppercase">Huquqlar (Ruxsatlar)</th>
+                                <th class="p-4 font-label-md text-on-surface-variant uppercase">Qo'shilgan sana</th>
+                                <th class="p-4 font-label-md text-on-surface-variant uppercase text-right">Amallar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admins-list" class="divide-y divide-outline-variant/30">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div id="tab-logs" class="tab-content hidden">
                 <div class="bg-surface-container-low rounded-3xl border border-outline-variant/30 overflow-hidden">
                     <div class="px-6 py-4 border-b border-outline-variant/30 flex justify-between items-center gap-4 flex-wrap">
@@ -355,13 +386,91 @@
                         <p class="text-sm mt-2"><span id="res-note"></span></p>
                     </div>
                     <button onclick="closeCreateModal()" class="w-full bg-primary text-on-primary px-4 py-2 rounded-lg font-label-md">Yopish</button>
-                </div>
-            </div>
+                        <div class="flex flex-col items-center gap-3 text-on-surface-variant">
+                            <span class="material-symbols-outlined text-[64px] opacity-20">receipt_long</span>
+                            <p class="font-label-md text-label-md">Hozircha hech qanday log yozuvi yo'q</p>
+                            <p class="text-body-sm opacity-60">Tizimda biror harakat amalga oshirilgandan so'ng bu yerda ko'rinadi</p>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+</div>
+
+<!-- ADMIN MODAL -->
+<div id="admin-modal" class="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm" style="display: none;">
+<div class="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-md border border-outline-variant/30 shadow-lg">
+<div class="flex justify-between items-center mb-6">
+    <h3 class="font-headline-md text-headline-md text-on-surface">Super Admin</h3>
+    <button type="button" onclick="closeAdminModal()" class="text-on-surface-variant hover:text-error transition-colors">
+        <span class="material-symbols-outlined">close</span>
+    </button>
+</div>
+<div id="admin-err" class="text-error font-body-sm mb-4"></div>
+<form id="admin-form" class="space-y-4">
+    <div>
+        <label class="block font-label-md text-on-surface-variant mb-1">Telegram Telefon Raqami</label>
+        <input type="tel" id="admin-phone-input" placeholder="+998901234567" class="w-full px-4 py-2.5 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-surface-container-lowest text-on-surface" required>
+    </div>
+    
+    <div>
+        <label class="block font-label-md text-on-surface-variant mb-2">Huquqlar (Ruxsatlar)</label>
+        <div class="space-y-2" id="admin-permissions">
+            <label class="flex items-center gap-2">
+                <input type="checkbox" value="CAN_CREATE_CLINICS" class="rounded text-primary focus:ring-primary h-4 w-4">
+                <span class="text-on-surface text-body-md">Klinika yaratish</span>
+            </label>
+            <label class="flex items-center gap-2">
+                <input type="checkbox" value="CAN_MANAGE_USERS" class="rounded text-primary focus:ring-primary h-4 w-4">
+                <span class="text-on-surface text-body-md">Hodimlarni boshqarish</span>
+            </label>
+            <label class="flex items-center gap-2">
+                <input type="checkbox" value="CAN_VIEW_LOGS" class="rounded text-primary focus:ring-primary h-4 w-4">
+                <span class="text-on-surface text-body-md">Loglarni ko'rish</span>
+            </label>
         </div>
     </div>
+    
+    <div class="flex justify-end gap-3 mt-6">
+        <button type="button" onclick="closeAdminModal()" class="px-5 py-2.5 rounded-full font-label-md text-on-surface hover:bg-surface-container-high transition-colors border border-outline-variant">Bekor qilish</button>
+        <button type="submit" id="btn-save-admin" class="px-5 py-2.5 rounded-full font-label-md bg-primary text-on-primary hover:bg-primary-container transition-colors">Saqlash</button>
+    </div>
+</form>
+</div>
+</div>
 
-    <script>
-let token = localStorage.getItem('sa_token') || '';
+<!-- STAFF MODAL -->
+<div id="staff-modal" class="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm" style="display: none;">
+<div class="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-lg border border-outline-variant/30 shadow-lg max-h-[80vh] flex flex-col">
+<div class="flex justify-between items-center mb-6">
+    <h3 id="staff-modal-title" class="font-headline-md text-headline-md text-on-surface">Klinika Xodimlari</h3>
+    <button type="button" onclick="closeStaffModal()" class="text-on-surface-variant hover:text-error transition-colors">
+        <span class="material-symbols-outlined">close</span>
+    </button>
+</div>
+
+<div class="overflow-y-auto flex-1">
+    <table class="w-full text-left border-collapse">
+        <thead>
+            <tr class="bg-surface-container-low border-b border-outline-variant/50">
+                <th class="p-3 font-label-md text-on-surface-variant uppercase">Telefon</th>
+                <th class="p-3 font-label-md text-on-surface-variant uppercase">Rol</th>
+            </tr>
+        </thead>
+        <tbody id="staff-list" class="divide-y divide-outline-variant/30">
+            <!-- Populated via JS -->
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+<script>
+    let token = localStorage.getItem('sa_token') || '';
+    let globalClinics = []; // Store clinics globally to access staff data
 
 async function apiCall(endpoint, options = {}) {
     if (!options.headers) options.headers = {};
@@ -400,6 +509,7 @@ function switchTab(tabId) {
     if (tabId === 'clinics') loadClinics();
     if (tabId === 'billing') loadBilling();
     if (tabId === 'logs') loadLogs();
+    if (tabId === 'admins') loadAdmins();
 }
 
 async function handleLogin(e) {
@@ -456,9 +566,10 @@ async function loadStats() {
 
 async function loadClinics() {
     const tbody = document.getElementById('clinics-tbody');
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">Loading...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">Loading...</td></tr>';
     try {
         const { clinics } = await apiCall('/api/superadmin/clinics');
+        globalClinics = clinics;
         tbody.innerHTML = clinics.map(c => `
             <tr class="hover:bg-surface-container-low transition-colors">
                 <td class="py-3 px-6 border-r border-outline-variant/30 font-medium">${c.name}</td>
@@ -478,6 +589,11 @@ async function loadClinics() {
                 </td>
                 <td class="py-3 px-6 border-r border-outline-variant/30 text-center">${c._count.doctors}</td>
                 <td class="py-3 px-6 border-r border-outline-variant/30 text-center">${c._count.appointments}</td>
+                <td class="py-3 px-6 border-r border-outline-variant/30 text-center">
+                    <button onclick="showStaffModal('${c.id}')" class="text-xs bg-tertiary-container text-on-tertiary-container px-3 py-1.5 rounded-full hover:opacity-90">
+                        Xodimlar (${c._count.users})
+                    </button>
+                </td>
                 <td class="py-3 px-6 text-center">
                     <div class="flex items-center justify-center gap-1">
                         <button onclick="viewClinicLogs('${c.id}', '${c.name}')" class="text-primary hover:bg-primary-container p-2 rounded transition" title="Klinika loglarini ko'rish">
@@ -491,9 +607,111 @@ async function loadClinics() {
             </tr>
         `).join('');
     } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-error">${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-error">${err.message}</td></tr>`;
     }
 }
+
+function showStaffModal(clinicId) {
+    const clinic = globalClinics.find(c => c.id === clinicId);
+    if (!clinic) return;
+    
+    document.getElementById('staff-modal-title').innerText = `${clinic.name} - Xodimlar`;
+    const tbody = document.getElementById('staff-list');
+    
+    if (!clinic.users || clinic.users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" class="p-4 text-center text-on-surface-variant">Xodimlar topilmadi</td></tr>';
+    } else {
+        tbody.innerHTML = clinic.users.map(u => `
+            <tr class="hover:bg-surface-container-lowest transition-colors">
+                <td class="p-3 font-mono">${u.telegramPhone}</td>
+                <td class="p-3"><span class="px-2 py-1 rounded bg-secondary-container text-on-secondary-container text-xs font-bold">${u.role}</span></td>
+            </tr>
+        `).join('');
+    }
+    
+    document.getElementById('staff-modal').style.display = 'flex';
+}
+
+function closeStaffModal() {
+    document.getElementById('staff-modal').style.display = 'none';
+}
+
+async function loadAdmins() {
+    const tbody = document.getElementById('admins-list');
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading...</td></tr>';
+    try {
+        const { superAdmins } = await apiCall('/api/superadmin/admins');
+        tbody.innerHTML = superAdmins.map(admin => `
+            <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="p-4 font-mono font-medium text-on-surface">${admin.telegramPhone}</td>
+                <td class="p-4">
+                    <div class="flex flex-wrap gap-1">
+                        ${admin.permissions.map(p => `<span class="bg-primary-container text-on-primary-container text-[10px] px-2 py-0.5 rounded-full font-bold">${p}</span>`).join('')}
+                        ${admin.permissions.length === 0 ? '<span class="text-xs text-on-surface-variant">Barchaga ruxsat (Default)</span>' : ''}
+                    </div>
+                </td>
+                <td class="p-4 text-sm text-on-surface-variant">${new Date(admin.createdAt).toLocaleDateString('uz-UZ')}</td>
+                <td class="p-4 text-right">
+                    <button onclick="editAdmin('${admin.telegramPhone}', '${admin.permissions.join(',')}')" class="text-primary hover:bg-primary-container p-2 rounded transition" title="Tahrirlash">
+                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-error">${err.message}</td></tr>`;
+    }
+}
+
+function showAdminModal() {
+    document.getElementById('admin-form').reset();
+    document.getElementById('admin-err').innerText = '';
+    document.getElementById('admin-phone-input').readOnly = false;
+    document.getElementById('admin-modal').style.display = 'flex';
+}
+
+function closeAdminModal() {
+    document.getElementById('admin-modal').style.display = 'none';
+}
+
+function editAdmin(phone, permsStr) {
+    document.getElementById('admin-form').reset();
+    document.getElementById('admin-err').innerText = '';
+    
+    document.getElementById('admin-phone-input').value = phone;
+    // Don't allow changing phone during edit
+    document.getElementById('admin-phone-input').readOnly = true;
+    
+    const perms = permsStr ? permsStr.split(',') : [];
+    document.querySelectorAll('#admin-permissions input[type="checkbox"]').forEach(cb => {
+        cb.checked = perms.includes(cb.value);
+    });
+    
+    document.getElementById('admin-modal').style.display = 'flex';
+}
+
+document.getElementById('admin-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btn-save-admin');
+    btn.disabled = true;
+    
+    const phone = document.getElementById('admin-phone-input').value;
+    const perms = Array.from(document.querySelectorAll('#admin-permissions input[type="checkbox"]:checked')).map(cb => cb.value);
+    
+    try {
+        await apiCall('/api/superadmin/admins', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ telegramPhone: phone, permissions: perms })
+        });
+        closeAdminModal();
+        loadAdmins();
+    } catch (err) {
+        document.getElementById('admin-err').innerText = err.message;
+    } finally {
+        btn.disabled = false;
+    }
+});
 
 function viewClinicLogs(clinicId, clinicName) {
     // Switch to logs tab and filter by this clinic

@@ -16,6 +16,9 @@ export async function GET(request: NextRequest) {
       include: {
         _count: {
           select: { appointments: true, doctors: true, users: true }
+        },
+        users: {
+          select: { telegramPhone: true, role: true }
         }
       }
     });
@@ -57,8 +60,8 @@ export async function POST(request: NextRequest) {
     }
 
     const existingUser = await prisma.user.findUnique({ where: { telegramPhone: adminPhone } });
-    if (existingUser) {
-      return NextResponse.json({ error: 'A user with this phone already exists' }, { status: 409 });
+    if (existingUser && existingUser.role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ error: 'Этот номер уже зарегистрирован за другим сотрудником.' }, { status: 409 });
     }
 
     const result = await prisma.$transaction(async (tx) => {
@@ -66,11 +69,16 @@ export async function POST(request: NextRequest) {
         data: { name, slug, address: address || null, phone: phone || null, isActive: true, plan: 'TRIAL' }
       });
 
-      const user = await tx.user.create({
-        data: { telegramPhone: adminPhone, role: 'ADMIN', clinicId: clinic.id }
-      });
+      let adminUserId = existingUser?.id;
 
-      return { clinic, adminUserId: user.id };
+      if (!existingUser) {
+        const user = await tx.user.create({
+          data: { telegramPhone: adminPhone, role: 'ADMIN', clinicId: clinic.id }
+        });
+        adminUserId = user.id;
+      }
+
+      return { clinic, adminUserId };
     });
 
     await logSystemEvent('INFO', 'BACKEND', `Yangi klinika yaratildi: ${name}`, { clinicId: result.clinic.id, slug, adminPhone });
@@ -81,7 +89,7 @@ export async function POST(request: NextRequest) {
       admin: {
         userId: result.adminUserId,
         telegramPhone: adminPhone,
-        note: 'Admin can now log in via Telegram OTP with this phone number'
+        note: existingUser ? 'Superadmin biriktirildi' : 'Admin can now log in via Telegram OTP with this phone number'
       }
     }, { status: 201 });
 

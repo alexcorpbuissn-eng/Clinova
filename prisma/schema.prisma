@@ -297,6 +297,7 @@ model User {
   telegramPhone String   @unique
   password      String?
   role          Role
+  permissions   String[] @default([])
   doctorId      String?
 
   createdAt DateTime @default(now())
