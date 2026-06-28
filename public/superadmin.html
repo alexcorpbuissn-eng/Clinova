@@ -1075,6 +1075,8 @@ async function doImpersonate(role) {
         
         errDiv.innerText = 'Muvaffaqiyatli! Oynaga o\'tilmoqda...';
         
+        localStorage.setItem('user_role', role);
+        
         if (role === 'ADMIN') {
             localStorage.setItem('admin_token', res.token);
             localStorage.setItem('staff_token', res.token);
