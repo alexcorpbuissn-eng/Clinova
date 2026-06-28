@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/uz.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/uz.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -1624,7 +1624,6 @@
     // ---- DOCTOR ADD/EDIT ----
     function openDoctorModal(docStr) {
       document.getElementById('role-error').style.display = 'none'; // reset just in case
-      closeLeaveModal(); // prevent overlapping
       const modal = document.getElementById('doctor-modal');
       const doc = docStr ? JSON.parse(decodeURIComponent(docStr)) : null;
       
