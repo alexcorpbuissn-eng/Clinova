@@ -23,14 +23,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Klinika topilmadi (Clinic not found)' }, { status: 404 });
     }
 
-    // Assign the SUPER_ADMIN the requested role for the requested clinic
+    // Assign the SUPER_ADMIN to the requested clinic but KEEP the SUPER_ADMIN role
+    // This allows them to bypass `isActive` checks and plan limits in clinic-guard
     const payload = {
       userId: session.userId,
-      role: role,
+      role: 'SUPER_ADMIN', 
+      impersonatedRole: role,
       clinicId: clinicId,
-      // For DOCTOR role, we would normally need a doctorId. 
-      // But SUPER_ADMIN usually just wants to see the doctor UI. 
-      // Let's find the first doctor in the clinic, or just pass undefined if none exists.
       doctorId: undefined as string | undefined
     };
 
