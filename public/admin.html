@@ -1409,7 +1409,7 @@
       const reason = document.getElementById('leave-reason').value;
 
       if(!doctorId || !startStr || !endStr) {
-        alert("Shifokor, boshlanish va tugash sanasini tanlang!");
+        showToast("Shifokor, boshlanish va tugash sanasini tanlang!", "error");
         return;
       }
 
@@ -1624,6 +1624,7 @@
     // ---- DOCTOR ADD/EDIT ----
     function openDoctorModal(docStr) {
       document.getElementById('role-error').style.display = 'none'; // reset just in case
+      closeLeaveModal(); // prevent overlapping
       const modal = document.getElementById('doctor-modal');
       const doc = docStr ? JSON.parse(decodeURIComponent(docStr)) : null;
       
