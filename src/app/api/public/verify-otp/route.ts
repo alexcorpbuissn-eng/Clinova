@@ -62,13 +62,13 @@ export async function POST(req: NextRequest) {
     where: { telegramPhone }
   });
 
-  // Bootstrap: If no users exist in the database at all, make the first person an ADMIN
+  // Bootstrap: If no users exist in the database at all, make the first person a SUPER_ADMIN
   const userCount = await prisma.user.count();
   if (userCount === 0 && !user) {
     user = await prisma.user.create({
       data: {
         telegramPhone,
-        role: 'ADMIN'
+        role: 'SUPER_ADMIN'
       }
     });
   }
