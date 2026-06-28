@@ -7,9 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Atkinson+Hyperlegible+Next:wght@400;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/uz.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -1299,14 +1298,22 @@
     let leaveStartPicker = null;
     let leaveEndPicker = null;
 
+    function closeAllModals() {
+      const modals = ['doctor-modal', 'history-modal', 'role-modal', 'leave-modal', 'new-user-modal'];
+      modals.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+    }
+
     async function openLeaveModal() {
+      closeAllModals();
       document.getElementById('leave-start').value = '';
       document.getElementById('leave-end').value = '';
       document.getElementById('leave-reason').value = '';
       
       if (!leaveStartPicker) {
         leaveStartPicker = flatpickr('#leave-start', {
-          locale: 'uz',
           dateFormat: 'Y-m-d',
         });
       } else {
@@ -1315,7 +1322,6 @@
       
       if (!leaveEndPicker) {
         leaveEndPicker = flatpickr('#leave-end', {
-          locale: 'uz',
           dateFormat: 'Y-m-d',
         });
       } else {
@@ -1623,6 +1629,7 @@
 
     // ---- DOCTOR ADD/EDIT ----
     function openDoctorModal(docStr) {
+      closeAllModals();
       document.getElementById('role-error').style.display = 'none'; // reset just in case
       const modal = document.getElementById('doctor-modal');
       const doc = docStr ? JSON.parse(decodeURIComponent(docStr)) : null;
