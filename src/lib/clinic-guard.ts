@@ -41,8 +41,9 @@ export async function requireClinicAccess(request: NextRequest): Promise<ClinicS
     doctorId: payload.doctorId,
   };
 
-  // SUPER_ADMIN bypasses clinic checks — resolve to first active clinic if no clinicId
-  if (session.role === 'SUPER_ADMIN') {
+  // If user has no clinicId (e.g. SUPER_ADMIN or bootstrapped ADMIN), resolve to first active clinic
+  // SUPER_ADMIN also bypasses the strict clinic isActive/plan checks below because they manage the platform
+  if (!session.clinicId || session.role === 'SUPER_ADMIN') {
     if (!session.clinicId) {
       const firstClinic = await prisma.clinic.findFirst({
         where: { isActive: true },
@@ -51,7 +52,9 @@ export async function requireClinicAccess(request: NextRequest): Promise<ClinicS
       });
       session.clinicId = firstClinic?.id;
     }
-    return session;
+    if (session.role === 'SUPER_ADMIN') {
+      return session;
+    }
   }
 
   if (session.clinicId) {
