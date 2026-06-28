@@ -689,23 +689,25 @@ async function loadAdmins() {
     tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading...</td></tr>';
     try {
         const { superAdmins } = await apiCall('/api/superadmin/admins');
-        tbody.innerHTML = superAdmins.map(admin => `
+        tbody.innerHTML = superAdmins.map(admin => {
+            const perms = admin.permissions || [];
+            return `
             <tr class="hover:bg-surface-container-low transition-colors">
                 <td class="p-4 font-mono font-medium text-on-surface">${admin.telegramPhone}</td>
                 <td class="p-4">
                     <div class="flex flex-wrap gap-1">
-                        ${admin.permissions.map(p => `<span class="bg-primary-container text-on-primary-container text-[10px] px-2 py-0.5 rounded-full font-bold">${p}</span>`).join('')}
-                        ${admin.permissions.length === 0 ? '<span class="text-xs text-on-surface-variant">Barchaga ruxsat (Default)</span>' : ''}
+                        ${perms.map(p => `<span class="bg-primary-container text-on-primary-container text-[10px] px-2 py-0.5 rounded-full font-bold">${p}</span>`).join('')}
+                        ${perms.length === 0 ? '<span class="text-xs text-on-surface-variant">Barchaga ruxsat (Default)</span>' : ''}
                     </div>
                 </td>
                 <td class="p-4 text-sm text-on-surface-variant">${new Date(admin.createdAt).toLocaleDateString('uz-UZ')}</td>
                 <td class="p-4 text-right">
-                    <button onclick="editAdmin('${admin.telegramPhone}', '${admin.permissions.join(',')}')" class="text-primary hover:bg-primary-container p-2 rounded transition" title="Tahrirlash">
+                    <button onclick="editAdmin('${admin.telegramPhone}', '${perms.join(',')}')" class="text-primary hover:bg-primary-container p-2 rounded transition" title="Tahrirlash">
                         <span class="material-symbols-outlined text-[18px]">edit</span>
                     </button>
                 </td>
             </tr>
-        `).join('');
+        `}).join('');
     } catch (err) {
         tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-error">${err.message}</td></tr>`;
     }
