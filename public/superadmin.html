@@ -629,11 +629,59 @@ function showStaffModal(clinicId) {
         `).join('');
     }
     
+    // Add admin form
+    let addAdminForm = document.getElementById('add-admin-form');
+    if (!addAdminForm) {
+        addAdminForm = document.createElement('div');
+        addAdminForm.id = 'add-admin-form';
+        addAdminForm.className = 'mt-4 pt-4 border-t border-outline-variant';
+        addAdminForm.innerHTML = `
+            <h4 class="font-label-md text-on-surface mb-2">Yangi Admin Qo'shish</h4>
+            <div class="flex gap-2">
+                <input type="tel" id="new-clinic-admin-phone" placeholder="+998..." class="flex-1 px-3 py-2 rounded border border-outline-variant outline-none focus:border-primary text-sm bg-surface">
+                <button onclick="addAdminToClinic()" class="bg-primary text-on-primary px-4 py-2 rounded font-label-md text-sm hover:bg-primary-container transition">Qo'shish</button>
+            </div>
+            <div id="add-admin-err" class="text-error text-xs mt-1"></div>
+            <input type="hidden" id="add-admin-clinic-id" value="">
+        `;
+        document.getElementById('staff-list').parentElement.parentElement.appendChild(addAdminForm);
+    }
+    document.getElementById('add-admin-clinic-id').value = clinicId;
+    document.getElementById('new-clinic-admin-phone').value = '';
+    document.getElementById('add-admin-err').innerText = '';
+    
     document.getElementById('staff-modal').style.display = 'flex';
 }
 
 function closeStaffModal() {
     document.getElementById('staff-modal').style.display = 'none';
+}
+
+async function addAdminToClinic() {
+    const clinicId = document.getElementById('add-admin-clinic-id').value;
+    const phone = document.getElementById('new-clinic-admin-phone').value;
+    
+    if (!phone) {
+        document.getElementById('add-admin-err').innerText = 'Telefon raqamini kiriting';
+        return;
+    }
+    
+    try {
+        await apiCall(\`/api/superadmin/clinics/\${clinicId}/admin\`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ telegramPhone: phone })
+        });
+        
+        document.getElementById('add-admin-err').innerText = 'Muvaffaqiyatli qo\'shildi. Yangilanmoqda...';
+        document.getElementById('add-admin-err').className = 'text-primary text-xs mt-1';
+        
+        await loadClinics();
+        showStaffModal(clinicId); // Refresh modal
+    } catch (err) {
+        document.getElementById('add-admin-err').innerText = err.message;
+        document.getElementById('add-admin-err').className = 'text-error text-xs mt-1';
+    }
 }
 
 async function loadAdmins() {

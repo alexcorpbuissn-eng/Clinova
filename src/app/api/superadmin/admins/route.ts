@@ -22,9 +22,9 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'asc' }
     });
     return NextResponse.json({ success: true, superAdmins });
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
-    return NextResponse.json({ error: 'Failed to fetch superadmins' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Failed to fetch superadmins', stack: error.stack }, { status: 500 });
   }
 }
 
