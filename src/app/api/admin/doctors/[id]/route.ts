@@ -66,6 +66,23 @@ export async function DELETE(
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  await prisma.doctor.delete({ where: { id } });
-  return NextResponse.json({ success: true });
+  try {
+    // Delete all slots, procedures, and leaves first since they are strictly tied to the doctor
+    await prisma.slot.deleteMany({ where: { doctorId: id } });
+    await prisma.procedure.deleteMany({ where: { doctorId: id } });
+    await prisma.leave.deleteMany({ where: { doctorId: id } });
+    await prisma.savedDraft.deleteMany({ where: { doctorId: id } });
+    await prisma.appointment.deleteMany({ where: { doctorId: id } });
+
+    await prisma.doctor.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    if (error.code === 'P2003') {
+      return NextResponse.json(
+        { error: "Bu shifokorni butunlay o'chirib bo'lmaydi, chunki uning tarixida to'lovlar (tashriflar) mavjud. Iltimos, uni o'chirish o'rniga 'Faolsizlantirish' (qizil tugma) orqali nofaol holatga o'tkazing." },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json({ error: "Xatolik yuz berdi: " + error.message }, { status: 500 });
+  }
 }
