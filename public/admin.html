@@ -808,12 +808,8 @@
 
     <script>
     function forceOpenModal(id) {
-        alert("Код 100% обновился! Открываем окно: " + id);
         const m = document.getElementById(id);
-        if (!m) {
-            alert("ОШИБКА: Окно " + id + " не найдено в HTML!");
-            return;
-        }
+        if (!m) return;
         document.body.appendChild(m);
         m.classList.remove('hidden');
         m.style.display = 'flex';
@@ -857,9 +853,7 @@
           </td>
         </tr>
       `).join('');
-      const hm = document.getElementById('history-modal');
-      hm.classList.remove('hidden');
-      hm.style.display = 'flex';
+      forceOpenModal('history-modal');
     }
 
     let currentPromotePhone = null;
@@ -883,9 +877,7 @@
       
       document.getElementById('role-select').value = 'RECEPTION';
       document.getElementById('role-doctor-select-group').style.display = 'none';
-      const rm = document.getElementById('role-modal');
-      rm.classList.remove('hidden');
-      rm.style.display = 'flex';
+      forceOpenModal('role-modal');
     }
     function toggleRoleModalDoctorSelect() {
       const role = document.getElementById('role-select').value;
@@ -1702,8 +1694,7 @@
         document.getElementById('photo-preview-container').style.display = 'none';
         document.getElementById('photo-drop-text').style.display = 'block';
       }
-      modal.classList.remove('hidden');
-      modal.style.display = 'flex';
+      forceOpenModal('doctor-modal');
     }
 
     function closeDoctorModal() {
