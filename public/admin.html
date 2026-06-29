@@ -1795,7 +1795,9 @@
       reader.readAsDataURL(file);
     }
 
+    let isSavingDoctor = false;
     async function submitDoctorModal() {
+      if (isSavingDoctor) return;
       const id = document.getElementById('edit-doc-id').value;
       const firstName = document.getElementById('edit-doc-first').value;
       const lastName = document.getElementById('edit-doc-last').value;
@@ -1833,13 +1835,14 @@
           alert("Xatolik: " + res.error);
         }
       } catch(e) { alert("Tarmoq xatosi"); }
+      finally { isSavingDoctor = false; }
     }
 
     async function toggleDoctorStatus(id, isActive) {
       if(!confirm(`Shifokorni ${isActive ? 'faollashtirishni' : 'o\'chirishni'} xohlaysizmi?`)) return;
       try {
         const res = await fetch(`/api/admin/doctors/${id}`, {
-          method: 'PUT',
+          method: 'PATCH',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('staff_token')}` },
           body: JSON.stringify({ isActive })
         }).then(r => r.json());
