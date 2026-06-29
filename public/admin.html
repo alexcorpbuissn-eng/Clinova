@@ -518,7 +518,7 @@
             <div id="tab-users" class="tab-content hidden">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="font-headline-md text-on-surface">Foydalanuvchilar va Rollar</h3>
-                    <button onclick="const m=document.getElementById('new-user-modal');if(m){m.classList.remove('hidden');m.style.display='flex';}else{alert('Oyna topilmadi! Keshni tozalang.');}" class="bg-primary text-on-primary px-4 py-2 rounded-full font-label-md flex items-center gap-2 hover:bg-primary-container transition">
+                    <button onclick="forceOpenModal('new-user-modal')" class="bg-primary text-on-primary px-4 py-2 rounded-full font-label-md flex items-center gap-2 hover:bg-primary-container transition">
                         <span class="material-symbols-outlined">add</span> Yangi Rol
                     </button>
                 </div>
@@ -807,6 +807,18 @@
     </div>
 
     <script>
+    function forceOpenModal(id) {
+        alert("Код 100% обновился! Открываем окно: " + id);
+        const m = document.getElementById(id);
+        if (!m) {
+            alert("ОШИБКА: Окно " + id + " не найдено в HTML!");
+            return;
+        }
+        document.body.appendChild(m);
+        m.classList.remove('hidden');
+        m.style.display = 'flex';
+        m.style.zIndex = '999999';
+    }
         
     function closeHistoryModal() { 
       const m = document.getElementById('history-modal');
@@ -1349,9 +1361,7 @@
       textSpan.textContent = 'Yuklanmoqda...';
       dropdown.innerHTML = '<div class="px-4 py-3 text-on-surface-variant text-center">Yuklanmoqda...</div>';
       
-      const leaveModal = document.getElementById('leave-modal');
-      leaveModal.classList.remove('hidden');
-      leaveModal.style.display = 'flex';
+      forceOpenModal('leave-modal');
       
       try {
         const data = await apiGet('/api/admin/doctors');
