@@ -174,6 +174,11 @@
         <nav id="admin-sidebar" class="fixed left-0 top-0 h-screen flex flex-col py-margin-desktop border-r border-outline-variant bg-surface-container-low w-sidebar-width z-50">
             <div class="px-margin-desktop mb-8">
                 <h1 id="sidebar-clinic-name" class="font-headline-md text-headline-md font-bold text-primary">Clinova Staff</h1>
+                <script>
+                  if(localStorage.getItem('clinicName')) {
+                    document.getElementById('sidebar-clinic-name').textContent = localStorage.getItem('clinicName');
+                  }
+                </script>
                 <p class="font-body-sm text-body-sm text-on-surface-variant">Medical Portal</p>
             </div>
             
@@ -1853,6 +1858,22 @@
       } catch(e) { alert("Xatolik"); }
     }
 
+    async function deleteDoctorFinal(id) {
+      if(!confirm("Shifokorni butunlay o'chirishni xohlaysizmi? Bu amalni ortga qaytarib bo'lmaydi!")) return;
+      try {
+        const res = await fetch(`/api/admin/doctors/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('staff_token')}` }
+        }).then(r => r.json());
+        if(res.success) {
+          showToast("Shifokor muvaffaqiyatli o'chirildi!");
+          loadDoctors();
+        } else {
+          alert("Xatolik: " + res.error);
+        }
+      } catch(e) { alert("Tarmoq xatosi"); }
+    }
+
     async function loadDoctors() {
       if (!localStorage.getItem('staff_token')) return;
       const tbodyStom = document.getElementById('doc-stomatolog-tbody');
@@ -1863,6 +1884,11 @@
       try {
         const data = await apiGet('/api/admin/stats');
         if (data.success) {
+          if (data.clinicName) {
+            localStorage.setItem('clinicName', data.clinicName);
+            const el = document.getElementById('sidebar-clinic-name');
+            if(el) el.textContent = data.clinicName;
+          }
           const fmt = (n) => n.toLocaleString('uz-UZ') + ' so\'m';
           const stomatologs = data.stats.filter(d => d.specialty.toLowerCase().includes('stomatolog'));
           const lors = data.stats.filter(d => d.specialty.toLowerCase().includes('lor'));
@@ -1934,8 +1960,11 @@
                    <button onclick="openDoctorModal('${encodeURIComponent(JSON.stringify(d))}')" class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-primary transition-colors" title="Tahrirlash">
                     <span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
                    </button>
-                   <button onclick="toggleDoctorStatus('${d.id}', ${!d.isActive})" class="w-8 h-8 rounded-full flex items-center justify-center ${d.isActive ? 'text-error hover:bg-error-container' : 'text-primary hover:bg-primary-container'} transition-colors" title="${d.isActive ? 'O\'chirish' : 'Faollashtirish'}">
+                   <button onclick="toggleDoctorStatus('${d.id}', ${!d.isActive})" class="w-8 h-8 rounded-full flex items-center justify-center ${d.isActive ? 'text-error hover:bg-error-container' : 'text-primary hover:bg-primary-container'} transition-colors" title="${d.isActive ? 'Faolsizlantirish' : 'Faollashtirish'}">
                     <span class="material-symbols-outlined" style="font-size: 18px;">${d.isActive ? 'person_off' : 'person_check'}</span>
+                   </button>
+                   <button onclick="deleteDoctorFinal('${d.id}')" class="w-8 h-8 rounded-full flex items-center justify-center text-error hover:bg-error-container transition-colors" title="Butunlay o'chirish">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
                    </button>
                  </div>
               </div>

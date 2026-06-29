@@ -153,7 +153,12 @@ tailwind.config = {
     <!-- SideNavBar -->
     <nav class="flex-shrink-0 w-[260px] h-screen flex flex-col py-8 border-r border-outline-variant bg-surface-container-low z-20 overflow-y-auto custom-scrollbar">
       <div class="px-6 mb-8">
-        <h1 class="font-headline-md text-primary font-bold">Clinova Staff</h1>
+        <h1 id="sidebar-clinic-name" class="font-headline-md text-primary font-bold">Clinova Staff</h1>
+        <script>
+          if(localStorage.getItem('clinicName')) {
+            document.getElementById('sidebar-clinic-name').textContent = localStorage.getItem('clinicName');
+          }
+        </script>
         <p class="font-label-sm text-on-surface-variant mt-1">Reception Portal</p>
       </div>
       

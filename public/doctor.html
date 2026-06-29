@@ -172,7 +172,12 @@ input:checked + .slider:before { transform: translateX(20px); }
         <!-- Sidebar -->
         <nav class="hidden md:flex fixed left-0 top-0 h-screen flex-col py-8 border-r border-outline-variant bg-surface-container-lowest w-[260px] z-40">
             <div class="px-6 mb-8 flex flex-col gap-2">
-                <span class="font-headline-md font-bold text-primary">CLINOVA</span>
+                <span id="sidebar-clinic-name" class="font-headline-md font-bold text-primary">CLINOVA</span>
+                <script>
+                  if(localStorage.getItem('clinicName')) {
+                    document.getElementById('sidebar-clinic-name').textContent = localStorage.getItem('clinicName');
+                  }
+                </script>
                 <div class="flex items-center gap-3 mt-6">
                     <div class="w-12 h-12 rounded-full bg-surface-variant border border-outline flex items-center justify-center text-primary overflow-hidden">
                         <span class="material-symbols-outlined text-2xl">medical_services</span>

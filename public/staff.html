@@ -310,6 +310,9 @@
               if (data.doctor) {
                   localStorage.setItem('doctor_info', JSON.stringify(data.doctor));
               }
+              if (data.clinicName) {
+                  localStorage.setItem('clinicName', data.clinicName);
+              }
               showPortal();
             } else {
               errEl.textContent = "Sizda xodimlik huquqi yo'q!";

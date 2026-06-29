@@ -85,5 +85,10 @@ export async function GET(request: NextRequest) {
     };
   }));
 
-  return NextResponse.json({ success: true, stats });
+  const clinic = await prisma.clinic.findUnique({
+    where: { id: session.clinicId },
+    select: { name: true }
+  });
+
+  return NextResponse.json({ success: true, stats, clinicName: clinic?.name });
 }

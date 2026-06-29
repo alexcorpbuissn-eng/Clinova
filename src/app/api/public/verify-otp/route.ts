@@ -59,7 +59,8 @@ export async function POST(req: NextRequest) {
 
   // Check if this phone belongs to an admin or staff
   let user = await prisma.user.findUnique({
-    where: { telegramPhone }
+    where: { telegramPhone },
+    include: { clinic: true }
   });
 
   // Bootstrap: If no users exist in the database at all, make the first person a SUPER_ADMIN
@@ -83,5 +84,5 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  return NextResponse.json({ success: true, patient, token, role: user?.role });
+  return NextResponse.json({ success: true, patient, token, role: user?.role, clinicName: user?.clinic?.name });
 }
