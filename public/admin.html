@@ -518,7 +518,7 @@
             <div id="tab-users" class="tab-content hidden">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="font-headline-md text-on-surface">Foydalanuvchilar va Rollar</h3>
-                    <button onclick="const m=document.getElementById('new-user-modal');m.classList.remove('hidden');m.classList.add('flex');" class="bg-primary text-on-primary px-4 py-2 rounded-full font-label-md flex items-center gap-2 hover:bg-primary-container transition">
+                    <button onclick="const m=document.getElementById('new-user-modal');m.classList.remove('hidden');m.style.display='flex';" class="bg-primary text-on-primary px-4 py-2 rounded-full font-label-md flex items-center gap-2 hover:bg-primary-container transition">
                         <span class="material-symbols-outlined">add</span> Yangi Rol
                     </button>
                 </div>
@@ -781,7 +781,7 @@
     <!-- New User Modal (from old file) -->
     <div id="new-user-modal" class="fixed inset-0 bg-black/50 z-[2000] hidden items-center justify-center">
         <div class="bg-surface-container-lowest p-8 rounded-2xl max-w-md w-full relative shadow-xl">
-            <button onclick="const m=document.getElementById('new-user-modal');m.classList.remove('flex');m.classList.add('hidden');" class="absolute top-4 right-4 text-outline hover:text-on-surface"><span class="material-symbols-outlined">close</span></button>
+            <button onclick="const m=document.getElementById('new-user-modal');m.classList.add('hidden');m.style.display='none';" class="absolute top-4 right-4 text-outline hover:text-on-surface"><span class="material-symbols-outlined">close</span></button>
             <h3 class="font-headline-md text-primary mb-6">Yangi Rol Qo'shish</h3>
             <div class="space-y-4">
                 <div>
@@ -810,9 +810,8 @@
         
     function closeHistoryModal() { 
       const m = document.getElementById('history-modal');
-      m.style.display = '';
-      m.classList.remove('flex');
       m.classList.add('hidden');
+      m.style.display = 'none';
     }
     
     // Loading animation helper
@@ -847,17 +846,15 @@
         </tr>
       `).join('');
       const hm = document.getElementById('history-modal');
-      hm.style.display = '';
       hm.classList.remove('hidden');
-      hm.classList.add('flex');
+      hm.style.display = 'flex';
     }
 
     let currentPromotePhone = null;
     function closeRoleModal() {
       const rm = document.getElementById('role-modal');
-      rm.style.display = '';
-      rm.classList.remove('flex');
       rm.classList.add('hidden');
+      rm.style.display = 'none';
       document.getElementById('role-error').style.display = 'none';
       currentPromotePhone = null;
     }
@@ -875,9 +872,8 @@
       document.getElementById('role-select').value = 'RECEPTION';
       document.getElementById('role-doctor-select-group').style.display = 'none';
       const rm = document.getElementById('role-modal');
-      rm.style.display = '';
       rm.classList.remove('hidden');
-      rm.classList.add('flex');
+      rm.style.display = 'flex';
     }
     function toggleRoleModalDoctorSelect() {
       const role = document.getElementById('role-select').value;
@@ -1317,9 +1313,8 @@
       modals.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-          el.style.display = '';
-          el.classList.remove('flex');
           el.classList.add('hidden');
+          el.style.display = 'none';
         }
       });
     }
@@ -1355,9 +1350,8 @@
       dropdown.innerHTML = '<div class="px-4 py-3 text-on-surface-variant text-center">Yuklanmoqda...</div>';
       
       const leaveModal = document.getElementById('leave-modal');
-      leaveModal.style.display = '';
       leaveModal.classList.remove('hidden');
-      leaveModal.classList.add('flex');
+      leaveModal.style.display = 'flex';
       
       try {
         const data = await apiGet('/api/admin/doctors');
@@ -1423,9 +1417,8 @@
 
     function closeLeaveModal() {
       const leaveModal = document.getElementById('leave-modal');
-      leaveModal.style.display = '';
-      leaveModal.classList.remove('flex');
       leaveModal.classList.add('hidden');
+      leaveModal.style.display = 'none';
       const dropdown = document.getElementById('leave-custom-select-dropdown');
       const arrow = document.getElementById('leave-custom-select-arrow');
       if (dropdown) dropdown.classList.add('hidden');
@@ -1699,16 +1692,14 @@
         document.getElementById('photo-preview-container').style.display = 'none';
         document.getElementById('photo-drop-text').style.display = 'block';
       }
-      modal.style.display = '';
       modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      modal.style.display = 'flex';
     }
 
     function closeDoctorModal() {
       const dm = document.getElementById('doctor-modal');
-      dm.style.display = '';
-      dm.classList.remove('flex');
       dm.classList.add('hidden');
+      dm.style.display = 'none';
     }
 
     // Photo Upload Logic
