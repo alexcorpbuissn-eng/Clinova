@@ -6,7 +6,7 @@ import { logSystemEvent } from '@/lib/logger';
 // POST /api/superadmin/clinics/[id]/admin
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await requireRole(request, ['SUPER_ADMIN']);
   if (!session) {
@@ -14,7 +14,7 @@ export async function POST(
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const { telegramPhone } = await request.json();
 
     if (!telegramPhone) {

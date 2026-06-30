@@ -70,7 +70,8 @@ export async function POST(req: NextRequest) {
       data: {
         telegramPhone,
         role: 'SUPER_ADMIN'
-      }
+      },
+      include: { clinic: true }
     });
   }
 
