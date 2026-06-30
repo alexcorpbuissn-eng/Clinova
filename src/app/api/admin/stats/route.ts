@@ -90,5 +90,49 @@ export async function GET(request: NextRequest) {
     select: { name: true }
   });
 
-  return NextResponse.json({ success: true, stats, clinicName: clinic?.name });
+  // Calculate last 7 days clinic-wide stats for the chart
+  const chartData = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const startOfDay = new Date(d);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    const endOfDay = new Date(d);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+
+    const dayVisits = await prisma.visit.count({
+      where: {
+        clinicId: session.clinicId,
+        startTime: { gte: startOfDay, lte: endOfDay }
+      }
+    });
+
+    const dayRevenue = await prisma.visit.aggregate({
+      where: {
+        clinicId: session.clinicId,
+        startTime: { gte: startOfDay, lte: endOfDay }
+      },
+      _sum: { price: true }
+    });
+
+    chartData.push({
+      date: d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }),
+      revenue: dayRevenue._sum.price || 0,
+      visits: dayVisits
+    });
+  }
+  const clinicNewPatients = await prisma.patient.count({
+    where: {
+      clinicId: session.clinicId,
+      createdAt: { gte: monthStart }
+    }
+  });
+
+  return NextResponse.json({ 
+    success: true, 
+    stats, 
+    clinicName: clinic?.name, 
+    chartData,
+    clinicNewPatients 
+  });
 }

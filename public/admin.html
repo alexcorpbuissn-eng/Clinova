@@ -330,8 +330,7 @@
                         <div>
                             <p class="font-label-md text-on-surface-variant uppercase tracking-wider mb-1">Jami Qabullar</p>
                             <div class="flex items-end gap-3">
-                                <h4 class="font-headline-xl text-on-surface leading-none">124</h4>
-                                <span class="font-label-sm text-primary flex items-center"><span class="material-symbols-outlined text-[16px]">arrow_upward</span> 12%</span>
+                                <h4 id="dash-total-visits" class="font-headline-xl text-on-surface leading-none">0</h4>
                             </div>
                         </div>
                     </div>
@@ -340,10 +339,9 @@
                             <span class="material-symbols-outlined text-3xl">payments</span>
                         </div>
                         <div>
-                            <p class="font-label-md text-on-surface-variant uppercase tracking-wider mb-1">Kutilayotgan Daromad</p>
+                            <p class="font-label-md text-on-surface-variant uppercase tracking-wider mb-1">Jami Daromad</p>
                             <div class="flex items-end gap-3">
-                                <h4 class="font-headline-xl text-on-surface leading-none">12.4M</h4>
-                                <span class="font-label-sm text-primary flex items-center"><span class="material-symbols-outlined text-[16px]">arrow_upward</span> 8%</span>
+                                <h4 id="dash-total-revenue" class="font-headline-xl text-on-surface leading-none">0 so'm</h4>
                             </div>
                         </div>
                     </div>
@@ -354,8 +352,7 @@
                         <div>
                             <p class="font-label-md text-on-surface-variant uppercase tracking-wider mb-1">Yangi Bemorlar</p>
                             <div class="flex items-end gap-3">
-                                <h4 class="font-headline-xl text-on-surface leading-none">48</h4>
-                                <span class="font-label-sm text-primary flex items-center"><span class="material-symbols-outlined text-[16px]">arrow_upward</span> 24%</span>
+                                <h4 id="dash-new-patients" class="font-headline-xl text-on-surface leading-none">0</h4>
                             </div>
                         </div>
                     </div>
@@ -547,6 +544,9 @@
                 <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-sm overflow-hidden">
                     <div class="p-6 border-b border-outline-variant/30 flex justify-between items-center">
                         <h3 class="font-headline-md text-on-surface">Xizmatlar va Narxlar</h3>
+                        <button onclick="openProcModal()" class="bg-primary text-on-primary px-4 py-2 rounded-full font-label-md flex items-center gap-2 hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm">
+                            <span class="material-symbols-outlined text-[18px]">add</span> Yangi qo'shish
+                        </button>
                     </div>
                     <table class="w-full text-left border-collapse">
                         <thead>
@@ -1105,7 +1105,7 @@
       }
 
       if (tab === 'appointments' || tab === 'dashboard') loadAppointments();
-      if (tab === 'dashboard') setTimeout(renderDashboardChart, 100);
+      if (tab === 'dashboard') setTimeout(() => renderDashboardChart(window.clinicChartData), 100);
       if (tab === 'patients') loadPatients();
       if (tab === 'doctors') loadDoctors();
       if (tab === 'users') loadUsers();
@@ -1115,7 +1115,7 @@
     }
 
     let dashboardChartInstance = null;
-    function renderDashboardChart() {
+    function renderDashboardChart(chartData) {
       const ctx = document.getElementById('dashboard-chart');
       if (!ctx || typeof Chart === 'undefined') return;
       
@@ -1123,16 +1123,25 @@
         dashboardChartInstance.destroy();
       }
       
-      const labels = [];
-      const dataRevenue = [];
-      const dataAppointments = [];
-      
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        labels.push(d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }));
-        dataRevenue.push(Math.floor(Math.random() * 2000000) + 500000);
-        dataAppointments.push(Math.floor(Math.random() * 30) + 10);
+      let labels = [];
+      let dataRevenue = [];
+      let dataAppointments = [];
+
+      if (chartData && chartData.length > 0) {
+        // Use real data from API (it's ordered oldest to newest from API: 6 days ago -> today)
+        // Wait, API pushed from i=6 down to 0, so it's oldest first.
+        labels = chartData.map(d => d.date);
+        dataRevenue = chartData.map(d => d.revenue);
+        dataAppointments = chartData.map(d => d.visits);
+      } else {
+        // Fallback or empty state
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date();
+          d.setDate(d.getDate() - i);
+          labels.push(d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }));
+          dataRevenue.push(0);
+          dataAppointments.push(0);
+        }
       }
 
       dashboardChartInstance = new Chart(ctx, {
@@ -1889,7 +1898,26 @@
             const el = document.getElementById('sidebar-clinic-name');
             if(el) el.textContent = data.clinicName;
           }
+          
+          // Populate dashboard stats
           const fmt = (n) => n.toLocaleString('uz-UZ') + ' so\'m';
+          let totalVisits = 0;
+          let totalRevenue = 0;
+          data.stats.forEach(d => {
+            totalVisits += d.totalPatients;
+            totalRevenue += d.yearlyRevenue; // Or whatever total makes sense
+          });
+          document.getElementById('dash-total-visits').textContent = totalVisits;
+          document.getElementById('dash-total-revenue').textContent = fmt(totalRevenue);
+          if (data.clinicNewPatients !== undefined) {
+             document.getElementById('dash-new-patients').textContent = data.clinicNewPatients;
+          }
+          
+          // Render chart with real data
+          window.clinicChartData = data.chartData;
+          if (document.getElementById('tab-dashboard').classList.contains('hidden') === false) {
+            renderDashboardChart(data.chartData);
+          }
           const stomatologs = data.stats.filter(d => d.specialty.toLowerCase().includes('stomatolog'));
           const lors = data.stats.filter(d => d.specialty.toLowerCase().includes('lor'));
 
