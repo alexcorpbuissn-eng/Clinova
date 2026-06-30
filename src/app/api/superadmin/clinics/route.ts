@@ -3,6 +3,19 @@ import { prisma } from '@/lib/prisma';
 import { requireClinicAccess } from '@/lib/clinic-guard';
 import { logSystemEvent } from '@/lib/logger';
 
+function getErrorCode(error: unknown): string | undefined {
+  if (typeof error !== 'object' || error === null || !('code' in error)) {
+    return undefined;
+  }
+
+  const { code } = error as { code?: unknown };
+  return typeof code === 'string' ? code : undefined;
+}
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : 'Failed to create clinic';
+}
+
 // GET /api/superadmin/clinics
 export async function GET(request: NextRequest) {
   const session = await requireClinicAccess(request);
@@ -59,7 +72,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Slug already taken' }, { status: 409 });
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { telegramPhone: adminPhone } });
+    const existingUser = await prisma.user.findUnique({
+      where: { telegramPhone: adminPhone },
+      select: { id: true, role: true }
+    });
     if (existingUser && existingUser.role !== 'SUPER_ADMIN') {
       return NextResponse.json({ error: 'Этот номер уже зарегистрирован за другим сотрудником.' }, { status: 409 });
     }
@@ -93,11 +109,11 @@ export async function POST(request: NextRequest) {
       }
     }, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Create clinic error:', error);
-    if (error?.code === 'P2002') {
+    if (getErrorCode(error) === 'P2002') {
       return NextResponse.json({ error: 'Ushbu URL manzil (slug) allaqachon band. Iltimos, boshqasini tanlang.' }, { status: 409 });
     }
-    return NextResponse.json({ error: error?.message || 'Failed to create clinic' }, { status: 500 });
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
