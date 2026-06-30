@@ -20,8 +20,7 @@ async function main() {
         } else {
             await prisma.user.create({
                 data: {
-                    firstName: 'Super',
-                    lastName: 'Admin',
+                    name: 'Super Admin',
                     telegramPhone: phone,
                     role: 'SUPER_ADMIN',
                     password: password

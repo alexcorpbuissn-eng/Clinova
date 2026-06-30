@@ -93,8 +93,11 @@ export async function POST(request: NextRequest) {
       }
     }, { status: 201 });
 
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Failed to create clinic' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Create clinic error:', error);
+    if (error?.code === 'P2002') {
+      return NextResponse.json({ error: 'Ushbu URL manzil (slug) allaqachon band. Iltimos, boshqasini tanlang.' }, { status: 409 });
+    }
+    return NextResponse.json({ error: error?.message || 'Failed to create clinic' }, { status: 500 });
   }
 }
