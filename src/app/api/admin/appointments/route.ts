@@ -113,7 +113,9 @@ export async function POST(request: NextRequest) {
       // Lock slot
       const slots = await tx.$queryRaw<any[]>`
         SELECT s.* FROM "Slot" s
-        WHERE s.id = ${slotId} AND s."isAvailable" = true
+        WHERE s.id = ${slotId}
+          AND s."clinicId" = ${session.clinicId}
+          AND s."isAvailable" = true
         FOR UPDATE
       `;
 
@@ -129,6 +131,8 @@ export async function POST(request: NextRequest) {
       });
 
       if (!procedure) throw new Error('PROCEDURE_NOT_FOUND');
+      if (procedure.clinicId !== session.clinicId) throw new Error('PROCEDURE_NOT_FOUND');
+      if (slot.clinicId !== session.clinicId) throw new Error('SLOT_UNAVAILABLE');
 
       const N = Math.ceil(procedure.durationMinutes / 30);
       const baseTime = new Date(slot.startTime);
@@ -138,6 +142,7 @@ export async function POST(request: NextRequest) {
         const chunkStartTime = new Date(baseTime.getTime() + i * 30 * 60 * 1000);
         const nextSlot = await tx.slot.findFirst({
           where: {
+            clinicId: session.clinicId,
             doctorId: slot.doctorId,
             startTime: chunkStartTime,
             isAvailable: true
@@ -160,6 +165,7 @@ export async function POST(request: NextRequest) {
       const existing = await tx.appointment.findFirst({
         where: {
           patientId: patient.id,
+          clinicId: session.clinicId,
           status: 'SCHEDULED',
           slot: { startTime: { gte: dayStart, lte: dayEnd } },
         },

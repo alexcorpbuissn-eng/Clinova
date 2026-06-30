@@ -1,23 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
-
+import { requireClinicAccess } from '@/lib/clinic-guard';
 import { getBot } from '@/lib/telegram';
 
-async function requireAdmin(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const payload = await verifyToken(authHeader.split(' ')[1]);
-  return (payload?.role === 'ADMIN' || payload?.role === 'SUPER_ADMIN') ? payload : null;
+async function requireAdminSession(request: NextRequest) {
+  const session = await requireClinicAccess(request);
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'SUPER_ADMIN') || !session.clinicId) {
+    return null;
+  }
+  return session;
 }
 
 // GET /api/admin/users
 export async function GET(request: NextRequest) {
-  if (!await requireAdmin(request)) {
+  const session = await requireAdminSession(request);
+  if (!session) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const users = await prisma.user.findMany({
+    where: { clinicId: session.clinicId },
     orderBy: { createdAt: 'desc' }
   });
 
@@ -48,7 +50,8 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/users
 export async function POST(request: NextRequest) {
-  if (!await requireAdmin(request)) {
+  const session = await requireAdminSession(request);
+  if (!session) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -64,21 +67,44 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Shifokor roli uchun shifokorni tanlash majburiy' }, { status: 400 });
     }
 
-    // Upsert user role instead of failing on duplicate phone
-    const user = await prisma.user.upsert({
-      where: { telegramPhone },
-      update: {
-        role,
-        name: name || null,
-        doctorId: role === 'DOCTOR' ? doctorId : null
-      },
-      create: {
-        telegramPhone,
-        role,
-        name: name || null,
-        doctorId: role === 'DOCTOR' ? doctorId : null
+    if (role === 'DOCTOR') {
+      const doctor = await prisma.doctor.findUnique({
+        where: { id: doctorId },
+        select: { clinicId: true }
+      });
+      if (!doctor || doctor.clinicId !== session.clinicId) {
+        return NextResponse.json({ error: 'Shifokor topilmadi' }, { status: 404 });
       }
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { telegramPhone },
+      select: { id: true, role: true, clinicId: true }
     });
+
+    if (existingUser?.role === 'SUPER_ADMIN' || (existingUser?.clinicId && existingUser.clinicId !== session.clinicId)) {
+      return NextResponse.json({ error: 'Bu telefon raqam boshqa klinikaga biriktirilgan' }, { status: 409 });
+    }
+
+    const user = existingUser
+      ? await prisma.user.update({
+        where: { id: existingUser.id },
+        data: {
+          role,
+          name: name || null,
+          doctorId: role === 'DOCTOR' ? doctorId : null,
+          clinicId: session.clinicId
+        }
+      })
+      : await prisma.user.create({
+        data: {
+          telegramPhone,
+          clinicId: session.clinicId,
+          role,
+          name: name || null,
+          doctorId: role === 'DOCTOR' ? doctorId : null
+        }
+      });
 
     let telegramChatIdToUse = null;
 

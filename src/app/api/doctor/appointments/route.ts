@@ -1,30 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
-
-async function requireDoctorOrAdmin(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const payload = await verifyToken(authHeader.split(' ')[1]);
-  if (!payload) return null;
-  if (payload.role === 'DOCTOR' || payload.role === 'ADMIN' || payload.role === 'RECEPTION' || payload.role === 'SUPER_ADMIN') return payload;
-  return null;
-}
+import { requireClinicAccess } from '@/lib/clinic-guard';
 
 // GET /api/doctor/appointments — Today's appointments for authenticated doctor
 export async function GET(request: NextRequest) {
-  const payload = await requireDoctorOrAdmin(request);
-  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const session = await requireClinicAccess(request);
+  if (!session || !session.clinicId || (session.role !== 'DOCTOR' && session.role !== 'ADMIN' && session.role !== 'RECEPTION' && session.role !== 'SUPER_ADMIN')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   // If Admin, use doctorId from query params. If Doctor, use their own.
-  let doctorId = payload.doctorId as string;
-  if (payload.role === 'ADMIN') {
+  let doctorId = session.doctorId as string;
+  if (session.role === 'ADMIN' || session.role === 'RECEPTION' || session.role === 'SUPER_ADMIN') {
     const qDocId = request.nextUrl.searchParams.get('doctorId');
     if (qDocId) doctorId = qDocId;
   }
 
   if (!doctorId || doctorId === 'ADMIN_GLOBAL') {
     return NextResponse.json({ success: true, appointments: [] });
+  }
+
+  const doctor = await prisma.doctor.findUnique({
+    where: { id: doctorId },
+    select: { clinicId: true }
+  });
+  if (!doctor || doctor.clinicId !== session.clinicId) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   // Today's start in Tashkent (UTC+5): midnight Tashkent = 19:00 UTC previous day
@@ -40,6 +41,7 @@ export async function GET(request: NextRequest) {
 
   const appointments = await prisma.appointment.findMany({
     where: {
+      clinicId: session.clinicId,
       doctorId,
       status: 'SCHEDULED',
       slot: { startTime: { gte: todayStartUTC } },

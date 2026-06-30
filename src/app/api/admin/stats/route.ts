@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
   });
 
   const stats = await Promise.all(doctors.map(async (doc) => {
-    const base = { doctorId: doc.id };
+    const base = { clinicId: session.clinicId, doctorId: doc.id };
 
     const [daily, weekly, monthly, totalPatients, monthlyRevenue, yearlyRevenue] = await Promise.all([
       prisma.visit.count({ where: { ...base, startTime: { gte: todayStart } } }),

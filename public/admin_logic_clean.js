@@ -210,6 +210,28 @@
     }
 
     const API = '';
+    function setCurrentClinicName(name) {
+      if (!name) return;
+      localStorage.setItem('clinicName', name);
+      const sidebarEl = document.getElementById('sidebar-clinic-name');
+      const welcomeEl = document.getElementById('welcome-admin-text');
+      if (sidebarEl) sidebarEl.textContent = name;
+      if (welcomeEl) welcomeEl.textContent = `Xayrli tong, ${name} administratori.`;
+    }
+
+    async function hydrateCurrentClinic() {
+      const token = localStorage.getItem('admin_token');
+      if (!token) return;
+      const res = await fetch('/api/admin/me', {
+        headers: { 'Authorization': `Bearer ${token}` },
+        cache: 'no-store'
+      });
+      if (!res.ok) throw new Error('Clinic context unavailable');
+      const data = await res.json();
+      if (data.success && data.clinic?.name) {
+        setCurrentClinicName(data.clinic.name);
+      }
+    }
     
     // Auth Check on load — verify token with server, don't just trust localStorage
     async function verifyAuthOnLoad() {
@@ -223,9 +245,11 @@
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
+          await hydrateCurrentClinic();
           showDashboard();
         } else {
           localStorage.removeItem('admin_token');
+          localStorage.removeItem('clinicName');
           document.getElementById('login-screen').style.display = 'flex';
         }
       } catch (err) {
@@ -332,6 +356,7 @@
 
     function logout() {
       localStorage.removeItem('admin_token');
+      localStorage.removeItem('clinicName');
       document.getElementById('dashboard').style.display = 'none';
       document.getElementById('login-screen').style.display = 'flex';
     }
@@ -774,10 +799,7 @@
         const data = await apiGet('/api/admin/appointments');
         if (data.success) {
           if (data.clinicName) {
-            const sidebarEl = document.getElementById('sidebar-clinic-name');
-            const welcomeEl = document.getElementById('welcome-admin-text');
-            if (sidebarEl) sidebarEl.textContent = data.clinicName;
-            if (welcomeEl) welcomeEl.textContent = `Xayrli tong, ${data.clinicName} administratori.`;
+            setCurrentClinicName(data.clinicName);
           }
           if (data.appointments.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Qabullar mavjud emas</td></tr>';

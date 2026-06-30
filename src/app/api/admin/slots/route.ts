@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
 
     // Fetch existing slots in range to avoid duplicates
     const existing = await prisma.slot.findMany({
-      where: { doctorId, startTime: { gte: from, lte: to } },
+      where: { clinicId: session.clinicId, doctorId, startTime: { gte: from, lte: to } },
       select: { startTime: true },
     });
     const existingSet = new Set(existing.map((s) => s.startTime.toISOString()));

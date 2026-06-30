@@ -45,6 +45,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid dates' }, { status: 400 });
     }
 
+    const doctor = await prisma.doctor.findUnique({
+      where: { id: doctorId },
+      select: { clinicId: true, telegramChatId: true }
+    });
+    if (!doctor || doctor.clinicId !== session.clinicId) {
+      return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
+    }
+
     // 1. Create the leave record
     const leave = await prisma.leave.create({
       data: {
@@ -60,6 +68,7 @@ export async function POST(request: NextRequest) {
     // Unbooked means they have no appointment
     const deletedSlots = await prisma.slot.deleteMany({
       where: {
+        clinicId: session.clinicId,
         doctorId,
         appointment: null,
         startTime: {
@@ -71,7 +80,6 @@ export async function POST(request: NextRequest) {
 
     // 3. Send Telegram notification to the doctor
     try {
-      const doctor = await prisma.doctor.findUnique({ where: { id: doctorId } });
       if (doctor && doctor.telegramChatId) {
         // dynamic import of bot to avoid top-level issues if any
         const { getBot, toTashkentDate } = await import('@/lib/telegram');

@@ -1,28 +1,28 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
+import { requireClinicAccess } from '@/lib/clinic-guard';
 
 // GET /api/admin/patients — All registered patients
 export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const token = authHeader.split(' ')[1];
-  const payload = await verifyToken(token);
-
-  if (!payload || (payload.role !== 'ADMIN' && payload.role !== 'RECEPTION' && payload.role !== 'DOCTOR' && payload.role !== 'SUPER_ADMIN')) {
+  const session = await requireClinicAccess(request);
+  if (!session || !session.clinicId || (session.role !== 'ADMIN' && session.role !== 'RECEPTION' && session.role !== 'DOCTOR' && session.role !== 'SUPER_ADMIN')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const patients = await prisma.patient.findMany({
-    where: { isVerified: true },
+    where: {
+      isVerified: true,
+      OR: [
+        { appointments: { some: { clinicId: session.clinicId } } },
+        { visits: { some: { clinicId: session.clinicId } } }
+      ]
+    },
     include: {
       _count: {
-        select: { appointments: true }
+        select: { appointments: { where: { clinicId: session.clinicId } } }
       },
       appointments: {
+        where: { clinicId: session.clinicId },
         select: {
           id: true,
           status: true,
@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
         }
       },
       visits: {
+        where: { clinicId: session.clinicId },
         select: {
           id: true,
           status: true,

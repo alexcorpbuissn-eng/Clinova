@@ -173,12 +173,7 @@
         <!-- Sidebar -->
         <nav id="admin-sidebar" class="fixed left-0 top-0 h-screen flex flex-col py-margin-desktop border-r border-outline-variant bg-surface-container-low w-sidebar-width z-50">
             <div class="px-margin-desktop mb-8">
-                <h1 id="sidebar-clinic-name" class="font-headline-md text-headline-md font-bold text-primary">Clinova Staff</h1>
-                <script>
-                  if(localStorage.getItem('clinicName')) {
-                    document.getElementById('sidebar-clinic-name').textContent = localStorage.getItem('clinicName');
-                  }
-                </script>
+                <h1 id="sidebar-clinic-name" class="font-headline-md text-headline-md font-bold text-primary">Klinika yuklanmoqda...</h1>
                 <p class="font-body-sm text-body-sm text-on-surface-variant">Medical Portal</p>
             </div>
             
@@ -1042,6 +1037,28 @@
     }
 
     const API = '';
+      function setCurrentClinicName(name) {
+        if (!name) return;
+        localStorage.setItem('clinicName', name);
+        const sidebarEl = document.getElementById('sidebar-clinic-name');
+        const welcomeEl = document.getElementById('welcome-admin-text');
+        if (sidebarEl) sidebarEl.textContent = name;
+        if (welcomeEl) welcomeEl.textContent = `Xayrli tong, ${name} administratori.`;
+      }
+
+      async function hydrateCurrentClinic() {
+        const token = localStorage.getItem('staff_token');
+        if (!token) return;
+        const res = await fetch('/api/admin/me', {
+          headers: { 'Authorization': `Bearer ${token}` },
+          cache: 'no-store'
+        });
+        if (!res.ok) throw new Error('Clinic context unavailable');
+        const data = await res.json();
+        if (data.success && data.clinic?.name) {
+          setCurrentClinicName(data.clinic.name);
+        }
+      }
           // Auth Check on load
       async function verifyAuthOnLoad() {
         try {
@@ -1055,9 +1072,11 @@
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (res.ok) {
+            await hydrateCurrentClinic();
             showDashboard();
           } else {
             localStorage.removeItem('staff_token');
+            localStorage.removeItem('clinicName');
             window.location.href = '/staff.html';
           }
         } catch (err) {
@@ -1074,6 +1093,7 @@
       function logout() {
         localStorage.removeItem('staff_token');
         localStorage.removeItem('user_role');
+        localStorage.removeItem('clinicName');
         window.location.href = '/staff.html';
       }
 
@@ -1529,6 +1549,9 @@
       try {
         const data = await apiGet('/api/admin/appointments');
         if (data.success) {
+          if (data.clinicName) {
+            setCurrentClinicName(data.clinicName);
+          }
           if (data.appointments.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Qabullar mavjud emas</td></tr>';
             return;
@@ -1898,9 +1921,7 @@
         const data = await apiGet('/api/admin/stats');
         if (data.success) {
           if (data.clinicName) {
-            localStorage.setItem('clinicName', data.clinicName);
-            const el = document.getElementById('sidebar-clinic-name');
-            if(el) el.textContent = data.clinicName;
+            setCurrentClinicName(data.clinicName);
           }
           
           // Populate dashboard stats

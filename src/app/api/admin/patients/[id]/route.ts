@@ -1,25 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
-
-async function requireStaff(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const payload = await verifyToken(authHeader.split(' ')[1]);
-  if (!payload) return null;
-  if (payload.role === 'ADMIN' || payload.role === 'RECEPTION' || payload.role === 'DOCTOR') {
-    return payload;
-  }
-  return null;
-}
+import { requireClinicAccess } from '@/lib/clinic-guard';
 
 // GET /api/admin/patients/[id] — Fetch detailed profile and history for a patient
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const payload = await requireStaff(request);
-  if (!payload) {
+  const session = await requireClinicAccess(request);
+  if (!session || !session.clinicId || (session.role !== 'ADMIN' && session.role !== 'RECEPTION' && session.role !== 'DOCTOR' && session.role !== 'SUPER_ADMIN')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -30,6 +19,7 @@ export async function GET(
       where: { id },
       include: {
         appointments: {
+          where: { clinicId: session.clinicId },
           include: {
             slot: true,
             doctor: { select: { firstName: true, lastName: true, specialty: true } },
@@ -38,6 +28,7 @@ export async function GET(
           orderBy: { slot: { startTime: 'desc' } }
         },
         visits: {
+          where: { clinicId: session.clinicId },
           include: {
             doctor: { select: { firstName: true, lastName: true, specialty: true } }
           },
@@ -48,6 +39,10 @@ export async function GET(
 
     if (!patient) {
       return NextResponse.json({ error: 'Bemor topilmadi' }, { status: 404 });
+    }
+
+    if (patient.appointments.length === 0 && patient.visits.length === 0) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     return NextResponse.json({ success: true, patient });
