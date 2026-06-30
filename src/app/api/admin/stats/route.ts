@@ -121,12 +121,15 @@ export async function GET(request: NextRequest) {
       visits: dayVisits
     });
   }
-  const clinicNewPatients = await prisma.patient.count({
+  const uniquePatientsThisMonth = await prisma.visit.findMany({
     where: {
       clinicId: session.clinicId,
-      createdAt: { gte: monthStart }
-    }
+      startTime: { gte: monthStart }
+    },
+    select: { patientId: true },
+    distinct: ['patientId']
   });
+  const clinicNewPatients = uniquePatientsThisMonth.length;
 
   return NextResponse.json({ 
     success: true, 
