@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 
   const usersWithName = users.map(u => ({
     ...u,
-    name: patientMap[u.telegramPhone] || null
+    name: u.name || patientMap[u.telegramPhone] || null
   }));
 
   return NextResponse.json({ success: true, users: usersWithName });
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { telegramPhone, role, doctorId } = body;
+    const { telegramPhone, role, doctorId, name } = body;
 
     if (!telegramPhone || !role) {
       return NextResponse.json({ error: 'Telefon raqam va rol majburiy' }, { status: 400 });
@@ -69,11 +69,13 @@ export async function POST(request: NextRequest) {
       where: { telegramPhone },
       update: {
         role,
+        name: name || null,
         doctorId: role === 'DOCTOR' ? doctorId : null
       },
       create: {
         telegramPhone,
         role,
+        name: name || null,
         doctorId: role === 'DOCTOR' ? doctorId : null
       }
     });
