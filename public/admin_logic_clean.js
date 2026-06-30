@@ -209,6 +209,61 @@
       }
     }
 
+    async function openProcModal() {
+      document.getElementById('proc-name').value = '';
+      document.getElementById('proc-duration').value = '30';
+      document.getElementById('proc-price').value = '0';
+      
+      const sel = document.getElementById('proc-specialty');
+      sel.innerHTML = '<option value="">Yuklanmoqda...</option>';
+      forceOpenModal('proc-modal');
+      
+      try {
+        const dData = await apiGet('/api/admin/doctors');
+        if (dData.success) {
+          const specs = new Set();
+          dData.doctors.forEach(d => specs.add(d.specialty));
+          if (specs.size === 0) {
+            sel.innerHTML = '<option value="">Shifokor topilmadi</option>';
+          } else {
+            sel.innerHTML = Array.from(specs).map(s => `<option value="${s}">${s === 'Stomatolog' ? 'Stomatologiya' : s}</option>`).join('');
+          }
+        }
+      } catch (err) {
+        sel.innerHTML = '<option value="">Xatolik yuz berdi</option>';
+      }
+    }
+
+    function closeProcModal() {
+      const modal = document.getElementById('proc-modal');
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+    }
+
+    async function submitProcModal() {
+      const specialty = document.getElementById('proc-specialty').value;
+      const name = document.getElementById('proc-name').value;
+      const durationMinutes = document.getElementById('proc-duration').value;
+      const price = document.getElementById('proc-price').value;
+
+      if (!specialty || !name || !durationMinutes || !price) {
+        alert("Barcha maydonlarni to'ldiring!");
+        return;
+      }
+
+      try {
+        const res = await apiPost('/api/admin/procedures', { specialty, name, durationMinutes, price });
+        if (res.success) {
+          closeProcModal();
+          loadProcedures();
+        } else {
+          alert(res.error || 'Xatolik yuz berdi');
+        }
+      } catch (err) {
+        alert('Server xatosi');
+      }
+    }
+
     const API = '';
     function setCurrentClinicName(name) {
       if (!name) return;

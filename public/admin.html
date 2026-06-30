@@ -778,6 +778,33 @@
         </div>
     </div>
 
+    <!-- Procedure Modal -->
+    <div id="proc-modal" class="fixed inset-0 bg-black/50 z-[2000] hidden items-center justify-center">
+        <div class="bg-surface-container-lowest p-8 rounded-2xl max-w-md w-full relative shadow-xl">
+            <button onclick="closeProcModal()" class="absolute top-4 right-4 text-outline hover:text-on-surface"><span class="material-symbols-outlined">close</span></button>
+            <h3 class="font-headline-md text-primary mb-6">Yangi Xizmat Qo'shish</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block font-label-md text-on-surface-variant mb-1">Mutaxassislik</label>
+                    <select id="proc-specialty" class="w-full px-4 py-2 rounded-lg border border-outline-variant focus:ring-primary"></select>
+                </div>
+                <div>
+                    <label class="block font-label-md text-on-surface-variant mb-1">Xizmat nomi</label>
+                    <input type="text" id="proc-name" placeholder="Masalan: Konsultatsiya" class="w-full px-4 py-2 rounded-lg border border-outline-variant focus:ring-primary">
+                </div>
+                <div>
+                    <label class="block font-label-md text-on-surface-variant mb-1">Davomiylik (daqiqa)</label>
+                    <input type="number" id="proc-duration" value="30" class="w-full px-4 py-2 rounded-lg border border-outline-variant focus:ring-primary">
+                </div>
+                <div>
+                    <label class="block font-label-md text-on-surface-variant mb-1">Narx (so'm)</label>
+                    <input type="number" id="proc-price" value="0" class="w-full px-4 py-2 rounded-lg border border-outline-variant focus:ring-primary">
+                </div>
+                <button onclick="submitProcModal()" class="w-full bg-primary text-on-primary py-3 rounded-full font-label-md hover:bg-primary-container transition">Saqlash</button>
+            </div>
+        </div>
+    </div>
+
     <!-- New User Modal (from old file) -->
     <div id="new-user-modal" class="fixed inset-0 bg-black/50 z-[2000] hidden items-center justify-center">
         <div class="bg-surface-container-lowest p-8 rounded-2xl max-w-md w-full relative shadow-xl">
@@ -1351,7 +1378,7 @@
     let leaveEndPicker = null;
 
     function closeAllModals() {
-      const modals = ['doctor-modal', 'history-modal', 'role-modal', 'leave-modal', 'new-user-modal'];
+      const modals = ['doctor-modal', 'history-modal', 'role-modal', 'leave-modal', 'new-user-modal', 'proc-modal'];
       modals.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
